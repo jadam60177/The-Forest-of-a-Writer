@@ -304,7 +304,7 @@ dialog.ask{max-width:min(90vw,380px)}
 
   <section id="tab-road" class="panel" hidden>
     <h3>집 성장 단계</h3>
-    <p class="small" style="margin-top:0">누적 작업 시간이 기준을 넘으면 집이 자동으로 커져요. 다음 집은 도착해야 알 수 있어요!</p>
+    <p class="small" style="margin-top:0">작업실에 오래 있을수록 집이 자동으로 커져요. 어떤 집이 언제 나올지는 도착해야 알 수 있어요!</p>
     <ol class="road" id="road"></ol>
   </section>
 
@@ -795,7 +795,7 @@ function renderRoad(){
   document.getElementById('road').innerHTML = STAGES.map((s,k)=> k>i
     ? `<li class="mystery">
         <div class="q">?</div>
-        <div class="step">${k+1}단계 · 누적 ${s.h}시간</div>
+        <div class="step">${k+1}단계 · 누적 ?시간</div>
         <div class="nm">???</div>
         <div class="small">어떤 집일까요?</div>
       </li>`
