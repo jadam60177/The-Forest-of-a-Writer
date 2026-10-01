@@ -203,6 +203,30 @@ dialog.visit h3{margin:0 0 .25rem}
 .sw:disabled:not(.cur){opacity:.45;cursor:not-allowed}
 .ask-yes{background:var(--accent);color:var(--btn-ink);border-color:var(--accent)}
 dialog.ask{max-width:min(90vw,380px)}
+.gift{display:grid;gap:.6rem;margin-bottom:1rem}
+.gift label{display:flex;flex-direction:column;gap:.2rem}
+.gift select,.gift input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.4rem .5rem;max-width:280px}
+.gift-reasons{display:flex;flex-wrap:wrap;gap:.35rem}
+.gift-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+.gift-row input[type=number]{width:90px}
+.sep{border:0;border-top:1px solid var(--line);margin:1.25rem 0}
+dialog.party{text-align:center;max-width:min(90vw,340px)}
+.party-emoji{font-size:3rem;line-height:1.2}
+#askMsg{white-space:pre-line}
+#partyMsg{white-space:pre-line;font-family:"Jua",sans-serif;font-size:1.15rem;margin:.4rem 0 1rem}
+.event-banner{text-align:center;padding:.55rem 1rem;font-family:"Jua",sans-serif;font-size:1.02rem}
+.event-banner.on{background:#FFCE5C;color:#3A2A00}
+.event-banner.soon{background:#2E3A63;color:#F2EFFF}
+.ev-item{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed var(--line)}
+.ev-item .mini{margin-left:auto}
+#noteDlg{max-width:min(92vw,440px)}
+#noteBody{width:100%;margin-top:.6rem;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.6rem;resize:vertical}
+.inbox{display:grid;gap:.5rem;margin-bottom:.5rem}
+.note{border:1px solid var(--line);border-radius:12px;padding:.6rem .8rem;background:var(--bg)}
+.note.unread{border-color:var(--lamp);box-shadow:0 0 0 1px var(--lamp)}
+.note-head{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.note-body{margin:.35rem 0;white-space:pre-line;word-break:keep-all}
+.note-act{display:flex;gap:.4rem;justify-content:flex-end}
 .road li.mystery .q{height:90px;display:grid;place-items:center;background:var(--sky-top);border-radius:10px;max-width:130px;margin:0 auto;color:#D9D6EE;font-family:"Jua",sans-serif;font-size:2.6rem}
 </style>
 
@@ -242,10 +266,12 @@ dialog.ask{max-width:min(90vw,380px)}
       <button class="voice-btn" id="voiceBtn">🎧 작업 채널 들어가기</button>
       <button class="ghost" id="ffBtn" title="미리보기용: 누적 작업 시간 +5시간">⏩ +5시간</button>
     </span>
+    <button class="ghost" id="noteBtn">✉️ 쪽지</button>
     <button class="ghost" id="logoutBtn">나가기</button>
   </div>
 </header>
 
+<div class="event-banner" id="eventBanner" hidden></div>
 <section class="village" aria-label="마감의 숲">
   <svg class="stars" data-stars preserveAspectRatio="none"></svg>
   <div class="village-head">
@@ -288,7 +314,7 @@ dialog.ask{max-width:min(90vw,380px)}
       <p class="hint small" id="hint"></p>
     </div>
     <div class="panel">
-      <p class="earn">🎧 작업실에 있으면 1분마다 🪙 1개씩 쌓여요</p>
+      <p class="earn" id="earn">🎧 작업실에 있으면 1분마다 🪙 1개씩 쌓여요</p>
       <h3>🎒 가방</h3>
       <div class="items" id="bag"></div>
       <details class="shop-box" id="shopBox">
@@ -309,6 +335,40 @@ dialog.ask{max-width:min(90vw,380px)}
   </section>
 
   <section id="tab-admin" class="panel" hidden>
+    <h3>✉️ 받은 쪽지 <span class="small" id="inboxCount"></span></h3>
+    <div id="inbox" class="inbox"></div>
+    <hr class="sep">
+    <h3>🔥 코인 이벤트</h3>
+    <p class="small" style="margin-top:0">기간 동안 작업실 1분마다 쌓이는 코인이 배로 늘어요. 집 크기(누적 시간)는 그대로예요.</p>
+    <div class="gift">
+      <div class="gift-row">
+        <label class="small">이벤트 이름 <input id="evName" maxlength="30" value="코인 2배 이벤트"></label>
+        <label class="small">배수
+          <select id="evMult"><option value="2">2배</option><option value="3">3배</option></select>
+        </label>
+      </div>
+      <div class="gift-row">
+        <label class="small">시작 <input id="evStart" type="datetime-local"></label>
+        <label class="small">끝 <input id="evEnd" type="datetime-local"></label>
+        <button class="mini ask-yes" id="evAdd">🔥 등록</button>
+      </div>
+      <div id="evList" class="small"></div>
+    </div>
+    <hr class="sep">
+    <h3>🎉 축하 코인 보내기</h3>
+    <p class="small" style="margin-top:0">받는 분이 숲에 들어오면 축하 메시지가 떠요.</p>
+    <div class="gift">
+      <label class="small">받는 분
+        <select id="giftWho"></select>
+      </label>
+      <div class="gift-reasons" id="giftReasons"></div>
+      <div class="gift-row">
+        <label class="small">축하 이유 <input id="giftReason" maxlength="30" placeholder="예: 완결"></label>
+        <label class="small">코인 <input id="giftAmount" type="number" min="1" max="10000" value="50"></label>
+        <button class="mini ask-yes" id="giftSend">🎉 보내기</button>
+      </div>
+    </div>
+    <hr class="sep">
     <h3>미접 명단</h3>
     <p class="small" style="margin-top:0">운영자 계정에만 보이는 탭이에요. 마지막으로 작업 채널에 있었던 때 기준으로, 오래된 순서대로 보여줘요.</p>
     <div class="legend small" id="legend"></div>
@@ -335,6 +395,24 @@ dialog.ask{max-width:min(90vw,380px)}
     <button class="mini" id="askNo">취소</button>
     <button class="mini ask-yes" id="askYes">좋아요</button>
   </div>
+</dialog>
+
+<dialog class="visit ask" id="noteDlg">
+  <h3 style="margin:0 0 .25rem">✉️ 운영자에게 쪽지</h3>
+  <p class="small" style="margin:0 0 .6rem">가구 요청, 건의, 고장 신고 뭐든 좋아요. 운영자만 볼 수 있어요.</p>
+  <div class="gift-reasons" id="noteCats"></div>
+  <textarea id="noteBody" maxlength="500" rows="5" placeholder="예: 책상 위에 올릴 고양이 머그컵 가구 갖고 싶어요!"></textarea>
+  <div class="small" style="text-align:right;color:var(--muted)"><span id="noteLen">0</span>/500</div>
+  <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+    <button class="mini" id="noteCancel">닫기</button>
+    <button class="mini ask-yes" id="noteSend">보내기</button>
+  </div>
+</dialog>
+
+<dialog class="visit ask party" id="party">
+  <div class="party-emoji">🎉</div>
+  <p id="partyMsg"></p>
+  <button class="mini ask-yes" id="partyOk">고마워요!</button>
 </dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -546,7 +624,11 @@ const demoApi = (() => {
       ['green','초록펜',18,false,0,20],['dawn','새벽두시',128,false,0,36],['owl','야행성',2,true,30,0],
       ['pencil','연필깎이',255,false,12,1],['bread','구름빵',41,false,0,63],
     ].map(([discord_id,display_name,h,in_voice,today_minutes,away])=>({discord_id,display_name,total_minutes:Math.round(h*60),in_voice,today_minutes,away,removed:false,house_color:Math.floor(Math.random()*10)})),
-    inv:{}, placed:[], nextId:1, otherRooms:{},
+    inv:{}, placed:[], nextId:1, otherRooms:{}, gifts:[], events:[], evId:1, noteId:3,
+    notes:[
+      {id:2, category:'가구 요청', body:'숲에 버섯 가구 있으면 좋겠어요 🍄 움막이랑 잘 어울릴 것 같아요!', created_at:new Date(Date.now()-3600e3).toISOString(), read:false, members:{display_name:'달빛작가'}},
+      {id:1, category:'건의', body:'담당자 대사에 \'수정고 부탁드려요\'도 넣어 주세요 ㅋㅋㅋ', created_at:new Date(Date.now()-86400e3).toISOString(), read:true, members:{display_name:'마감요정'}},
+    ],
   };
   try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; } }catch(e){}
   const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId})); }catch(e){} };
@@ -606,10 +688,22 @@ const demoApi = (() => {
       if(st.me.coins<PAINT_PRICE) fail('코인이 부족해요');
       st.me.coins-=PAINT_PRICE; st.me.house_color=k; persist();
     },
+    async adminGift(id, amount, reason){
+      if(id==='me'){ st.me.coins+=amount; st.gifts.push({id:Date.now(), amount, reason}); persist(); }
+    },
+    async myGifts(){ return st.gifts.splice(0); },
+    async events(){ const n=Date.now(); st.events=st.events.filter(e=>new Date(e.ends_at)>n); return st.events.slice().sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at)); },
+    async addEvent(name,mult,start,end){ st.events.push({id:st.evId++, name, multiplier:mult, starts_at:start, ends_at:end}); },
+    async deleteEvent(id){ st.events=st.events.filter(e=>e.id!==id); },
+    async sendNote(cat, body){ st.notes.unshift({id:st.noteId++, category:cat, body, created_at:new Date().toISOString(), read:false, members:{display_name:st.me.display_name}}); },
+    async notes(){ return st.notes.slice(); },
+    async readNote(id){ const n=st.notes.find(x=>x.id===id); if(n) n.read=true; },
+    async deleteNote(id){ st.notes=st.notes.filter(x=>x.id!==id); },
+    async giftsSeen(){},
     async adminClear(id){ const o=st.others.find(x=>x.discord_id===id); o.removed=true; o.justRemoved=true; o.in_voice=false; },
     // 미리보기 전용
     tick(){
-      if(st.me.in_voice){ st.me.total_minutes++; st.me.coins++; st.me.today_minutes++; persist(); }
+      if(st.me.in_voice){ st.me.total_minutes++; st.me.coins+=currentMult(); st.me.today_minutes++; persist(); }
       st.others.forEach(o=>{ if(o.in_voice && !o.removed){ o.today_minutes++; o.total_minutes++; } });
     },
     shuffle(){
@@ -653,6 +747,16 @@ const supaApi = (() => {
     async remove(id){ ok(await sb.rpc('remove_item', {p_id:id})); },
     async adminList(){ return ok(await sb.rpc('admin_list')); },
     async adminClear(id){ ok(await sb.rpc('admin_clear', {p_discord_id:id})); },
+    async adminGift(id, amount, reason){ ok(await sb.rpc('admin_gift', {p_discord_id:id, p_amount:amount, p_reason:reason})); },
+    async myGifts(){ return ok(await sb.from('gifts').select('id,amount,reason').eq('discord_id', myId).eq('seen', false).order('id')); },
+    async giftsSeen(){ ok(await sb.rpc('gifts_seen')); },
+    async events(){ return ok(await sb.from('coin_events').select('*').gt('ends_at', new Date().toISOString()).order('starts_at')); },
+    async addEvent(name,mult,start,end){ ok(await sb.rpc('admin_add_event', {p_name:name, p_mult:mult, p_start:start, p_end:end})); },
+    async deleteEvent(id){ ok(await sb.rpc('admin_delete_event', {p_id:id})); },
+    async sendNote(cat, body){ ok(await sb.rpc('send_note', {p_category:cat, p_body:body})); },
+    async notes(){ return ok(await sb.from('notes').select('id,category,body,created_at,read,members(display_name)').order('created_at', {ascending:false}).limit(100)); },
+    async readNote(id){ ok(await sb.rpc('admin_note_read', {p_id:id})); },
+    async deleteNote(id){ ok(await sb.rpc('admin_note_delete', {p_id:id})); },
     async paint(k){ ok(await sb.rpc('paint_house', {p_color:k})); },
     myId(){ return myId; },
   };
@@ -807,8 +911,87 @@ function renderRoad(){
     </li>`).join('');
 }
 
+// 축하 이유별 기본 코인 (버튼 누르면 자동으로 채워져요)
+const GIFT_REASONS = [['무연 시작',50],['완결',50],['계약',100],['출간',300],['생일',50]];
+function renderGiftForm(){
+  const sel = document.getElementById('giftWho'), keep = sel.value;
+  const people = VILLAGE.filter(p=>!p.removed).slice().sort((a,b)=>a.display_name.localeCompare(b.display_name,'ko'));
+  sel.innerHTML = `<option value="">— 골라 주세요 —</option>` + people.map(p=>`<option value="${esc(p.discord_id)}">${esc(isMe(p)?p.display_name+' (나)':p.display_name)}</option>`).join('');
+  if(keep) sel.value = keep;
+  document.getElementById('giftReasons').innerHTML = GIFT_REASONS.map(([r,n])=>`<button class="mini" data-reason="${r}" data-amount="${n}">${r} · 🪙${n}</button>`).join('');
+}
+
+async function showGifts(){
+  try{
+    const list = await api.myGifts();
+    if(!list || !list.length) return;
+    const total = list.reduce((a,g)=>a+g.amount,0);
+    const msg = list.length===1
+      ? `「${list[0].reason}」 축하해요!\n운영자님이 🪙 ${list[0].amount}코인을 보냈어요.`
+      : list.map(g=>`「${g.reason}」 🪙 ${g.amount}`).join('\n') + `\n\n축하 코인 🪙 ${total}개가 도착했어요!`;
+    document.getElementById('partyMsg').textContent = msg;
+    const d = document.getElementById('party');
+    document.getElementById('partyOk').onclick = ()=>d.close();
+    d.showModal();
+    await api.giftsSeen();
+  }catch(e){}
+}
+
+let NOTES = [];
+const NOTE_CATS = ['가구 요청','건의','고장 신고','기타'];
+let noteCat = NOTE_CATS[0];
+async function refreshNotes(){
+  if(!ME || !ME.is_admin) return;
+  try{ NOTES = (await api.notes()) || []; }catch(e){ NOTES = []; }
+  const unread = NOTES.filter(n=>!n.read).length;
+  document.getElementById('adminTabBtn').textContent = unread ? `🔒 운영자 전용 ✉️${unread}` : '🔒 운영자 전용';
+  document.getElementById('inboxCount').textContent = NOTES.length ? `안 읽은 쪽지 ${unread}통 · 전체 ${NOTES.length}통` : '';
+  document.getElementById('inbox').innerHTML = NOTES.length ? NOTES.map(n=>`
+    <div class="note ${n.read?'':'unread'}">
+      <div class="note-head"><b>${esc(n.members?.display_name || '알 수 없음')}</b>
+        <span class="pill">${esc(n.category)}</span><span class="small">${when(n.created_at)}</span></div>
+      <div class="note-body">${esc(n.body)}</div>
+      <div class="note-act">${n.read?'':`<button class="mini" data-nread="${n.id}">읽음</button>`}<button class="mini" data-ndel="${n.id}">삭제</button></div>
+    </div>`).join('') : '<p class="small">아직 받은 쪽지가 없어요.</p>';
+}
+function renderNoteCats(){
+  document.getElementById('noteCats').innerHTML = NOTE_CATS.map(c=>`<button class="mini ${c===noteCat?'ask-yes':''}" data-ncat="${c}">${c}</button>`).join('');
+}
+function openNote(){
+  renderNoteCats();
+  const d = document.getElementById('noteDlg'); if(!d.open) d.showModal();
+  document.getElementById('noteBody').focus();
+}
+
+let EVENTS = [];
+const when = d => new Date(d).toLocaleString('ko-KR',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+function activeEvent(){ const n=Date.now(); return EVENTS.filter(e=>new Date(e.starts_at)<=n && new Date(e.ends_at)>n).sort((a,b)=>b.multiplier-a.multiplier)[0]; }
+function currentMult(){ const e=activeEvent(); return e ? e.multiplier : 1; }
+async function refreshEvents(){ try{ EVENTS = (await api.events()) || []; }catch(e){ EVENTS = []; } renderEvents(); }
+function renderEvents(){
+  const b = document.getElementById('eventBanner'), a = activeEvent(), n = Date.now();
+  const next = EVENTS.filter(e=>new Date(e.starts_at)>n)[0];
+  if(a){ b.hidden=false; b.className='event-banner on'; b.textContent = `🔥 ${a.name} 진행 중! 작업실 1분마다 🪙 ${a.multiplier}개 · ${when(a.ends_at)}까지`; }
+  else if(next){ b.hidden=false; b.className='event-banner soon'; b.textContent = `⏰ ${when(next.starts_at)}부터 ${next.name}! (🪙 ${next.multiplier}배)`; }
+  else b.hidden=true;
+  document.getElementById('earn').textContent = `🎧 작업실에 있으면 1분마다 🪙 ${a?a.multiplier:1}개씩 쌓여요${a?' 🔥':''}`;
+  if(ME && ME.is_admin){
+    document.getElementById('evList').innerHTML = EVENTS.length
+      ? EVENTS.map(e=>`<div class="ev-item">${new Date(e.starts_at)<=n?'🔥 진행 중':'⏰ 예정'} · ${esc(e.name)} (${e.multiplier}배) · ${when(e.starts_at)} ~ ${when(e.ends_at)}
+          <button class="mini" data-evdel="${e.id}">취소</button></div>`).join('')
+      : '등록된 이벤트가 없어요.';
+  }
+}
+
 async function renderAdmin(){
   if(!ME.is_admin) return;
+  renderGiftForm();
+  const sEl=document.getElementById('evStart'), eEl=document.getElementById('evEnd');
+  if(!sEl.value){
+    const pad=n=>String(n).padStart(2,'0'), fmtL=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const now=new Date(); now.setSeconds(0,0); const end=new Date(now.getTime()+24*3600e3);
+    sEl.value=fmtL(now); eEl.value=fmtL(end);
+  }
   document.getElementById('legend').innerHTML = DECAY.slice(1).map((x,i)=>`<span><span class="pill d${i+1}">${x.d}일+</span> ${x.label}</span>`).join('');
   try{
     const rows = (await api.adminList()).filter(p=>!isMe(p));
@@ -834,6 +1017,9 @@ async function loadAll(){
   renderTop(); renderVillage(); renderMyHouse(); renderBag(); renderRoad(); setHint();
   document.getElementById('adminTabBtn').hidden = !ME.is_admin;
   renderAdmin();
+  showGifts();
+  refreshEvents();
+  refreshNotes();
 }
 
 /* ---------- 행동 ---------- */
@@ -879,6 +1065,59 @@ document.addEventListener('click', e=>{
     renderTop(); renderVillage(); renderMyHouse(); renderBag(); renderRoad();
   });
 
+  if(e.target.closest('#noteBtn')) return openNote();
+  if(e.target.closest('#noteCancel')) return document.getElementById('noteDlg').close();
+  const nc = e.target.closest('[data-ncat]');
+  if(nc){ noteCat = nc.dataset.ncat; renderNoteCats(); return; }
+  if(e.target.closest('#noteSend')) return act(async()=>{
+    const body = document.getElementById('noteBody').value.trim();
+    if(!body) return toast('내용을 적어 주세요');
+    await api.sendNote(noteCat, body);
+    document.getElementById('noteBody').value=''; document.getElementById('noteLen').textContent='0';
+    document.getElementById('noteDlg').close(); toast('✉️ 운영자에게 쪽지를 보냈어요!');
+    refreshNotes();
+  });
+  const nr = e.target.closest('[data-nread]');
+  if(nr) return act(async()=>{ await api.readNote(+nr.dataset.nread); await refreshNotes(); });
+  const nd = e.target.closest('[data-ndel]');
+  if(nd) return act(async()=>{ if(!(await ask('이 쪽지를 지울까요?'))) return; await api.deleteNote(+nd.dataset.ndel); await refreshNotes(); });
+
+  if(e.target.closest('#evAdd')) return act(async()=>{
+    const name=document.getElementById('evName').value.trim()||'코인 이벤트';
+    const mult=+document.getElementById('evMult').value;
+    const sv=document.getElementById('evStart').value, ev=document.getElementById('evEnd').value;
+    if(!sv||!ev) return toast('시작과 끝을 정해 주세요');
+    const start=new Date(sv), end=new Date(ev);
+    if(end<=start) return toast('끝이 시작보다 뒤여야 해요');
+    if(!(await ask(`${when(start)} ~ ${when(end)}\n「${name}」 코인 ${mult}배로 등록할까요?`))) return;
+    await api.addEvent(name, mult, start.toISOString(), end.toISOString());
+    toast('🔥 이벤트를 등록했어요!'); await refreshEvents();
+  });
+  const ed = e.target.closest('[data-evdel]');
+  if(ed) return act(async()=>{
+    if(!(await ask('이 이벤트를 취소할까요?'))) return;
+    await api.deleteEvent(+ed.dataset.evdel); toast('이벤트를 취소했어요'); await refreshEvents();
+  });
+
+  const rs = e.target.closest('[data-reason]');
+  if(rs){ document.getElementById('giftReason').value = rs.dataset.reason; document.getElementById('giftAmount').value = rs.dataset.amount; return; }
+
+  if(e.target.closest('#giftSend')) return act(async()=>{
+    const who = document.getElementById('giftWho').value;
+    const reason = document.getElementById('giftReason').value.trim();
+    const amount = Math.floor(+document.getElementById('giftAmount').value);
+    if(!who) return toast('받는 분을 골라 주세요');
+    if(!reason) return toast('축하 이유를 적어 주세요');
+    if(!(amount>=1 && amount<=10000)) return toast('코인은 1~10000개까지 보낼 수 있어요');
+    const name = (VILLAGE.find(p=>p.discord_id===who)||{}).display_name || '';
+    if(!(await ask(`${name}님께 「${reason}」 축하 코인 🪙 ${amount}개를 보낼까요?`))) return;
+    await api.adminGift(who, amount, reason);
+    toast(`🎉 ${name}님께 축하 코인을 보냈어요!`);
+    document.getElementById('giftReason').value = '';
+    await refreshMine(); renderTop(); renderBag(); renderMyHouse();
+    if(who===(DEMO?'me':supaApi.myId())) showGifts();
+  });
+
   const clr = e.target.closest('[data-clear]');
   if(clr) return act(async()=>{
     if(!(await ask(`${clr.dataset.name}님 집을 빈 터로 정리할까요? 가구와 기록이 함께 정리돼요.`))) return;
@@ -896,6 +1135,8 @@ document.querySelector('.tabs').addEventListener('click', e=>{
   ['home','road','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
   if(b.dataset.tab==='admin') renderAdmin();
 });
+
+document.getElementById('noteBody').addEventListener('input', e=>{ document.getElementById('noteLen').textContent = e.target.value.length; });
 
 const roomEl = document.getElementById('room');
 roomEl.addEventListener('mouseover', e=>{
@@ -990,7 +1231,7 @@ async function start(){
       demoApi.tick(); await refreshMine(); await refreshVillage();
       const after = stageIdx(ME.total_minutes);
       if(after>before) toast(`🎉 집이 ${STAGES[after].name}(으)로 커졌어요!`);
-      renderTop(); renderVillage(); renderMyHouse(); renderBag(); if(after>before) renderRoad();
+      renderTop(); renderVillage(); renderMyHouse(); renderBag(); if(after>before) renderRoad(); renderEvents();
     }, 1000);
     setInterval(async ()=>{
       const o = demoApi.shuffle(); if(o && o.in_voice) toast(`🕯️ ${o.display_name}님 집에 불이 켜졌어요`);
@@ -1005,6 +1246,7 @@ async function start(){
         const after = stageIdx(ME.total_minutes);
         if(after>before){ toast(`🎉 집이 ${STAGES[after].name}(으)로 커졌어요!`); renderMyHouse(); renderRoad(); }
         renderTop(); renderVillage(); renderBag();
+        showGifts(); refreshEvents(); refreshNotes();
       }catch(e){}
     }, 30000);
   }
