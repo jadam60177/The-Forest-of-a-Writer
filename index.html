@@ -58,12 +58,12 @@ button:focus-visible,.tile:focus-visible{outline:3px solid var(--lamp);outline-o
 .wolf{position:absolute;bottom:10px;left:2%;width:78px;text-align:center}
 .wolf-svg{width:70px;height:auto;display:block;margin:0 auto}
 .wolf .tag{font-family:"Jua",sans-serif;font-size:.85rem;color:#F2EFFF;background:rgba(0,0,0,.25);border-radius:999px;display:inline-block;padding:0 .55rem}
-.bubble{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff;color:#26233A;font-size:.82rem;border-radius:10px;padding:.15rem .55rem;margin-bottom:-4px;transition:opacity .4s}
+.bubble{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:200px;white-space:normal;text-align:center;line-height:1.4;;color:#26233A;font-size:.82rem;border-radius:10px;padding:.15rem .55rem;margin-bottom:-4px;transition:opacity .4s}
 .bubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;border:5px solid transparent;border-top-color:#fff}
 @media (prefers-reduced-motion:no-preference){
   .wolf{animation:roam 48s linear infinite alternate}
   .wolf-svg{animation:face 96s step-end infinite}
-  @keyframes roam{from{left:1%}to{left:calc(99% - 78px)}}
+  @keyframes roam{from{left:8%}to{left:calc(87% - 78px)}}
   @keyframes face{0%{transform:scaleX(1)}50%{transform:scaleX(-1)}}
 }
 .house{display:flex;flex-direction:column;align-items:center;text-align:center;color:#F2EFFF;background:none;border:0;padding:.25rem;border-radius:12px}
