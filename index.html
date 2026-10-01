@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>마감의 숲</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌲</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-top:#1F2A55; --sky-bot:#5B5E8E; --hill:#3F5A3A; --hill2:#4E6E45;
+  --lamp:#FFCE5C; --lamp-glow:rgba(255,206,92,.55);
+  --bg:#EEF1E7; --panel:#FFFFFF; --ink:#26233A; --muted:#6B6880; --line:#D9DCCD;
+  --tile-a:#F3E7D2; --tile-b:#EADBC1; --tile-locked:#D5D8CB;
+  --win-off:#3B3F5C; --accent:#4E6E45; --btn-ink:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16182A; --panel:#20233A; --ink:#ECEAF5; --muted:#A7A4BE; --line:#33374F;
+    --tile-a:#3A3448; --tile-b:#332E40; --tile-locked:#262938; --win-off:#2A2D44; --accent:#7FA16F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16182A; --panel:#20233A; --ink:#ECEAF5; --muted:#A7A4BE; --line:#33374F;
+  --tile-a:#3A3448; --tile-b:#332E40; --tile-locked:#262938; --win-off:#2A2D44; --accent:#7FA16F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.6}
+h1,h2,h3,.jua{font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-weight:400}
+button{font:inherit;cursor:pointer}
+button:focus-visible,.tile:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
+
+/* 상단 바 */
+.top{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;
+  padding:.9rem 1.25rem;background:var(--sky-top);color:#F2EFFF}
+.top h1{margin:0;font-size:1.5rem;letter-spacing:.02em}
+.top .right{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.coin{background:rgba(255,255,255,.1);border-radius:999px;padding:.3rem .9rem;font-family:"Jua",sans-serif;font-size:1.05rem}
+.voice-btn{border:0;border-radius:999px;padding:.45rem 1rem;background:#fff;color:var(--sky-top);font-family:"Jua",sans-serif}
+.voice-btn.on{background:var(--lamp);color:#3A2A00;box-shadow:0 0 18px var(--lamp-glow)}
+.ghost{border:1px solid rgba(255,255,255,.35);background:transparent;color:#F2EFFF;border-radius:999px;padding:.4rem .9rem}
+
+/* 마을 */
+.village{position:relative;background:linear-gradient(var(--sky-top),var(--sky-bot) 70%);overflow:hidden;padding:1.5rem 1rem 0}
+.stars{position:absolute;inset:0;pointer-events:none}
+.village-head{position:relative;max-width:1100px;margin:0 auto .5rem;color:#E6E3F7;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;align-items:baseline}
+.village-head p{margin:0;font-size:.95rem;opacity:.85}
+.lit-count{font-family:"Jua",sans-serif;font-size:1.1rem;color:var(--lamp)}
+.houses{position:relative;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem 1rem;padding-bottom:.25rem;z-index:2}
+.pines{position:absolute;left:0;right:0;bottom:40%;width:100%;height:110px;z-index:0}
+.trail{position:relative;z-index:2;max-width:1100px;height:92px;margin:0 auto}
+.wolf{position:absolute;bottom:10px;left:2%;width:78px;text-align:center}
+.wolf-svg{width:70px;height:auto;display:block;margin:0 auto}
+.wolf .tag{font-family:"Jua",sans-serif;font-size:.85rem;color:#F2EFFF;background:rgba(0,0,0,.25);border-radius:999px;display:inline-block;padding:0 .55rem}
+.bubble{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff;color:#26233A;font-size:.82rem;border-radius:10px;padding:.15rem .55rem;margin-bottom:-4px;transition:opacity .4s}
+.bubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;border:5px solid transparent;border-top-color:#fff}
+@media (prefers-reduced-motion:no-preference){
+  .wolf{animation:roam 48s linear infinite alternate}
+  .wolf-svg{animation:face 96s step-end infinite}
+  @keyframes roam{from{left:1%}to{left:calc(99% - 78px)}}
+  @keyframes face{0%{transform:scaleX(1)}50%{transform:scaleX(-1)}}
+}
+.house{display:flex;flex-direction:column;align-items:center;text-align:center;color:#F2EFFF;background:none;border:0;padding:.25rem;border-radius:12px}
+.house svg{width:100%;max-width:150px;height:auto;display:block}
+.house .nm{font-family:"Jua",sans-serif;font-size:1.05rem;margin-top:.1rem}
+.house .st{font-size:.8rem;opacity:.85}
+.house.me .nm{color:var(--lamp)}
+.ground{z-index:1;position:absolute;left:0;right:0;bottom:0;height:46%;background:var(--hill);border-radius:60% 60% 0 0/30% 30% 0 0}
+.ground::before{content:"";position:absolute;left:-10%;right:30%;top:18%;bottom:0;background:var(--hill2);border-radius:50% 50% 0 0/25% 25% 0 0}
+.lit .glowwin{filter:drop-shadow(0 0 5px var(--lamp))}
+@media (prefers-reduced-motion:no-preference){
+  .lit .glowwin{animation:flicker 3.2s ease-in-out infinite}
+  @keyframes flicker{0%,100%{opacity:1}50%{opacity:.82}}
+}
+
+/* 본문 */
+main{max-width:1100px;margin:0 auto;padding:1.25rem 1rem 3rem}
+.tabs{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:.45rem 1rem;font-family:"Jua",sans-serif;font-size:1.02rem}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--btn-ink);border-color:var(--accent)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:1.25rem}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:1.25rem}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.myhouse-head{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+.myhouse-head svg{width:110px;height:auto;flex:none;background:var(--sky-top);border-radius:12px;padding:.3rem}
+.myhouse-head h2{margin:0;font-size:1.5rem}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:.35rem 0 .2rem;max-width:340px}
+.bar span{display:block;height:100%;background:var(--lamp);border-radius:99px;transition:width .4s}
+.small{font-size:.88rem;color:var(--muted)}
+.room-wrap{overflow-x:auto}
+.room{display:grid;gap:3px;width:max-content;padding:8px;background:#8A6A4A;border-radius:10px;margin:0 auto}
+.tile{width:46px;height:46px;border:0;border-radius:6px;font-size:1.65rem;display:grid;place-items:center;padding:0;line-height:1}
+.tile.a{background:var(--tile-a)} .tile.b{background:var(--tile-b)}
+.tile.locked{background:var(--tile-locked);cursor:not-allowed;font-size:.9rem;color:var(--muted)}
+.tile{grid-row:auto}
+.tile.pv-ok{outline:2px dashed var(--accent);outline-offset:-2px;background:color-mix(in srgb,var(--accent) 22%,var(--tile-a))}
+.tile.pv-no{outline:2px dashed #B4513E;outline-offset:-2px;background:color-mix(in srgb,#B4513E 22%,var(--tile-a))}
+.furn{z-index:1;border:0;border-radius:8px;background:rgba(255,255,255,.35);font-size:1.65rem;line-height:1;display:grid;place-items:center;padding:0;box-shadow:inset 0 0 0 2px rgba(138,106,74,.35)}
+.furn.long{font-size:2.3rem}
+.furn.big{font-size:3.6rem}
+.furn:hover{box-shadow:inset 0 0 0 2px #B4513E}
+.room.placing .furn{pointer-events:none;opacity:.85}
+.hint{text-align:center;margin:.6rem 0 0;min-height:1.5em}
+h3{margin:0 0 .5rem;font-size:1.2rem}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:.5rem;margin-bottom:1.25rem}
+.item{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:.45rem .3rem;display:flex;flex-direction:column;align-items:center;gap:.1rem}
+.item .em{font-size:1.6rem;line-height:1.2}
+.item .t{font-size:.8rem}
+.item .p{font-family:"Jua",sans-serif;font-size:.9rem;color:var(--accent)}
+.item.sel{border-color:var(--lamp);box-shadow:0 0 0 2px var(--lamp)}
+.item:disabled{opacity:.45;cursor:not-allowed}
+.empty{color:var(--muted);font-size:.9rem;margin:0 0 1.25rem}
+
+/* 성장 단계 */
+.road{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.75rem}
+.road li{border:1px solid var(--line);border-radius:14px;padding:.75rem;text-align:center;background:var(--bg)}
+.road li svg{width:100%;max-width:130px;background:var(--sky-top);border-radius:10px}
+.road li.locked svg{filter:grayscale(1) brightness(.6)}
+.road li.now{border-color:var(--lamp);box-shadow:0 0 0 2px var(--lamp)}
+.road .step{font-size:.8rem;color:var(--muted)}
+.road .nm{font-family:"Jua",sans-serif;font-size:1.1rem}
+
+.rules{margin-top:1rem;font-size:.92rem;color:var(--muted)}
+.rules p{margin:.25rem 0}
+
+.toast{position:fixed;left:50%;bottom:calc(1.25rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(150%);background:var(--sky-top);color:#fff;
+  padding:.8rem 1.2rem;border-radius:14px;font-family:"Jua",sans-serif;font-size:1.05rem;transition:transform .35s;z-index:10;max-width:90vw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.house.ruin svg{filter:grayscale(.85) brightness(.75)}
+.house.vacant{opacity:.8}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin:.25rem 0 .9rem}
+.table-wrap{overflow-x:auto}
+table.admin{width:100%;border-collapse:collapse;min-width:560px;font-size:.95rem}
+table.admin th{text-align:left;font-weight:400;color:var(--muted);font-size:.85rem;padding:.4rem .5rem;border-bottom:1px solid var(--line)}
+table.admin td{padding:.55rem .5rem;border-bottom:1px solid var(--line);vertical-align:middle}
+table.admin tr.d3 td{background:rgba(180,81,62,.1)}
+.pill{display:inline-block;border-radius:999px;padding:.05rem .6rem;font-size:.82rem;background:var(--bg);border:1px solid var(--line)}
+.pill.d1{border-color:#7FA65A} .pill.d2{border-color:#B9A15A} .pill.d3{border-color:#B4513E;color:#B4513E}
+.pill.on{background:var(--lamp);color:#3A2A00;border-color:var(--lamp)}
+.mini{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:.25rem .65rem;font-size:.85rem}
+.demo-note{background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:.6rem .9rem;margin-bottom:1rem;font-size:.9rem;color:var(--muted)}
+
+/* ---- 정식 버전 추가 ---- */
+[hidden]{display:none !important}
+.who{display:flex;align-items:center;gap:.5rem;font-size:.95rem}
+.who img{width:28px;height:28px;border-radius:50%}
+.gate{min-height:100vh;min-height:100dvh;display:grid;place-items:center;text-align:center;padding:2rem 1rem;
+  background:linear-gradient(var(--sky-top),var(--sky-bot));color:#F2EFFF;position:relative;overflow:hidden}
+.gate-inner{position:relative;z-index:2;max-width:420px}
+.gate h1{font-size:2.6rem;margin:.2rem 0 .4rem}
+.gate p{opacity:.9;margin:.2rem 0 1.4rem}
+.gate .wolf-svg{width:110px;margin:0 auto}
+.discord-btn{border:0;border-radius:12px;padding:.8rem 1.4rem;background:#5865F2;color:#fff;font-family:"Jua",sans-serif;font-size:1.15rem}
+.gate .small{color:#D9D6EE}
+.house{cursor:pointer}
+.house:focus-visible{outline:3px solid var(--lamp)}
+dialog.visit{border:0;border-radius:18px;padding:1.25rem;background:var(--panel);color:var(--ink);max-width:min(92vw,560px)}
+dialog.visit::backdrop{background:rgba(20,18,40,.55)}
+dialog.visit h3{margin:0 0 .25rem}
+.visit-close{float:right}
+.room.view .furn{cursor:default;pointer-events:none}
+.loading{opacity:.6}
+.err{color:#B4513E}
+</style>
+
+</head>
+<body>
+
+<!-- 입구: 로그인 전 -->
+<section class="gate" id="screenLogin" hidden>
+  <svg class="stars" data-stars preserveAspectRatio="none"></svg>
+  <div class="gate-inner">
+    <svg class="wolf-svg" data-wolf viewBox="0 0 42 30" role="img" aria-label="담당자 늑대"></svg>
+    <h1>🌲 마감의 숲</h1>
+    <p>디스코드 계정으로 들어와 주세요.<br>마감의 숲 서버 주민만 들어올 수 있어요.</p>
+    <button class="discord-btn" id="loginBtn">디스코드로 들어가기</button>
+  </div>
+</section>
+
+<!-- 입구: 주민이 아님 -->
+<section class="gate" id="screenNotMember" hidden>
+  <svg class="stars" data-stars preserveAspectRatio="none"></svg>
+  <div class="gate-inner">
+    <svg class="wolf-svg" data-wolf viewBox="0 0 42 30" role="img" aria-label="담당자 늑대"></svg>
+    <h1>🌲 마감의 숲</h1>
+    <p>이 숲은 마감의 숲 디스코드 서버 주민만 들어올 수 있어요.<br>서버에 들어온 지 얼마 안 됐다면 잠시 뒤 다시 들어와 주세요.</p>
+    <button class="discord-btn" id="logoutBtn2">다른 계정으로 들어가기</button>
+  </div>
+</section>
+
+<!-- 숲 -->
+<div id="app" hidden>
+<header class="top">
+  <h1>🌲 마감의 숲</h1>
+  <div class="right">
+    <span class="who" id="who"></span>
+    <span class="coin" id="coin">🪙 0</span>
+    <span id="demoCtrls" hidden>
+      <button class="voice-btn" id="voiceBtn">🎧 작업 채널 들어가기</button>
+      <button class="ghost" id="ffBtn" title="미리보기용: 누적 작업 시간 +5시간">⏩ +5시간</button>
+    </span>
+    <button class="ghost" id="logoutBtn">나가기</button>
+  </div>
+</header>
+
+<section class="village" aria-label="마감의 숲">
+  <svg class="stars" data-stars preserveAspectRatio="none"></svg>
+  <div class="village-head">
+    <p>불 켜진 집은 지금 작업 채널에 있는 사람이에요. 오래 비운 집에는 담당자가 찾아가요. 집을 누르면 구경할 수 있어요.</p>
+    <span class="lit-count" id="litCount"></span>
+  </div>
+  <div class="ground"></div>
+  <svg class="pines" id="pines" viewBox="0 0 1000 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+  <div class="houses" id="houses"></div>
+  <div class="trail">
+    <div class="wolf">
+      <div class="bubble" id="bubble">원고는요?</div>
+      <svg class="wolf-svg" data-wolf viewBox="0 0 42 30" role="img" aria-label="담당자 늑대"></svg>
+      <div class="tag">담당자</div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="demo-note" id="demoNote" hidden>미리보기 모드예요. 데이터베이스를 연결하기 전이라 가짜 이웃들과 함께 움직이고, 1초를 작업 1분으로 계산해요. 연결하면 이 안내와 위의 미리보기 버튼은 사라지고, 디스코드 봇이 잰 시간이 들어와요.</div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="home">우리 집 꾸미기</button>
+    <button role="tab" aria-selected="false" data-tab="road">집 성장 단계</button>
+    <button role="tab" aria-selected="false" data-tab="admin" id="adminTabBtn" hidden>🔒 운영자 전용</button>
+  </div>
+
+  <section id="tab-home" class="grid2">
+    <div class="panel">
+      <div class="myhouse-head">
+        <div id="myHouseIcon"></div>
+        <div>
+          <h2 id="myStageName"></h2>
+          <div class="bar"><span id="stageBar"></span></div>
+          <div class="small" id="stageInfo"></div>
+        </div>
+      </div>
+      <div class="room-wrap"><div class="room" id="room"></div></div>
+      <p class="hint small" id="hint"></p>
+    </div>
+    <div class="panel">
+      <h3>🎒 가방</h3>
+      <div class="items" id="bag"></div>
+      <h3>🛒 가구 상점</h3>
+      <div class="items" id="shop"></div>
+      <div class="rules">
+        <p>작업 채널에 있으면 1분마다 🪙 1개가 쌓여요.</p>
+        <p>집은 누적 작업 시간으로 커지고, 집이 클수록 방도 넓어져요.</p>
+        <p>침대처럼 큰 가구는 여러 칸을 차지해요. 길쭉한 가구는 돌려서 놓을 수 있어요.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-road" class="panel" hidden>
+    <h3>집 성장 단계</h3>
+    <p class="small" style="margin-top:0">누적 작업 시간이 기준을 넘으면 집이 자동으로 커져요. 빨간 벽돌집부터는 담당자가 불어도 날아가지 않아요.</p>
+    <ol class="road" id="road"></ol>
+  </section>
+
+  <section id="tab-admin" class="panel" hidden>
+    <h3>미접 명단</h3>
+    <p class="small" style="margin-top:0">운영자 계정에만 보이는 탭이에요. 마지막으로 작업 채널에 있었던 때 기준으로, 오래된 순서대로 보여줘요.</p>
+    <div class="legend small" id="legend"></div>
+    <div class="table-wrap">
+      <table class="admin">
+        <thead><tr><th>주민</th><th>마지막 작업</th><th>집 상태</th><th>누적</th><th></th></tr></thead>
+        <tbody id="adminRows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</div>
+
+<dialog class="visit" id="visit">
+  <button class="mini visit-close" id="visitClose">닫기</button>
+  <h3 id="visitTitle"></h3>
+  <p class="small" id="visitSub" style="margin-top:0"></p>
+  <div class="room-wrap"><div class="room view" id="visitRoom"></div></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* =========================================================
+   마감의 숲
+   ▼ 여기 두 줄만 채우면 진짜 데이터베이스와 연결돼요.
+     비워 두면 가짜 이웃들과 움직이는 미리보기 모드로 열려요.
+   ========================================================= */
+const CONFIG = {
+  SUPABASE_URL: 'https://udnecgyatvxsqpwtccjg.supabase.co',  // 예: https://abcdefgh.supabase.co
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkbmVjZ3lhdHZ4c3Fwd3RjY2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NjI3MTUsImV4cCI6MjEwNjQzODcxNX0.qNag7BcYJXc8MNibe-otUdfJlzAzdFD7f5z5BXaF1mA',  // Supabase > Project Settings > API 의 anon public 키
+};
+const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
+
+/* ---------- 기준 데이터 (schema.sql 의 room_size 와 같아야 해요) ---------- */
+const STAGES = [
+  {name:'나뭇가지 움막', h:0,   cols:3, rows:3},
+  {name:'낡은 텐트',     h:5,   cols:4, rows:3},
+  {name:'초가집',        h:15,  cols:4, rows:4},
+  {name:'통나무집',      h:30,  cols:5, rows:4},
+  {name:'흙벽돌집',      h:50,  cols:6, rows:4},
+  {name:'기와집',        h:80,  cols:6, rows:5},
+  {name:'빨간 벽돌집',   h:120, cols:7, rows:5},
+  {name:'이층집',        h:170, cols:8, rows:5},
+  {name:'정원 딸린 저택',h:240, cols:8, rows:6},
+  {name:'작가의 성',     h:330, cols:9, rows:6},
+];
+const MAXC = 9, MAXR = 6;
+const DECAY = [
+  {d:0,  label:'정상'},
+  {d:14, label:'담당자가 어슬렁거려요'},
+  {d:30, label:'담당자가 후— 불고 갔어요'},
+  {d:60, label:'집이 날아갔어요'},
+];
+const STURDY = 6;
+const decayOf = away => away>=60?3:away>=30?2:away>=14?1:0;
+const decayLabel = (dc, stage) => stage>=STURDY && dc>0 ? '담당자가 문 앞에서 기다리는 중' : DECAY[dc].label;
+const awayText = d => d===0?'오늘':d===1?'어제':`${d}일 전`;
+const stageIdx = minutes => { const h = minutes/60; let i=0; STAGES.forEach((s,k)=>{ if(h>=s.h) i=k; }); return i; };
+const fmt = m => { const h=Math.floor(m/60), mm=m%60; return h ? `${h}시간 ${mm}분` : `${mm}분`; };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+const DEFAULT_SHOP = [
+  ['coffee','☕','커피',10,1,1],['candle','🕯️','촛불',15,1,1],['firewood','🪵','장작',20,1,1],['plant','🪴','화분',30,1,1],
+  ['chair','🪑','의자',40,1,1],['teddy','🧸','곰인형',50,1,1],['books','📚','책더미',60,1,1],['moonlamp','🌙','무드등',70,1,1],
+  ['frame','🖼️','액자',80,1,1],['clock','🕰️','괘종시계',90,1,2],['bed','🛏️','침대',120,2,2],['sofa','🛋️','소파',150,2,1],
+  ['desk','🖥️','작업 책상',200,2,1],['bathtub','🛁','욕조',250,2,1],['cat','🐈','고양이',300,1,1],['piano','🎹','피아노',400,2,1],
+].map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h}));
+
+const WOLF_BODY = `
+  <path d="M9 17 Q1 10 3 19 Q6 21 9 19 Z" fill="#6F6B7E"/>
+  <ellipse cx="19" cy="18" rx="11" ry="6" fill="#7A7690"/>
+  <rect x="11" y="21" width="3" height="8" rx="1.2" fill="#6F6B7E"/><rect x="24" y="21" width="3" height="8" rx="1.2" fill="#6F6B7E"/>
+  <circle cx="30" cy="12" r="5.5" fill="#7A7690"/>
+  <path d="M26.5 9 L27.5 2 L30.5 7.5 Z M30.5 7 L33.5 1.5 L34.5 8.5 Z" fill="#6F6B7E"/>
+  <path d="M34 10.5 L40.5 13 L34 15.5 Z" fill="#8E8AA3"/>
+  <circle cx="39.6" cy="13" r="1" fill="#2A2233"/>
+  <circle cx="32" cy="10.8" r="1.1" fill="#FFCE5C"/>
+  <path d="M24 14 L36 16" stroke="#B4513E" stroke-width="1.6"/>`;
+
+function houseSVG(stage, lit, decay=0){
+  const W = lit ? '#FFCE5C' : 'var(--win-off)';
+  const win = (x,y,w,h) => `<rect class="glowwin" x="${x}" y="${y}" width="${w}" height="${h}" rx="1.5" fill="${W}"/>`;
+  let g = '';
+  switch(stage){
+    case 0: // 나뭇가지 움막
+      g = `<path d="M60 40 L38 90 M60 40 L82 90 M56 44 L44 90 M64 44 L76 90 M60 40 L52 90 M60 40 L68 90" stroke="#8B6A42" stroke-width="3" stroke-linecap="round"/>
+           <path d="M55 36 L66 47 M65 36 L54 47" stroke="#6E522F" stroke-width="3" stroke-linecap="round"/>
+           <path d="M53 90 Q60 70 67 90 Z" fill="${W}" class="glowwin"/>
+           <path d="M40 76 L80 74 M43 66 L77 64" stroke="#7A5B36" stroke-width="2.5" stroke-linecap="round"/>`;
+      break;
+    case 1: // 텐트
+      g = `<path d="M60 38 L30 90 L90 90 Z" fill="#C9B48A"/>
+           <path d="M60 38 L45 90 M60 38 L75 90" stroke="#A8935F" stroke-width="2"/>
+           <path d="M60 52 L50 90 L70 90 Z" fill="${W}" class="glowwin"/>
+           <path d="M60 52 L52 90" stroke="#8C7A50" stroke-width="2"/>
+           <line x1="60" y1="30" x2="60" y2="40" stroke="#6E522F" stroke-width="2.5"/>`;
+      break;
+    case 2: // 초가집
+      g = `<rect x="34" y="60" width="52" height="30" fill="#C9A77C"/>
+           <path d="M26 64 Q60 26 94 64 Q60 56 26 64 Z" fill="#D9BE6E"/>
+           <path d="M30 63 Q60 34 90 63" stroke="#B89A4E" stroke-width="2" fill="none"/>
+           ${win(40,68,12,10)}<rect x="62" y="70" width="14" height="20" fill="#7A5B36"/>`;
+      break;
+    case 3: // 통나무집
+      g = `<rect x="30" y="58" width="60" height="32" fill="#9C6B3F"/>
+           ${[62,68,74,80,86].map(y=>`<line x1="30" y1="${y}" x2="90" y2="${y}" stroke="#7C522E" stroke-width="2"/>`).join('')}
+           <path d="M24 60 L60 32 L96 60 Z" fill="#5E3E22"/>
+           ${win(38,64,13,11)}${win(69,64,13,11)}<rect x="54" y="72" width="12" height="18" fill="#4A3019"/>`;
+      break;
+    case 4: // 흙벽돌집
+      g = `<rect x="28" y="54" width="64" height="36" fill="#D4A574"/>
+           <rect x="24" y="48" width="72" height="8" rx="2" fill="#B9875A"/>
+           ${win(35,62,12,12)}${win(73,62,12,12)}<rect x="53" y="68" width="14" height="22" rx="7" fill="#7A4E2C"/>`;
+      break;
+    case 5: // 기와집
+      g = `<rect x="32" y="60" width="56" height="30" fill="#F1EBDD"/>
+           <line x1="32" y1="60" x2="32" y2="90" stroke="#7A4E2C" stroke-width="4"/><line x1="88" y1="60" x2="88" y2="90" stroke="#7A4E2C" stroke-width="4"/>
+           <line x1="60" y1="60" x2="60" y2="90" stroke="#7A4E2C" stroke-width="3"/>
+           <path d="M16 58 Q30 62 34 52 L86 52 Q90 62 104 58 Q96 66 60 64 Q24 66 16 58 Z" fill="#3D4458"/>
+           <path d="M34 52 Q60 30 86 52 Z" fill="#4A5268"/>
+           ${win(38,68,16,13)}${win(66,68,16,13)}`;
+      break;
+    case 6: // 빨간 벽돌집
+      g = `<rect x="78" y="34" width="8" height="18" fill="#7E3A2E"/>
+           <rect x="28" y="56" width="64" height="34" fill="#B4513E"/>
+           ${[62,68,74,80,86].map((y,i)=>`<line x1="28" y1="${y}" x2="92" y2="${y}" stroke="#94402F" stroke-width="1"/>`).join('')}
+           <path d="M22 58 L60 30 L98 58 Z" fill="#5B5F6E"/>
+           ${win(34,63,13,12)}${win(73,63,13,12)}<rect x="53" y="70" width="14" height="20" fill="#3F2A22"/>`;
+      break;
+    case 7: // 이층집
+      g = `<rect x="34" y="40" width="52" height="50" fill="#7E9CC0"/>
+           <path d="M28 42 L60 18 L92 42 Z" fill="#40496A"/>
+           <line x1="34" y1="64" x2="86" y2="64" stroke="#6A87AA" stroke-width="2"/>
+           ${win(40,46,12,11)}${win(68,46,12,11)}${win(40,70,12,11)}<rect x="66" y="70" width="14" height="20" fill="#3B3352"/>`;
+      break;
+    case 8: // 정원 딸린 저택
+      g = `<circle cx="16" cy="76" r="10" fill="#5F8F4E"/><rect x="14" y="80" width="4" height="10" fill="#6E522F"/>
+           <circle cx="104" cy="74" r="11" fill="#6FA05A"/><rect x="102" y="80" width="4" height="10" fill="#6E522F"/>
+           <rect x="28" y="46" width="64" height="44" fill="#E8DCC4"/>
+           <path d="M22 48 L60 24 L98 48 Z" fill="#6B3E3E"/>
+           <rect x="52" y="34" width="16" height="12" fill="#E8DCC4"/>${win(55,37,10,8)}
+           ${win(33,53,11,10)}${win(48,53,11,10)}${win(61,53,11,10)}${win(76,53,11,10)}
+           ${win(33,70,11,10)}${win(76,70,11,10)}<rect x="53" y="70" width="14" height="20" rx="7" fill="#5A3A2A"/>
+           ${[8,14,20,26,94,100,106,112].map(x=>`<line x1="${x}" y1="84" x2="${x}" y2="92" stroke="#E8DCC4" stroke-width="2"/>`).join('')}
+           <line x1="6" y1="87" x2="28" y2="87" stroke="#E8DCC4" stroke-width="2"/><line x1="92" y1="87" x2="114" y2="87" stroke="#E8DCC4" stroke-width="2"/>`;
+      break;
+    default: // 작가의 성
+      g = `<rect x="22" y="40" width="18" height="50" fill="#A9A6B8"/><rect x="80" y="40" width="18" height="50" fill="#A9A6B8"/>
+           <rect x="36" y="52" width="48" height="38" fill="#BDBACB"/>
+           <rect x="50" y="26" width="20" height="64" fill="#A9A6B8"/>
+           <path d="M20 40 L31 24 L42 40 Z M78 40 L89 24 L100 40 Z M48 26 L60 8 L72 26 Z" fill="#5A4F86"/>
+           <line x1="60" y1="8" x2="60" y2="0" stroke="#5A4F86" stroke-width="1.5"/><path d="M60 0 L69 3 L60 6 Z" fill="#FFCE5C"/>
+           ${[36,42,48,54,60,66,72,78].map(x=>`<rect x="${x}" y="48" width="4" height="5" fill="#BDBACB"/>`).join('')}
+           ${win(27,48,8,10)}${win(85,48,8,10)}${win(56,34,8,10)}${win(27,66,8,10)}${win(85,66,8,10)}${win(44,60,8,9)}${win(68,60,8,9)}
+           <path d="M53 90 L53 76 Q60 68 67 76 L67 90 Z" fill="#3E3452"/>`;
+  }
+  const sturdy = stage >= STURDY;
+  const label = `${STAGES[stage].name}${lit?' (불 켜짐)':''}${decay?' · '+decayLabel(decay, stage):''}`;
+  // 집이 날아간 상태 (벽돌집 미만)
+  if(decay>=3 && !sturdy){
+    const mat = ['#8B6A42','#C9B48A','#D9BE6E','#9C6B3F','#D4A574','#3D4458'][stage] || '#8B6A42';
+    return `<svg viewBox="0 0 120 96" role="img" aria-label="${label}">
+      <ellipse cx="52" cy="90" rx="34" ry="4" fill="#000" opacity=".2"/>
+      <path d="M28 90 L44 80 M40 90 L58 84 M54 90 L70 78 M66 90 L78 86 M34 86 L50 88" stroke="${mat}" stroke-width="4" stroke-linecap="round"/>
+      <path d="M8 40 q8 -6 16 0 t16 0 M14 52 q8 -6 16 0 t16 0" stroke="#DDE3F2" stroke-width="2" fill="none" opacity=".7" stroke-linecap="round"/>
+      ${wolfMini(84,60,.9)}
+      <rect x="2" y="70" width="26" height="12" rx="2" fill="#D9C9A3"/><line x1="15" y1="82" x2="15" y2="92" stroke="#6E522F" stroke-width="2"/>
+      <text x="15" y="79" font-size="7" text-anchor="middle" fill="#5A3A1A" font-family="Jua,sans-serif">날아감</text>
+    </svg>`;
+  }
+  let body = g, over = '';
+  if(decay>=1){ // 발자국
+    over += [[16,92],[24,89],[32,92],[40,89]].map(([x,y])=>`<g fill="#3C3548" opacity=".55"><circle cx="${x}" cy="${y}" r="1.6"/><circle cx="${x-1.6}" cy="${y-2.2}" r=".7"/><circle cx="${x+1.6}" cy="${y-2.2}" r=".7"/></g>`).join('');
+  }
+  if(sturdy && decay>=1){ // 튼튼한 집: 문 앞에서 기다리는 담당자
+    over += wolfMini(86,62,.85);
+  } else if(decay===1){ // 어슬렁
+    over += wolfMini(90,64,.7);
+  } else if(decay===2){ // 후— 불고 간 흔적
+    body = `<g transform="rotate(-6 60 92)">${g}</g>`;
+    over += `<path d="M4 46 q8 -6 16 0 t16 0 M2 60 q8 -6 16 0 t16 0" stroke="#DDE3F2" stroke-width="2" fill="none" opacity=".8" stroke-linecap="round"/>`;
+    over += wolfMini(90,64,.7);
+  }
+  return `<svg viewBox="0 0 120 96" role="img" aria-label="${label}">${body}${over}</svg>`;
+}
+
+function wolfMini(x,y,s){
+  return `<g transform="translate(${x} ${y}) scale(${s})">${WOLF_BODY}</g>`;
+}
+
+function vacantSVG(){
+  return `<svg viewBox="0 0 120 96" role="img" aria-label="빈 터">
+    <ellipse cx="60" cy="88" rx="38" ry="6" fill="#6B5A3E" opacity=".7"/>
+    <rect x="70" y="66" width="28" height="13" rx="2" fill="#D9C9A3"/><line x1="84" y1="79" x2="84" y2="92" stroke="#6E522F" stroke-width="2"/>
+    <text x="84" y="75.5" font-size="7.5" text-anchor="middle" fill="#5A3A1A" font-family="Jua,sans-serif">빈 터</text>
+  </svg>`;
+}
+
+
+/* =========================================================
+   데이터 연결: 미리보기(demoApi) / 진짜(supaApi)
+   ========================================================= */
+const demoApi = (() => {
+  const st = {
+    me:{discord_id:'me', display_name:'나', avatar_url:'', is_admin:true, coins:30, total_minutes:0, in_voice:false, today_minutes:0},
+    others:[
+      ['moon','달빛작가',62,true,95,0],['cat','고양이손',7,false,0,75],['dl','마감요정',185,true,210,0],
+      ['green','초록펜',18,false,0,20],['dawn','새벽두시',128,false,0,36],['owl','야행성',2,true,30,0],
+      ['pencil','연필깎이',255,false,12,1],['bread','구름빵',41,false,0,63],
+    ].map(([discord_id,display_name,h,in_voice,today_minutes,away])=>({discord_id,display_name,total_minutes:Math.round(h*60),in_voice,today_minutes,away,removed:false})),
+    inv:{}, placed:[], nextId:1, otherRooms:{},
+  };
+  try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; } }catch(e){}
+  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId})); }catch(e){} };
+  const item = code => DEFAULT_SHOP.find(s=>s.code===code);
+  const fail = msg => { throw new Error(msg); };
+  return {
+    st,
+    async init(){ return {status:'ok'}; },
+    async login(){}, async logout(){ toast('미리보기에서는 나갈 수 없어요'); },
+    async me(){ return {...st.me}; },
+    async village(){
+      return [
+        {...st.me, decay:0, removed:false},
+        ...st.others.filter(o=>!o.removed || o.justRemoved).map(o=>({...o, decay:o.in_voice?0:decayOf(o.away)})),
+      ];
+    },
+    async shop(){ return DEFAULT_SHOP; },
+    async inventory(){ return {...st.inv}; },
+    async placements(id){
+      if(id==='me') return st.placed.map(p=>({...p}));
+      if(!st.otherRooms[id]){
+        const o = st.others.find(x=>x.discord_id===id), cur = STAGES[stageIdx(o.total_minutes)];
+        const picks = ['bed','desk','plant','books','candle','cat','coffee'];
+        const list=[]; let n=1;
+        for(const code of picks){
+          const it=item(code);
+          for(let tries=0;tries<20;tries++){
+            const r=Math.floor(Math.random()*cur.rows), c=Math.floor(Math.random()*cur.cols);
+            if(canPlaceIn(list,r,c,it.w,it.h,cur)){ list.push({id:n++,item_code:code,r,c,w:it.w,h:it.h}); break; }
+          }
+        }
+        st.otherRooms[id]=list;
+      }
+      return st.otherRooms[id];
+    },
+    async buy(code){
+      const it=item(code); if(!it) fail('상점에 없는 가구예요');
+      if(st.me.coins<it.price) fail('코인이 부족해요');
+      st.me.coins-=it.price; st.inv[code]=(st.inv[code]||0)+1; persist(); return st.me.coins;
+    },
+    async place(code,r,c,rot){
+      const it=item(code); let w=it.w,h=it.h; if(rot) [w,h]=[h,w];
+      const cur=STAGES[stageIdx(st.me.total_minutes)];
+      if(!(st.inv[code]>0)) fail('가방에 없는 가구예요');
+      if(!canPlaceIn(st.placed,r,c,w,h,cur)) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
+      st.inv[code]--; st.placed.push({id:st.nextId++,item_code:code,r,c,w,h}); persist();
+    },
+    async remove(id){
+      const i=st.placed.findIndex(p=>p.id===id); if(i<0) fail('내 가구가 아니에요');
+      const [p]=st.placed.splice(i,1); st.inv[p.item_code]=(st.inv[p.item_code]||0)+1; persist();
+    },
+    async adminList(){
+      return st.others.filter(o=>!o.removed).map(o=>({discord_id:o.discord_id, display_name:o.display_name, total_minutes:o.total_minutes, in_voice:o.in_voice, away_days:o.in_voice?0:o.away})).sort((a,b)=>b.away_days-a.away_days);
+    },
+    async adminClear(id){ const o=st.others.find(x=>x.discord_id===id); o.removed=true; o.justRemoved=true; o.in_voice=false; },
+    // 미리보기 전용
+    tick(){
+      if(st.me.in_voice){ st.me.total_minutes++; st.me.coins++; st.me.today_minutes++; persist(); }
+      st.others.forEach(o=>{ if(o.in_voice && !o.removed){ o.today_minutes++; o.total_minutes++; } });
+    },
+    shuffle(){
+      const pool=st.others.filter(o=>!o.removed && o.away<14);
+      const o=pool[Math.floor(Math.random()*pool.length)]; if(!o) return null;
+      o.in_voice=!o.in_voice; if(o.in_voice) o.away=0; return o;
+    },
+  };
+})();
+
+const supaApi = (() => {
+  let sb = null, myId = null;
+  const ok = ({data, error}) => { if(error) throw new Error(error.message); return data; };
+  return {
+    async init(){
+      sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+      const { data:{ session } } = await sb.auth.getSession();
+      if(!session) return {status:'login'};
+      const md = session.user.user_metadata || {};
+      myId = md.provider_id || md.sub;
+      const me = ok(await sb.from('members').select('*').eq('discord_id', myId).maybeSingle());
+      if(!me || me.removed) return {status:'notmember'};
+      return {status:'ok'};
+    },
+    async login(){
+      await sb.auth.signInWithOAuth({ provider:'discord', options:{ redirectTo: location.origin + location.pathname } });
+    },
+    async logout(){ await sb.auth.signOut(); location.reload(); },
+    async me(){ return ok(await sb.from('members').select('*').eq('discord_id', myId).single()); },
+    async village(){ return ok(await sb.rpc('get_village')); },
+    async shop(){ return ok(await sb.from('shop_items').select('*').eq('active', true).order('sort')); },
+    async inventory(){
+      const rows = ok(await sb.from('inventory').select('item_code, qty').eq('discord_id', myId));
+      return Object.fromEntries(rows.filter(r=>r.qty>0).map(r=>[r.item_code, r.qty]));
+    },
+    async placements(id){
+      return ok(await sb.from('placements').select('id,item_code,r,c,w,h').eq('discord_id', id==='me'?myId:id));
+    },
+    async buy(code){ return ok(await sb.rpc('buy_item', {p_code:code})); },
+    async place(code,r,c,rot){ ok(await sb.rpc('place_item', {p_code:code, p_r:r, p_c:c, p_rotated:rot})); },
+    async remove(id){ ok(await sb.rpc('remove_item', {p_id:id})); },
+    async adminList(){ return ok(await sb.rpc('admin_list')); },
+    async adminClear(id){ ok(await sb.rpc('admin_clear', {p_discord_id:id})); },
+    myId(){ return myId; },
+  };
+})();
+
+const api = DEMO ? demoApi : supaApi;
+
+/* =========================================================
+   화면 상태
+   ========================================================= */
+let ME = null, VILLAGE = [], SHOP = DEFAULT_SHOP, INV = {}, PLACED = [];
+let selected = null, rotated = false, hover = null, busy = false;
+const itemOf = code => SHOP.find(s=>s.code===code) || DEFAULT_SHOP.find(s=>s.code===code) || {code, emoji:'❔', name:'', w:1, h:1};
+const sizeText = it => it.w===1&&it.h===1 ? '1칸' : `${it.w}×${it.h}칸`;
+const isMe = p => DEMO ? p.discord_id==='me' : p.discord_id===supaApi.myId();
+
+function canPlaceIn(list,r,c,w,h,cur){
+  if(r<0||c<0||r+h>cur.rows||c+w>cur.cols) return false;
+  return !list.some(f => r < f.r+f.h && f.r < r+h && c < f.c+f.w && f.c < c+w);
+}
+function footprint(code){ const it=itemOf(code); return rotated ? {w:it.h,h:it.w} : {w:it.w,h:it.h}; }
+
+/* ---------- 알림 ---------- */
+let toastT;
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+
+/* ---------- 그리기 ---------- */
+function renderTop(){
+  document.getElementById('coin').textContent = `🪙 ${ME.coins}`;
+  document.getElementById('who').innerHTML = `${ME.avatar_url?`<img src="${esc(ME.avatar_url)}" alt="">`:''}<span>${esc(ME.display_name)}</span>`;
+  if(DEMO){
+    const b=document.getElementById('voiceBtn');
+    b.classList.toggle('on', ME.in_voice);
+    b.textContent = ME.in_voice ? `🔥 작업 중 · 오늘 ${fmt(ME.today_minutes)}` : '🎧 작업 채널 들어가기';
+  }
+}
+
+function renderVillage(){
+  const lit = VILLAGE.filter(p=>p.in_voice && !p.removed).length;
+  document.getElementById('litCount').textContent = `🕯️ 불 켜진 집 ${lit}채`;
+  document.getElementById('houses').innerHTML = VILLAGE.map(p=>{
+    if(p.removed) return `<div class="house vacant">${vacantSVG()}<div class="nm">빈 터</div><div class="st">누군가 새로 이사 올 자리</div></div>`;
+    const st = stageIdx(p.total_minutes), dc = p.decay||0, me = isMe(p);
+    const status = p.in_voice ? `작업 중 · 오늘 ${fmt(p.today_minutes)}` : dc ? decayLabel(dc, st) : `불 꺼짐 · 오늘 ${fmt(p.today_minutes)}`;
+    return `<button class="house ${p.in_voice?'lit':''} ${me?'me':''}" data-visit="${esc(p.discord_id)}" aria-label="${esc(me?'내 집':p.display_name)} 구경하기">
+      ${houseSVG(st, p.in_voice, dc)}
+      <span class="nm">${me?'내 집':esc(p.display_name)}</span>
+      <span class="st">${status}</span>
+    </button>`;
+  }).join('');
+}
+
+function roomHTML(list, cur, {editable}){
+  let prev = null;
+  if(editable && selected && hover){
+    const fp = footprint(selected);
+    prev = {cells:new Set(), ok: canPlaceIn(list, hover.r, hover.c, fp.w, fp.h, cur)};
+    for(let y=0;y<fp.h;y++) for(let x=0;x<fp.w;x++) prev.cells.add(`${hover.r+y}-${hover.c+x}`);
+  }
+  let html='';
+  for(let r=0;r<MAXR;r++) for(let c=0;c<MAXC;c++){
+    const pos = `grid-row:${r+1};grid-column:${c+1}`;
+    if(!(c<cur.cols && r<cur.rows)){ html += `<span class="tile locked" style="${pos}" aria-hidden="true">🔒</span>`; continue; }
+    const pv = prev && prev.cells.has(`${r}-${c}`) ? (prev.ok?'pv-ok':'pv-no') : '';
+    html += editable
+      ? `<button class="tile ${(r+c)%2?'b':'a'} ${pv}" style="${pos}" data-r="${r}" data-c="${c}" aria-label="빈 칸 ${r+1}행 ${c+1}열"></button>`
+      : `<span class="tile ${(r+c)%2?'b':'a'}" style="${pos}"></span>`;
+  }
+  list.forEach(f=>{
+    const it = itemOf(f.item_code), big = Math.min(f.w,f.h)>=2;
+    const style = `grid-row:${f.r+1}/span ${f.h};grid-column:${f.c+1}/span ${f.w}`;
+    html += editable
+      ? `<button class="furn ${big?'big':''} ${f.w!==f.h?'long':''}" data-pid="${f.id}" style="${style}" aria-label="${esc(it.name)} 치우기">${it.emoji}</button>`
+      : `<span class="furn ${big?'big':''} ${f.w!==f.h?'long':''}" style="${style}" title="${esc(it.name)}">${it.emoji}</span>`;
+  });
+  return html;
+}
+
+function renderMyHouse(){
+  const i = stageIdx(ME.total_minutes), cur = STAGES[i], next = STAGES[i+1];
+  document.getElementById('myHouseIcon').innerHTML = houseSVG(i, ME.in_voice);
+  document.getElementById('myStageName').textContent = cur.name;
+  const bar = document.getElementById('stageBar'), info = document.getElementById('stageInfo');
+  if(next){
+    bar.style.width = Math.min(100, (ME.total_minutes/60-cur.h)/(next.h-cur.h)*100)+'%';
+    info.textContent = `누적 ${fmt(ME.total_minutes)} · ${next.name}까지 ${fmt(Math.max(0, next.h*60-ME.total_minutes))} 남았어요`;
+  } else { bar.style.width='100%'; info.textContent = `누적 ${fmt(ME.total_minutes)} · 마지막 단계에 도착했어요!`; }
+  const room = document.getElementById('room');
+  room.style.gridTemplateColumns = `repeat(${MAXC}, 46px)`;
+  room.style.gridTemplateRows = `repeat(${MAXR}, 46px)`;
+  room.classList.toggle('placing', !!selected);
+  room.innerHTML = roomHTML(PLACED, cur, {editable:true});
+}
+
+function setHint(){
+  const el = document.getElementById('hint');
+  if(!selected){ el.textContent = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구를 누르면 가방으로 돌아가요.'; return; }
+  const it = itemOf(selected), fp = footprint(selected);
+  el.innerHTML = `${it.emoji} ${esc(it.name)}(${fp.w}×${fp.h}칸) · 놓을 자리의 왼쪽 위 칸을 눌러 주세요.` +
+    (it.w!==it.h ? ` <button class="mini" id="rotBtn">↻ 돌리기</button>` : '');
+}
+
+function renderBag(){
+  const entries = Object.entries(INV).filter(([,n])=>n>0);
+  document.getElementById('bag').innerHTML = entries.length ? entries.map(([code,n])=>{
+    const it = itemOf(code);
+    return `<button class="item ${selected===code?'sel':''}" data-bag="${esc(code)}"><span class="em">${it.emoji}</span><span class="t">${esc(it.name)} · ${sizeText(it)}</span><span class="p">×${n}</span></button>`;
+  }).join('') : `<p class="empty" style="grid-column:1/-1">가방이 비어 있어요. 상점에서 가구를 사 보세요.</p>`;
+  document.getElementById('shop').innerHTML = SHOP.map(s=>
+    `<button class="item" data-buy="${esc(s.code)}" ${ME.coins<s.price?'disabled':''}><span class="em">${s.emoji}</span><span class="t">${esc(s.name)} · ${sizeText(s)}</span><span class="p">🪙 ${s.price}</span></button>`
+  ).join('');
+}
+
+function renderRoad(){
+  const i = stageIdx(ME.total_minutes);
+  document.getElementById('road').innerHTML = STAGES.map((s,k)=>
+    `<li class="${k>i?'locked':''} ${k===i?'now':''}">
+      ${houseSVG(k, k<=i)}
+      <div class="step">${k+1}단계 · 누적 ${s.h}시간</div>
+      <div class="nm">${s.name}</div>
+      <div class="small">방 크기 ${s.cols}×${s.rows}</div>
+    </li>`).join('');
+}
+
+async function renderAdmin(){
+  if(!ME.is_admin) return;
+  document.getElementById('legend').innerHTML = DECAY.slice(1).map((x,i)=>`<span><span class="pill d${i+1}">${x.d}일+</span> ${x.label}</span>`).join('');
+  try{
+    const rows = (await api.adminList()).filter(p=>!isMe(p));
+    document.getElementById('adminRows').innerHTML = rows.length ? rows.map(p=>{
+      const dc = decayOf(p.away_days);
+      const pill = p.in_voice ? `<span class="pill on">작업 중</span>` : `<span class="pill d${dc}">${decayLabel(dc, stageIdx(p.total_minutes))}</span>`;
+      return `<tr class="d${dc}">
+        <td class="jua">${esc(p.display_name)}</td>
+        <td>${p.in_voice?'지금':awayText(p.away_days)}</td>
+        <td>${pill}</td>
+        <td>${Math.floor(p.total_minutes/60)}시간</td>
+        <td>${dc===3?`<button class="mini" data-clear="${esc(p.discord_id)}" data-name="${esc(p.display_name)}">빈 터로 정리</button>`:''}</td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="5" class="small">아직 다른 주민이 없어요.</td></tr>`;
+  }catch(e){ document.getElementById('adminRows').innerHTML = `<tr><td colspan="5" class="err">명단을 불러오지 못했어요: ${esc(e.message)}</td></tr>`; }
+}
+
+/* ---------- 불러오기 ---------- */
+async function refreshMine(){ [ME, INV, PLACED] = await Promise.all([api.me(), api.inventory(), api.placements('me')]); }
+async function refreshVillage(){ VILLAGE = await api.village(); }
+async function loadAll(){
+  await Promise.all([refreshMine(), refreshVillage(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
+  renderTop(); renderVillage(); renderMyHouse(); renderBag(); renderRoad(); setHint();
+  document.getElementById('adminTabBtn').hidden = !ME.is_admin;
+  renderAdmin();
+}
+
+/* ---------- 행동 ---------- */
+async function act(fn){
+  if(busy) return; busy = true;
+  try{ await fn(); }
+  catch(e){ toast(e.message || '잠시 뒤 다시 해 주세요'); }
+  finally{ busy = false; }
+}
+
+document.addEventListener('click', e=>{
+  if(e.target.closest('#rotBtn')){ rotated=!rotated; setHint(); renderMyHouse(); return; }
+
+  const bg = e.target.closest('[data-bag]');
+  if(bg){ selected = selected===bg.dataset.bag ? null : bg.dataset.bag; rotated=false; setHint(); renderMyHouse(); renderBag(); return; }
+
+  const buy = e.target.closest('[data-buy]');
+  if(buy) return act(async()=>{
+    const it = itemOf(buy.dataset.buy);
+    await api.buy(it.code); await refreshMine(); toast(`${it.emoji} ${it.name}을(를) 샀어요`);
+    renderTop(); renderBag();
+  });
+
+  const fu = e.target.closest('.furn[data-pid]');
+  if(fu) return act(async()=>{
+    await api.remove(+fu.dataset.pid); await refreshMine(); renderMyHouse(); renderBag();
+  });
+
+  const tile = e.target.closest('#room .tile[data-r]');
+  if(tile && selected) return act(async()=>{
+    const r=+tile.dataset.r, c=+tile.dataset.c, code=selected;
+    await api.place(code, r, c, rotated); await refreshMine();
+    if(!(INV[code]>0)){ selected=null; rotated=false; }
+    hover=null; setHint(); renderMyHouse(); renderBag();
+  });
+
+  const clr = e.target.closest('[data-clear]');
+  if(clr) return act(async()=>{
+    if(!confirm(`${clr.dataset.name}님 집을 빈 터로 정리할까요? 가구와 기록이 함께 정리돼요.`)) return;
+    await api.adminClear(clr.dataset.clear); toast(`${clr.dataset.name}님 자리를 조용히 빈 터로 정리했어요`);
+    await refreshVillage(); renderVillage(); renderAdmin();
+  });
+
+  const v = e.target.closest('[data-visit]');
+  if(v) return openVisit(v.dataset.visit);
+});
+
+document.querySelector('.tabs').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-tab]'); if(!b) return;
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b));
+  ['home','road','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
+  if(b.dataset.tab==='admin') renderAdmin();
+});
+
+const roomEl = document.getElementById('room');
+roomEl.addEventListener('mouseover', e=>{
+  const t = e.target.closest('.tile[data-r]');
+  const h = t ? {r:+t.dataset.r, c:+t.dataset.c} : null;
+  if(JSON.stringify(h)!==JSON.stringify(hover)){ hover=h; if(selected) renderMyHouse(); }
+});
+roomEl.addEventListener('mouseleave', ()=>{ hover=null; if(selected) renderMyHouse(); });
+document.addEventListener('keydown', e=>{
+  if((e.key==='r'||e.key==='R') && selected && !e.target.closest('input,textarea')){ rotated=!rotated; setHint(); renderMyHouse(); }
+  if(e.key==='Escape' && selected){ selected=null; rotated=false; setHint(); renderMyHouse(); renderBag(); }
+});
+
+/* ---------- 집 구경 ---------- */
+async function openVisit(id){
+  const p = VILLAGE.find(x=>x.discord_id===id); if(!p) return;
+  if(isMe(p)){ document.getElementById('tab-home').scrollIntoView({behavior:'smooth'}); return; }
+  const dlg = document.getElementById('visit'), st = stageIdx(p.total_minutes), cur = STAGES[st];
+  document.getElementById('visitTitle').textContent = `${p.display_name}님의 ${cur.name}`;
+  document.getElementById('visitSub').textContent = p.in_voice ? '지금 작업 중이에요. 조용히 구경하고 나와요 🤫' : (p.decay ? decayLabel(p.decay, st) : '집주인은 지금 자리를 비웠어요.');
+  const room = document.getElementById('visitRoom');
+  room.style.gridTemplateColumns = `repeat(${cur.cols}, 46px)`;
+  room.style.gridTemplateRows = `repeat(${cur.rows}, 46px)`;
+  room.innerHTML = '<span class="small">불러오는 중…</span>';
+  dlg.showModal();
+  try{
+    const list = await api.placements(id);
+    // 열린 칸만 보여주기
+    room.innerHTML = roomHTML(list, cur, {editable:false}).replace(/<span class="tile locked"[^>]*>🔒<\/span>/g,'');
+  }catch(e){ room.innerHTML = `<span class="err">집을 불러오지 못했어요</span>`; }
+}
+document.getElementById('visitClose').onclick = ()=>document.getElementById('visit').close();
+document.getElementById('visit').addEventListener('click', e=>{ if(e.target.id==='visit') e.target.close(); });
+
+/* ---------- 숲 풍경 ---------- */
+function decorate(){
+  document.querySelectorAll('[data-stars]').forEach(s=>{
+    let out=''; for(let i=0;i<40;i++) out += `<circle cx="${Math.random()*100}%" cy="${Math.random()*45}%" r="${Math.random()*1.3+.3}" fill="#fff" opacity="${Math.random()*.6+.2}"/>`;
+    s.innerHTML = out;
+  });
+  document.querySelectorAll('[data-wolf]').forEach(s=>s.innerHTML = WOLF_BODY);
+  let out='';
+  for(let x=-10;x<1010;x+=22+Math.random()*18){
+    const h=50+Math.random()*55, w=h*.45, c=Math.random()<.5?'#2C4632':'#34523A';
+    out += `<path d="M${x} 120 L${x+w/2} ${120-h} L${x+w} 120 Z" fill="${c}"/>`;
+  }
+  document.getElementById('pines').innerHTML = out;
+  const lines = ['원고는요?','마감 사흘 남았어요~','오늘 몇 자 쓰셨어요?','후— 불어 버린다?','교정지 보내 드렸어요','다음 화 기다리는 중…'];
+  let i=0; const b=document.getElementById('bubble');
+  setInterval(()=>{ b.style.opacity=0; setTimeout(()=>{ i=(i+1)%lines.length; b.textContent=lines[i]; b.style.opacity=1; },400); }, 6000);
+}
+
+/* ---------- 시작 ---------- */
+function show(id){ ['screenLogin','screenNotMember','app'].forEach(x=>document.getElementById(x).hidden = x!==id); }
+
+async function start(){
+  decorate();
+  document.getElementById('loginBtn').onclick = ()=>api.login();
+  document.getElementById('logoutBtn').onclick = ()=>api.logout();
+  document.getElementById('logoutBtn2').onclick = ()=>api.logout();
+
+  let res;
+  try{ res = await api.init(); }
+  catch(e){ show('screenLogin'); toast('연결이 안 돼요. 설정을 확인해 주세요'); return; }
+  if(res.status==='login') return show('screenLogin');
+  if(res.status==='notmember') return show('screenNotMember');
+
+  show('app');
+  await loadAll();
+
+  if(DEMO){
+    document.getElementById('demoCtrls').hidden = false;
+    document.getElementById('demoNote').hidden = false;
+    document.getElementById('voiceBtn').onclick = async ()=>{
+      demoApi.st.me.in_voice = !demoApi.st.me.in_voice;
+      toast(demoApi.st.me.in_voice ? '🎧 작업 채널에 들어왔어요. 집에 불이 켜졌어요!' : '불을 끄고 나왔어요. 오늘도 수고했어요!');
+      await refreshMine(); await refreshVillage(); renderTop(); renderVillage(); renderMyHouse();
+    };
+    document.getElementById('ffBtn').onclick = async ()=>{
+      const before = stageIdx(demoApi.st.me.total_minutes);
+      demoApi.st.me.total_minutes += 300; demoApi.st.me.coins += 300;
+      const after = stageIdx(demoApi.st.me.total_minutes);
+      if(after>before) toast(`🎉 집이 ${STAGES[after].name}(으)로 커졌어요!`);
+      await refreshMine(); await refreshVillage(); renderTop(); renderVillage(); renderMyHouse(); renderBag(); renderRoad();
+    };
+    setInterval(async ()=>{
+      const before = stageIdx(ME.total_minutes);
+      demoApi.tick(); await refreshMine(); await refreshVillage();
+      const after = stageIdx(ME.total_minutes);
+      if(after>before) toast(`🎉 집이 ${STAGES[after].name}(으)로 커졌어요!`);
+      renderTop(); renderVillage(); renderMyHouse(); renderBag(); if(after>before) renderRoad();
+    }, 1000);
+    setInterval(async ()=>{
+      const o = demoApi.shuffle(); if(o && o.in_voice) toast(`🕯️ ${o.display_name}님 집에 불이 켜졌어요`);
+      await refreshVillage(); renderVillage();
+    }, 9000);
+  } else {
+    // 30초마다 마을 불빛·코인 새로 고침
+    setInterval(async ()=>{
+      try{
+        const before = stageIdx(ME.total_minutes);
+        await Promise.all([refreshVillage(), api.me().then(m=>ME=m)]);
+        const after = stageIdx(ME.total_minutes);
+        if(after>before){ toast(`🎉 집이 ${STAGES[after].name}(으)로 커졌어요!`); renderMyHouse(); renderRoad(); }
+        renderTop(); renderVillage(); renderBag();
+      }catch(e){}
+    }, 30000);
+  }
+}
+start();
+
+</script>
+</body>
+</html>
