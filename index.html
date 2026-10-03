@@ -715,7 +715,7 @@ const DRAWN_FURN = [
 ].map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code}));
 DEFAULT_SHOP.splice(DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'), 0, ...DRAWN_FURN);
 DEFAULT_SHOP.find(x=>x.code==='table').icon = 'diningtable';   // 식탁은 그림으로
-// 기간 한정 아이템 — limited_until 이 지나면 상점에서 사라져요(산 건 그대로)
+// 기간 한정 아이템 — limited_until 이 지나면 상점에서 사라져요(구매한 건 그대로 남아요)
 const HALLOWEEN_UNTIL = '2026-11-01T00:00:00+09:00';
 [['ghost','👻','유령',66,1,1,'accessory'],['pumpkin','🎃','할로윈 호박',40,1,1,'accessory'],['bat','🦇','박쥐',45,1,1,'accessory'],
  ['witchhat','🧙','마녀 모자',55,1,1,'accessory'],['cauldron','🧪','마녀의 솥',90,1,1,'furniture']]
@@ -1597,7 +1597,7 @@ function renderBag(){
     const end = Math.min(...lim.map(x=>new Date(x.limited_until).getTime()));
     const last = new Date(end - 1), dday = Math.ceil((end - Date.now())/86400000);
     const dateTxt = `${last.toLocaleDateString('ko-KR',{month:'long', day:'numeric', timeZone:'Asia/Seoul'})}까지`;
-    limNote = `<p class="lim-note">${esc(lim[0].season||'')} 한정 · ⏰ ${dateTxt} · ${dday<=1?'오늘 마감!':'D-'+(dday-1)}<br><span>기간이 끝나면 상점에서 사라져요. 산 건 계속 갖고 있어요.</span></p>`;
+    limNote = `<p class="lim-note">${esc(lim[0].season||'')} 한정 · ⏰ ${dateTxt} · ${dday<=1?'오늘 마감!':'D-'+(dday-1)}<br><span>기간이 끝나면 상점에서 사라져요. 한정 판매가 끝나도 구매한 건 남아 있어요.</span></p>`;
   }
   document.getElementById('shop').innerHTML = limNote + (shopTab==='limited'?lim:shopTab==='accessory'?accs:furn).map(s=>
     `<button class="item" data-buy="${esc(s.code)}" ${ME.coins<s.price?'disabled':''}><span class="em">${ico(s)}</span><span class="t">${esc(s.name)} · ${sizeText(s)}</span><span class="p">🪙 ${s.price}</span></button>`
