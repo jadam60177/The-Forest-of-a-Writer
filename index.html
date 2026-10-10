@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>마감의 숲</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌲</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-top:#1F2A55; --sky-bot:#5B5E8E; --hill:#3F5A3A; --hill2:#4E6E45;
+  --lamp:#FFCE5C; --lamp-glow:rgba(255,206,92,.55);
+  --bg:#EEF1E7; --panel:#FFFFFF; --ink:#26233A; --muted:#6B6880; --line:#D9DCCD;
+  --tile-a:#F3E7D2; --tile-b:#EADBC1; --tile-locked:#D5D8CB;
+  --win-off:#3B3F5C; --accent:#4E6E45; --btn-ink:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16182A; --panel:#20233A; --ink:#ECEAF5; --muted:#A7A4BE; --line:#33374F;
+    --tile-a:#3A3448; --tile-b:#332E40; --tile-locked:#262938; --win-off:#2A2D44; --accent:#7FA16F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16182A; --panel:#20233A; --ink:#ECEAF5; --muted:#A7A4BE; --line:#33374F;
+  --tile-a:#3A3448; --tile-b:#332E40; --tile-locked:#262938; --win-off:#2A2D44; --accent:#7FA16F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;word-break:keep-all;overflow-wrap:break-word;background:var(--bg);color:var(--ink);font-family:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.6}
+h1,h2,h3,.jua{font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-weight:400}
+button{font:inherit;cursor:pointer}
+button:focus-visible,.tile:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
+
+/* 상단 바 */
+.top{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;padding:.9rem 1.25rem;background:var(--sky-top);color:#F2EFFF}
+.top h1{margin:0;font-size:1.5rem;letter-spacing:.02em}
+.top .right{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.coin{background:rgba(255,255,255,.1);border-radius:999px;padding:.3rem .9rem;font-family:"Jua",sans-serif;font-size:1.05rem}
+.voice-btn{border:0;border-radius:999px;padding:.45rem 1rem;background:#fff;color:var(--sky-top);font-family:"Jua",sans-serif}
+.voice-btn.on{background:var(--lamp);color:#3A2A00;box-shadow:0 0 18px var(--lamp-glow)}
+.ghost{border:1px solid rgba(255,255,255,.35);background:transparent;color:#F2EFFF;border-radius:999px;padding:.4rem .9rem}
+
+/* 마을 */
+.village{position:relative;background:linear-gradient(var(--sky-top),var(--sky-bot) 70%);overflow:hidden;padding:1.5rem 1rem 0}
+.stars{position:absolute;inset:0;pointer-events:none}
+.village-head{position:relative;max-width:1100px;margin:0 auto .5rem;color:#E6E3F7;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;align-items:baseline}
+.village-head p{margin:0;font-size:.95rem;opacity:.85}
+.lit-count{font-family:"Jua",sans-serif;font-size:1.1rem;color:var(--lamp)}
+.houses{position:relative;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem 1rem;padding-bottom:.25rem;z-index:2}
+.pines{position:absolute;left:0;right:0;bottom:40%;width:100%;height:110px;z-index:0}
+.trail{position:relative;z-index:2;max-width:1100px;height:92px;margin:0 auto}
+.wolf{position:absolute;bottom:10px;left:2%;width:78px;text-align:center}
+.wolf-svg{width:70px;height:auto;display:block;margin:0 auto}
+.wolf .tag{font-family:"Jua",sans-serif;font-size:.85rem;color:#F2EFFF;background:rgba(0,0,0,.25);border-radius:999px;display:inline-block;padding:0 .55rem}
+.bubble{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:200px;white-space:normal;text-align:center;line-height:1.4;background:#fff;color:#26233A;font-size:.82rem;border-radius:10px;padding:.3rem .65rem;margin-bottom:-4px;transition:opacity .4s}
+.bubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;border:5px solid transparent;border-top-color:#fff}
+@media (prefers-reduced-motion:no-preference){
+  .wolf{animation:roam 48s linear infinite alternate}
+  .wolf-svg{animation:face 96s step-end infinite}
+  @keyframes roam{from{left:8%}to{left:calc(92% - 78px)}}
+  @keyframes face{0%{transform:scaleX(1)}50%{transform:scaleX(-1)}}
+}
+.house{display:flex;flex-direction:column;align-items:center;text-align:center;color:#F2EFFF;background:none;border:0;padding:.25rem;border-radius:12px}
+.house svg{width:100%;max-width:150px;height:auto;display:block}
+.house .nm{font-family:"Jua",sans-serif;font-size:1.05rem;margin-top:.1rem}
+.house .st{font-size:.8rem;opacity:.85}
+.house.me .nm{color:var(--lamp)}
+.ground{z-index:1;position:absolute;left:0;right:0;bottom:0;height:46%;background:var(--hill);border-radius:60% 60% 0 0/30% 30% 0 0}
+.ground::before{content:"";position:absolute;left:-10%;right:30%;top:18%;bottom:0;background:var(--hill2);border-radius:50% 50% 0 0/25% 25% 0 0}
+.lit .glowwin{filter:drop-shadow(0 0 5px var(--lamp))}
+@media (prefers-reduced-motion:no-preference){
+  .lit .glowwin{animation:flicker 3.2s ease-in-out infinite}
+  @keyframes flicker{0%,100%{opacity:1}50%{opacity:.82}}
+}
+
+/* 본문 */
+main{max-width:1100px;margin:0 auto;padding:1.25rem 1rem 3rem}
+.tabs{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:.45rem 1rem;font-family:"Jua",sans-serif;font-size:1.02rem}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--btn-ink);border-color:var(--accent)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:1.25rem}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:1.25rem}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.myhouse-head{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+.myhouse-head svg{width:110px;height:auto;flex:none;background:var(--sky-top);border-radius:12px;padding:.3rem}
+.myhouse-head h2{margin:0;font-size:1.5rem}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:.35rem 0 .2rem;max-width:340px}
+.bar span{display:block;height:100%;background:var(--lamp);border-radius:99px;transition:width .4s}
+.small{font-size:.88rem;color:var(--muted)}
+.room-wrap{overflow-x:auto}
+
+/* 마당 화단 */
+.garden-lead{margin:.1rem 0 .55rem}
+.seed-row{display:flex;flex-wrap:wrap;gap:.4rem .6rem;align-items:center;margin:0 0 .7rem}
+.seed-row b{font-family:"Jua",sans-serif;font-weight:400}
+.bed{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;background:#7A5A3C;border-radius:14px;padding:10px}
+.plot{background:#9C7650;border-radius:10px;min-height:156px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px 4px 8px;gap:4px;text-align:center}
+.plot svg{width:100%;max-width:88px;height:auto}
+.plot .pl{font-size:.78rem;color:#FFF3DF;line-height:1.35}
+.plot .pl b{font-family:"Jua",sans-serif;font-weight:400;font-size:.95rem}
+.plot.empty{justify-content:center;gap:.5rem}
+.plot.lock{background:#6B5038;justify-content:center}
+.plot.lock .pl{color:#D8C3A5}
+.plot.bloom{background:#A7825A}
+.plot.secret{background:#8E7AA8}
+.plot .mini{background:#FFF3DF;color:#5A3E26;border-color:#FFF3DF;border-radius:999px;font-size:.8rem}
+.plot .mini:disabled{opacity:.55}
+.gdex-title{margin:1rem 0 .4rem}
+.gdex{display:flex;flex-wrap:wrap;gap:6px}
+.gdx{width:46px;height:46px;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;color:var(--muted);font-family:"Jua",sans-serif}
+.gdx svg{width:46px;height:46px}
+.gdx.garden{border-color:#8DB8E0}
+.gdx.secret{border:2px solid #B4A2DC}
+.rtab.garden-tab{border-color:#8FD1B8}
+
+:root{--tile:46px}
+@media (max-width:600px){:root{--tile:36px} .cab span{font-size:.58rem} .cab.c3 span{font-size:.68rem} .cab.big span{font-size:1rem} .slot{width:52px;height:52px;font-size:1.6rem} .cab-slots{grid-template-columns:repeat(var(--cc,3),52px)!important} .tile,.furn{font-size:1.3rem} .furn.long{font-size:1.8rem} .furn.big{font-size:2.8rem}}
+.room{display:grid;gap:3px;width:max-content;padding:8px;background:#8A6A4A;border-radius:10px;margin:0 auto}
+.tile{width:var(--tile);height:var(--tile);border:0;border-radius:6px;font-size:1.65rem;display:grid;place-items:center;padding:0;line-height:1}
+.tile.a{background:var(--tile-a)} .tile.b{background:var(--tile-b)}
+.tile.ext.a{background:#E6D6B8} .tile.ext.b{background:#DCCBAA}
+.tile.ext-lock{background:repeating-linear-gradient(45deg,var(--tile-locked) 0 6px,transparent 6px 12px),var(--tile-locked);font-size:1rem}
+.room-tabs{display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;margin:.2rem 0 .6rem}
+.rtab{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:.3rem .85rem;font-family:"Jua",sans-serif;font-size:.92rem}
+.rtab.on{background:var(--accent);border-color:var(--accent);color:var(--btn-ink)}
+.rtab .ren{font-size:.8rem;margin-left:.15rem;cursor:pointer}
+.rtab.add{border-style:dashed;color:var(--accent);border-color:var(--accent);background:var(--panel)}
+.rtab.add:disabled{opacity:.45;cursor:not-allowed}
+.fsvg{display:block;width:100%;height:100%}
+.furn.drawn{padding:2px;background:rgba(255,255,255,.18)}
+.furn.rot{position:relative;overflow:hidden}
+.furn.r1 .fsvg,.furn.r3 .fsvg{position:absolute;left:50%;top:50%;width:var(--rh);height:var(--rw);transform:translate(-50%,-50%) rotate(90deg)}
+.furn.r3 .fsvg{transform:translate(-50%,-50%) rotate(-90deg)}
+.furn.r2 .fsvg{transform:scaleX(-1)}
+.furn.rot:not(.drawn) > .emo{display:inline-block}
+.furn.r1:not(.drawn) > .emo{transform:rotate(90deg)} .furn.r2:not(.drawn) > .emo{transform:scaleX(-1)} .furn.r3:not(.drawn) > .emo{transform:rotate(-90deg)}
+.hint-ico{display:inline-block;transition:transform .2s}
+.hint-ico.r1{transform:rotate(90deg)} .hint-ico.r2{transform:scaleX(-1)} .hint-ico.r3{transform:rotate(-90deg)}
+.item .em .fsvg{height:1.9rem;width:auto;margin:0 auto}
+.hint .fsvg{display:inline-block;height:1.3em;width:auto;vertical-align:-.3em}
+.furn.cabf{padding:2px;background:transparent;box-shadow:none}
+.cab{display:grid;gap:2px;width:100%;height:100%;padding:3px;background:linear-gradient(#B08559,#8A6A4A);border-radius:7px;box-shadow:inset 0 0 0 2px #6E5038}
+.cab span{display:grid;place-items:center;background:rgba(255,255,255,.22);border-radius:3px;line-height:1;font-size:.72rem;overflow:hidden}
+.cab.c3 span{font-size:.85rem}
+.cab.big span{font-size:1.25rem}
+.cab-slots{display:grid;gap:6px;justify-content:center;padding:10px;background:linear-gradient(#B08559,#8A6A4A);border-radius:12px;width:max-content;margin:0 auto}
+.slot{width:64px;height:64px;border-radius:8px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:2rem;border:0}
+.slot.full{background:rgba(255,255,255,.55);cursor:pointer}
+.slot.full:hover{box-shadow:inset 0 0 0 2px #B4513E}
+.visit-err{padding:1.4rem 1rem;text-align:center;color:#F4ECD8;font-family:"Jua",sans-serif;line-height:1.7}
+.visit-err span{font-family:"Gowun Dodum",sans-serif;font-size:.8rem;opacity:.85;word-break:break-all}
+.raid{text-align:center;margin-top:.6rem}
+.raid-btn{border:1px solid #E0802F;background:#FFF1E2;color:#9A4A1E;border-radius:999px;padding:.4rem 1rem;font-family:"Jua",sans-serif;font-size:1rem}
+.raid-btn:disabled{opacity:.5;cursor:not-allowed}
+.raid .small{display:block;margin-top:.25rem}
+.dex-line{text-align:center;margin:.6rem 0 0}
+.tile.locked{background:var(--tile-locked);cursor:not-allowed;font-size:.9rem;color:var(--muted)}
+.tile{grid-row:auto}
+.tile.pv-ok{outline:2px dashed var(--accent);outline-offset:-2px;background:color-mix(in srgb,var(--accent) 22%,var(--tile-a))}
+.tile.pv-no{outline:2px dashed #B4513E;outline-offset:-2px;background:color-mix(in srgb,#B4513E 22%,var(--tile-a))}
+.furn{z-index:1;border:0;border-radius:8px;background:rgba(255,255,255,.35);font-size:1.65rem;line-height:1;display:grid;place-items:center;padding:0;box-shadow:inset 0 0 0 2px rgba(138,106,74,.35)}
+.furn.long{font-size:2.3rem}
+.furn.big{font-size:3.6rem}
+.furn:hover{box-shadow:inset 0 0 0 2px #B4513E}
+.room.placing .furn{pointer-events:none;opacity:.85}
+.hint{text-align:center;margin:.6rem 0 0;min-height:1.5em}
+h3{margin:0 0 .5rem;font-size:1.2rem}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:.5rem;margin-bottom:1.25rem}
+.item{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:.45rem .3rem;display:flex;flex-direction:column;align-items:center;gap:.1rem}
+.item .em{font-size:1.6rem;line-height:1.2}
+.item .t{font-size:.8rem}
+.item .p{font-family:"Jua",sans-serif;font-size:.9rem;color:var(--accent)}
+.item{position:relative}
+.item.owned{border-color:#8FD1B8}
+.item .own{position:absolute;top:.3rem;right:.3rem;background:#E3F3EA;color:#2F6B4F;border-radius:999px;padding:0 .4rem;font-size:.68rem;line-height:1.5;font-family:"Jua",sans-serif}
+.item.sel{border-color:var(--lamp);box-shadow:0 0 0 2px var(--lamp)}
+.item:disabled{opacity:.45;cursor:not-allowed}
+.empty{color:var(--muted);font-size:.9rem;margin:0 0 1.25rem}
+
+/* 성장 단계 */
+.road{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.75rem}
+.road li{border:1px solid var(--line);border-radius:14px;padding:.75rem;text-align:center;background:var(--bg)}
+.road li svg{width:100%;max-width:130px;background:var(--sky-top);border-radius:10px}
+.road li.locked svg{filter:grayscale(1) brightness(.6)}
+.road li.now{border-color:var(--lamp);box-shadow:0 0 0 2px var(--lamp)}
+.road .step{font-size:.8rem;color:var(--muted)}
+.road .nm{font-family:"Jua",sans-serif;font-size:1.1rem}
+
+.rules{margin-top:1rem;font-size:.92rem;color:var(--muted)}
+.rules p{margin:.25rem 0}
+.toast{position:fixed;left:50%;bottom:calc(1.25rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(150%);background:var(--sky-top);color:#fff;padding:.8rem 1.2rem;border-radius:14px;font-family:"Jua",sans-serif;font-size:1.05rem;transition:transform .35s;z-index:10;max-width:90vw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.house.ruin svg{filter:grayscale(.85) brightness(.75)}
+.house.vacant{opacity:.8}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin:.25rem 0 .9rem}
+.table-wrap{overflow-x:auto}
+table.admin{width:100%;border-collapse:collapse;min-width:560px;font-size:.95rem}
+table.admin th{text-align:left;font-weight:400;color:var(--muted);font-size:.85rem;padding:.4rem .5rem;border-bottom:1px solid var(--line)}
+table.admin td{padding:.55rem .5rem;border-bottom:1px solid var(--line);vertical-align:middle}
+table.admin tr.d3 td{background:rgba(180,81,62,.1)}
+.pill{display:inline-block;border-radius:999px;padding:.05rem .6rem;font-size:.82rem;background:var(--bg);border:1px solid var(--line)}
+.pill.d1{border-color:#7FA65A} .pill.d2{border-color:#B9A15A} .pill.d3{border-color:#B4513E;color:#B4513E}
+.pill.on{background:var(--lamp);color:#3A2A00;border-color:var(--lamp)}
+.mini{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:.25rem .65rem;font-size:.85rem}
+.demo-note{background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:.6rem .9rem;margin-bottom:1rem;font-size:.9rem;color:var(--muted)}
+
+[hidden]{display:none !important}
+.who{display:flex;align-items:center;gap:.5rem;font-size:.95rem}
+.who img{width:28px;height:28px;border-radius:50%}
+.gate{min-height:100vh;min-height:100dvh;display:grid;place-items:center;text-align:center;padding:2rem 1rem;background:linear-gradient(var(--sky-top),var(--sky-bot));color:#F2EFFF;position:relative;overflow:hidden}
+.gate-inner{position:relative;z-index:2;max-width:420px}
+.gate h1{font-size:2.6rem;margin:.2rem 0 .4rem}
+.gate p{opacity:.9;margin:.2rem 0 1.4rem}
+.gate .wolf-svg{width:110px;margin:0 auto}
+.discord-btn{border:0;border-radius:12px;padding:.8rem 1.4rem;background:#5865F2;color:#fff;font-family:"Jua",sans-serif;font-size:1.15rem}
+.gate .small{color:#D9D6EE}
+.house{cursor:pointer}
+.house:focus-visible{outline:3px solid var(--lamp)}
+dialog.visit{border:0;border-radius:18px;padding:1.25rem;background:var(--panel);color:var(--ink);max-width:min(92vw,560px)}
+dialog.visit::backdrop{background:rgba(20,18,40,.55)}
+dialog.visit h3{margin:0 0 .25rem}
+.visit-close{float:right}
+.room.view .furn{cursor:default;pointer-events:none}
+.loading{opacity:.6}
+.err{color:#B4513E}
+.earn{margin:0 0 1rem;padding:.55rem .8rem;border-radius:10px;background:color-mix(in srgb,var(--lamp) 28%,var(--panel));font-family:"Jua",sans-serif;font-size:1rem}
+.shop-box{border:1px solid var(--line);border-radius:12px;padding:.2rem .8rem;margin-bottom:.5rem}
+.shop-box summary{cursor:pointer;padding:.55rem 0;font-size:1.2rem;list-style:none;display:flex;align-items:baseline;gap:.4rem}
+.shop-box summary::-webkit-details-marker{display:none}
+.shop-box summary::after{content:"펼치기 ▾";margin-left:auto;font-size:.85rem;color:var(--muted);font-family:"Gowun Dodum",sans-serif}
+.shop-box[open] summary::after{content:"접기 ▴"}
+.shop-box .items{margin-top:.25rem}
+
+/* 마을 광장 */
+.plaza-scene{position:relative;overflow:hidden;border-radius:16px;padding:1.1rem 1rem 1.3rem;margin-bottom:1rem;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-bot) 62%,var(--hill) 62%,var(--hill2) 100%);color:#F4F1FF}
+.plaza-scene .stars{position:absolute;inset:0;width:100%;height:60%;pointer-events:none}
+.plaza-head{position:relative}
+.plaza-head h3{margin:0 0 .2rem;font-size:1.35rem}
+.plaza-head p{text-wrap:balance;margin:0 0 .9rem;font-size:.9rem;opacity:.85;max-width:44rem}
+.lots{position:relative;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.6rem}
+@media (max-width:560px){.lots{grid-template-columns:repeat(2,1fr)}}
+.lot{border-radius:12px;padding:.55rem .4rem .5rem;text-align:center;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.15rem}
+.lot .b{font-size:2.6rem;line-height:1.1}
+.lot .n{font-family:"Jua",sans-serif;font-size:.95rem}
+.lot .s{font-size:.75rem;opacity:.8}
+.lot.built{background:rgba(255,206,92,.16);border:1px solid rgba(255,206,92,.45)}
+.lot.built .b{filter:drop-shadow(0 0 10px var(--lamp-glow))}
+.lot.building{background:rgba(255,255,255,.1);border:2px dashed rgba(255,255,255,.55)}
+.lot.building .b{position:relative}
+.lot.building .b .ghost{opacity:.35}
+.lot.building .b .crane{position:absolute;right:-.9rem;top:-.4rem;font-size:1.3rem}
+.lot.fog{background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.2)}
+.lot.fog .b{opacity:.5;font-size:2rem}
+.lot .mbar{width:80%;height:6px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden}
+.lot .mbar span{display:block;height:100%;background:var(--lamp)}
+.plaza-panel h3{margin:0 0 .3rem}
+.give-row{display:flex;flex-wrap:wrap;gap:.45rem;margin:.7rem 0 .4rem;align-items:center}
+.give-row .give{border:1px solid var(--accent);background:var(--panel);color:var(--accent);border-radius:999px;padding:.4rem .9rem;font-family:"Jua",sans-serif;font-size:1rem}
+.give-row .give:hover:not(:disabled){background:var(--accent);color:var(--btn-ink)}
+.give-row .give:disabled{opacity:.4;cursor:not-allowed}
+.give-row input{width:6.5rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:.4rem .8rem;font:inherit}
+.unlock-list{display:flex;flex-wrap:wrap;gap:.4rem;margin:.3rem 0 0}
+.unlock-list span{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.15rem .5rem;font-size:.85rem}
+.plaza-bar{max-width:none;height:14px}
+
+/* 꽃다발 선물 & 집 앞 펫 */
+.hwrap{position:relative;display:block;width:100%;max-width:150px}
+.hwrap .yard{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.house-pet{position:absolute;right:4px;bottom:2px;z-index:3;pointer-events:none}
+.house-pet .pet-sprite{filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.visit-gift{display:flex;gap:.5rem;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:.6rem}
+.fpicks{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.4rem 0 .7rem}
+.fpick{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:.5rem .3rem;display:flex;flex-direction:column;align-items:center;gap:.1rem}
+.fpick svg{width:64px;height:64px}
+.fpick b{font-family:"Jua",sans-serif;font-weight:400}
+.fpick span{font-size:.8rem;color:var(--accent)}
+.fpick.on{border-color:#E58FA8;box-shadow:0 0 0 2px #F0A8BC}
+.fpick:disabled{opacity:.45}
+
+/* 현수막 */
+#bannerBox{position:relative;max-width:760px;margin:0 auto .6rem;text-align:center;z-index:4}
+.banner-rope{position:absolute;left:4%;right:4%;top:6px;height:2px;background:#C9B48A;border-radius:2px}
+.banner{position:relative;display:inline-flex;align-items:center;gap:.6rem;max-width:100%;border:0;cursor:pointer;padding:.55rem 1.6rem .7rem;background:#E9584A;color:#FFF7E6;font-family:"Jua",sans-serif;font-size:1.25rem;line-height:1.25;clip-path:polygon(0 0,100% 0,97% 50%,100% 100%,0 100%,3% 50%);animation:sway 4s ease-in-out infinite;transform-origin:50% 0}
+.banner:before{content:"";position:absolute;inset:4px 10px;border:1.5px dashed rgba(255,247,230,.55);pointer-events:none}
+.banner .b-text{overflow-wrap:anywhere}
+.banner.done,.banner.mine{cursor:default}
+.banner.done{background:#C94A6A}
+@keyframes sway{0%,100%{transform:rotate(-.6deg)}50%{transform:rotate(.6deg)}}
+.banner-meta{display:flex;gap:.4rem;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:.3rem;font-size:.78rem;color:#E6E3F7}
+.banner-meta .b-nav{padding:0 .5rem;background:rgba(255,255,255,.12);color:#F4F1FF;border-color:rgba(255,255,255,.3)}
+.heart-fly{position:absolute;z-index:50;pointer-events:none;font-size:1.3rem;animation:hfly 1s ease-out forwards}
+@keyframes hfly{0%{transform:translate(-50%,0) scale(.6);opacity:1}100%{transform:translate(calc(-50% + var(--dx)),-70px) scale(1.2);opacity:0}}
+@media (prefers-reduced-motion:reduce){.banner{animation:none}}
+
+/* 게시판 */
+.board-head{display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.5rem}.board-head h3{margin:0}
+.cork{background:#B98A5C;border:6px solid #8A6142;border-radius:10px;padding:.9rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.8rem;min-height:120px;background-image:radial-gradient(rgba(0,0,0,.08) 1px,transparent 1.2px);background-size:7px 7px}
+.cork-empty{grid-column:1/-1;text-align:center;color:#FFF3DF;margin:2rem 0}
+.memo{position:relative;color:#3A3428;padding:.9rem .7rem .5rem;border-radius:2px;transform:rotate(var(--r));box-shadow:0 2px 4px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:.3rem;min-height:92px}
+.memo p{margin:0;font-family:"Gowun Dodum",sans-serif;font-size:.92rem;line-height:1.45;overflow-wrap:anywhere;flex:1}
+.memo .tape{position:absolute;top:-7px;left:50%;width:44px;height:14px;transform:translateX(-50%) rotate(-3deg);background:rgba(255,255,255,.55)}
+.memo.news{border:1.5px dashed #A9784B}
+.memo.news p{font-family:"Jua",sans-serif}
+.memo .m-foot{font-size:.72rem;color:#7A6E5A}
+.memo .m-del{border:0;background:none;color:#B4513E;font-size:.72rem;padding:0;cursor:pointer;text-decoration:underline}
+.board-form{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;margin:.7rem 0 .2rem}
+.board-form input{flex:1;min-width:200px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:.45rem .9rem;font:inherit}
+.b-emojis{display:flex;gap:.25rem;flex-wrap:wrap}
+
+/* 세계수 */
+.tree-scene{position:relative;overflow:hidden;border-radius:16px;margin-bottom:1rem;padding:0 1rem 1.2rem;text-align:center;color:#E9E6F5;background:radial-gradient(ellipse at 50% 30%,#2E2A6A 0%,#171C3F 60%,#0E1230 100%)}
+.tree-art{max-width:440px;margin:0 auto}
+.tree-svg{display:block;width:100%;height:auto}
+.tree-scene h3{margin:0;font-size:1.35rem}
+.tree-about{margin:.1rem 0 .5rem;font-size:.9rem;opacity:.8}
+.tree-bar{height:14px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;max-width:440px;margin:.3rem auto}
+.tree-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--tg1,#7FE0D0),var(--tg2,#B4A2DC));box-shadow:0 0 12px var(--tg1,#7FE0D0)}
+.tree-num{font-size:.85rem;opacity:.9;margin:.2rem 0}
+.pour-row{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;align-items:center;margin:.7rem 0 .3rem}
+.pour-row .pocket{font-size:.95rem}.pour-row b{font-family:"Jua",sans-serif;font-weight:400;font-size:1.1rem}
+.pour-row .give{border:1px solid var(--tg1,#7FE0D0);background:rgba(255,255,255,.08);color:#F4F1FF;border-radius:999px;padding:.4rem .9rem;font-family:"Jua",sans-serif;font-size:1rem}
+.pour-row .give:disabled{opacity:.4;cursor:not-allowed}
+.tw{animation:tw 2.6s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+#floatDrops{position:absolute;inset:0;pointer-events:none;z-index:3}
+.fdrop{position:absolute;width:30px;height:38px;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;animation:fl 3s ease-in-out infinite;filter:drop-shadow(0 0 7px #9FF0E8)}
+.fdrop svg{width:100%;height:100%}
+.fdrop.caught{animation:caught .35s forwards}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes caught{to{transform:translateY(-30px) scale(.4);opacity:0}}
+@media (prefers-reduced-motion:reduce){.fdrop,.tw{animation:none}}
+
+/* 호숫가 */
+.lake-scene{position:relative;overflow:hidden;border-radius:16px;margin-bottom:1rem;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-bot) 52%);color:#F4F1FF;text-align:center}
+.lake-svg{display:block;width:100%;height:150px;background:linear-gradient(180deg,var(--sky-top),var(--sky-bot))}
+.lake-inner{position:relative;padding:.4rem 1rem 1.3rem;background:#2C4A6E}
+.lake-inner h3{margin:0 0 .15rem;font-size:1.35rem}
+.lake-inner p{text-wrap:balance;margin:0 auto .9rem;font-size:.9rem;opacity:.9;max-width:34rem}
+.lake-inner b{font-family:"Jua",sans-serif;font-weight:400}
+.lake-msg{font-family:"Jua",sans-serif;font-size:1.05rem}
+.lake-inner .locked-note{color:#F4F1FF}
+.bob{animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.lcard{width:112px;border-radius:12px;padding:.4rem .3rem .45rem;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);display:flex;flex-direction:column;align-items:center;gap:.1rem;font-size:.8rem;animation:pop .35s forwards}
+.lcard b{font-family:"Jua",sans-serif;font-weight:400;font-size:.98rem}
+.lcard .fsh{width:96px;height:auto}
+.lcard.rare{background:rgba(141,184,224,.28);border-color:#8DB8E0}
+.lcard.legend{background:rgba(255,206,92,.25);border-color:var(--lamp);box-shadow:0 0 18px var(--lamp-glow)}
+.lcard.wide{width:min(100%,300px)}
+.lcard.wide .fsh{width:150px}
+.lcard .kind{border-radius:999px;padding:0 .45rem;font-size:.72rem;background:#F4F1FF;color:var(--sky-top)}
+.lcard .kind.record{background:var(--lamp);color:#3A2E10}
+.lcard .rw{font-family:"Jua",sans-serif}
+.legend-pick{display:flex;flex-direction:column;gap:.35rem;margin-top:.4rem;width:100%}
+.legend-pick .mini{background:#F4F1FF;color:var(--sky-top);border-color:#F4F1FF;border-radius:999px}
+.fish-dex{grid-template-columns:repeat(auto-fill,minmax(98px,1fr))}
+.fish-dex .cell .fsh{width:84px;max-width:100%;height:auto}
+.fish-dex .cell .fsh.shadow{filter:brightness(0);opacity:.18}
+.fsh.shadow .fx{display:none}
+.lcard .small{color:inherit;opacity:.85}
+.fish-dex .cell.owned{border-color:#8DB8E0}
+.rb.common{background:var(--bg);border:1px solid var(--line)}
+
+/* 담당자의 보따리 */
+.gacha-scene{position:relative;overflow:hidden;border-radius:16px;padding:1.4rem 1rem 1.3rem;margin-bottom:1rem;text-align:center;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-bot) 70%,var(--hill) 70%,var(--hill2) 100%);color:#F4F1FF}
+.gacha-scene .stars{position:absolute;inset:0;width:100%;height:70%;pointer-events:none}
+.gacha-inner{position:relative}
+.gacha-inner h3{margin:.2rem 0 .1rem;font-size:1.35rem}
+.gacha-inner p{text-wrap:balance;margin:0 auto .9rem;font-size:.9rem;opacity:.88;max-width:32rem}
+.sack{font-size:3.6rem;line-height:1.1;display:inline-block;filter:drop-shadow(0 0 14px var(--lamp-glow))}
+.sack.shake{animation:shake .5s ease-in-out}
+@keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-7deg)}80%{transform:rotate(4deg)}}
+.pull-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap}
+.pull{border:0;border-radius:999px;padding:.55rem 1.1rem;font-family:"Jua",sans-serif;font-size:1.02rem;background:#F4F1FF;color:var(--sky-top)}
+.pull.ten{background:var(--lamp);color:#3A2E10}
+.pull:disabled{opacity:.45;cursor:not-allowed}
+.results{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-top:1rem;min-height:1px}
+.rcard{width:84px;border-radius:12px;padding:.45rem .2rem .35rem;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);opacity:0;transform:translateY(8px) scale(.9);animation:pop .35s forwards}
+.rcard .em{font-size:2rem;line-height:1.15;display:block}
+.rcard .t{font-size:.75rem;display:block}
+.rcard.rare{background:rgba(141,184,224,.28);border-color:#8DB8E0}
+.rcard.legend{background:rgba(255,206,92,.3);border-color:var(--lamp);box-shadow:0 0 18px var(--lamp-glow)}
+@keyframes pop{to{opacity:1;transform:none}}
+.rb{display:inline-block;border-radius:6px;padding:0 .35rem;font-size:.7rem;font-family:"Jua",sans-serif}
+.rb.common{background:var(--line);color:var(--ink)}
+.rb.rare{background:#8DB8E0;color:#1F2A55}
+.rb.legend{background:var(--lamp);color:#3A2E10}
+.box-tabs{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.35rem;margin-bottom:.6rem}
+.box-tab{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:.4rem .75rem;font-family:"Jua",sans-serif;font-size:.95rem;display:flex;align-items:center;gap:.3rem}
+.box-tab.on{background:var(--accent);border-color:var(--accent);color:var(--btn-ink)}
+.box-tab.locked{color:var(--muted);background:var(--bg);border-style:dashed}
+.box-tab .cnt{font-family:"Gowun Dodum",sans-serif;font-size:.75rem;opacity:.8}
+.locked-note{background:rgba(255,255,255,.1);border:1px dashed rgba(255,255,255,.45);border-radius:12px;padding:.6rem 1rem;display:inline-block;font-size:.92rem}
+.rcard{position:relative}
+.dupmark,.newmark{position:absolute;top:-7px;right:-5px;font-size:.62rem;font-family:"Jua",sans-serif;border-radius:999px;padding:0 .35rem;line-height:1.5}
+.dupmark{background:#ECEAF5;color:#5F4F8C}
+.newmark{background:#B4513E;color:#fff}
+.dex .cell{position:relative}
+.dex .cell .have{position:absolute;top:.3rem;right:.3rem;background:#E3F3EA;color:#2F6B4F;border-radius:999px;padding:0 .4rem;font-size:.68rem;line-height:1.5;font-family:"Jua",sans-serif}
+.dex .cell.owned{border-color:#8FD1B8}
+.dex .cell .where{font-size:.7rem;color:var(--muted)}
+.dex .cell .dupb{border-color:#9180BD;color:#5F4F8C;background:#F2EFFA}
+.dup-all{margin-left:auto;border-color:#9180BD;color:#5F4F8C;background:#F2EFFA}
+.dup-all + .stars-have{margin-left:0}
+.gacha-top{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.stars-have{margin-left:auto;font-family:"Jua",sans-serif;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:.2rem .8rem}
+.dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:.5rem}
+.dex .cell{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:.45rem .3rem;display:flex;flex-direction:column;align-items:center;gap:.15rem;text-align:center}
+.dex .cell .em{font-size:1.7rem;line-height:1.2}
+.dex .cell.no .em{filter:grayscale(1) brightness(.6);opacity:.45}
+.dex .cell .t{font-size:.8rem}
+.dex .cell button{border:1px solid var(--accent);background:var(--panel);color:var(--accent);border-radius:999px;font-size:.78rem;padding:.1rem .55rem}
+.dex .cell button:disabled{opacity:.4;cursor:not-allowed;border-color:var(--line);color:var(--muted)}
+.shop-tabs{display:flex;gap:.4rem;margin:.1rem 0 .5rem}
+.shop-tab{flex:1;border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;padding:.4rem .6rem;font-family:"Jua",sans-serif;font-size:.95rem;cursor:pointer}
+.shop-tab.lim{color:#B4513E;border-color:#E0802F;background:#FFF1E2}
+.shop-tab.lim.on{background:#E0802F;border-color:#E0802F;color:#fff}
+.lim-note{grid-column:1/-1;margin:0 0 .2rem;padding:.5rem .8rem;border-radius:10px;background:#FFF1E2;color:#9A4A1E;font-family:"Jua",sans-serif;text-align:center}
+.lim-note span{font-family:"Gowun Dodum",sans-serif;font-size:.8rem;opacity:.85}
+.cab span .fsvg,.slot .fsvg{width:88%;height:88%}
+.shop-tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.shop-tab span{font-family:"Gowun Dodum",sans-serif;font-size:.8rem;opacity:.85}
+
+/* 🐾 펫 탭 스타일 */
+.pet-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.pet-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1.5rem}
+.pet-card{border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:1rem;display:flex;flex-direction:column;gap:.6rem;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.pet-card.sad{border-color:#B4513E;background:rgba(180,81,62,.06)}
+.pet-card-top{display:flex;gap:.8rem;align-items:center}
+.pet-sprite-wrap{width:76px;height:76px;border-radius:14px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;position:relative;flex:none}
+.pet-badge{position:absolute;bottom:2px;right:2px;font-size:.68rem;background:var(--lamp);color:#3A2E10;border-radius:6px;padding:0 .35rem;font-family:"Jua",sans-serif}
+.pet-meta{flex:1;min-width:0}
+.pet-meta .pname{margin:0;font-family:"Jua",sans-serif;font-size:1.15rem;display:flex;align-items:center;gap:.3rem}
+.pet-actions{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center}
+.pet-actions button{flex:1;min-width:64px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:.3rem .4rem;font-size:.82rem;font-family:"Jua",sans-serif}
+.pet-actions button:disabled{opacity:.45;cursor:not-allowed}
+.pet-event-box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.55rem .7rem;margin-top:.2rem}
+.pet-event-btns{display:flex;gap:.35rem;margin-top:.35rem}
+.pet-event-btns button{flex:1;border:1px solid var(--accent);background:var(--bg);color:var(--accent);border-radius:8px;padding:.3rem;font-size:.8rem;font-family:"Jua",sans-serif}
+.pet-dex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:.6rem}
+.pet-dex-cell{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:.6rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.25rem;text-align:center}
+.pet-dex-cell.owned{border-color:#8FD1B8}
+.pet-dex-cell button{width:100%;margin-top:.2rem}
+
+/* 숲 배경 */
+.village{padding-top:1.25rem}
+.village .stars{bottom:auto;height:calc(180px + var(--bh,0px))}
+.village-head{z-index:3;text-shadow:0 1px 3px rgba(20,24,50,.8)}
+.pines{top:calc(60px + var(--bh,0px));bottom:auto;height:200px}
+.ground{top:calc(160px + var(--bh,0px));bottom:0;height:auto;border-radius:50% 50% 0 0/70px 70px 0 0;background:linear-gradient(var(--hill2),var(--hill) 320px)}
+.ground::before{display:none}
+.houses{margin-top:4.5rem}
+@media (max-width:600px){
+  .village-head p{font-size:.82rem}
+  .village .stars{height:calc(230px + var(--bh,0px))}
+  .pines{top:calc(100px + var(--bh,0px))}
+  .ground{top:calc(205px + var(--bh,0px))}
+  .houses{grid-template-columns:repeat(3,minmax(0,1fr));gap:.25rem .5rem;margin-top:3.5rem}
+  .house .nm{font-size:.95rem}
+  .house .st{font-size:.7rem}
+}
+.toast:not(.show){opacity:0;pointer-events:none}
+.house .st{word-break:keep-all;line-height:1.4}
+.house .st .t{display:block;white-space:nowrap}
+.bubble{word-break:keep-all;white-space:pre-line}
+.paint{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem;margin-top:.5rem}
+.paint-label{font-size:.85rem;color:var(--muted);margin-right:.2rem}
+.hstyle{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem;margin-top:.45rem}
+.hs-btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:.15rem .6rem;font-size:.8rem}
+.hs-btn.on{background:var(--accent);border-color:var(--accent);color:var(--btn-ink)}
+.hs-btn.locked{opacity:.75;border-style:dashed}
+.smoke{animation:smoke 4s ease-in-out infinite}@keyframes smoke{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:var(--c);padding:0}
+.sw:not(:disabled):hover{transform:scale(1.15)}
+.sw.cur{border-color:var(--ink);box-shadow:0 0 0 2px var(--panel) inset}
+.sw:disabled:not(.cur){opacity:.45;cursor:not-allowed}
+.ask-yes{background:var(--accent);color:var(--btn-ink);border-color:var(--accent)}
+dialog.ask{max-width:min(90vw,380px)}
+.gift{display:grid;gap:.6rem;margin-bottom:1rem}
+.gift label{display:flex;flex-direction:column;gap:.2rem}
+.gift select,.gift input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.4rem .5rem;max-width:280px}
+.gift-reasons{display:flex;flex-wrap:wrap;gap:.35rem}
+.gift-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+.gift-row input[type=number]{width:90px}
+.sep{border:0;border-top:1px solid var(--line);margin:1.25rem 0}
+dialog.party{text-align:center;max-width:min(90vw,340px)}
+.party-emoji{font-size:3rem;line-height:1.2}
+#askMsg{white-space:pre-line}
+#partyMsg{white-space:pre-line;font-family:"Jua",sans-serif;font-size:1.15rem;margin:.4rem 0 1rem}
+.event-banner{text-align:center;padding:.55rem 1rem;font-family:"Jua",sans-serif;font-size:1.02rem}
+.event-banner.on{background:#FFCE5C;color:#3A2A00}
+.event-banner.soon{background:#2E3A63;color:#F2EFFF}
+.ev-item{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed var(--line)}
+.ev-item .mini{margin-left:auto}
+#noteDlg{max-width:min(92vw,440px)}
+#noteBody{width:100%;margin-top:.6rem;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.6rem;resize:vertical}
+.inbox{display:grid;gap:.5rem;margin-bottom:.5rem}
+.note{border:1px solid var(--line);border-radius:12px;padding:.6rem .8rem;background:var(--bg)}
+.note.unread{border-color:var(--lamp);box-shadow:0 0 0 1px var(--lamp)}
+.note-head{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.note-body{margin:.35rem 0;white-space:pre-line;word-break:keep-all}
+.note-act{display:flex;gap:.4rem;justify-content:flex-end}
+.road li.mystery .q{height:90px;display:grid;place-items:center;background:var(--sky-top);border-radius:10px;max-width:130px;margin:0 auto;color:#D9D6EE;font-family:"Jua",sans-serif;font-size:2.6rem}
+</style>
+</head>
+<body>
+
+<!-- 입구: 로그인 전 -->
+<section class="gate" id="screenLogin" hidden>
+  <svg class="stars" data-stars preserveAspectRatio="none"></svg>
+  <div class="gate-inner">
+    <svg class="wolf-svg" data-wolf viewBox="0 0 42 30" role="img" aria-label="담당자 늑대"></svg>
+    <h1>🌲 마감의 숲</h1>
+    <p>디스코드 계정으로 들어와 주세요.<br>마감의 숲 서버 주민만 들어올 수 있어요.</p>
+    <button class="discord-btn" id="loginBtn">디스코드로 들어가기</button>
+  </div>
+</section>
+
+<!-- 입구: 주민이 아님 -->
+<section class="gate" id="screenNotMember" hidden>
+  <svg class="stars" data-stars preserveAspectRatio="none"></svg>
+  <div class="gate-inner">
+    <svg class="wolf-svg" data-wolf viewBox="0 0 42 30" role="img" aria-label="담당자 늑대"></svg>
+    <h1>🌲 마감의 숲</h1>
+    <p>이 숲은 마감의 숲 디스코드 서버 주민만 들어올 수 있어요.<br>서버에 들어온 지 얼마 안 됐다면 잠시 뒤 다시 들어와 주세요.</p>
+    <button class="discord-btn" id="logoutBtn2">다른 계정으로 들어가기</button>
+  </div>
+</section>
+
+<!-- 숲 -->
+<div id="app" hidden>
+<header class="top">
+  <h1>🌲 마감의 숲</h1>
+  <div class="right">
+    <span class="who" id="who"></span>
+    <span class="coin" id="coin">🪙 0</span>
+    <span id="demoCtrls" hidden>
+      <button class="voice-btn" id="voiceBtn">🎧 작업 채널 들어가기</button>
+      <button class="ghost" id="ffBtn" title="미리보기용: 누적 작업 시간 +5시간">⏩ +5시간</button>
+    </span>
+    <button class="ghost" id="noteBtn">✉️ 쪽지</button>
+    <button class="ghost" id="logoutBtn">나가기</button>
+  </div>
+</header>
+
+<div class="event-banner" id="eventBanner" hidden></div>
+<section class="village" aria-label="마감의 숲">
+  <svg class="stars" data-stars preserveAspectRatio="none"></svg>
+  <div id="bannerBox" hidden></div>
+  <div class="village-head">
+    <p>불 켜진 집은 지금 작업 채널에 있는 사람이에요. 오래 비운 집에는 담당자가 찾아가요. 집을 누르면 구경할 수 있어요.</p>
+    <span class="lit-count" id="litCount"></span>
+  </div>
+  <div class="ground"></div>
+  <svg class="pines" id="pines" viewBox="0 0 2600 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+  <div class="houses" id="houses"></div>
+  <div id="floatDrops"></div>
+  <div class="trail">
+    <div class="wolf">
+      <div class="bubble" id="bubble">다음주까지 송부 가능하실까요?</div>
+      <svg class="wolf-svg" data-wolf viewBox="0 0 42 30" role="img" aria-label="담당자 늑대"></svg>
+      <div class="tag">담당자</div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="demo-note" id="demoNote" hidden>미리보기 모드예요. 데이터베이스를 연결하기 전이라 가짜 이웃들과 함께 움직이고, 1초를 작업 1분으로 계산해요.</div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="home">우리 집 꾸미기</button>
+    <button role="tab" aria-selected="false" data-tab="road">집 성장 단계</button>
+    <button role="tab" aria-selected="false" data-tab="plaza">🏘️ 마을 광장</button>
+    <button role="tab" aria-selected="false" data-tab="tree">🌳 세계수</button>
+    <button role="tab" aria-selected="false" data-tab="lake">🎣 호숫가</button>
+    <button role="tab" aria-selected="false" data-tab="gacha">🎁 담당자의 보따리</button>
+    <button role="tab" aria-selected="false" data-tab="pet" id="petTabBtn">🐾 펫</button>
+    <button role="tab" aria-selected="false" data-tab="admin" id="adminTabBtn" hidden>🔒 숲지기 전용</button>
+  </div>
+
+  <section id="tab-home" class="grid2">
+    <div class="panel">
+      <div class="myhouse-head">
+        <div id="myHouseIcon"></div>
+        <div>
+          <h2 id="myStageName"></h2>
+          <div class="bar"><span id="stageBar"></span></div>
+          <div class="small" id="stageInfo"></div>
+          <div class="paint" id="paint"></div>
+          <div class="hstyle" id="hstyle"></div>
+        </div>
+      </div>
+      <div class="room-tabs" id="roomTabs"></div>
+      <div class="room-wrap"><div class="room" id="room"></div></div>
+      <div class="garden" id="gardenBox" hidden></div>
+      <p class="hint small" id="hint"></p>
+    </div>
+    <div class="panel">
+      <p class="earn" id="earn">🎧 작업실에 있으면 1분마다 🪙 1개씩 쌓여요</p>
+      <h3>🎒 가방</h3>
+      <div class="items" id="bag"></div>
+      <details class="shop-box" id="shopBox">
+        <summary><span class="jua">🛒 가구 상점</span> <span class="small" id="shopCount"></span></summary>
+        <div class="shop-tabs" role="tablist">
+          <button class="shop-tab lim" data-shoptab="limited" role="tab" id="limTab" hidden></button>
+          <button class="shop-tab" data-shoptab="furniture" role="tab">🪑 가구 <span id="cntF"></span></button>
+          <button class="shop-tab" data-shoptab="accessory" role="tab">✨ 소품 <span id="cntA"></span></button>
+        </div>
+        <div class="items" id="shop"></div>
+      </details>
+      <div class="rules">
+        <p>집은 누적 작업 시간으로 커지고, 집이 클수록 방도 넓어져요.</p>
+        <p>침대처럼 큰 가구는 여러 칸을 차지해요. 길쭉한 가구는 돌려서 놓을 수 있어요.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-road" class="panel" hidden>
+    <h3>집 성장 단계</h3>
+    <p class="small" style="margin-top:0">작업실에 오래 있을수록 집이 자동으로 커져요. 어떤 집이 언제 나올지는 도착해야 알 수 있어요!</p>
+    <ol class="road" id="road"></ol>
+  </section>
+
+  <section id="tab-plaza" hidden>
+    <div class="panel" id="boardBox" style="margin-bottom:1rem"></div>
+    <div class="plaza-scene">
+      <svg class="stars" data-stars preserveAspectRatio="none"></svg>
+      <div class="plaza-head">
+        <h3>🏘️ 마을 광장</h3>
+        <p>주민들이 모은 코인으로 광장에 건물을 하나씩 지어요. 건물이 생기면 상점에 그 건물에서만 파는 소품이 들어와요.</p>
+      </div>
+      <div class="lots" id="lots"></div>
+    </div>
+    <div class="panel plaza-panel" id="plazaWork"></div>
+  </section>
+
+  <section id="tab-tree" hidden>
+    <div id="treeBox"></div>
+  </section>
+
+  <section id="tab-lake" hidden>
+    <div id="lakeBox"></div>
+    <div class="panel">
+      <h3 style="margin:0 0 .2rem">🐟 물고기 도감 <span class="small" id="fishDexCount"></span></h3>
+      <p class="small" style="margin:0 0 .8rem">처음 낚으면 흔함 🪙50 · 귀함 🪙150 · 전설 🪙600, 내 최고 기록보다 크게 낚으면 30 · 80 · 400, 그냥 낚으면 10 · 30 · 300이에요.</p>
+      <div class="dex fish-dex" id="fishDex"></div>
+    </div>
+  </section>
+
+  <section id="tab-gacha" hidden>
+    <div class="box-tabs" id="boxTabs"></div>
+    <div class="gacha-scene">
+      <svg class="stars" data-stars preserveAspectRatio="none"></svg>
+      <div class="gacha-inner">
+        <div class="sack" id="sack">🎁</div>
+        <h3 id="boxName">담당자의 보따리</h3>
+        <p><span id="boxAbout"></span><br>열어 보면 상점에는 없는 소품이 들어 있어요.<br>한 번 열 때마다 ✨ 별조각도 1개씩 모여요.</p>
+        <div class="pull-row">
+          <button class="pull" data-pull="1">한 번 열기 · 🪙 <span id="p1"></span></button>
+          <button class="pull ten" data-pull="10">열 번 열기 · 🪙 <span id="p10"></span></button>
+        </div>
+        <div class="results" id="pullResults"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="gacha-top">
+        <h3 style="margin:0">📖 <span id="dexTitle">도감</span> <span class="small" id="dexCount"></span></h3>
+        <span class="small" id="dexAll"></span>
+        <button class="mini dup-all" id="dupAll" hidden></button>
+        <span class="stars-have" id="starHave"></span>
+      </div>
+      <p class="small" style="margin:.3rem 0 .2rem" id="rateText"></p>
+      <p class="small" style="margin:0 0 .8rem">갖고 싶은 소품이 안 나오면 별조각으로 바꿀 수 있어요.</p>
+      <div class="dex" id="dex"></div>
+    </div>
+  </section>
+
+  <!-- 🐾 펫 탭 -->
+  <section id="tab-pet" class="panel" hidden>
+    <div id="petBox"></div>
+  </section>
+
+  <section id="tab-admin" class="panel" hidden>
+    <h3>✉️ 받은 쪽지 <span class="small" id="inboxCount"></span></h3>
+    <div id="inbox" class="inbox"></div>
+    <hr class="sep">
+    <h3>🔥 코인 이벤트</h3>
+    <p class="small" style="margin-top:0">기간 동안 작업실 1분마다 쌓이는 코인이 배로 늘어요.</p>
+    <div class="gift">
+      <div class="gift-row">
+        <label class="small">이벤트 이름 <input id="evName" maxlength="30" value="코인 2배 이벤트"></label>
+        <label class="small">배수
+          <select id="evMult"><option value="2">2배</option><option value="3">3배</option><option value="4">4배</option><option value="5">5배</option></select>
+        </label>
+      </div>
+      <div class="gift-row">
+        <span class="gift-reasons" id="evQuick" style="width:100%"><button class="mini" data-evq="3h">⏱️ 지금부터 3시간</button><button class="mini" data-evq="tonight">🌙 지금부터 오늘 자정까지</button><button class="mini" data-evq="tomorrow">📅 지금부터 내일 자정까지</button></span>
+      </div>
+      <div class="gift-row">
+        <label class="small">시작 <input id="evStart" type="datetime-local"></label>
+        <label class="small">끝 <input id="evEnd" type="datetime-local"></label>
+        <button class="mini ask-yes" id="evAdd">🔥 등록</button>
+      </div>
+      <div id="evList" class="small"></div>
+    </div>
+    <hr class="sep">
+    <h3>🎉 축하 코인 보내기</h3>
+    <div class="gift">
+      <label class="small">받는 분
+        <select id="giftWho"></select>
+      </label>
+      <div class="gift-reasons" id="giftReasons"></div>
+      <div class="gift-row">
+        <label class="small">축하 이유 <input id="giftReason" maxlength="30" placeholder="예: 완결"></label>
+        <label class="small">코인 <input id="giftAmount" type="number" min="1" max="10000" value="50"></label>
+        <button class="mini ask-yes" id="giftSend">🎉 보내기</button>
+      </div>
+    </div>
+    <hr class="sep">
+    <h3>미접 명단</h3>
+    <div class="legend small" id="legend"></div>
+    <div class="table-wrap">
+      <table class="admin">
+        <thead><tr><th>주민</th><th>마지막 작업</th><th>집 상태</th><th>누적</th><th></th></tr></thead>
+        <tbody id="adminRows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</div>
+
+<dialog class="visit" id="visit">
+  <button class="mini visit-close" id="visitClose">닫기</button>
+  <h3 id="visitTitle"></h3>
+  <p class="small" id="visitSub" style="margin-top:0"></p>
+  <div class="room-tabs" id="visitTabs"></div>
+  <div class="room-wrap"><div class="room view" id="visitRoom"></div></div>
+  <div class="garden" id="visitGarden" hidden></div>
+  <p class="small dex-line" id="visitDex"></p>
+  <p class="small dex-line" id="visitPets" style="color:var(--accent)"></p>
+  <div class="raid" id="visitRaid"></div>
+  <div class="visit-gift" id="visitGift"></div>
+</dialog>
+
+<dialog class="visit ask" id="flowerDlg">
+  <h3 style="margin:0 0 .2rem" id="flowerTitle">💐 꽃 보내기</h3>
+  <div class="fpicks" id="flowerPick"></div>
+  <input id="flowerNote" maxlength="20" placeholder="한마디 (선택) · 예: 완결 축하해요!!" style="width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:.45rem .7rem;font:inherit">
+  <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem">
+    <button class="mini" id="flowerCancel">취소</button>
+    <button class="mini ask-yes" id="flowerSend">💐 보내기</button>
+  </div>
+</dialog>
+
+<dialog class="visit" id="cabDlg">
+  <button class="mini visit-close" id="cabClose">닫기</button>
+  <h3 id="cabTitle"></h3>
+  <div class="cab-slots" id="cabSlots"></div>
+  <h4 style="margin:.9rem 0 .4rem">🎒 가방에서 올리기</h4>
+  <div class="items" id="cabBag"></div>
+  <div style="display:flex;justify-content:flex-end"><button class="mini" id="cabRemove">진열장째 가방에 넣기</button></div>
+</dialog>
+
+<dialog class="visit ask" id="textDlg">
+  <p id="textMsg" style="margin:.2rem 0 .6rem;white-space:pre-line"></p>
+  <input id="textIn" maxlength="10" style="width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:.45rem .7rem;font:inherit">
+  <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem">
+    <button class="mini" id="textNo">취소</button>
+    <button class="mini ask-yes" id="textYes">좋아요</button>
+  </div>
+</dialog>
+
+<dialog class="visit ask" id="ask">
+  <p id="askMsg" style="margin:.2rem 0 1rem"></p>
+  <div style="display:flex;gap:.5rem;justify-content:flex-end">
+    <button class="mini" id="askNo">취소</button>
+    <button class="mini ask-yes" id="askYes">좋아요</button>
+  </div>
+</dialog>
+
+<dialog class="visit ask" id="noteDlg">
+  <h3 style="margin:0 0 .25rem">✉️ 숲지기에게 쪽지</h3>
+  <div class="gift-reasons" id="noteCats"></div>
+  <textarea id="noteBody" maxlength="500" rows="5" placeholder="가구 요청, 건의, 고장 신고 등"></textarea>
+  <div class="small" style="text-align:right;color:var(--muted)"><span id="noteLen">0</span>/500</div>
+  <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+    <button class="mini" id="noteCancel">닫기</button>
+    <button class="mini ask-yes" id="noteSend">보내기</button>
+  </div>
+</dialog>
+
+<dialog class="visit ask party" id="party">
+  <div class="party-emoji">🎉</div>
+  <p id="partyMsg"></p>
+  <button class="mini ask-yes" id="partyOk">고마워요!</button>
+</dialog>
+
+<dialog class="visit ask party" id="raidDlg">
+  <div class="party-emoji" id="raidEmoji">🍑</div>
+  <p id="raidMsg" style="white-space:pre-line"></p>
+  <button class="mini ask-yes" id="raidOk">알겠어요</button>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const CONFIG = {
+  SUPABASE_URL: 'https://udnecgyatvxsqpwtccjg.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkbmVjZ3lhdHZ4c3Fwd3RjY2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NjI3MTUsImV4cCI6MjEwNjQzODcxNX0.qNag7BcYJXc8MNibe-otUdfJlzAzdFD7f5z5BXaF1mA',
+};
+const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
+
+/* ---------- 🐾 펫 기준 데이터 ---------- */
+const PET_STAGE_NAME = { 1: '아기', 2: '성장기' };
+const PET_TIER_LABEL = { common: '흔함', rare: '희귀', legend: '전설' };
+const PET_OPEN_PRICE = { common: 300, rare: 1000, legend: 3000 };
+const PET_ADOPT_PRICE = { common: 200, rare: 500, legend: 1500 };
+const PET_SLOT_PRICE = [0, 2000, 5000];
+const PET_SPECIES = [
+  {code:'shiba', name:'시바견', tier:'common', sort:1},
+  {code:'cheese', name:'까만 고양이', tier:'common', sort:2},
+  {code:'bunny', name:'토끼', tier:'common', sort:3},
+  {code:'hamster', name:'햄스터', tier:'common', sort:4},
+  {code:'chick', name:'병아리', tier:'common', sort:5},
+  {code:'fox', name:'여우', tier:'rare', sort:6},
+  {code:'raccoon', name:'너구리', tier:'rare', sort:7},
+  {code:'hedgehog', name:'고슴도치', tier:'rare', sort:8},
+  {code:'penguin', name:'펭귄', tier:'rare', sort:9},
+  {code:'otter', name:'수달', tier:'rare', sort:10},
+  {code:'dragon', name:'아기 용', tier:'legend', sort:11},
+  {code:'unicorn', name:'유니콘', tier:'legend', sort:12},
+  {code:'phoenix', name:'불사조', tier:'legend', sort:13},
+  {code:'wolfpup', name:'꼬마 담당자', tier:'legend', sort:14},
+];
+const PET_EMOJI = {
+  shiba:'🐶', cheese:'🐱', bunny:'🐰', hamster:'🐹', chick:'🐥',
+  fox:'🦊', raccoon:'🦝', hedgehog:'🦔', penguin:'🐧', otter:'🦦',
+  dragon:'🐉', unicorn:'🦄', phoenix:'🔥', wolfpup:'🐺'
+};
+function petImgUrl(code, stage = 1) {
+  return `assets/pets/${code}_${stage}.png`;
+}
+function petSpriteHTML(code, stage = 1, size = 64, sad = false) {
+  const emoji = PET_EMOJI[code] || '🐾';
+  const filter = sad ? 'filter: grayscale(0.8) opacity(0.7);' : '';
+  return `<span class="pet-sprite" style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;${filter}">
+    <img src="${petImgUrl(code, stage)}" alt="${code}" width="${size}" height="${size}" style="object-fit:contain;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block';">
+    <span style="display:none;font-size:${Math.round(size*0.7)}px;">${emoji}</span>
+  </span>`;
+}
+
+/* ---------- 기존 기준 데이터 ---------- */
+const STAGES = [
+  {name:'나뭇가지 움막', h:0,   cols:4,  rows:3},
+  {name:'낡은 텐트',     h:5,   cols:5,  rows:4},
+  {name:'초가집',        h:15,  cols:6,  rows:4},
+  {name:'통나무집',      h:30,  cols:6,  rows:5},
+  {name:'흙벽돌집',      h:50,  cols:7,  rows:5},
+  {name:'기와집',        h:80,  cols:8,  rows:5},
+  {name:'벽돌집',        h:120, cols:8,  rows:6},
+  {name:'이층집',        h:170, cols:9,  rows:6},
+  {name:'정원 딸린 저택',h:240, cols:10, rows:6},
+  {name:'작가의 성',     h:330, cols:10, rows:7},
+];
+const MAXC = 10, MAXR = 7, EXTRA_ROWS = 0, RAID_PER_DAY = 5;
+const FRUITS = ['🍑','🍎','🍐','🍇','🍊','🍓'];
+const CAPACITY = {shelf:4, cabinet:6, vitrine:9};
+const MAX_ROOMS = 4;
+const ROOM_PRICE = n => n*1000;
+const ROOM_NAMES = ['거실','침실','서재','다락방'];
+const roomOf = (minutes, blocks) => { const s = STAGES[stageIdx(minutes)]; return {...s, extraW: Math.min(s.cols, (blocks||0)*2), maxBlocks: Math.ceil(s.cols/2), blocks: blocks||0}; };
+const DECAY = [{d:0,label:'정상'},{d:14,label:'담당자가 어슬렁거려요'},{d:30,label:'담당자가 후— 불고 갔어요'},{d:60,label:'집이 날아갔어요'}];
+const STURDY = 6;
+const PALETTE = [
+  {name:'벚꽃 분홍', main:'#E8A0B4', dark:'#C77D93'},{name:'하늘색', main:'#8DB8E0', dark:'#6A97C2'},{name:'민트', main:'#8FD1B8', dark:'#6BB096'},
+  {name:'레몬', main:'#EED77A', dark:'#CDB559'},{name:'라벤더', main:'#B4A2DC', dark:'#9180BD'},{name:'살구', main:'#F0B08A', dark:'#D08E68'},
+  {name:'새벽 남색',main:'#4A5A8C', dark:'#36436E'},{name:'숲 초록', main:'#5E8F5A', dark:'#477143'},{name:'버건디', main:'#9A3A4A', dark:'#7A2A38'},
+  {name:'눈 흰색', main:'#F1EEE8', dark:'#CFCAC0'}
+];
+const PAINT_PRICE = 300;
+const decayOf = away => away>=60?3:away>=30?2:away>=14?1:0;
+const decayLabel = (dc, stage) => stage>=STURDY && dc>0 ? '담당자가 문 앞에서 기다리는 중' : DECAY[dc].label;
+const awayText = d => d===0?'오늘':d===1?'어제':`${d}일 전`;
+const stageIdx = minutes => { const h = minutes/60; let i=0; STAGES.forEach((s,k)=>{ if(h>=s.h) i=k; }); return i; };
+const fmt = m => { const h=Math.floor(m/60), mm=m%60; return h ? `${h}시간 ${mm}분` : `${mm}분`; };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+const ACC_CODES = new Set(["chestnut","letter","stamp","croissant","cake","baguette","sunflower","tulip","blossom","openbook","newspaper","teapot","cupcake","balloon","windchime","koinobori","compass","urn","coffee", "candle", "firewood", "plant", "teddy", "books", "moonlamp", "frame", "cat", "tea", "cookie", "mushroom", "notebook", "cactus", "pen", "bouquet", "radio", "lantern", "mirror", "headphone", "keyboard", "guitar", "contract", "laptop", "fishbowl", "rabbit", "dog", "violin", "wolfdoll", "trophy"]);
+const isLive = it => !it.limited_until || new Date(it.limited_until).getTime() > Date.now();
+const catOf = it => it.category || ((it.rarity || it.gacha_rarity || ACC_CODES.has(it.code)) ? 'accessory' : 'furniture');
+const DEFAULT_SHOP = [
+  ['coffee','☕','커피',10,1,1],['candle','🕯️','촛불',15,1,1],['firewood','🪵','장작',20,1,1],['plant','🪴','화분',30,1,1],
+  ['chair','🪑','의자',40,1,1],['teddy','🧸','곰인형',50,1,1],['books','📚','책더미',60,1,1],['moonlamp','🌙','무드등',70,1,1],
+  ['frame','🖼️','액자',80,1,1],['clock','🕰️','괘종시계',90,1,2],['bed','🛏️','침대',120,2,2],['sofa','🛋️','소파',150,2,1],
+  ['desk','🖥️','작업 책상',200,2,1],['bathtub','🛁','욕조',250,2,1],['cat','🐈','고양이',300,1,1],['piano','🎹','피아노',400,2,1],
+  ['tea','🍵','녹차',12,1,1],['cookie','🍪','쿠키',18,1,1],['mushroom','🍄','버섯',22,1,1],['notebook','📓','원고 노트',25,1,1],
+  ['cactus','🌵','선인장',35,1,1],['pen','🖋️','만년필',45,1,1],['bouquet','💐','꽃다발',55,1,1],['radio','📻','라디오',65,1,1],
+  ['lantern','🏮','등롱',75,1,1],['mirror','🪞','거울',85,1,1],['headphone','🎧','헤드폰',95,1,1],['keyboard','⌨️','키보드',100,1,1],
+  ['guitar','🎸','기타',110,1,1],['contract','📜','출간 계약서',150,1,1],['tree','🌳','실내 나무',160,1,2],['laptop','💻','노트북',180,1,1],
+  ['fishbowl','🐠','어항',190,1,1],['rabbit','🐇','토끼',220,1,1],['table','🍽️','식탁',230,2,1],
+  ['dog','🐕','강아지',300,1,1],['telescope','🔭','망원경',320,1,1],['fireplace','🔥','벽난로',350,2,1],['violin','🎻','바이올린',380,1,1],
+  ['camptent','⛺','캠핑 텐트',450,2,2],['wolfdoll','🐺','담당자 인형',500,1,1],['fountain','⛲','분수',700,2,2],['trophy','🏆','완결 트로피',1000,1,1],
+  ['carousel','🎠','회전목마',1200,2,2],
+  ['shelf','🗄️','작은 진열장',150,1,1],['cabinet','🗄️','진열장',350,2,1],['vitrine','🗄️','큰 유리 진열장',700,2,2],
+  ['xmastree','🎄','트리',260,1,2,false],
+].map(([code,emoji,name,price,w,h,active=true,unlock_by=null])=>({code,emoji,name,price,w,h,active,unlock_by,category:ACC_CODES.has(code)?'accessory':'furniture'}));
+
+const PLAZA_DEFAULT = [
+  {code:'campfire', emoji:'🔥', name:'광장 모닥불', goal:600, sort:1, about:'숲 사람들이 처음 모이는 자리', unlocks:['chestnut']},
+  {code:'postbox', emoji:'📮', name:'우체통', goal:1500, sort:2, about:'숲 소식이 오가는 빨간 우체통', unlocks:['letter','stamp']},
+  {code:'bakery', emoji:'🍞', name:'빵집', goal:3000, sort:3, about:'마감 전날 밤에도 불 켜진 빵집', unlocks:['croissant','cake','baguette']},
+  {code:'florist', emoji:'💐', name:'꽃집', goal:5000, sort:4, about:'계절마다 다른 꽃이 들어오는 꽃집', unlocks:['sunflower','tulip','blossom']},
+  {code:'lake', emoji:'🎣', name:'호숫가', goal:6000, sort:5, about:'어망을 던져 두고 원고 쓰기 좋은 호숫가', unlocks:[]},
+  {code:'bookstore', emoji:'📚', name:'서점', goal:7500, sort:6, about:'숲 작가들의 책이 꽂히는 서점', unlocks:['openbook','newspaper']},
+  {code:'teahouse', emoji:'☕', name:'찻집', goal:10000, sort:7, about:'원고 들고 앉아 있기 좋은 찻집', unlocks:['teapot','cupcake']},
+  {code:'festival', emoji:'🎪', name:'축제 천막', goal:13000, sort:8, about:'완결을 축하하는 축제 천막', unlocks:['balloon','windchime','koinobori']},
+  {code:'library', emoji:'🏛️', name:'숲의 도서관', goal:17000, sort:9, about:'숲의 이야기가 모두 모이는 곳', unlocks:['compass','urn']},
+  {code:'shelter', emoji:'🐾', name:'동물 보호소', goal:10000, sort:10, about:'숲의 꼬마 동물들이 새 가족을 기다리는 곳', unlocks:[]}
+];
+
+/* ---------- 데이터 연결 (demoApi & supaApi) ---------- */
+const demoApi = (() => {
+  const st = {
+    me:{discord_id:'me', display_name:'나', avatar_url:'', is_admin:true, coins:1000, stars:0, room_blocks:0, room_names:['거실'], total_minutes:0, in_voice:false, today_minutes:0, house_color:Math.floor(Math.random()*10), seeds:3, pet_slots:1},
+    others:[
+      ['moon','달빛작가',62,true,95,0],['cat','고양이손',7,false,0,75],['dl','마감요정',185,true,210,0],
+      ['green','초록펜',18,false,0,20],['dawn','새벽두시',128,false,0,36],['owl','야행성',2,true,30,0],
+      ['pencil','연필깎이',255,false,12,1],['bread','구름빵',41,false,0,63],
+    ].map(([discord_id,display_name,h,in_voice,today_minutes,away])=>({discord_id,display_name,total_minutes:Math.round(h*60),in_voice,today_minutes,away,removed:false,house_color:Math.floor(Math.random()*10)})),
+    plaza: PLAZA_DEFAULT.map((b,i)=>({...b, raised: i===0?b.goal: i===1?1350: b.code==='shelter'?10000:0, built_at: (i===0||b.code==='shelter')?new Date(Date.now()-5*86400e3).toISOString():null, givers: new Set(['moon','dl','green']), mine:0})),
+    coll:new Set(), cabs:{}, otherCabs:{}, raidDay:'', raidOwners:[],
+    garden:[], gdex:{}, inv:{}, placed:[], nextId:1, otherRooms:{}, gifts:[], events:[], notes:[],
+    petDex: new Set(['shiba']),
+    pets: [
+      {id:1, pet_code:'shiba', name:'시바', affection:120, stage:2, level:5, last_cared:new Date().toISOString(), sad:false, fed:1, patted:2, played:1, event_at:new Date(Date.now()-3600e3).toISOString()}
+    ]
+  };
+  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify(st)); }catch(e){} };
+  const fail = msg => { throw new Error(msg); };
+  return {
+    st,
+    async init(){ return {status:'ok'}; },
+    async login(){}, async logout(){ toast('미리보기에서는 나갈 수 없어요'); },
+    async me(){ return {...st.me}; },
+    async village(){ return [{...st.me, decay:0, removed:false}, ...st.others.map(o=>({...o, decay:o.in_voice?0:decayOf(o.away)}))]; },
+    async shop(){ return DEFAULT_SHOP.filter(s=>s.active); },
+    async plaza(){ return st.plaza.map(b=>({...b, givers:b.givers.size, my_amount:b.mine})); },
+    async givePlaza(amount){
+      const b = st.plaza.find(x=>!x.built_at); if(!b) fail('광장이 다 지어졌어요');
+      const amt = Math.min(amount, b.goal-b.raised);
+      st.me.coins-=amt; b.raised+=amt; b.mine+=amt;
+      if(b.raised>=b.goal) b.built_at = new Date().toISOString();
+      persist(); return {coins:st.me.coins};
+    },
+    async inventory(){ return {...st.inv}; },
+    async placements(id){ return id==='me' ? st.placed : (st.otherRooms[id]||[]); },
+    async cabinets(){ return []; },
+    async addRoom(name){ st.me.room_names.push(name); persist(); return st.me.coins; },
+    async renameRoom(k, name){ st.me.room_names[k]=name; persist(); },
+    async house(id){ return {room_blocks:0, room_names:['거실'], dex_have:10, dex_total:50, legends:[]}; },
+    async buy(code){ st.inv[code] = (st.inv[code]||0)+1; persist(); return st.me.coins; },
+    async place(code,r,c,rot,room=0){ st.placed.push({id:st.nextId++,item_code:code,r,c,w:1,h:1,room,rot}); persist(); },
+    async remove(id){ st.placed = st.placed.filter(p=>p.id!==id); persist(); },
+    async paint(k){ st.me.house_color=k; persist(); },
+    async houseStyles(){ return []; },
+    async buyHouseStyle(k){ st.me.house_style = k; persist(); return st.me.coins; },
+    async setHouseStyle(k){ st.me.house_style = k; persist(); },
+    async flowersOn(){ return []; },
+    async flowerNotices(){ return []; },
+    async flowerNoticesSeen(){},
+    async sendFlowers(){ return st.me.coins; },
+    async board(){ return []; },
+    async postBoard(){}, async deleteBoard(){},
+    async banners(){ return []; },
+    async hangBanner(){ return st.me.coins; },
+    async heartBanner(){ return st.me.coins; },
+    async deleteBanner(){},
+    async tree(){ return {tree_no:1, color:'water', goal:1000, poured:500, reward:500, givers:3, my_poured:100, drops:5, float_wait:2, float_today:2}; },
+    async catchDrop(){ return {drops:6, coins:st.me.coins+10, float_wait:1, float_today:3}; },
+    async pourDrops(n){ return {poured:500+n, goal:1000, drops:0, grown:false}; },
+    async fishing(){ return {lake_open:true, cast_at:null, ready_in:null, used:0}; },
+    async fishDex(){ return []; }, async fishPending(){ return []; }, async fishBest(){ return null; },
+    async garden(){ return []; }, async gardenDex(){ return []; },
+    async adminList(){ return []; }, async myGifts(){ return []; }, async giftsSeen(){},
+    async raidStatus(){ return {used:0, owners:[]}; }, async raid(){ return {success:true, amount:3}; }, async raidNotices(){ return []; }, async raidSeen(){},
+    async events(){ return []; }, async notes(){ return []; },
+    async gachaBoxes(){ return [{code:'basic', name:'기본', unlocked:true, sort:0}]; },
+    async gacha(){ return []; },
+
+    /* 🐾 펫 메서드 (Demo) */
+    async getPets(){
+      const shelter = st.plaza.find(b=>b.code==='shelter' && b.built_at);
+      return {
+        open: !!shelter,
+        slots: st.me.pet_slots || 1,
+        dex: [...st.petDex],
+        pets: st.pets
+      };
+    },
+    async openPetDex(code){
+      st.petDex.add(code); persist(); return st.me.coins;
+    },
+    async adoptPet(code, name){
+      st.pets.push({
+        id: Date.now(), pet_code: code, name: name || '아기',
+        affection: 0, level: 1, stage: 1, last_cared: new Date().toISOString(),
+        sad: false, fed: 0, patted: 0, played: 0, event_at: new Date().toISOString()
+      });
+      persist(); return st.me.coins;
+    },
+    async buyPetSlot(){
+      st.me.pet_slots = (st.me.pet_slots || 1) + 1; persist(); return st.me.coins;
+    },
+    async carePet(id, kind){
+      const p = st.pets.find(x=>x.id===id);
+      const gain = kind==='feed'?3:kind==='play'?5:1;
+      p.affection += gain;
+      const oldStage = p.stage;
+      p.stage = p.affection >= 170 ? 2 : 1; // 170친밀도(Lv 5) 이상이면 성장기
+      p.level = Math.min(10, Math.floor(p.affection/50)+1);
+      if(kind==='feed') p.fed++; else if(kind==='pat') p.patted++; else if(kind==='play') p.played++;
+      persist();
+      return {affection:p.affection, level:p.level, stage:p.stage, stage_up:p.stage>oldStage, level_up:false, reward:20, coins:st.me.coins};
+    },
+    async petEvent(id, choice){
+      const p = st.pets.find(x=>x.id===id);
+      p.event_at = new Date(Date.now()+4*3600e3).toISOString();
+      persist();
+      return {kind:'coins', amount:50, item:null, coins:st.me.coins+50};
+    },
+    async renamePet(id, name){
+      const p = st.pets.find(x=>x.id===id); if(p) p.name=name; persist();
+    },
+    async getPetsOn(){
+      return st.pets.length ? [{discord_id:'me', pet_code:st.pets[0].pet_code, name:st.pets[0].name, stage:st.pets[0].stage, sad:st.pets[0].sad}] : [];
+    },
+    async getPetsOf(id){
+      return id==='me' ? st.pets : [];
+    }
+  };
+})();
+
+const supaApi = (() => {
+  let sb = null, myId = null;
+  const ok = ({data, error}) => { if(error) throw new Error(error.message); return data; };
+  return {
+    async init(){
+      sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+      const { data:{ session } } = await sb.auth.getSession();
+      if(!session) return {status:'login'};
+      myId = (session.user.user_metadata||{}).provider_id || (session.user.user_metadata||{}).sub;
+      const me = ok(await sb.from('members').select('*').eq('discord_id', myId).maybeSingle());
+      if(!me || me.removed) return {status:'notmember'};
+      return {status:'ok'};
+    },
+    async login(){ await sb.auth.signInWithOAuth({ provider:'discord', options:{ redirectTo: location.origin + location.pathname } }); },
+    async logout(){ await sb.auth.signOut(); location.reload(); },
+    async me(){ return ok(await sb.from('members').select('*').eq('discord_id', myId).single()); },
+    async village(){ return ok(await sb.rpc('get_village')); },
+    async shop(){ return ok(await sb.from('shop_items').select('*').eq('active', true).order('sort')); },
+    async inventory(){
+      const rows = ok(await sb.from('inventory').select('item_code, qty').eq('discord_id', myId));
+      return Object.fromEntries(rows.filter(r=>r.qty>0).map(r=>[r.item_code, r.qty]));
+    },
+    async placements(id){ return ok(await sb.from('placements').select('*').eq('discord_id', id==='me'?myId:id)); },
+    async buy(code){ return ok(await sb.rpc('buy_item_ex', {p_code:code})); },
+    async place(code,r,c,rot,room){ return ok(await sb.rpc('place_item_rot', {p_code:code, p_r:r, p_c:c, p_rot:rot||0, p_room:room||0})); },
+    async remove(id){ return ok(await sb.rpc('remove_item_ex', {p_id:id})); },
+    async plaza(){ return ok(await sb.rpc('get_plaza')); },
+    async givePlaza(amount){ return ok(await sb.rpc('give_to_plaza', {p_amount:amount})); },
+    async cabinets(){ return []; },
+    async addRoom(name){ return ok(await sb.rpc('buy_room', {p_name:name})); },
+    async renameRoom(k, name){ return ok(await sb.rpc('rename_room', {p_idx:k, p_name:name})); },
+    async house(id){ return ok(await sb.rpc('get_house', {p_discord_id:id})); },
+    async paint(k){ return ok(await sb.rpc('paint_house', {p_color:k})); },
+    async houseStyles(){ return ok(await sb.rpc('get_house_styles')); },
+    async buyHouseStyle(k){ return ok(await sb.rpc('buy_house_style', {p_style:k})); },
+    async setHouseStyle(k){ return ok(await sb.rpc('set_house_style', {p_style:k})); },
+    async flowersOn(){ return ok(await sb.rpc('get_flowers_on')); },
+    async flowerNotices(){ return ok(await sb.rpc('my_flower_notices')); },
+    async flowerNoticesSeen(){ return ok(await sb.rpc('flower_notices_seen')); },
+    async sendFlowers(to, kind, note){ return ok(await sb.rpc('send_flowers', {p_to:to, p_kind:kind, p_note:note})); },
+    async board(){ return ok(await sb.rpc('get_board')); },
+    async postBoard(body){ return ok(await sb.rpc('post_board', {p_body:body})); },
+    async deleteBoard(id){ return ok(await sb.rpc('delete_board', {p_id:id})); },
+    async banners(){ return ok(await sb.rpc('get_banners')); },
+    async hangBanner(body, emoji){ return ok(await sb.rpc('hang_banner', {p_body:body, p_emoji:emoji})); },
+    async heartBanner(id){ return ok(await sb.rpc('heart_banner', {p_id:id})); },
+    async deleteBanner(id){ return ok(await sb.rpc('delete_banner', {p_id:id})); },
+    async tree(){ return ok(await sb.rpc('get_tree')); },
+    async catchDrop(){ return ok(await sb.rpc('catch_drop')); },
+    async pourDrops(n){ return ok(await sb.rpc('pour_drops', {p_amount:n})); },
+    async fishing(){ return ok(await sb.rpc('get_fishing')); },
+    async fishDex(){ return ok(await sb.rpc('get_fish_dex')); },
+    async fishPending(){ return ok(await sb.rpc('fish_pending_list')); },
+    async fishBest(id){ return ok(await sb.rpc('get_fish_best', {p_discord_id:id})); },
+    async garden(id){ return ok(await sb.rpc('get_garden', {p_discord_id: id==='me'?myId:id})); },
+    async gardenDex(){ return ok(await sb.rpc('get_garden_dex')); },
+    async adminList(){ return ok(await sb.rpc('admin_list')); },
+    async myGifts(){ return ok(await sb.from('gifts').select('id,amount,reason').eq('discord_id', myId).eq('seen', false).order('id')); },
+    async giftsSeen(){ return ok(await sb.rpc('gifts_seen')); },
+    async raidStatus(){ return ok(await sb.rpc('raid_status')); },
+    async raid(owner){ return ok(await sb.rpc('raid_house', {p_owner:owner})); },
+    async raidNotices(){ return ok(await sb.rpc('raid_notices')); },
+    async raidSeen(){ return ok(await sb.rpc('raid_notices_seen')); },
+    async events(){ return ok(await sb.from('coin_events').select('*').gt('ends_at', new Date().toISOString()).order('starts_at')); },
+    async notes(){ return ok(await sb.from('notes').select('id,discord_id,category,body,created_at,read,members(display_name)').order('created_at', {ascending:false})); },
+    async gachaBoxes(){ return ok(await sb.rpc('get_gacha_boxes')); },
+    async gacha(){ return ok(await sb.rpc('get_gacha')); },
+
+    /* 🐾 펫 메서드 (Supabase RPC 연동) */
+    async getPets(){ return ok(await sb.rpc('get_pets')); },
+    async openPetDex(code){ return ok(await sb.rpc('open_pet_dex', {p_code:code})); },
+    async adoptPet(code, name){ return ok(await sb.rpc('adopt_pet', {p_code:code, p_name:name})); },
+    async buyPetSlot(){ return ok(await sb.rpc('buy_pet_slot')); },
+    async carePet(id, kind){ return ok(await sb.rpc('care_pet', {p_id:id, p_kind:kind})); },
+    async petEvent(id, choice){ return ok(await sb.rpc('pet_event', {p_id:id, p_choice:choice})); },
+    async renamePet(id, name){ return ok(await sb.rpc('rename_pet', {p_id:id, p_name:name})); },
+    async getPetsOn(){ return ok(await sb.rpc('get_pets_on')); },
+    async getPetsOf(id){ return ok(await sb.rpc('get_pets_of', {p_discord_id:id})); },
+    myId(){ return myId; }
+  };
+})();
+
+const api = DEMO ? demoApi : supaApi;
+
+/* ---------- 앱 상태 ---------- */
+let ME = null, VILLAGE = [], SHOP = DEFAULT_SHOP, INV = {}, PLACED = [];
+let selected = null, rotated = 0, hover = null, busy = false;
+let curRoom = 0, inGarden = false, VISIT = null;
+let PET_DATA = { open: false, slots: 1, dex: [], pets: [] };
+let PETS_ON = {};
+
+async function refreshPets() {
+  try {
+    const [pData, onData] = await Promise.all([api.getPets(), api.getPetsOn()]);
+    PET_DATA = pData || { open: false, slots: 1, dex: [], pets: [] };
+    PETS_ON = {};
+    (onData || []).forEach(x => { PETS_ON[x.discord_id] = x; });
+  } catch(e) {
+    console.error('펫 정보 불러오기 오류:', e);
+  }
+}
+
+function renderPets() {
+  const box = document.getElementById('petBox'); if(!box) return;
+  if (!PET_DATA.open) {
+    box.innerHTML = `
+      <div style="text-align:center;padding:3rem 1rem;">
+        <span style="font-size:3.5rem;display:block;margin-bottom:.5rem">🐾</span>
+        <h3>동물 보호소가 아직 준비 중이에요</h3>
+        <p class="small">마을 광장에 <b>동물 보호소</b>가 완공되면 귀여운 펫 친구들을 입양하고 돌볼 수 있어요!</p>
+      </div>`;
+    return;
+  }
+
+  const { slots, dex, pets } = PET_DATA;
+  const nextSlotPrice = PET_SLOT_PRICE[slots] || null;
+
+  let myPetsHtml = '';
+  if (pets.length === 0) {
+    myPetsHtml = `<p class="empty" style="grid-column:1/-1">아직 입양한 펫이 없어요. 아래 도감에서 친구를 입양해 보세요!</p>`;
+  } else {
+    myPetsHtml = pets.map(p => {
+      const isEventReady = new Date(p.event_at) <= new Date();
+      return `
+        <div class="pet-card ${p.sad ? 'sad' : ''}">
+          <div class="pet-card-top">
+            <div class="pet-sprite-wrap">
+              ${petSpriteHTML(p.code, p.stage, 68, p.sad)}
+              <span class="pet-badge">${PET_STAGE_NAME[p.stage] || '아기'}</span>
+            </div>
+            <div class="pet-meta">
+              <h4 class="pname">
+                <span>${esc(p.name)}</span>
+                <button class="mini" data-pet-rename="${p.id}" style="padding:0 .3rem;font-size:.75rem">✏️</button>
+              </h4>
+              <div class="small">친밀도 Lv.${p.level} (${p.affection})</div>
+              ${p.sad ? `<div class="small" style="color:#B4513E">시무룩해요 (돌봐주면 기운을 차려요)</div>` : ''}
+            </div>
+          </div>
+          <div class="pet-actions">
+            <button data-care="${p.id}" data-kind="feed" ${p.fed >= 3 ? 'disabled' : ''}>🍚 밥 (${p.fed}/3)</button>
+            <button data-care="${p.id}" data-kind="pat" ${p.patted >= 5 ? 'disabled' : ''}>🖐️ 쓰다듬기 (${p.patted}/5)</button>
+            <button data-care="${p.id}" data-kind="play" ${p.played >= 2 ? 'disabled' : ''}>🎾 놀기 (${p.played}/2)</button>
+          </div>
+          <div class="pet-event-box">
+            <div class="small" style="font-weight:bold">🐾 4시간 산책</div>
+            ${isEventReady ? `
+              <div class="pet-event-btns">
+                <button data-walk="${p.id}" data-choice="0">🌿 수풀(씨앗)</button>
+                <button data-walk="${p.id}" data-choice="1">🌊 물가(별조각)</button>
+                <button data-walk="${p.id}" data-choice="2">🏘️ 마을(코인)</button>
+              </div>
+            ` : `
+              <div class="small" style="color:var(--muted);margin-top:.2rem">지금은 산책하고 쉬는 중이에요</div>
+            `}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // 도감 그리드
+  const dexHtml = PET_SPECIES.map(sp => {
+    const isOpened = dex.includes(sp.code);
+    const isAdopted = pets.some(p => p.code === sp.code);
+    const openPrice = PET_OPEN_PRICE[sp.tier];
+    const adoptPrice = PET_ADOPT_PRICE[sp.tier];
+
+    return `
+      <div class="pet-dex-cell ${isAdopted ? 'owned' : ''}">
+        ${petSpriteHTML(sp.code, 1, 48)}
+        <span class="rb ${sp.tier}">${PET_TIER_LABEL[sp.tier]}</span>
+        <b style="font-size:.88rem">${esc(sp.name)}</b>
+        ${!isOpened ? `
+          <button class="mini" data-pet-open="${sp.code}" ${ME.coins < openPrice ? 'disabled' : ''}>
+            칸 열기 🪙${openPrice}
+          </button>
+        ` : !isAdopted ? `
+          <button class="mini ask-yes" data-pet-adopt="${sp.code}" data-pname="${esc(sp.name)}" ${ME.coins < adoptPrice || pets.length >= slots ? 'disabled' : ''}>
+            입양 🪙${adoptPrice}
+          </button>
+        ` : `
+          <span class="small" style="color:var(--accent)">입양 완료 ✓</span>
+        `}
+      </div>`;
+  }).join('');
+
+  box.innerHTML = `
+    <div class="pet-head">
+      <h3 style="margin:0">🐾 내 펫 (${pets.length} / ${slots}마리)</h3>
+      ${nextSlotPrice && slots < 3 ? `
+        <button class="mini ask-yes" id="buySlotBtn" ${ME.coins < nextSlotPrice ? 'disabled' : ''}>
+          ＋ 키우는 칸 늘리기 (🪙 ${nextSlotPrice.toLocaleString()})
+        </button>
+      ` : ''}
+    </div>
+    <div class="pet-cards">${myPetsHtml}</div>
+    <hr class="sep">
+    <h3 style="margin:0 0 .6rem">📖 펫 도감</h3>
+    <div class="pet-dex-grid">${dexHtml}</div>
+  `;
+}
+
+/* 🐾 펫 인터랙션 이벤트 */
+document.addEventListener('click', async e => {
+  // 1) 펫 탭 전환
+  const pTab = e.target.closest('button[data-tab="pet"]');
+  if (pTab) {
+    await refreshPets();
+    renderPets();
+    return;
+  }
+
+  // 2) 도감 칸 열기
+  const op = e.target.closest('[data-pet-open]');
+  if (op) {
+    const code = op.dataset.pet_open;
+    const sp = PET_SPECIES.find(x => x.code === code);
+    if (!sp) return;
+    const price = PET_OPEN_PRICE[sp.tier];
+    if (!(await ask(`${sp.name} 도감 칸을 열까요? 🪙 ${price}코인이 들어요.`))) return;
+    try {
+      const coins = await api.openPetDex(code);
+      ME.coins = coins; renderTop();
+      await refreshPets(); renderPets();
+      toast(`📖 ${sp.name} 도감 칸이 열렸어요! 이제 입양할 수 있어요`);
+    } catch(err) { toast(err.message || '칸을 열지 못했어요'); }
+    return;
+  }
+
+  // 3) 입양하기
+  const ad = e.target.closest('[data-pet-adopt]');
+  if (ad) {
+    const code = ad.dataset.pet_adopt;
+    const defName = ad.dataset.pname;
+    const sp = PET_SPECIES.find(x => x.code === code);
+    if (!sp) return;
+    const price = PET_ADOPT_PRICE[sp.tier];
+    const petName = await askText(`새 가족이 될 ${sp.name}의 이름을 지어 주세요 (10자까지)`, defName);
+    if (petName == null) return;
+    try {
+      const coins = await api.adoptPet(code, petName);
+      ME.coins = coins; renderTop();
+      await refreshPets(); renderPets();
+      toast(`🎉 ${petName}을(를) 입양했어요! 정성껏 돌봐주세요`);
+    } catch(err) { toast(err.message || '입양하지 못했어요'); }
+    return;
+  }
+
+  // 4) 슬롯 확장
+  if (e.target.closest('#buySlotBtn')) {
+    const price = PET_SLOT_PRICE[PET_DATA.slots];
+    if (!(await ask(`펫을 키울 수 있는 칸을 늘릴까요? 🪙 ${price.toLocaleString()}코인이 들어요.`))) return;
+    try {
+      const coins = await api.buyPetSlot();
+      ME.coins = coins; renderTop();
+      await refreshPets(); renderPets();
+      toast('🐾 키우는 칸이 늘어났어요!');
+    } catch(err) { toast(err.message || '칸을 늘리지 못했어요'); }
+    return;
+  }
+
+  // 5) 돌보기 (밥/쓰다듬기/놀기)
+  const cr = e.target.closest('[data-care]');
+  if (cr) {
+    const petId = +cr.dataset.care;
+    const kind = cr.dataset.kind;
+    cr.disabled = true;
+    try {
+      const res = await api.carePet(petId, kind);
+      ME.coins = res.coins; renderTop();
+      await refreshPets(); renderPets();
+      if (res.stage_up) {
+        document.getElementById('partyMsg').textContent = `축하합니다!\n친밀도가 쌓여 펫이 [${PET_STAGE_NAME[res.stage]}] 단계로 자랐어요!`;
+        const d = document.getElementById('party');
+        document.getElementById('partyOk').onclick = () => d.close();
+        d.showModal();
+      } else if (res.level_up) {
+        toast(`친밀도 레벨 업! 보너스 🪙 ${res.reward}코인을 받았어요`);
+      } else {
+        toast('펫이 기뻐하고 있어요 ✨');
+      }
+    } catch(err) { toast(err.message || '돌보지 못했어요'); cr.disabled = false; }
+    return;
+  }
+
+  // 6) 산책 보내기
+  const wk = e.target.closest('[data-walk]');
+  if (wk) {
+    const petId = +wk.dataset.walk;
+    const choice = +wk.dataset.choice;
+    try {
+      const res = await api.petEvent(petId, choice);
+      ME.coins = res.coins; renderTop();
+      await refreshPets(); renderPets();
+      if (res.kind === 'coins') toast(`산책에서 돌아와 코인 🪙 ${res.amount}개를 물어왔어요!`);
+      else if (res.kind === 'seeds') toast(`산책에서 씨앗 🌰 ${res.amount}개를 물어왔어요!`);
+      else if (res.kind === 'stars') toast(`산책에서 별조각 ✨ ${res.amount}개를 물어왔어요!`);
+      else toast(`산책에서 소품을 물어와 가방에 챙겨뒀어요!`);
+    } catch(err) { toast(err.message || '산책을 가지 못했어요'); }
+    return;
+  }
+
+  // 7) 이름 바꾸기
+  const pr = e.target.closest('[data-pet-rename]');
+  if (pr) {
+    const petId = +pr.dataset.pet_rename;
+    const targetPet = PET_DATA.pets.find(x => x.id === petId);
+    if (!targetPet) return;
+    const newName = await askText('새 이름을 지어 주세요 (10자까지)', targetPet.name);
+    if (newName == null) return;
+    try {
+      await api.renamePet(petId, newName);
+      await refreshPets(); renderPets();
+      toast('이름을 바꿨어요');
+    } catch(err) { toast(err.message || '이름을 바꾸지 못했어요'); }
+    return;
+  }
+});
+
+/* 마을 렌더링에 집 앞 펫 반영 */
+function renderVillage(){
+  const lit = VILLAGE.filter(p=>p.in_voice && !p.removed).length;
+  document.getElementById('litCount').textContent = `🕯️ 불 켜진 집 ${lit}채`;
+  document.getElementById('houses').innerHTML = VILLAGE.map(p=>{
+    if(p.removed) return `<div class="house vacant"><div class="nm">빈 터</div><div class="st">새 이웃 자리</div></div>`;
+    const st = stageIdx(p.total_minutes), dc = p.decay||0, me = isMe(p);
+    const today = `<span class="t">오늘 ${fmt(p.today_minutes)}</span>`;
+    const status = p.in_voice ? `작업 중${today}` : dc ? decayLabel(dc, st) : `불 꺼짐${today}`;
+
+    // 집 옆 펫 표시
+    const petOn = PETS_ON[p.discord_id];
+    const petBadge = petOn ? `<span class="house-pet" title="${esc(petOn.name)} (${PET_STAGE_NAME[petOn.stage]||'아기'})">${petSpriteHTML(petOn.pet_code, petOn.stage, 36, petOn.sad)}</span>` : '';
+
+    return `<button class="house ${p.in_voice?'lit':''} ${me?'me':''}" data-visit="${esc(p.discord_id)}" aria-label="${esc(me?'내 집':p.display_name)} 구경하기">
+      <span class="hwrap">
+        ${houseSVG(st, p.in_voice, dc, p.house_color, me ? ME.house_style : null)}
+        ${petBadge}
+      </span>
+      <span class="nm">${me?'내 집':esc(p.display_name)}</span>
+      <span class="st">${status}</span>
+    </button>`;
+  }).join('');
+}
+
+/* 탭 전환 이벤트 */
+document.querySelector('.tabs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-tab]'); if(!b) return;
+  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x===b));
+  ['home','road','plaza','tree','lake','gacha','pet','admin'].forEach(t => {
+    const sec = document.getElementById('tab-' + t);
+    if(sec) sec.hidden = b.dataset.tab !== t;
+  });
+  if(b.dataset.tab === 'pet') { refreshPets().then(renderPets); }
+  if(b.dataset.tab === 'plaza') { refreshPlaza().then(renderPlaza); }
+  if(b.dataset.tab === 'gacha') { refreshGacha().then(renderGacha); }
+  if(b.dataset.tab === 'lake') { renderLake(); }
+  if(b.dataset.tab === 'tree') { renderTree(); }
+});
+
+/* 알림 / 모달 헬퍼 */
+let toastT;
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+function ask(msg){
+  return new Promise(res=>{
+    const d=document.getElementById('ask'); document.getElementById('askMsg').textContent=msg;
+    const done=v=>{ d.close(); res(v); };
+    document.getElementById('askYes').onclick=()=>done(true);
+    document.getElementById('askNo').onclick=()=>done(false);
+    d.showModal();
+  });
+}
+function askText(msg, value=''){
+  return new Promise(res=>{
+    const d=document.getElementById('textDlg'), inp=document.getElementById('textIn');
+    document.getElementById('textMsg').textContent=msg; inp.value=value;
+    const done=v=>{ d.close(); res(v); };
+    document.getElementById('textYes').onclick=()=>{ const v=inp.value.trim(); if(!v) return inp.focus(); done(v.slice(0,10)); };
+    document.getElementById('textNo').onclick=()=>done(null);
+    d.showModal(); inp.select();
+  });
+}
+function renderTop(){
+  document.getElementById('coin').textContent = `🪙 ${ME.coins}`;
+  document.getElementById('who').innerHTML = `<span>${esc(ME.display_name)}</span>`;
+}
+function show(id){ ['screenLogin','screenNotMember','app'].forEach(x=>document.getElementById(x).hidden = x!==id); }
+
+/* 집 구경 펫 연동 */
+async function openVisit(id){
+  const p = VILLAGE.find(x=>x.discord_id===id); if(!p) return;
+  const dlg = document.getElementById('visit'), st = stageIdx(p.total_minutes);
+  document.getElementById('visitTitle').textContent = `${p.display_name}님의 집`;
+  document.getElementById('visitSub').textContent = p.in_voice ? '작업 채널에 접속 중이에요.' : '자리를 비운 상태예요.';
+  
+  // 이웃 펫 표시
+  try {
+    const neighborPets = await api.getPetsOf(id);
+    const petsLine = (neighborPets || []).map(np => `${esc(np.name)} (Lv.${np.level} ${PET_STAGE_NAME[np.stage]||'아기'})`).join(', ');
+    document.getElementById('visitPets').textContent = petsLine ? `🐾 함께 사는 펫: ${petsLine}` : '';
+  } catch(e) {
+    document.getElementById('visitPets').textContent = '';
+  }
+  dlg.showModal();
+}
+document.getElementById('visitClose').onclick = () => document.getElementById('visit').close();
+
+/* 초기 실행 */
+async function start(){
+  document.getElementById('loginBtn').onclick = () => api.login();
+  document.getElementById('logoutBtn').onclick = () => api.logout();
+  try{ const res = await api.init(); if(res.status==='login') return show('screenLogin'); if(res.status==='notmember') return show('screenNotMember'); }
+  catch(e){ show('screenLogin'); return; }
+  show('app');
+  ME = await api.me();
+  VILLAGE = await api.village();
+  await refreshPets();
+  renderTop();
+  renderVillage();
+}
+start();
+</script>
+</body>
+</html>
