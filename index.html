@@ -2693,17 +2693,31 @@ const FLOWER_GIFTS = [
 ];
 let FLOWERS_ON = {}, giftKind = 'bouquet';
 async function refreshFlowersOn(){ try{ const r = (await api.flowersOn()) || []; FLOWERS_ON = {}; r.forEach(x=>{ FLOWERS_ON[x.discord_id] = x; }); }catch(e){ FLOWERS_ON = {}; } }
-// 집 앞 꽃밭 (집 그림과 같은 0 0 120 96 칸 위에 겹쳐 그려요)
-const YARD_SLOTS = [[14,97],[106,97],[-2,94],[122,94],[30,99],[90,99],[4,101],[116,101],[44,101],[76,101],[22,92],[98,92]];   // 집 앞 자리 (가운데 문 앞은 비워요)
+// 집 앞 꽃바구니 (집 그림과 같은 0 0 120 96 칸 위에 겹쳐 그려요) — 펫은 왼쪽, 바구니는 오른쪽
+const YARD_HEAP = [[96,84.5],[101.5,85],[107,85],[112,84.5],[98.5,81],[104,80.5],[109.5,81],[101,75.5],[107,75.5],[104,70.5]];   // 아래 줄부터 차곡차곡
 const YARD_COL = [['#F0A8BC','#E58FA8'],['#F6D56A','#E6B84A'],['#FFFFFF','#E9E3D8'],['#B4A2DC','#9180BD'],['#F0A04B','#D9692E'],['#8DB8E0','#6A97C2']];
+const YARD_R = {small:2.7, bouquet:3.4, basket:4.1};
+function yardBloom(x, y, r, k, kind){
+  const [p, q] = YARD_COL[k % YARD_COL.length];
+  let s = kind!=='small' ? `<ellipse cx="${x-r*.9}" cy="${y+r*.5}" rx="${r*.75}" ry="${r*.35}" fill="#5E8F5A" transform="rotate(-30 ${x-r*.9} ${y+r*.5})"/><ellipse cx="${x+r*.9}" cy="${y+r*.5}" rx="${r*.75}" ry="${r*.35}" fill="#6FA86A" transform="rotate(30 ${x+r*.9} ${y+r*.5})"/>` : '';
+  for(let i=0;i<5;i++){ const a = (i*72-90)*Math.PI/180; s += `<circle cx="${(x+Math.cos(a)*r*.62).toFixed(1)}" cy="${(y+Math.sin(a)*r*.62).toFixed(1)}" r="${(r*.55).toFixed(1)}" fill="${p}" stroke="${q}" stroke-width=".4"/>`; }
+  return s + `<circle cx="${x}" cy="${y}" r="${(r*.36).toFixed(1)}" fill="${kind==='basket'?'#E58FA8':'#F2CC55'}"/>`;
+}
 function flowerYard(f){
   if(!f) return '';
   const items = []; for(let i=0;i<(f.basket||0);i++) items.push('basket'); for(let i=0;i<(f.bouquet||0);i++) items.push('bouquet'); for(let i=0;i<(f.small||0);i++) items.push('small');
   if(!items.length) return '';
-  let g = ''; items.slice(0, YARD_SLOTS.length).forEach((t,i)=>{ const [x,y] = YARD_SLOTS[i];
-    g += giftAt(t, x, y, i); });
-  const n = (f.small||0)+(f.bouquet||0)+(f.basket||0);
-  return `<svg class="yard" viewBox="0 0 120 96" aria-hidden="true">${g}${n>YARD_SLOTS.length?`<text x="60" y="80" font-size="9" text-anchor="middle" fill="#FFF3C4">+${n-YARD_SLOTS.length}</text>`:''}</svg>`;
+  const shown = items.slice(0, YARD_HEAP.length), more = items.length - shown.length;
+  // 손잡이 → 꽃 (위 줄부터 그려서 아래 줄이 앞에 와요) → 바구니 앞면
+  let g = `<path d="M93.5 88 C93 66 115 66 114.5 88" stroke="#A9784B" stroke-width="2.2" fill="none"/><path d="M93.5 88 C93 66 115 66 114.5 88" stroke="#C99A66" stroke-width=".8" fill="none" stroke-dasharray="1.6 1.6"/>`;
+  g += `<ellipse cx="104" cy="88" rx="11" ry="2.6" fill="#7A5235"/>`;
+  shown.map((t,i)=>({t,i})).reverse().forEach(({t,i})=>{ const [x,y] = YARD_HEAP[i]; g += yardBloom(x, y, YARD_R[t], i, t); });
+  g += `<path d="M92.5 87.6 H115.5 L113 98 Q104 99.6 95 98 Z" fill="#C99A66" stroke="#8A6142" stroke-width=".8" stroke-linejoin="round"/>`
+     + `<path d="M93.4 91 Q104 92.4 114.6 91 M94.2 94.4 Q104 95.8 113.8 94.4" stroke="#A9784B" stroke-width=".8" fill="none"/>`
+     + [97,101,105,109,113].map(x=>`<path d="M${x} 88.4 L${x-(x-104)*.12} 98" stroke="#A9784B" stroke-width=".6"/>`).join('')
+     + `<rect x="91.6" y="86.6" width="24.8" height="2.6" rx="1.3" fill="#B8875A" stroke="#8A6142" stroke-width=".6"/>`;
+  if(more > 0) g += `<g transform="translate(117 72)"><rect x="-6" y="-5" width="12" height="9" rx="4.5" fill="#FFF3C4" stroke="#E6B84A" stroke-width=".6"/><text x="0" y="1.8" font-size="6" text-anchor="middle" fill="#7A5235" font-family="Jua,sans-serif">+${more}</text></g>`;
+  return `<svg class="yard" viewBox="0 0 120 96" aria-hidden="true"><g transform="translate(103 98) scale(1.4) translate(-104 -98)">${g}</g></svg>`;
 }
 const flowerCount = f => f ? (f.small||0)+(f.bouquet||0)+(f.basket||0) : 0;
 
