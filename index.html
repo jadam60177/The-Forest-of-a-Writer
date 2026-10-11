@@ -1445,7 +1445,7 @@ async function refreshHouseLooks(){ try{ const r = (await api.houseLooks()) || [
 // 보이는 단계: 고른 겉모습이 있으면 그것 (실제 단계보다 낮을 때만)
 const lookStage = (id, real) => { const l = HOUSE_LOOK_OF[id]; return (l!=null && l < real) ? l : real; };
 // 예전 단계 모습을 고르면 그 단계의 원래(기본) 집으로 보여요. 스타일은 지금 단계 집에만 입혀져요
-const lookStyle = (id, real, style) => lookStage(id, real) < real ? null : style;
+const lookStyle = (id, real, style) => style;   // 예전 모습을 골라도 스타일은 그대로 (통나무집부터 보여요)
 const meId = () => DEMO ? 'me' : supaApi.myId();
 async function refreshHouseStyles(){ try{ const r = (await api.houseStyles()) || []; HOUSE_STYLE_OF = {}; r.forEach(x=>{ HOUSE_STYLE_OF[x.discord_id] = x.house_style; }); }catch(e){ HOUSE_STYLE_OF = {}; } }
 // 기본 집 10단계 (120×96, 땅은 y=90) — c = {M, D, W, win}
@@ -2417,7 +2417,7 @@ function renderDeco(){
   ].join('');
   el.innerHTML = `
     <div class="deco-stage">
-      <div class="deco-house">${houseSVG(shown, true, 0, pv.color, pv.look==null ? pv.style : null)}</div>
+      <div class="deco-house">${houseSVG(shown, true, 0, pv.color, pv.style)}</div>
       <div class="deco-tag">${colorChanged||styleChanged||lookChanged ? '👀 미리보기 중' : '지금 우리 집'}</div>
     </div>
     <div class="deco-side">
@@ -2428,7 +2428,7 @@ function renderDeco(){
         <span class="small">${pc ? esc(pc.name) : ''}${pv.color===now.color?' · 지금 색':''}</span></div>
       <div class="deco-row"><span class="paint-label">🏠 스타일</span>
         ${opts.map(([k,e,n])=>`<button class="hs-btn ${k===pv.style?'on':''} ${owned.has(k)?'':'locked'}" data-pv-style="${k}" title="${k==='basic'?'기본 모양':esc(HOUSE_STYLES[k].about)}">${e} ${n}${owned.has(k)?'':` · 🪙 ${STYLE_PRICE}`}</button>`).join('')}
-        ${pv.look!=null ? `<span class="small" style="display:block;width:100%">예전 집 모습일 땐 그 단계의 원래 집으로 보여요. 스타일은 지금 집에 입혀져요.</span>` : shown < HOUSE_STYLE_FROM ? `<span class="small" style="display:block;width:100%">스타일은 ${STAGES[HOUSE_STYLE_FROM].name}부터 모양이 달라져요.</span>` : ''}</div>
+              ${shown < HOUSE_STYLE_FROM ? `<span class="small" style="display:block;width:100%">스타일은 ${STAGES[HOUSE_STYLE_FROM].name}부터 모양이 달라져요.</span>` : ''}</div>
       <div class="deco-row"><span class="paint-label">🏚️ 모습</span>
         <span class="small">${pv.look==null ? `지금 집 (${STAGES[stg].name})` : `${STAGES[pv.look].name} 모습 · 방 크기와 화단은 지금 집 그대로`}</span>
         ${pv.look!=null ? `<button class="mini" data-pv-look="now">지금 집으로</button>` : ''}
@@ -3795,7 +3795,7 @@ function renderRoad(){
         <div class="small">어떤 집일까요?</div>
       </li>`
     : `<li class="${k===i?'now':''} ${DECO_PV && (DECO_PV.look==null ? k===i : DECO_PV.look===k) ? 'pv' : ''}" data-pv-look="${k===i?'now':k}" title="이 모습으로 미리 보기">
-      ${houseSVG(k, true, 0, ME.house_color, k===i ? ME.house_style : null)}
+      ${houseSVG(k, true, 0, ME.house_color, ME.house_style)}
       ${(HOUSE_LOOK_OF[meId()] ?? null)===k ? `<div class="look-badge">👀 마을에 보이는 모습</div>` : ''}
       <div class="step">${k+1}단계 · 누적 ${s.h}시간</div>
       <div class="nm">${s.name}</div>
