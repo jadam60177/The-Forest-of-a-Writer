@@ -1627,6 +1627,24 @@ const STYLE_ANNEX = {
       + `<path d="M8 90 l3 -36 l3 36Z" fill="#E6D8B8"/><path d="M11 54 l-1.6 -4 h3.2Z" fill="#E6B84A"/>`,
   ],
 };
+  // 🏠 집 크기 맞추기: 그림마다 크기가 제각각이라, 단계별 크기에 맞춰 줄이거나 늘려요 (땅 위치·가운데는 그대로)
+const HOUSE_FIT = [58,62,66,70,74,78,82,86,92,100];   // 단계별 집 크기 (움막 → 성으로 갈수록 커져요)
+const FIT_CACHE = {}; let FIT_SVG = null;
+function fitHouse(g, stage, key){
+  let bb = FIT_CACHE[key];
+  if(!bb){
+    try{
+      if(!FIT_SVG){ FIT_SVG = document.createElementNS('http://www.w3.org/2000/svg','svg'); FIT_SVG.setAttribute('aria-hidden','true');
+        FIT_SVG.style.cssText = 'position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none'; document.body.appendChild(FIT_SVG); }
+      FIT_SVG.innerHTML = g; const b = FIT_SVG.getBBox(); FIT_SVG.innerHTML = '';
+      bb = FIT_CACHE[key] = {x:b.x, y:b.y, w:b.width, h:b.height};
+    }catch(e){ return g; }
+  }
+  if(!bb.w || !bb.h) return g;
+  const k = Math.min(HOUSE_FIT[stage] / Math.sqrt(bb.w*bb.h), 118/bb.w, 92/bb.h);
+  const tx = 60 - (bb.x + bb.w/2)*k, ty = 94 - (bb.y + bb.h)*k;
+  return `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${k.toFixed(3)})">${g}</g>`;
+}
 function houseSVG(stage, lit, decay=0, color=null, style=null){
   const P = (color==null || color<0) ? null : PALETTE[color % PALETTE.length];
   const M = o => P ? P.main : o, D = o => P ? P.dark : o;
@@ -1640,6 +1658,7 @@ function houseSVG(stage, lit, decay=0, color=null, style=null){
     g = STYLE_ANNEX[style][STYLE_UPGRADE[stage]]({M, D, W, win}) + `<g transform="translate(${tx} ${ty}) scale(${sc})">${g}</g>`;
   }
   if(!styled) g = BASIC_HOUSES[Math.min(Math.max(stage,0), BASIC_HOUSES.length-1)]({M, D, W, win});   // 기본 집 그림
+    g = fitHouse(g, stage, (styled ? style : 'basic') + stage);   // 단계별 크기 맞추기
   const sturdy = stage >= STURDY;
   const label = `${STAGES[stage].name}${lit?' (불 켜짐)':''}${decay?' · '+decayLabel(decay, stage):''}`;
   // 집이 날아간 상태 (벽돌집 미만)
