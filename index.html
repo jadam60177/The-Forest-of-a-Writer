@@ -1177,7 +1177,8 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
           <button class="shop-tab" data-shoptab="furniture" role="tab">🪑 가구 <span id="cntF"></span></button>
           <button class="shop-tab" data-shoptab="wall" role="tab">🪟 창문·벽 <span id="cntW"></span></button>
           <button class="shop-tab" data-shoptab="rug" role="tab">🧶 러그 <span id="cntR"></span></button>
-          <button class="shop-tab" data-shoptab="accessory" role="tab">✨ 기타 <span id="cntA"></span></button>
+          <button class="shop-tab" data-shoptab="etc" role="tab">📦 기타 <span id="cntE"></span></button>
+          <button class="shop-tab" data-shoptab="accessory" role="tab">✨ 소품 <span id="cntA"></span></button>
         </div>
         <div class="items" id="shop"></div>
       </details>
@@ -4832,13 +4833,14 @@ function renderBag(){
   const regular = SHOP.filter(x=>!x.limited_until), lim = SHOP.filter(x=>x.limited_until && isLive(x));
   document.getElementById('shopCount').textContent = `${regular.length+lim.length}개`;
   const cabs = regular.filter(x=>CAPACITY[x.code]).sort((a,b)=>a.price-b.price);   // 진열장은 소품 탭 맨 위에
-  // 상점 칸 나누기 (10-12): 가구 / 창문·벽 / 러그 / 기타(소품 · 진열장은 기타 맨 위)
+  // 상점 칸 나누기 (10-12): 가구 / 창문·벽 / 러그 / 기타 / 소품 (진열장은 소품 맨 위)
   const isRug = x => layerOf(x.code)==='floor', isWall = x => /^wall_/.test(x.code) || SHOP_WALL.has(x.code);
   const bigs = regular.filter(x=>catOf(x)==='furniture' && !CAPACITY[x.code]);
-  const rugs = bigs.filter(isRug), walls = bigs.filter(x=>!isRug(x) && isWall(x)), furn = bigs.filter(x=>!isRug(x) && !isWall(x));
+  const isEtc = x => SHOP_ETC.has(x.code) || SHOP_ETC.has(x.icon||'');
+  const rugs = bigs.filter(isRug), walls = bigs.filter(x=>!isRug(x) && isWall(x)), etcs = bigs.filter(x=>!isRug(x) && !isWall(x) && isEtc(x)), furn = bigs.filter(x=>!isRug(x) && !isWall(x) && !isEtc(x));
   const accs = [...cabs, ...regular.filter(x=>catOf(x)==='accessory' && !CAPACITY[x.code])];
   document.getElementById('cntF').textContent = furn.length; document.getElementById('cntA').textContent = accs.length;
-  document.getElementById('cntW').textContent = walls.length; document.getElementById('cntR').textContent = rugs.length;
+  document.getElementById('cntW').textContent = walls.length; document.getElementById('cntR').textContent = rugs.length; document.getElementById('cntE').textContent = etcs.length;
   const lt = document.getElementById('limTab');
   lt.hidden = !lim.length;
   if(lim.length) lt.innerHTML = `${esc(lim[0].season || '⏰ 한정')} <span>${lim.length}</span>`;
@@ -4851,12 +4853,14 @@ function renderBag(){
     const dateTxt = `${last.toLocaleDateString('ko-KR',{month:'long', day:'numeric', timeZone:'Asia/Seoul'})}까지`;
     limNote = `<p class="lim-note">${esc(lim[0].season||'')} 한정 · ⏰ ${dateTxt} · ${dday<=1?'오늘 마감!':'D-'+(dday-1)}<br><span>기간이 끝나면 상점에서 사라져요. 산 건 계속 갖고 있어요.</span></p>`;
   }
-  document.getElementById('shop').innerHTML = limNote + (shopTab==='limited'?lim:shopTab==='accessory'?accs:shopTab==='wall'?walls:shopTab==='rug'?rugs:furn).map(s=>{ const own = ownedCount(s.code); return ''+
+  document.getElementById('shop').innerHTML = limNote + (shopTab==='limited'?lim:shopTab==='accessory'?accs:shopTab==='wall'?walls:shopTab==='rug'?rugs:shopTab==='etc'?etcs:furn).map(s=>{ const own = ownedCount(s.code); return ''+
     `<button class="item ${own?'owned':''}" data-buy="${esc(s.code)}" ${ME.coins<s.price?'disabled':''}>${own?`<span class="own" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${own}</span>`:''}<span class="em">${ico(s)}</span><span class="t">${esc(s.name)} · ${sizeText(s)}</span><span class="p">🪙 ${s.price}</span></button>`; }
   ).join('');
 }
 
 const SHOP_WALL = new Set(['window','screen']);   // 창문·벽 칸에 같이 보일 가구
+// 기타 칸: 가구로 분류돼 있지만 큰 가구는 아닌 것들 (나무·동물 집·놀이기구·광장 물건 등)
+const SHOP_ETC = new Set(['tree','monstera','telescope','camptent','fountain','carousel','cattower','aquarium','hammock','postbox','campfire','xmastree','cauldron','gramophone','plotboard']);
 function renderRoad(){
   renderDeco();
   const i = stageIdx(ME.total_minutes);
