@@ -911,6 +911,13 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .lot.building .b .ghost img.pimg{filter:grayscale(.6) brightness(.9)}
 .lot.building .b .ghost{opacity:.5;display:block;border:0;background:none;box-shadow:none;padding:0;border-radius:0}
 @media (max-width:560px){.lot .b img.pimg{height:78px}}
+/* ===== 세계수 물방울 (10-12) — 마을 하늘 → 세계수 둘레 ===== */
+#tab-tree{position:relative}
+#floatDrops{--sh:max(240px,min(56vw,480px));position:absolute;left:0;right:0;top:0;bottom:auto;inset:0 0 auto 0;height:var(--sh);z-index:3;pointer-events:none}
+.fdrop{width:46px;height:56px;filter:drop-shadow(0 0 6px rgba(159,240,232,.55))}
+.fdrop img{width:100%;height:100%;object-fit:contain;display:block}
+@media (max-width:600px){.fdrop{width:36px;height:44px}}
+.drop-badge{margin-left:.3rem;font-size:.78em;padding:.05rem .4rem;border-radius:99px;background:rgba(127,224,208,.22);border:1px solid rgba(127,224,208,.55)}
 /* ===== 접기 (10-12) — 마을·가방 ===== */
 .village-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
 .village-head .fold-btn{margin-left:auto;white-space:nowrap}
@@ -977,7 +984,6 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
   <svg class="pines" id="pines" viewBox="0 0 2600 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
   <div class="houses" id="houses"></div>
   <div class="fireflies" id="fireflies" aria-hidden="true"></div>
-  <div id="floatDrops"></div>
   <div class="trail">
     <div class="wolf">
       <div class="bubble" id="bubble">다음주까지 송부 가능하실까요?</div>
@@ -1063,6 +1069,7 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
   </section>
 
   <section id="tab-tree" hidden>
+    <div id="floatDrops"></div>
     <div id="treeBox"></div>
   </section>
 
@@ -3108,11 +3115,19 @@ function yardBloom(x, y, r, k, kind){
   for(let i=0;i<5;i++){ const a = (i*72-90)*Math.PI/180; s += `<circle cx="${(x+Math.cos(a)*r*.62).toFixed(1)}" cy="${(y+Math.sin(a)*r*.62).toFixed(1)}" r="${(r*.55).toFixed(1)}" fill="${p}" stroke="${q}" stroke-width=".4"/>`; }
   return s + `<circle cx="${x}" cy="${y}" r="${(r*.36).toFixed(1)}" fill="${kind==='basket'?'#E58FA8':'#F2CC55'}"/>`;
 }
+const BASKET_IMG = true;   // false 로 바꾸면 예전 코드 그림
 function flowerYard(f){
   if(!f) return '';
   const items = []; for(let i=0;i<(f.basket||0);i++) items.push('basket'); for(let i=0;i<(f.bouquet||0);i++) items.push('bouquet'); for(let i=0;i<(f.small||0);i++) items.push('small');
   if(!items.length) return '';
   const shown = items.slice(0, YARD_HEAP.length), more = items.length - shown.length;
+  // 제미나이 꽃바구니 그림 6단계 (1·2·3·4~5·6~8·9송이 이상)
+  const n = items.length, tier = n<=3 ? n : n<=5 ? 4 : n<=8 ? 5 : 6;
+  if(BASKET_IMG){
+    let g = `<image href="garden/basket${tier}.webp" x="89" y="65.5" width="29" height="34" preserveAspectRatio="xMidYMax meet"/>`;
+    if(more > 0) g += `<g transform="translate(117 68)"><rect x="-6" y="-5" width="12" height="9" rx="4.5" fill="#FFF3C4" stroke="#E6B84A" stroke-width=".6"/><text x="0" y="1.8" font-size="6" text-anchor="middle" fill="#7A5235" font-family="Jua,sans-serif">+${more}</text></g>`;
+    return `<svg class="yard" viewBox="0 0 120 96" aria-hidden="true" style="overflow:visible">${g}</svg>`;
+  }
   // 손잡이 → 꽃 (위 줄부터 그려서 아래 줄이 앞에 와요) → 바구니 앞면
   let g = `<path d="M93.5 88 C93 66 115 66 114.5 88" stroke="#A9784B" stroke-width="2.2" fill="none"/><path d="M93.5 88 C93 66 115 66 114.5 88" stroke="#C99A66" stroke-width=".8" fill="none" stroke-dasharray="1.6 1.6"/>`;
   g += `<ellipse cx="104" cy="88" rx="11" ry="2.6" fill="#7A5235"/>`;
@@ -3357,12 +3372,12 @@ function renderTree(){
     <div class="panel tree-help">
       <h3 style="margin:0 0 .3rem">💧 물방울 모으는 법</h3>
       <p class="small" style="margin:0 0 .3rem">🎧 작업실에 ${TREE_WORK_MIN}분 있을 때마다 주머니에 1방울씩 저절로 모여요.</p>
-      <p class="small" style="margin:0 0 .3rem">✨ 숲 마을 하늘에 1시간마다 물방울이 2~5개 떠올라요. 누르면 물방울 1개와 🪙 ${TREE_DROP_COIN}코인! 안 주우면 ${TREE_FLOAT_MAX}개까지 기다려 줘요. (하루 ${TREE_FLOAT_DAY}개까지 · 오늘 ${TREE.float_today}개 주웠어요)</p>
+      <p class="small" style="margin:0 0 .3rem">✨ 세계수 둘레에 1시간마다 물방울이 2~5개 떠올라요. 누르면 물방울 1개와 🪙 ${TREE_DROP_COIN}코인! 안 주우면 ${TREE_FLOAT_MAX}개까지 기다려 줘요. (하루 ${TREE_FLOAT_DAY}개까지 · 오늘 ${TREE.float_today}개 주웠어요)</p>
       <p class="small" style="margin:0">🌳 다 같이 물을 부어 세계수가 다 자라면, 그 나무에 한 방울이라도 준 주민 모두에게 🪙 ${TREE.reward}코인이 도착해요. 그리고 새 씨앗이 심겨요.</p>
     </div>`;
   if(box._html !== html){ box.innerHTML = html; box._html = html; }
 }
-// 숲 마을 하늘에 떠다니는 물방울
+// 세계수 둘레에 떠다니는 물방울
 function renderFloatDrops(){
   const el = document.getElementById('floatDrops'); if(!el) return;
   const n = TREE && TREE.float_today < TREE_FLOAT_DAY ? Math.min(TREE.float_wait||0, TREE_FLOAT_DAY - TREE.float_today) : 0;
@@ -3371,14 +3386,16 @@ function renderFloatDrops(){
   for(let i=have;i<n;i++){
     const b = document.createElement('button');
     b.className = 'fdrop'; b.title = '물방울 줍기'; b.setAttribute('aria-label','물방울 줍기');
-    // 글씨·현수막 아래, 집 위의 하늘에만 떠요
-    const v = el.parentElement.getBoundingClientRect(), hd = el.parentElement.querySelector('.village-head').getBoundingClientRect(),
-          hs = document.getElementById('houses').getBoundingClientRect();
-    const y0 = hd.bottom - v.top + 14, y1 = Math.max(y0 + 10, hs.top - v.top - 44);
-    b.style.left = (6 + Math.random()*84) + '%'; b.style.top = (y0 + Math.random()*(y1-y0)) + 'px';
+    // 세계수 둘레에 떠요 (그림 높이 --sh 기준: 나무 가운데에서 위·옆으로 둥글게)
+    const ang = (-200 + Math.random()*220) * Math.PI/180, r = .30 + Math.random()*.16;
+    b.style.left = `calc(50% + var(--sh) * ${(Math.cos(ang)*r*1.15).toFixed(3)} - 23px)`;
+    b.style.top = `max(4px, calc(var(--sh) * ${(.47 + Math.sin(ang)*r*.95).toFixed(3)} - 28px))`;
     b.style.animationDelay = (Math.random()*3).toFixed(2) + 's';
-    b.innerHTML = DROP_SVG; el.appendChild(b);
+    b.innerHTML = `<img src="bg/drop.webp" alt="" draggable="false">`; el.appendChild(b);
   }
+  const tb = document.querySelector('[data-tab="tree"]');   // 세계수 탭에 기다리는 물방울 수
+  if(tb){ let bd = tb.querySelector('.drop-badge'); if(!bd){ bd = document.createElement('span'); bd.className = 'drop-badge'; tb.appendChild(bd); }
+    bd.textContent = n ? `💧${n}` : ''; bd.hidden = !n; }
 }
 document.addEventListener('click', async e=>{
   const d = e.target.closest('.fdrop');
