@@ -1119,6 +1119,11 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 @media (prefers-reduced-motion:reduce){.vtruck .vfox{animation:none}}
 /* ===== 🐟 흔함·귀함 물고기 그림 (10-13) ===== */
 .zoom-art img.zfish{display:block;width:100%;max-width:420px;height:auto;max-height:46vh;object-fit:contain;margin:0 auto;filter:drop-shadow(0 4px 6px rgba(10,20,40,.35))}
+/* ===== 🌸 활짝 핀 꽃 그림 (10-13) ===== */
+.plot img.gstage.bloomimg{max-width:116px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))}
+.plot.bloom.secret img.gstage.bloomimg{filter:drop-shadow(0 0 10px rgba(200,180,255,.55)) drop-shadow(0 3px 4px rgba(0,0,0,.35))}
+.gdx img.gdximg{width:46px;height:46px;object-fit:cover;object-position:50% 0;transform:scale(1.55);transform-origin:50% 12%}
+.zoom-art img.zbloom{display:block;width:100%;max-width:300px;height:auto;margin:0 auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))}
 </style>
 </head>
 <body>
@@ -3405,6 +3410,10 @@ const flowerArt = f => G_FLOWER[f.code] || gGeneric(f.hint);
 const PLOT_VB = '8 4 80 88';   // 화단에서는 꽃을 조금 크게
 const STAGE_NAME = {seed:'씨앗', sprout:'새싹', bud:'꽃봉오리'};
 const GARDEN_STAGE_IMG = {seed:'garden/seed.webp', sprout:'garden/sprout.webp', bud:'garden/bud.webp'};
+// 🌸 활짝 핀 꽃 그림 (10-13, garden/bloom_코드.webp) — 여기 없는 꽃은 예전 코드 그림
+const BLOOM_IMG = new Set(['starflower','orchid','endflower','nightrose','moonlily','babysbreath','cornflower','carnation','camellia','daffodil',
+  'lilyvalley','peony','lavender','hydrangea','forsythia','pasque','pinks','mossrose','morningglory','marigold','cosmos','forgetmenot','violet','daisy','dandelion']);   // 25종 전부
+const bloomSrc = code => BLOOM_IMG.has(code) ? `garden/bloom_${code}.webp` : null;
 
 function plotHTML(p, k, editable){
   if(!p) return editable
@@ -3412,7 +3421,7 @@ function plotHTML(p, k, editable){
     : `<div class="plot empty"><span class="pl">빈 화단</span></div>`;
   if(p.stage==='bloom'){
     const f = flowerOf(p.flower), t = GTIER[p.tier||f.tier] || GTIER.wild;
-    return `<div class="plot bloom ${p.tier==='secret'?'secret':''}">${gSvg(flowerArt(f), PLOT_VB)}<span class="pl"><b>${esc(f.name)}</b><br>${t.name}${editable?` · 🪙 ${t.reward}`:''}</span>`
+    return `<div class="plot bloom ${p.tier==='secret'?'secret':''}">${bloomSrc(f.code) ? `<img class="gstage bloomimg" src="${bloomSrc(f.code)}" alt="" draggable="false" loading="lazy">` : gSvg(flowerArt(f), PLOT_VB)}<span class="pl"><b>${esc(f.name)}</b><br>${t.name}${editable?` · 🪙 ${t.reward}`:''}</span>`
       + (editable ? `<button class="mini" data-harvest="${k}">수확하기</button>` : '') + `</div>`;
   }
   const stg = GARDEN_STAGE_IMG[p.stage] ? p.stage : 'seed';   // 씨앗·새싹·꽃봉오리 그림 (garden 폴더)
@@ -3434,7 +3443,7 @@ function gardenDexHTML(){
   const have = list.filter(f=>f.have).length;
   return `<h4 class="gdex-title">🌼 꽃 도감 <span class="small">${have} / ${list.length}</span></h4><div class="gdex">`
     + list.map(f=> f.have
-      ? `<button class="gdx ${f.tier} zoomable" data-gzoom="${esc(f.code)}" title="${esc(f.name)} · 크게 보기">${gSvg(flowerArt(f),'14 4 68 68')}</button>`
+      ? `<button class="gdx ${f.tier} zoomable" data-gzoom="${esc(f.code)}" title="${esc(f.name)} · 크게 보기">${bloomSrc(f.code) ? `<img class="gdximg" src="${bloomSrc(f.code)}" alt="" draggable="false" loading="lazy">` : gSvg(flowerArt(f),'14 4 68 68')}</button>`
       : `<span class="gdx unknown" title="아직 못 본 꽃이에요${f.season?` (${esc(f.season)})`:''}">?</span>`).join('') + `</div>`;
 }
 function renderGarden(){
@@ -4161,7 +4170,7 @@ function openZoom(kind, code){
   } else {
     const f = flowerOf(code), t = GTIER[f.tier] || GTIER.wild;
     art.className = 'zoom-art flower ' + f.tier;
-    art.innerHTML = `<svg viewBox="4 0 88 92" aria-hidden="true">${flowerArt(f)}</svg>`;
+    art.innerHTML = bloomSrc(f.code) ? `<img class="zbloom" src="${bloomSrc(f.code)}" alt="">` : `<svg viewBox="4 0 88 92" aria-hidden="true">${flowerArt(f)}</svg>`;
     name = f.name; badge = `<span class="rb ${f.tier==='secret'?'legend':f.tier==='garden'?'rare':'common'}">${t.name}</span>`;
     meta = `지금까지 ${f.harvested||1}번 수확했어요`;
   }
@@ -5780,6 +5789,6 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ③</p>
 </body>
 </html>
