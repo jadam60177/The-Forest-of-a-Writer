@@ -1189,6 +1189,10 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 .ml-empty{text-align:center;color:var(--muted);padding:1.5rem 0}
 .ml-foot{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.7rem;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){.mail-btn.ring{animation:none}}
+/* ===== 🚪 세로로 긴 그림 가구 키 맞추기 (10-13) — 옷장이 2칸인데 1칸만큼 작게 보이던 것 ===== */
+.furn.tallfit{overflow:visible}
+.furn.tallfit > img.fimg.fsvg{left:50%;width:auto;max-width:150%;transform:translateX(-50%)}
+.furn.tallfit.r2 > img.fimg.fsvg,.furn.tallfit.r3 > img.fimg.fsvg{transform:translateX(-50%) scaleX(-1)}
 </style>
 </head>
 <body>
@@ -3331,7 +3335,9 @@ function roomHTML(list, cur, {editable, cabs={}}){
     const turn = !stretch && !wallH && rot%2 && !!fimg(it);   // 그림 칸막이는 그림째 눕혀요
     if(hKey) rot = 0;
     const rs = rot%2 ? `;--rw:calc(${f.w}*var(--tile) + ${f.w-1}*3px - 4px);--rh:calc(${f.h}*var(--tile) + ${f.h-1}*3px - 4px)` : '';
-    const cls = `furn ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${rot?'rot r'+rot:''}`;
+    // 세로로 긴 그림 가구(1×2 등)는 키를 칸에 꽉 맞추고, 그림이 통통하면 옆으로 조금 삐져나와요 (10-13 옷장 제보)
+    const tallfit = !!fimg(it) && f.h>f.w && !stretch && !turn && !wallH && !tile && !floor && !TURN_IMG.has(f.item_code);
+    const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${rot?'rot r'+rot:''}`;
     const art = wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
     html += editable
@@ -5991,6 +5997,6 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑥</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑦</p>
 </body>
 </html>
