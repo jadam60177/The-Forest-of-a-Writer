@@ -4707,7 +4707,7 @@ document.addEventListener('click', e=>{
 
 function wolfCheer(code){
   try{ localStorage.setItem('majam-wolf-happy', JSON.stringify({code, until: Date.now()+3600e3})); }catch(e){}
-  const b = document.getElementById('bubble'); if(b) b.textContent = (WOLF_HAPPY[code]||['고맙습니다.'])[0];
+  const b = document.getElementById('bubble'); if(b){ b.textContent = (WOLF_HAPPY[code]||['고맙습니다.'])[0]; b.style.visibility = 'visible'; b.style.opacity = 1; }
 }
 function wolfHappyLines(){
   try{ const w = JSON.parse(localStorage.getItem('majam-wolf-happy')||'null'); if(w && w.until > Date.now()) return WOLF_HAPPY[w.code]; }catch(e){}
@@ -6214,9 +6214,20 @@ function decorate(){
   }
   out += `<rect x="-20" y="118" width="2640" height="82" fill="#2C4632"/>`;   // 숲 바닥 (언덕 둥근 가장자리 아래 틈 메우기)
   document.getElementById('pines').innerHTML = out;
-  const lines = ['다음주까지 송부 가능하실까요?','작가님의 첫번째 독자여서 기쁩니다.','작가님! 이번 원고도 즐겁게 읽었습니다. 다만...','표지 제안서 확인했습니다.','교정고 보내 드렸어요','리뷰고 보내 드렸어요','2교 보내 드렸어요','작가님! 메일 확인 부탁드립니다.','작가님의 집필을 응원하고 있겠습니다!','작가님, 안녕하세요. 좋은 하루 보내고 계실까요? 다름이 아니라...','재촉 드리는 게 아니며 혹 기간이 너무 빠듯하다면 말씀해 주세요.','작가님! 파일이 누락되어 연락드렸습니다.',];
-  let i=0; const b=document.getElementById('bubble');
-  setInterval(()=>{ b.style.opacity=0; setTimeout(()=>{ const hl = wolfHappyLines(), L = hl || lines; i=(i+1)%L.length; b.textContent=L[i]; b.style.opacity=1; },400); }, 6000);
+  const lines = ['다음주까지 송부 가능하실까요?','작가님의 첫번째 독자여서 기쁩니다.','작가님! 이번 원고도 즐겁게 읽었습니다. 다만...','표지 제안서 확인했습니다.','교정고 보내 드렸어요','리뷰고 보내 드렸어요','2교 보내 드렸어요','작가님! 메일 확인 부탁드립니다.','작가님의 집필을 응원하고 있겠습니다!','작가님, 안녕하세요. 좋은 하루 보내고 계실까요? 다름이 아니라...','재촉 드리는 게 아니며 혹 기간이 너무 빠듯하다면 말씀해 주세요.','작가님! 파일이 누락되어 연락드렸습니다.',
+    '마감일은 다음 주 수요일입니다. 혹시 몰라 한 번 더 말씀드려요.','원고 잘 받았습니다! 검토하고 다시 연락드릴게요.','작가님, 혹시 진행 상황 여쭤봐도 될까요?','이번 화 엔딩 정말 좋았어요. 다음 화가 기다려집니다.','오탈자 몇 군데 표시해서 보내 드렸어요.','연재 일정표 공유드립니다.','외전 원고는 천천히 주셔도 괜찮아요.','작가님, 오늘도 한 줄만 써 볼까요?','물 한 잔 드시면서 하세요.','분량은 지금 정도면 충분합니다.','독자 반응이 좋아요! 댓글 모아서 전달드릴게요.','제목 후보 중에 2번이 제일 좋더라고요.','원고 파일명에 화수 꼭 넣어 주세요.','오늘 마감이신 작가님들, 응원합니다!','막히는 장면이 있으면 같이 이야기해 봐요.','세이브 원고가 있으시면 마음이 든든하시죠?','수정 요청 사항 정리해서 보내 드렸어요.','작가님, 회신 기다리고 있겠습니다.','작업실 불이 켜져 있으니 반갑네요.','오늘 쓴 한 줄이 내일의 한 화가 됩니다.','출간 일정 확정되면 바로 알려 드릴게요.','시놉시스 잘 받았습니다. 설레네요.','프롤로그가 정말 강렬하네요.','작가님, 마감 하루 전입니다. 화이팅이에요!'];   // (10-13) 문구 추가
+  // 💬 (10-13) 담당자가 너무 수다스럽다는 제보 → 말풍선은 7초만 보이고, 20~40초 쉬었다가 다음 말 (섞어서, 방금 한 말은 안 겹치게)
+  const b=document.getElementById('bubble'); if(!b) return;
+  const WOLF_SHOW = 7000, WOLF_QUIET = [20000, 40000];
+  let bag = [], last = '';
+  const nextLine = () => { const hl = wolfHappyLines(); if(hl) return hl[Math.floor(Math.random()*hl.length)];
+    if(!bag.length){ bag = lines.slice().sort(()=>Math.random()-.5); if(bag[0]===last) bag.push(bag.shift()); }
+    return (last = bag.shift()); };
+  b.style.transition = 'opacity .5s';
+  const hush = () => { b.style.opacity = 0; setTimeout(()=>{ if(b.style.opacity==='0') b.style.visibility = 'hidden'; }, 500);
+    setTimeout(talk, WOLF_QUIET[0] + Math.random()*(WOLF_QUIET[1]-WOLF_QUIET[0])); };
+  const talk = () => { b.textContent = nextLine(); b.style.visibility = 'visible'; b.style.opacity = 1; setTimeout(hush, WOLF_SHOW); };
+  setTimeout(hush, WOLF_SHOW);   // 처음 들어오면 첫 인사는 바로 보이고, 7초 뒤 숨었다가 이어서
 }
 
 /* ---------- 시작 ---------- */
@@ -6585,6 +6596,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑯</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑰</p>
 </body>
 </html>
