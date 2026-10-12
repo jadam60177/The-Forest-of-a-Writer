@@ -1064,6 +1064,9 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 .ticket.tbg .t-cell.hit{background:radial-gradient(circle at 50% 45%,rgba(255,236,150,.85),rgba(255,206,92,.25) 70%,transparent);box-shadow:inset 0 0 0 .5cqw #E2A92F,0 0 2cqw rgba(255,200,60,.6)}
 .ticket.tbg .t-foil{border-radius:2cqw}
 .ticket.tbg .t-rule{position:absolute;left:17%;right:17%;top:71.5%;height:14%;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:2.6cqw;line-height:1.5;color:#7A6440}
+/* ===== 🛒 상점 칸 나누기 (10-12) ===== */
+.shop-tabs{flex-wrap:wrap}
+.shop-tab{flex:1 1 auto;white-space:nowrap;padding:.35rem .55rem}
 </style>
 </head>
 <body>
@@ -1172,7 +1175,9 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
         <div class="shop-tabs" role="tablist">
           <button class="shop-tab lim" data-shoptab="limited" role="tab" id="limTab" hidden></button>
           <button class="shop-tab" data-shoptab="furniture" role="tab">🪑 가구 <span id="cntF"></span></button>
-          <button class="shop-tab" data-shoptab="accessory" role="tab">✨ 소품 <span id="cntA"></span></button>
+          <button class="shop-tab" data-shoptab="wall" role="tab">🪟 창문·벽 <span id="cntW"></span></button>
+          <button class="shop-tab" data-shoptab="rug" role="tab">🧶 러그 <span id="cntR"></span></button>
+          <button class="shop-tab" data-shoptab="accessory" role="tab">✨ 기타 <span id="cntA"></span></button>
         </div>
         <div class="items" id="shop"></div>
       </details>
@@ -4827,8 +4832,13 @@ function renderBag(){
   const regular = SHOP.filter(x=>!x.limited_until), lim = SHOP.filter(x=>x.limited_until && isLive(x));
   document.getElementById('shopCount').textContent = `${regular.length+lim.length}개`;
   const cabs = regular.filter(x=>CAPACITY[x.code]).sort((a,b)=>a.price-b.price);   // 진열장은 소품 탭 맨 위에
-  const furn = regular.filter(x=>catOf(x)==='furniture' && !CAPACITY[x.code]), accs = [...cabs, ...regular.filter(x=>catOf(x)==='accessory' && !CAPACITY[x.code])];
+  // 상점 칸 나누기 (10-12): 가구 / 창문·벽 / 러그 / 기타(소품 · 진열장은 기타 맨 위)
+  const isRug = x => layerOf(x.code)==='floor', isWall = x => /^wall_/.test(x.code) || SHOP_WALL.has(x.code);
+  const bigs = regular.filter(x=>catOf(x)==='furniture' && !CAPACITY[x.code]);
+  const rugs = bigs.filter(isRug), walls = bigs.filter(x=>!isRug(x) && isWall(x)), furn = bigs.filter(x=>!isRug(x) && !isWall(x));
+  const accs = [...cabs, ...regular.filter(x=>catOf(x)==='accessory' && !CAPACITY[x.code])];
   document.getElementById('cntF').textContent = furn.length; document.getElementById('cntA').textContent = accs.length;
+  document.getElementById('cntW').textContent = walls.length; document.getElementById('cntR').textContent = rugs.length;
   const lt = document.getElementById('limTab');
   lt.hidden = !lim.length;
   if(lim.length) lt.innerHTML = `${esc(lim[0].season || '⏰ 한정')} <span>${lim.length}</span>`;
@@ -4841,11 +4851,12 @@ function renderBag(){
     const dateTxt = `${last.toLocaleDateString('ko-KR',{month:'long', day:'numeric', timeZone:'Asia/Seoul'})}까지`;
     limNote = `<p class="lim-note">${esc(lim[0].season||'')} 한정 · ⏰ ${dateTxt} · ${dday<=1?'오늘 마감!':'D-'+(dday-1)}<br><span>기간이 끝나면 상점에서 사라져요. 산 건 계속 갖고 있어요.</span></p>`;
   }
-  document.getElementById('shop').innerHTML = limNote + (shopTab==='limited'?lim:shopTab==='accessory'?accs:furn).map(s=>{ const own = ownedCount(s.code); return ''+
+  document.getElementById('shop').innerHTML = limNote + (shopTab==='limited'?lim:shopTab==='accessory'?accs:shopTab==='wall'?walls:shopTab==='rug'?rugs:furn).map(s=>{ const own = ownedCount(s.code); return ''+
     `<button class="item ${own?'owned':''}" data-buy="${esc(s.code)}" ${ME.coins<s.price?'disabled':''}>${own?`<span class="own" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${own}</span>`:''}<span class="em">${ico(s)}</span><span class="t">${esc(s.name)} · ${sizeText(s)}</span><span class="p">🪙 ${s.price}</span></button>`; }
   ).join('');
 }
 
+const SHOP_WALL = new Set(['window','screen']);   // 창문·벽 칸에 같이 보일 가구
 function renderRoad(){
   renderDeco();
   const i = stageIdx(ME.total_minutes);
