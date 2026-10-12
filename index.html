@@ -1710,6 +1710,9 @@ const TILE_WALLS = [["wall_brick1", "🧱", "벽돌 벽", 40, 1, 1], ["wall_bric
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='wall_arch')+1; DEFAULT_SHOP.splice(at, 0, ...TILE_WALLS.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); }
 const TILE_WALL = new Set(['wall_brick', ...TILE_WALLS.map(r=>r[0])]);
 TILE_WALL.forEach(c=>FURN_IMG.add(c)); WALL_H.forEach(c=>FURN_IMG.add(c));
+// 🪟 새 창문 20종 (10-12 밤, newwins.sql 과 같아요) — 전부 1×1. 유리는 옅은 하늘색으로 칠했어요
+const NEW_WINS = [["win_lace", "🪟", "레이스 커튼 창문", 120, 1, 1], ["win_pinkarch", "🪟", "분홍 아치 창문", 120, 1, 1], ["win_roundval", "🪟", "동그란 커튼 창문", 120, 1, 1], ["win_gingham", "🪟", "체크 커튼 창문", 120, 1, 1], ["win_green", "🪟", "초록 커튼 창문", 120, 1, 1], ["win_lattice", "🪟", "동그란 격자 창문", 100, 1, 1], ["win_pots", "🪟", "화분 창문", 120, 1, 1], ["win_twin", "🪟", "쌍둥이 아치 창문", 120, 1, 1], ["win_catnap", "🪟", "낮잠 고양이 창문", 150, 1, 1], ["win_octa", "🪟", "팔각 창문", 100, 1, 1], ["win_ivyshut", "🪟", "담쟁이 덧창 창문", 130, 1, 1], ["win_stained", "🪟", "스테인드글라스 창문", 150, 1, 1], ["win_ivyarch", "🪟", "담쟁이 아치 창문", 130, 1, 1], ["win_gable", "🪟", "지붕 모양 창문", 120, 1, 1], ["win_nook", "🪟", "책 읽는 창가", 150, 1, 1], ["win_blueshut", "🪟", "파란 덧창 꽃 창문", 130, 1, 1], ["win_roundcat", "🪟", "동그란 고양이 창문", 150, 1, 1], ["win_awning", "🪟", "차양 창문", 130, 1, 1], ["win_hanging", "🪟", "행잉 화분 창문", 130, 1, 1], ["win_potion", "🪟", "물약 창문", 150, 1, 1]];
+{ const at = DEFAULT_SHOP.findIndex(x=>x.code==='window_3')+1 || DEFAULT_SHOP.length; DEFAULT_SHOP.splice(at, 0, ...NEW_WINS.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); NEW_WINS.forEach(r=>FURN_IMG.add(r[0])); }
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
 const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp` : null;
 const icoSrc = it => it && WALL_H.has(it.code) && fimg(it) ? `furn/${it.code}_h.webp` : fimg(it);   // 예전 벽 4종은 상점·가방에서 앞모습으로
@@ -4884,7 +4887,7 @@ function renderBag(){
   document.getElementById('shopCount').textContent = `${regular.length+lim.length}개`;
   const cabs = regular.filter(x=>CAPACITY[x.code]).sort((a,b)=>a.price-b.price);   // 진열장은 소품 탭 맨 위에
   // 상점 칸 나누기 (10-12): 가구 / 창문·벽 / 러그 / 기타 / 소품 (진열장은 소품 맨 위)
-  const isRug = x => layerOf(x.code)==='floor', isWall = x => /^wall_/.test(x.code) || SHOP_WALL.has(x.code);
+  const isRug = x => layerOf(x.code)==='floor', isWall = x => /^(wall|win)_/.test(x.code) || SHOP_WALL.has(x.code);
   const bigs = regular.filter(x=>catOf(x)==='furniture' && !CAPACITY[x.code]);
   const isEtc = x => SHOP_ETC.has(x.code) || SHOP_ETC.has(x.icon||'');
   const rugs = bigs.filter(isRug), walls = bigs.filter(x=>!isRug(x) && isWall(x)), etcs = bigs.filter(x=>!isRug(x) && !isWall(x) && isEtc(x)), furn = bigs.filter(x=>!isRug(x) && !isWall(x) && !isEtc(x));
@@ -5613,6 +5616,6 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-12 밤판</p>
+<p class="site-ver">마감의 숲 · 10-12 밤판 ②</p>
 </body>
 </html>
