@@ -3224,7 +3224,7 @@ const demoApi = (() => {
       if(!P.dex.includes(code)) fail('먼저 도감 칸을 열어 주세요'); if(P.pets.length>=P.slots) fail('키우는 칸이 꽉 찼어요. 칸을 늘려 주세요');
       if(st.me.coins<price) fail('코인이 부족해요'); st.me.coins-=price;
       P.pets.push({id:P.nid++, code, name:(name||s.name).slice(0,10), affection:0, last_cared:new Date().toISOString(), fed:0, patted:0, played:0, day:this.fday(), event_at:new Date().toISOString()}); persist(); return st.me.coins; },
-    async buyPetSlot(){ const P = this.pstate(); if(P.slots>=PET_MAX) fail('펫은 3마리까지 키울 수 있어요');
+    async buyPetSlot(){ const P = this.pstate(); if(P.slots>=PET_MAX) fail(`펫은 ${PET_MAX}마리까지 키울 수 있어요`);
       const price = PET_SLOT_PRICE[P.slots]; if(st.me.coins<price) fail('코인이 부족해요'); st.me.coins-=price; P.slots++; persist(); return st.me.coins; },
     async carePet(id, kind){ const P = this.pstate(), p = P.pets.find(x=>x.id===id), c = PET_CARE[kind]; if(!p) fail('내 펫이 아니에요');
       if((p[c.key]||0)>=c.max) fail('오늘은 충분히 했어요. 새벽 12시에 다시 할 수 있어요');
@@ -4883,7 +4883,7 @@ const petSvg = (code, mood='ok', cls='') => `<svg class="pet-svg ${cls} ${mood==
 /* ---------- 🐾 펫 ---------- */
 // 아래 숫자들은 pets.sql 과 같아야 해요
 const PET_TIER = {common:{label:'일반', open:300, adopt:200}, rare:{label:'희귀', open:500, adopt:500}, legend:{label:'전설', open:1000, adopt:1000}, fairy:{label:'요정', open:0, adopt:1000}};
-const PET_SLOT_PRICE = {1:1000, 2:1500}, PET_MAX = 3;
+const PET_MAX = 5, PET_SLOT_PRICE = new Proxy({}, {get:()=>1500});   // (10-13) 칸 늘리기는 늘 1,500 · 최대 5마리 — petslot5.sql 과 같아야 해요
 const PET_CARE = {feed:{label:'🍖 밥 주기', max:3, gain:3, key:'fed'}, pat:{label:'🤲 쓰다듬기', max:5, gain:1, key:'patted'}, play:{label:'🧶 놀아 주기', max:2, gain:5, key:'played'}};
 const PET_LV = [0,20,50,100,170,260,370,500,650,820];
 const PET_EVENT_HOURS = 4, PET_SAD_DAYS = 7;
@@ -6544,6 +6544,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑭</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑮</p>
 </body>
 </html>
