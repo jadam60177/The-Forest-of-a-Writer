@@ -1044,6 +1044,26 @@ dialog.lotto-win h3{margin:.1rem 0 .2rem;font-family:"Jua",sans-serif;font-weigh
 dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 .furn.wide.tallw > img.fimg.fsvg{height:calc(205% - 4px)}
 @media (prefers-reduced-motion:reduce){.t-cell.hit,.wolf-note,dialog.lotto-win .lw-art img{animation:none}}
+/* ===== 🎁 보따리 소품 그림 (10-12 저녁) ===== */
+.dex .cell .em img.fimg{display:block;height:2.5rem;width:auto;max-width:100%;margin:.5rem auto 0}
+.rcard{display:flex;flex-direction:column;align-items:center}
+.rcard .em img.fimg{display:block;height:2.5rem;width:auto;max-width:100%;margin:0 auto .1rem}
+.dex .cell.no .em img.fimg{filter:grayscale(1) brightness(.75)}
+.cab span .fsvg.fimg{filter:drop-shadow(0 1px 1px rgba(60,35,15,.3))}
+/* ===== 🎟️ 복권 뒷배경 그림 (10-12 저녁, bg/lotto.webp 2528×1696 기준 칸 위치) ===== */
+.ticket.tbg{container-type:inline-size;aspect-ratio:2528/1696;max-width:640px;padding:0;border-radius:16px;overflow:hidden;
+  background:url(bg/lotto.webp) center/100% 100% no-repeat,#1B203E;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+.ticket.tbg::before,.ticket.tbg::after{display:none}
+.ticket.tbg .t-top{position:absolute;left:16%;right:16%;top:18.5%;height:11.5%;margin:0;padding:0;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1em}
+.ticket.tbg .t-title{font-size:6cqw;line-height:1.1;color:#8A3B12;text-shadow:0 1px 0 #FFF7E3}
+.ticket.tbg .t-no{font-size:2.3cqw;color:#9A7A4E}
+.ticket.tbg .t-play{position:absolute;left:13.77%;width:72.42%;top:34.08%;height:33.67%;background:none;box-shadow:none;border-radius:2.2cqw;overflow:hidden}
+.ticket.tbg .t-cells{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:2.4%;padding:0;height:100%}
+.ticket.tbg .t-cell{aspect-ratio:auto;height:100%;background:none;box-shadow:none;border-radius:2cqw;font-size:12cqw}
+.ticket.tbg .t-cell.blank{font-size:9cqw;color:#D9BF8A}
+.ticket.tbg .t-cell.hit{background:radial-gradient(circle at 50% 45%,rgba(255,236,150,.85),rgba(255,206,92,.25) 70%,transparent);box-shadow:inset 0 0 0 .5cqw #E2A92F,0 0 2cqw rgba(255,200,60,.6)}
+.ticket.tbg .t-foil{border-radius:2cqw}
+.ticket.tbg .t-rule{position:absolute;left:17%;right:17%;top:71.5%;height:14%;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:2.6cqw;line-height:1.5;color:#7A6440}
 </style>
 </head>
 <body>
@@ -1634,6 +1654,9 @@ const HALLOWEEN_UNTIL = '2026-11-01T00:00:00+09:00';
 const iconKey = it => it && (it.icon || (CAPACITY[it.code] ? it.code : null));   // 진열장은 DB 설정 없이도 그림으로
 // 제미나이 가구 그림 (furn 폴더) — 있으면 코드 그림 대신 이걸 써요
 const FURN_IMG = new Set(["draftdesk", "windowbed", "coffeebar", "cookstation", "wall_white", "aquarium", "armchair", "bat", "bathtub", "bed", "bigshelf", "books", "bookshelf", "bouquet", "cabinet", "cactus", "campfire", "camptent", "candle", "canopy", "carousel", "cat", "cattower", "cauldron", "chair", "clock", "coatrack", "coffee", "contract", "cookie", "desk", "deskchair", "diningtable", "dog", "drawer", "fireplace", "firewood", "fishbowl", "floorlamp", "fountain", "fox", "frame", "fridge", "ghost", "gramophone", "grandpiano", "guitar", "hammock", "headphone", "hedgehog", "ironstove", "keyboard", "kitchen", "lantern", "laptop", "lowtable", "mirror", "monstera", "moonlamp", "mushroom", "notebook", "pen", "piano", "plant", "plotboard", "postbox", "pumpkin", "rabbit", "radio", "rocking", "roundtable", "rug_blue", "rug_cloud", "rug_green", "rug_living", "rug_navy", "rug_orange", "rug_persian", "rug_purple", "rug_red", "rug_round", "rug_runner", "rug_straw", "rug_yellow", "screen", "shelf", "sofa", "sofa3", "tallmirror", "tea", "teddy", "telescope", "tr_bookmark", "tr_cushion", "tr_dict", "tr_letter", "tr_medal", "tr_pass", "tr_receipt", "tr_redpen", "tr_scarf", "tr_tea", "tree", "trophy", "tvstand", "twdesk", "vanity", "violin", "vitrine", "wall_arch", "wall_bamboo", "wall_brick", "wall_curtain", "wall_wood", "wardrobe", "washer", "window", "witchhat", "wolfdoll", "xmastree"]);
+// 🎁 보따리 소품 그림 (10-12 저녁, furn 폴더) — 보따리 소품 전부 + 도장(stamp)
+const GACHA_IMG = ["unicorn", "dragon", "shootingstar", "fairy", "squirrel", "butterfly", "crystal", "turtle", "umbrella", "socks", "mapleleaf", "shell", "yarn", "honeypot", "basket", "fullmoon", "deer", "raccoon", "moonviewing", "chestnut", "sweetpotato", "fishcake", "flashlight", "backpack", "boots", "swan", "oldkey", "dove", "posthorn", "seal", "letter", "envelope", "parcel", "nametag", "clip", "memo", "stamp", "birthdaycake", "mooncake", "cake", "pie", "pudding", "croissant", "baguette", "bagel", "waffle", "pancake", "donut", "peacock", "rainbow", "clover", "blossom", "rosette", "sunflower", "tulip", "wildflower", "rose", "herb", "sprout", "medal", "legendms", "treasuremap", "quill", "magnifier", "openbook", "newspaper", "redbook", "greenbook", "bookmark", "pencil", "panda", "parfait", "bubbletea", "jar", "strawberry", "teapot", "cupcake", "dango", "milk", "juice", "lemon", "ferris", "coaster", "fireworks", "sparkler", "mask", "balloon", "windchime", "koinobori", "confetti", "popper", "ticket", "crown", "galaxy", "globe", "statue", "amulet", "compass", "urn", "ruler", "cardbox", "oillamp", "hourglass", "ribbon", "logs", "bonfire", "sleepbag", "thermos", "inkbottle", "mailbox", "bread", "muffin", "jam", "rollingpin", "chefhat", "potplant", "wateringcan", "flowerbunch", "shears", "seedpack", "bookstack", "glasses", "journal", "minishelf", "teacup", "teabag", "teacookie", "rollcake", "teatray", "cottoncandy", "candyapple", "takoyaki", "garland", "glowstick", "parchment", "startele", "libladder", "exlibris", "candlestick"];
+GACHA_IMG.forEach(c=>FURN_IMG.add(c));
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
 const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp` : null;
 const ico = it => fimg(it) ? `<img class="fsvg fimg" src="${fimg(it)}" alt="" draggable="false" loading="lazy">` : (iconKey(it) && FURN_SVG[iconKey(it)]) ? `<svg class="fsvg" viewBox="${FURN_SVG[iconKey(it)].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[iconKey(it)].svg}</svg>` : (it ? it.emoji : '');
@@ -1753,7 +1776,43 @@ const GACHA_DEFAULT = [
   ['statue','🗿','석상',1,1,'rare','library'],
   ['amulet','🧿','부적',1,1,'rare','library'],
   ['crown','👑','왕관',1,1,'legend','library'],
-  ['galaxy','🌌','은하수 창문',2,1,'legend','library']
+  ['galaxy','🌌','은하수 창문',2,1,'legend','library'],
+  // 10-12 저녁 새 보따리 소품 35개 (newgacha.sql 과 같아요)
+  ['logs','🪵','통나무',1,1,'common','campfire'],
+  ['bonfire','🔥','작은 모닥불',1,1,'rare','campfire'],
+  ['sleepbag','🛌','침낭',1,1,'common','campfire'],
+  ['thermos','🧴','보온병',1,1,'common','campfire'],
+  ['inkbottle','🫙','잉크병',1,1,'common','postbox'],
+  ['mailbox','📫','빨간 우체통',1,1,'rare','postbox'],
+  ['bread','🍞','식빵',1,1,'common','bakery'],
+  ['muffin','🧁','머핀',1,1,'common','bakery'],
+  ['jam','🍓','딸기잼',1,1,'common','bakery'],
+  ['rollingpin','🥖','밀대',1,1,'common','bakery'],
+  ['chefhat','👨‍🍳','제빵 모자',1,1,'rare','bakery'],
+  ['potplant','🪴','작은 화분',1,1,'common','florist'],
+  ['wateringcan','💧','물뿌리개',1,1,'common','florist'],
+  ['flowerbunch','💐','들꽃 다발',1,1,'rare','florist'],
+  ['shears','✂️','원예 가위',1,1,'common','florist'],
+  ['seedpack','🌱','꽃씨 봉투',1,1,'common','florist'],
+  ['bookstack','📚','쌓인 책',1,1,'common','bookstore'],
+  ['glasses','👓','동그란 안경',1,1,'common','bookstore'],
+  ['journal','📔','가죽 노트',1,1,'common','bookstore'],
+  ['minishelf','🗄️','미니 책장',1,1,'rare','bookstore'],
+  ['teacup','☕','찻잔',1,1,'common','teahouse'],
+  ['teabag','🍵','티백',1,1,'common','teahouse'],
+  ['teacookie','🍪','찻집 쿠키',1,1,'common','teahouse'],
+  ['rollcake','🍰','롤케이크',1,1,'rare','teahouse'],
+  ['teatray','🫖','다과 쟁반',1,1,'rare','teahouse'],
+  ['cottoncandy','🍭','솜사탕',1,1,'common','festival'],
+  ['candyapple','🍎','사과사탕',1,1,'common','festival'],
+  ['takoyaki','🐙','타코야키',1,1,'common','festival'],
+  ['garland','🎉','가랜드',1,1,'common','festival'],
+  ['glowstick','✨','야광봉',1,1,'rare','festival'],
+  ['parchment','📜','양피지',1,1,'common','library'],
+  ['startele','🔭','천체망원경',1,1,'rare','library'],
+  ['libladder','🪜','도서관 사다리',1,1,'rare','library'],
+  ['exlibris','🔏','장서인',1,1,'common','library'],
+  ['candlestick','🕯️','촛대',1,1,'common','library']
 ].map(([code,emoji,name,w,h,rarity,box])=>({code,emoji,name,price:0,w,h,active:false,category:'accessory',gacha_rarity:rarity,gacha_box:box}));
 DEFAULT_SHOP.push(...GACHA_DEFAULT);
 const RARITY = {common:{label:'일반', rate:70, cost:10, dup:2}, rare:{label:'희귀', rate:25, cost:30, dup:6}, legend:{label:'전설', rate:5, cost:80, dup:16}};
@@ -4452,10 +4511,10 @@ function renderLotto(){
       </div>
       <div class="lotto-wrap">
         <div>
-          <div class="ticket">
+          <div class="ticket tbg">
             <div class="t-top"><span class="t-title">마감 복권</span><span class="t-no">담당자 늑대 발행 · 한 장 🪙 ${LOTTO_PRICE}</span></div>
             <div class="t-play"><div class="t-cells">${cells}</div>${scratching?'<canvas class="t-foil" id="lottoFoil" aria-label="복권 은박"></canvas>':''}</div>
-            <p class="t-rule">같은 그림 3개 = 당첨 · 하루 ${LOTTO_PER_DAY}장 · 새벽 12시에 다시 채워져요</p>
+            <p class="t-rule"><span>같은 그림 3개가 나오면 당첨!<br>하루 ${LOTTO_PER_DAY}장 · 새벽 12시에 다시 채워져요</span></p>
           </div>
           <div class="t-btns">
             ${scratching
@@ -4592,7 +4651,7 @@ function renderGacha(){
     const cost = RARITY[g.rarity].cost, hide = !box.unlocked && !g.owned;
     const have = (INV[g.code]||0) + ownedOutside(g.code), dup = dupesOf(g.code);
     const bag = INV[g.code]||0, out = ownedOutside(g.code);
-    return `<div class="cell ${g.owned?'':'no'} ${have?'owned':''}">${have?`<span class="have" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${have}</span>`:''}<span class="em">${hide?'❔':g.emoji}</span><span class="rb ${g.rarity}">${RARITY[g.rarity].label}</span>
+    return `<div class="cell ${g.owned?'':'no'} ${have?'owned':''}">${have?`<span class="have" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${have}</span>`:''}<span class="em">${hide?'❔':ico(g)}</span><span class="rb ${g.rarity}">${RARITY[g.rarity].label}</span>
       <span class="t">${hide?'???':esc(g.name)}${!hide&&g.w*g.h>1?` · ${g.w}×${g.h}칸`:''}</span>
       ${have?`<span class="where">${[bag?`가방 ${bag}`:'', out?`꺼내 둠 ${out}`:''].filter(Boolean).join(' · ')}</span>`:(g.owned?`<span class="where">지금은 없어요</span>`:'')}
       ${box.unlocked?`<button data-exch="${esc(g.code)}" ${stars<cost?'disabled':''}>✨${cost} 교환</button>`:''}
@@ -4620,7 +4679,7 @@ document.querySelector('.pull-row').addEventListener('click', async e=>{
     document.getElementById('pullResults').innerHTML = sorted.map((r,k)=>{
       const it = itemOf(r.item_code);
       const isDup = before.has(r.item_code); before.add(r.item_code);
-      return `<div class="rcard ${r.rarity}" style="animation-delay:${k*90}ms">${isDup?'<span class="dupmark">중복</span>':'<span class="newmark">NEW</span>'}<span class="em">${it.emoji}</span><span class="t">${esc(it.name)}</span><span class="rb ${r.rarity}">${RARITY[r.rarity].label}</span></div>`;
+      return `<div class="rcard ${r.rarity}" style="animation-delay:${k*90}ms">${isDup?'<span class="dupmark">중복</span>':'<span class="newmark">NEW</span>'}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span><span class="rb ${r.rarity}">${RARITY[r.rarity].label}</span></div>`;
     }).join('');
     const nDup = sorted.filter((r,k)=>document.querySelectorAll('#pullResults .rcard')[k]?.querySelector('.dupmark')).length;
     const leg = res.filter(r=>r.rarity==='legend');
