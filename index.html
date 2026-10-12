@@ -1763,6 +1763,76 @@ TILE_WALL.forEach(c=>FURN_IMG.add(c)); WALL_H.forEach(c=>FURN_IMG.add(c));
 // 🪟 새 창문 20종 (10-12 밤, newwins.sql 과 같아요) — 전부 1×1. 유리는 옅은 하늘색으로 칠했어요
 const NEW_WINS = [["win_lace", "🪟", "레이스 커튼 창문", 120, 1, 1], ["win_pinkarch", "🪟", "분홍 아치 창문", 120, 1, 1], ["win_roundval", "🪟", "동그란 커튼 창문", 120, 1, 1], ["win_gingham", "🪟", "체크 커튼 창문", 120, 1, 1], ["win_green", "🪟", "초록 커튼 창문", 120, 1, 1], ["win_lattice", "🪟", "동그란 격자 창문", 100, 1, 1], ["win_pots", "🪟", "화분 창문", 120, 1, 1], ["win_twin", "🪟", "쌍둥이 아치 창문", 120, 1, 1], ["win_catnap", "🪟", "낮잠 고양이 창문", 150, 1, 1], ["win_octa", "🪟", "팔각 창문", 100, 1, 1], ["win_ivyshut", "🪟", "담쟁이 덧창 창문", 130, 1, 1], ["win_stained", "🪟", "스테인드글라스 창문", 150, 1, 1], ["win_ivyarch", "🪟", "담쟁이 아치 창문", 130, 1, 1], ["win_gable", "🪟", "지붕 모양 창문", 120, 1, 1], ["win_nook", "🪟", "책 읽는 창가", 150, 1, 1], ["win_blueshut", "🪟", "파란 덧창 꽃 창문", 130, 1, 1], ["win_roundcat", "🪟", "동그란 고양이 창문", 150, 1, 1], ["win_awning", "🪟", "차양 창문", 130, 1, 1], ["win_hanging", "🪟", "행잉 화분 창문", 130, 1, 1], ["win_potion", "🪟", "물약 창문", 150, 1, 1]];
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='window_3')+1 || DEFAULT_SHOP.length; DEFAULT_SHOP.splice(at, 0, ...NEW_WINS.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); NEW_WINS.forEach(r=>FURN_IMG.add(r[0])); }
+// 🛋️ 새 가구 66종 (10-13, newfurn66.sql 과 같아요) — code, emoji, 이름, 가격, 가로, 세로, 분류
+const NEW_FURN66 = [
+  ["foldtable","📐","접이식 제도대",180,2,1,"furniture"],
+  ["paperroll","📜","원고지 두루마리 스탠드",140,1,2,"furniture"],
+  ["spinshelf","📚","빙글빙글 회전 책장",260,1,2,"furniture"],
+  ["wastebin","🗑️","구겨진 원고 휴지통",40,1,1,"accessory"],
+  ["rocking2","🪑","담요 걸친 흔들의자",200,1,1,"furniture"],
+  ["artcart","🛒","화방 트롤리",150,1,1,"furniture"],
+  ["stereo","📻","레트로 오디오",230,2,1,"furniture"],
+  ["memotree","🌿","메모 나무",60,1,1,"accessory"],
+  ["corkstand","📌","세우는 코르크 보드",200,1,2,"furniture"],
+  ["steelcab","🗄️","철제 서류 캐비닛",300,2,2,"furniture"],
+  ["messydesk","📝","원고 더미 책상",120,1,1,"furniture"],
+  ["msshelf","📚","원고 꽂힌 책장",160,1,1,"furniture"],
+  ["calendar","📅","마감 달력",40,1,1,"accessory"],
+  ["plotwhite","📋","플롯 화이트보드",220,2,1,"furniture"],
+  ["typetable","⌨️","타자기 탁자",160,1,1,"furniture"],
+  ["beanbag","🫘","빈백",120,1,1,"furniture"],
+  ["cushions","🛋️","방석 더미",70,1,1,"furniture"],
+  ["hammock2","🌿","기둥 해먹",280,2,1,"furniture"],
+  ["planttray","🪴","다육이 화분 쟁반",110,1,1,"furniture"],
+  ["starlamp","⭐","별 무드등",60,1,1,"accessory"],
+  ["lightstr","✨","꼬마전구 줄",80,2,1,"accessory"],
+  ["forestframe","🖼️","숲 그림 액자",90,1,1,"accessory"],
+  ["pendclock","🕰️","추 달린 벽시계",90,1,1,"accessory"],
+  ["vineshelf","🌿","덩굴 벽선반",100,2,1,"accessory"],
+  ["win_snow","🪟","눈 오는 커튼 창문",130,1,1,"furniture"],
+  ["macrame","🪴","마크라메 행잉 화분",70,1,1,"accessory"],
+  ["bakecart","🍞","베이킹 카트",170,1,1,"furniture"],
+  ["teashelf","🫖","찻잔 벽선반",150,1,1,"furniture"],
+  ["microstand","🍱","전자레인지 수납장",220,1,2,"furniture"],
+  ["snackbox","🍜","야식 바구니",80,2,1,"accessory"],
+  ["herbshelf","🌿","허브 화분 선반",90,2,1,"accessory"],
+  ["dripcart","☕","핸드드립 카트",180,1,1,"furniture"],
+  ["pottery","🏺","도자기 물레 세트",240,2,1,"furniture"],
+  ["upright","🎹","업라이트 피아노",500,2,2,"furniture"],
+  ["yarnbasket","🧶","털실 바구니",60,1,1,"accessory"],
+  ["easel","🎨","수채화 이젤",160,1,2,"furniture"],
+  ["globetable","🌍","지구본 탁자",150,1,1,"furniture"],
+  ["orgeltable","⏳","모래시계와 오르골 탁자",160,1,1,"furniture"],
+  ["specimen","🫙","표본 유리병",70,1,1,"accessory"],
+  ["tapestry","🌌","별자리 태피스트리",100,1,1,"accessory"],
+  ["tiffany","💡","스테인드글라스 램프",130,1,1,"accessory"],
+  ["wall_trellis","🌿","담쟁이 격자 울타리",120,1,2,"furniture"],
+  ["dreamcatch","🪶","드림캐처 모빌",70,1,1,"accessory"],
+  ["zengarden","🪨","미니 모래 정원",80,1,1,"accessory"],
+  ["gears","⚙️","톱니바퀴 장식",60,1,1,"accessory"],
+  ["flipclock","🕚","플립 시계",70,1,1,"accessory"],
+  ["magboard","🧲","여행 사진 자석 보드",90,1,1,"accessory"],
+  ["letterrack","📮","편지 꽂이",80,1,1,"accessory"],
+  ["inkcab","🖋️","잉크 유리장",140,1,1,"furniture"],
+  ["notebasket","📒","노트 바구니",50,1,1,"accessory"],
+  ["suitcases","🧳","여행 가방 더미",120,1,1,"furniture"],
+  ["catalogcab","🗃️","카드 목록 서랍장",260,2,2,"furniture"],
+  ["scrollbin","🗺️","두루마리 통",70,1,1,"accessory"],
+  ["dryflower","💐","말린 꽃 걸이",70,1,1,"accessory"],
+  ["magrack","📰","잡지꽂이",90,1,1,"furniture"],
+  ["curioshelf","🧸","수집품 칸 선반",160,1,1,"furniture"],
+  ["stairnook","📚","계단 밑 독서 공간",550,2,2,"furniture"],
+  ["windowseat","🛋️","창가 수납 벤치",450,2,2,"furniture"],
+  ["readtent","⛺","책 읽는 인디언 텐트",380,2,2,"furniture"],
+  ["leatherchair","💺","가죽 안락의자와 발받침",260,2,1,"furniture"],
+  ["eggchair","🪺","행잉 에그 체어",300,1,2,"furniture"],
+  ["teatable","🍵","차 마시는 좌탁",170,2,1,"furniture"],
+  ["campbed","🏕️","야전 침대",180,2,1,"furniture"],
+  ["radiator","🐈","라디에이터와 고양이 바구니",200,1,1,"furniture"],
+  ["booktower","📚","책탑과 커피",90,1,2,"furniture"],
+  ["floorchair","🪑","좌식 의자와 러그",100,1,1,"furniture"]
+];
+{ const at = DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'); DEFAULT_SHOP.splice(at<0?DEFAULT_SHOP.length:at, 0, ...NEW_FURN66.map(([code,emoji,name,price,w,h,category])=>({code,emoji,name,price,w,h,active:true,category,icon:code,layer:'furniture'}))); NEW_FURN66.forEach(r=>FURN_IMG.add(r[0])); }
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
 const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp` : null;
 const icoSrc = it => it && WALL_H.has(it.code) && fimg(it) ? `furn/${it.code}_h.webp` : fimg(it);   // 예전 벽 4종은 상점·가방에서 앞모습으로
@@ -2567,24 +2637,24 @@ const demoApi = (() => {
     async flowersOn(){ this.fstate(); const by = {}; st.fl.filter(f=>Date.now()-new Date(f.at)<864e5).forEach(f=>{ const o = by[f.to] ||= {discord_id:f.to, small:0, bouquet:0, basket:0}; o[f.kind]++; }); return Object.values(by); },
     async flowerNotices(){ this.fstate(); return st.fl.filter(f=>f.to==='me' && f.fresh).map(f=>({sender:f.from||'이웃', kind:f.kind, note:f.note||null})); },
     async flowerNoticesSeen(){ st.fl.forEach(f=>{ f.fresh=false; }); },
-    bstate(){ if(!st.board){ const h = 3600e3;
+    boardState(){ if(!st.board){ const h = 3600e3;
         st.board = [{id:3, discord_id:null, author:'담당자', body:'🔥 광장 모닥불 완공! 다 같이 벽돌을 나른 덕분이에요', kind:'news', created_at:new Date(Date.now()-30*h).toISOString()},
           {id:2, discord_id:'dl', author:'마감요정', body:'오늘 3화 마감 성공!! 다들 화이팅', kind:'post', created_at:new Date(Date.now()-2*h).toISOString()},
           {id:1, discord_id:'moon', author:'달빛작가', body:'철수네 집 송아지 2마리 태어남 (아님) 우리 집 고양이 들어옴', kind:'post', created_at:new Date(Date.now()-.3*h).toISOString()}];
         st.bid = 4;
         st.bans = [{id:1, discord_id:'moon', author:'달빛작가', body:'달빛작가 1권 완결 했어요!!', emoji:'🎊', ends_at:new Date(Date.now()+20*h).toISOString(), hearts:new Set(['dl','owl'])}];
         st.banId = 2; } },
-    async board(){ this.bstate(); return st.board.map(p=>({...p, mine:p.discord_id==='me'})).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)); },
-    async postBoard(body){ this.bstate(); const v=(body||'').trim().slice(0,BOARD_LEN); if(!v) fail('내용을 적어 주세요');
+    async board(){ this.boardState(); return st.board.map(p=>({...p, mine:p.discord_id==='me'})).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)); },
+    async postBoard(body){ this.boardState(); const v=(body||'').trim().slice(0,BOARD_LEN); if(!v) fail('내용을 적어 주세요');
       st.board.push({id:st.bid++, discord_id:'me', author:st.me.display_name, body:v, kind:'post', created_at:new Date().toISOString()}); },
-    async deleteBoard(id){ this.bstate(); st.board = st.board.filter(p=>p.id!==id); },
-    async banners(){ this.bstate(); const n=Date.now(); return st.bans.filter(b=>new Date(b.ends_at)>n).map(b=>({id:b.id, author:b.author, author_id:b.discord_id, body:b.body, emoji:b.emoji, ends_at:b.ends_at, hearts:b.hearts.size, hearted:b.hearts.has('me'), mine:b.discord_id==='me'})).sort((a,b)=>b.id-a.id); },
-    async hangBanner(body, emoji){ this.bstate(); const v=(body||'').trim().slice(0,BANNER_LEN); if(!v) fail('현수막에 적을 말을 적어 주세요');
+    async deleteBoard(id){ this.boardState(); st.board = st.board.filter(p=>p.id!==id); },
+    async banners(){ this.boardState(); const n=Date.now(); return st.bans.filter(b=>new Date(b.ends_at)>n).map(b=>({id:b.id, author:b.author, author_id:b.discord_id, body:b.body, emoji:b.emoji, ends_at:b.ends_at, hearts:b.hearts.size, hearted:b.hearts.has('me'), mine:b.discord_id==='me'})).sort((a,b)=>b.id-a.id); },
+    async hangBanner(body, emoji){ this.boardState(); const v=(body||'').trim().slice(0,BANNER_LEN); if(!v) fail('현수막에 적을 말을 적어 주세요');
       st.bans.push({id:st.banId++, discord_id:'me', author:st.me.display_name, body:v, emoji, ends_at:new Date(Date.now()+24*3600e3).toISOString(), hearts:new Set()}); persist(); return st.me.coins; },
-    async heartBanner(id){ this.bstate(); const b=st.bans.find(x=>x.id===id); if(!b) fail('이미 내려간 현수막이에요');
+    async heartBanner(id){ this.boardState(); const b=st.bans.find(x=>x.id===id); if(!b) fail('이미 내려간 현수막이에요');
       if(b.discord_id==='me') fail('내 현수막은 누를 수 없어요'); if(b.hearts.has('me')) fail('이미 하트를 눌렀어요');
       b.hearts.add('me'); st.me.coins += BANNER_HEART_COIN; persist(); return st.me.coins; },
-    async deleteBanner(id){ this.bstate(); st.bans = st.bans.filter(b=>b.id!==id); },
+    async deleteBanner(id){ this.boardState(); st.bans = st.bans.filter(b=>b.id!==id); },
     tick2(){
       const t = st.tree = st.tree || {no:1, color:['water','blossom','moon','gold','maple'][Math.floor(Math.random()*5)], goal:1800, reward:700, poured:1210, givers:new Set(['moon','dl','green','dawn','pencil']), mine:0};
       const m = st.me; if(m.dropMark==null){ m.dropMark = m.total_minutes; m.drops = m.drops||0; m.floatMark = Date.now(); m.floatWait = 4; m.floatToday = 0; }
@@ -5789,6 +5859,6 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ③</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ④</p>
 </body>
 </html>
