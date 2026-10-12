@@ -979,6 +979,66 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .tpick b{font-family:"Jua",sans-serif;font-weight:400}
 .tpick span{font-size:.8rem;color:var(--accent)}
 .tpick:disabled{opacity:.45;cursor:default}
+/* ===== 🎟️ 마감 스크래치 복권 (10-12) ===== */
+.lotto-wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:1rem;align-items:start}
+@media (max-width:760px){.lotto-wrap{grid-template-columns:1fr}}
+.lotto-head{display:flex;align-items:flex-end;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem}
+.lotto-head h3{margin:0}
+.lotto-left{font-family:"Jua",sans-serif;font-size:1.05rem;color:var(--accent);white-space:nowrap}
+.lotto-left .dots{letter-spacing:.15em}
+.ticket{position:relative;background:linear-gradient(170deg,#FFF7E3,#F6E6C4);color:#3A2A14;border-radius:14px;padding:.85rem .9rem .7rem;
+  box-shadow:0 0 0 2px #E8C77A inset,0 0 0 5px #FFF7E3 inset,0 0 0 6px #D9B25E inset,0 10px 26px rgba(0,0,0,.35);max-width:440px;margin:0 auto}
+.ticket::before,.ticket::after{content:"";position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:var(--night,#121526);transform:translateY(-50%)}
+.ticket::before{left:-9px}.ticket::after{right:-9px}
+.t-top{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;border-bottom:2px dashed #D9B25E;padding-bottom:.45rem;margin-bottom:.6rem}
+.t-title{font-family:"Jua",sans-serif;font-size:1.35rem;color:#8A3B12;letter-spacing:.02em}
+.t-no{font-size:.78rem;color:#8C7550}
+.t-play{position:relative;border-radius:10px;overflow:hidden;background:#FFFDF6;box-shadow:0 0 0 1px #E6CF9A inset}
+.t-cells{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;padding:.55rem}
+.t-cell{aspect-ratio:1;display:grid;place-items:center;border-radius:9px;background:radial-gradient(circle at 50% 40%,#FFFFFF,#F4E7C8);box-shadow:0 0 0 1px #EAD7A8 inset;font-size:clamp(2rem,9vw,3rem);line-height:1}
+.t-cell.blank{color:#D8C59A;font-family:"Jua",sans-serif;font-size:2rem}
+.t-cell.hit{background:radial-gradient(circle at 50% 40%,#FFF6C8,#FFD86A);box-shadow:0 0 0 2px #E2A92F inset,0 0 14px rgba(255,200,60,.6);animation:tpop .5s ease both}
+.t-cell.hit:nth-child(2){animation-delay:.08s}.t-cell.hit:nth-child(3){animation-delay:.16s}
+@keyframes tpop{0%{transform:scale(.8)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.t-foil{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab;transition:opacity .45s ease;border-radius:10px}
+.t-foil.gone{opacity:0;pointer-events:none}
+.t-rule{font-size:.8rem;color:#7A6440;text-align:center;margin:.5rem 0 0}
+.t-btns{display:flex;gap:.5rem;justify-content:center;margin-top:.75rem;flex-wrap:wrap}
+.t-btns .pull{min-width:9.5rem}
+.t-result{margin:.75rem auto 0;max-width:440px;text-align:center;min-height:1.5rem}
+.t-win{font-family:"Jua",sans-serif;font-size:1.2rem;color:var(--accent);text-shadow:0 0 12px rgba(255,206,92,.45)}
+.wolf-note{display:flex;gap:.6rem;align-items:center;background:#FFF6DC;color:#4A3A20;border-radius:12px;padding:.55rem .8rem .55rem .5rem;text-align:left;
+  box-shadow:0 4px 14px rgba(0,0,0,.3);transform:rotate(-1.2deg);max-width:420px;margin:0 auto;animation:tpop .4s ease both}
+.wolf-note img{width:64px;height:auto;flex:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.wolf-note b{display:block;font-family:"Jua",sans-serif;font-size:.85rem;color:#9A5A22;font-weight:normal}
+.wolf-note span{font-size:.98rem}
+.prize-table{list-style:none;margin:0;padding:0;display:grid;gap:.3rem}
+.prize-table li{display:flex;align-items:center;gap:.55rem;padding:.35rem .55rem;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.prize-table .sym{font-size:1.15rem;letter-spacing:.05em;flex:none;width:4.6rem}
+.prize-table .lb{flex:1;font-size:.93rem}
+.prize-table .rt{font-size:.78rem;color:var(--muted)}
+.prize-table li.top{background:linear-gradient(90deg,rgba(255,206,92,.2),rgba(255,206,92,.04));border-color:rgba(255,206,92,.45)}
+.lotto-week{margin-top:1.1rem}
+.lotto-week h4{margin:0 0 .15rem;font-family:"Jua",sans-serif;font-weight:normal;font-size:1.08rem}
+.lw-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem;margin-top:.55rem}
+@media (max-width:560px){.lw-row{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.lw{position:relative;border-radius:12px;padding:.45rem .3rem .4rem;text-align:center;background:radial-gradient(ellipse at 50% 30%,rgba(255,206,92,.16),rgba(255,255,255,.03) 70%);border:1px solid var(--line)}
+.lw img{display:block;width:100%;height:92px;object-fit:contain;margin:0 auto .25rem}
+.lw.lock img{filter:brightness(0) drop-shadow(0 0 6px rgba(255,206,92,.55));opacity:.55}
+.lw.have{border-color:rgba(255,206,92,.6);box-shadow:0 0 12px rgba(255,206,92,.25) inset}
+.lw .nm{font-size:.74rem;line-height:1.25;word-break:keep-all}
+.lw .sz{font-size:.68rem;color:var(--muted)}
+.lw .ok{position:absolute;top:.25rem;right:.3rem;font-size:.7rem;background:var(--accent);color:var(--btn-ink);border-radius:8px;padding:0 .3rem}
+.lw .wk{position:absolute;top:.25rem;left:.3rem;font-size:.66rem;background:rgba(255,206,92,.85);color:#2E2006;border-radius:8px;padding:0 .3rem}
+details.lotto-dex{margin-top:1rem}
+details.lotto-dex summary{cursor:pointer;font-family:"Jua",sans-serif}
+dialog.lotto-win .lw-art{width:min(60vw,220px);height:min(60vw,220px);margin:.2rem auto .4rem;display:block;position:relative;overflow:visible;
+  background:radial-gradient(circle,rgba(255,206,92,.35),transparent 65%)}
+dialog.lotto-win .lw-art img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:contain;filter:drop-shadow(0 0 16px rgba(255,206,92,.6));animation:floaty 2.6s ease-in-out infinite}
+dialog.lotto-win h3{margin:.1rem 0 .2rem;font-family:"Jua",sans-serif;font-weight:normal;font-size:1.3rem;word-break:keep-all}
+dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
+.furn.wide.tallw > img.fimg.fsvg{height:calc(205% - 4px)}
+@media (prefers-reduced-motion:reduce){.t-cell.hit,.wolf-note,dialog.lotto-win .lw-art img{animation:none}}
 </style>
 </head>
 <body>
@@ -1050,6 +1110,7 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
     <button role="tab" aria-selected="true" data-tab="home">우리 집 꾸미기</button>
     <button role="tab" aria-selected="false" data-tab="road">🎨 집 꾸미기</button>
     <button role="tab" aria-selected="false" data-tab="plaza">🏘️ 마을 광장</button>
+    <button role="tab" aria-selected="false" data-tab="lotto">🎟️ 복권</button>
     <button role="tab" aria-selected="false" data-tab="tree">🌳 세계수</button>
     <button role="tab" aria-selected="false" data-tab="lake">🎣 호숫가</button>
     <button role="tab" aria-selected="false" data-tab="pet">🐾 펫</button>
@@ -1116,6 +1177,10 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
       <div class="lots" id="lots"></div>
     </div>
     <div class="panel plaza-panel" id="plazaWork"></div>
+  </section>
+
+  <section id="tab-lotto" hidden>
+    <div id="lottoBox"></div>
   </section>
 
   <section id="tab-tree" hidden>
@@ -1306,6 +1371,13 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
   <div id="zoomBadge"></div>
   <p class="small" id="zoomMeta"></p>
   <button class="mini ask-yes" id="zoomOk">닫기</button>
+</dialog>
+
+<dialog class="visit ask party lotto-win" id="lottoWinDlg">
+  <div class="lw-art" id="lottoWinArt"></div>
+  <h3 id="lottoWinName"></h3>
+  <p id="lottoWinMsg"></p>
+  <button class="mini ask-yes" id="lottoWinOk">우리 집에 놓으러 갈래요!</button>
 </dialog>
 
 <dialog class="visit ask party" id="raidDlg">
@@ -2151,8 +2223,8 @@ const demoApi = (() => {
       {id:1, discord_id:'dl', category:'건의', body:'담당자 대사에 \'수정고 부탁드려요\'도 넣어 주세요 ㅋㅋㅋ', created_at:new Date(Date.now()-86400e3).toISOString(), read:true, members:{display_name:'마감요정'}},
     ],
   };
-  try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; st.coll=new Set(s.coll||[]); st.cabs=s.cabs||{}; st.garden=s.garden||[]; st.gdex=s.gdex||{}; st.fdex=s.fdex||{}; st.fpend=s.fpend||[]; st.fpid=s.fpid||1; st.net=s.net||null; st.fday=s.fday||''; st.fused=s.fused||0; st.pt=s.pt||null; st.looks=s.looks||null; } }catch(e){}
-  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId, coll:[...st.coll], cabs:st.cabs, garden:st.garden, gdex:st.gdex, fdex:st.fdex, fpend:st.fpend, fpid:st.fpid, net:st.net, fday:st.fday, fused:st.fused, pt:st.pt, looks:st.looks})); }catch(e){} };
+  try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; st.coll=new Set(s.coll||[]); st.cabs=s.cabs||{}; st.garden=s.garden||[]; st.gdex=s.gdex||{}; st.fdex=s.fdex||{}; st.fpend=s.fpend||[]; st.fpid=s.fpid||1; st.net=s.net||null; st.fday=s.fday||''; st.fused=s.fused||0; st.pt=s.pt||null; st.looks=s.looks||null; st.lotto=s.lotto||null; } }catch(e){}
+  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId, coll:[...st.coll], cabs:st.cabs, garden:st.garden, gdex:st.gdex, fdex:st.fdex, fpend:st.fpend, fpid:st.fpid, net:st.net, fday:st.fday, fused:st.fused, pt:st.pt, looks:st.looks, lotto:st.lotto})); }catch(e){} };
   DEFAULT_SHOP.forEach(it=>{ if(it.unlock_by && st.plaza.find(b=>b.code===it.unlock_by && b.built_at)) it.active=true; });
   const item = code => DEFAULT_SHOP.find(s=>s.code===code);
   const fail = msg => { throw new Error(msg); };
@@ -2561,6 +2633,26 @@ const demoApi = (() => {
     async deleteNote(id){ st.notes=st.notes.filter(x=>x.id!==id); },
     async giftsSeen(){},
     async adminClear(id){ const o=st.others.find(x=>x.discord_id===id); o.removed=true; o.justRemoved=true; o.in_voice=false; },
+    // 🎟️ 복권
+    lstate(){ st.lotto = st.lotto || {day:'', n:0, dex:[]}; if(st.lotto.day!==this.fday()){ st.lotto.day = this.fday(); st.lotto.n = 0; } return st.lotto; },
+    lweek(){ const wk = Math.floor((Date.now() - Date.parse('2026-10-09T00:00:00+09:00'))/604800e3), cyc = Math.max(1, Math.ceil(LOTTO_FURN.length/LOTTO_WEEK_N)), c = Math.floor(wk/cyc), k = wk%cyc;
+      const h = t => { let x = 2166136261; for(const ch of t){ x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619); } return x>>>0; };
+      return LOTTO_FURN.map(x=>x.code).sort((a,b)=>h(a+':'+c)-h(b+':'+c)).slice(k*LOTTO_WEEK_N, (k+1)*LOTTO_WEEK_N); },
+    async lotto(){ const L = this.lstate(); return {plays_today:L.n, week:this.lweek(), dex:[...L.dex]}; },
+    async playLotto(){ const L = this.lstate();
+      if(L.n>=LOTTO_PER_DAY) fail('오늘 복권은 다 긁었어요. 새벽 12시에 다시 채워져요');
+      if(st.me.coins<LOTTO_PRICE) fail('코인이 부족해요');
+      L.n++; st.me.coins -= LOTTO_PRICE; const paid = st.me.coins;
+      const r = Math.random()*100; let kind = 'miss', amount = 0, item = null, dup = false;
+      if(r<2) kind='furn'; else if(r<3){ kind='x10'; amount=300; } else if(r<6){ kind='x5'; amount=150; } else if(r<19){ kind='back'; amount=30; }
+      else if(r<29){ kind='stars'; amount=2; } else if(r<38){ kind='seed'; amount=1; } else if(r<45){ kind='bait'; amount=1; }
+      if(kind==='furn'){ const w = this.lweek(); item = w[Math.floor(Math.random()*w.length)];
+        if(L.dex.includes(item)){ dup = true; amount = LOTTO_DUP_COIN; } else { L.dex.push(item); st.inv[item] = (st.inv[item]||0)+1; } }
+      if(['x10','x5','back'].includes(kind) || dup) st.me.coins += amount;
+      if(kind==='stars') st.me.stars = (st.me.stars||0)+amount;
+      if(kind==='seed') st.me.seeds = (st.me.seeds||0)+amount;
+      if(kind==='bait'){ st.bait = st.bait || {inv:{}, day:null, legendBought:0, net:null}; st.bait.inv.shiny = (st.bait.inv.shiny||0)+1; }
+      persist(); return {kind, amount, item, dup, coins:st.me.coins, coins_paid:paid, plays_today:L.n}; },
     // 미리보기 전용
     tick(){
       if(st.me.in_voice){ this.streakTick(); st.me.total_minutes++; st.me.coins+=currentMult(); st.me.today_minutes++; persist(); }
@@ -2697,6 +2789,8 @@ const supaApi = (() => {
     async mainPet(){ return ok(await sb.rpc('get_main_pet')); },
     async setMainPet(id){ ok(await sb.rpc('set_main_pet', {p_id:id})); },
     async petsOf(id){ return ok(await sb.rpc('get_pets_of', {p_discord_id:id})); },
+    async lotto(){ return ok(await sb.rpc('get_lotto')); },
+    async playLotto(){ return ok(await sb.rpc('play_lotto')); },
     myId(){ return myId; },
   };
 })();
@@ -2888,7 +2982,7 @@ function roomHTML(list, cur, {editable, cabs={}}){
     const turn = rot%2 && fimg(it) && (floor || (iconKey(it) && FURN_SVG[iconKey(it)+'_h']));   // 그림 칸막이는 그림째 눕혀요
     if(hKey) rot = 0;
     const rs = rot%2 ? `;--rw:calc(${f.w}*var(--tile) + ${f.w-1}*3px - 4px);--rh:calc(${f.h}*var(--tile) + ${f.h-1}*3px - 4px)` : '';
-    const cls = `furn ${big?'big':''} ${f.w!==f.h?'long':''} ${turn?'turn':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':''):''} ${it.icon?'drawn':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${rot?'rot r'+rot:''}`;
+    const cls = `furn ${big?'big':''} ${f.w!==f.h?'long':''} ${turn?'turn':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${rot?'rot r'+rot:''}`;
     const art = hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
     html += editable
@@ -4245,6 +4339,201 @@ document.addEventListener('click', e=>{
   });
 });
 
+/* ---------- 🎟️ 마감 스크래치 복권 (lotto.sql) ---------- */
+const LOTTO_PRICE = 30, LOTTO_PER_DAY = 5, LOTTO_DUP_COIN = 120, LOTTO_WEEK_N = 5;   // lotto.sql 의 play_lotto 와 같아야 해요
+// 전설 가구 — furn/코드.webp · 새 가구를 넣을 땐 여기 + lotto.sql 의 lotto_items 둘 다
+const LOTTO_FURN = [
+  ['ashfire','🔥','불태운 초고들의 잿더미 벽난로',2,1,'갈아엎은 설정집이 푸른 불꽃으로 타올라요'],
+  ['escapeportal','🌀','마감 도피용 차원 이동 포털',2,2,'뛰어들면 마감도 독촉도 없는 세계로…'],
+  ['hourglassbed','⏳','시간 왜곡의 모래시계 캡슐 침대',2,2,'누워만 있어도 마감이 늘어날 것 같아요'],
+  ['wolftable','🏳️','담당자 늑대의 백기 항복 테이블',2,1,'이번 마감은 작가님의 승리입니다'],
+  ['galaxypond','🌌','은하수를 담은 실내 달빛 연못',2,2,'수면 아래로 별똥별이 지나가요'],
+  ['orrery','🪐','플롯 붕괴 방지용 마법 천구의',1,2,'두기만 해도 복선이 회수될 것 같아요'],
+  ['coinpool','💰','완결 정산금 코인 볼풀장',2,2,'정산받은 금화를 가득 부었어요'],
+  ['angelorgel','🪽','천사의 깃털 만년필 오르골',1,2,'깃펜이 저절로 원고를 써 내려가요'],
+  ['bunker','🚫','휴식 방해 금지 벙커',2,2,'유리 밖에서 담당자가 두드려도 평화로워요'],
+  ['bsthrone','👑','베스트셀러 1위 등극 옥좌',2,2,'성공한 작가만 앉을 수 있는 자리'],
+  ['obswindow','🪟','거대한 아치형 천체 관측창',2,2,'창밖으로 은하수가 천천히 흘러요'],
+  ['secretdoor','🚪','비밀 통로 책장문',1,2,'틈새로 촛불 켜진 비밀 서고가 보여요'],
+  ['floattea','🫖','심야의 공중 티팟 & 애프터눈 티 세트',2,1,'티팟이 혼자 둥둥 떠서 차를 따라요'],
+  ['grimfountain','⛲','고대 마도서 석조 분수대',2,2,'물줄기 위로 금빛 룬 문자가 일렁여요'],
+  ['daybed','🛋️','샹들리에 걸린 벨벳 캐노피 데이베드',2,2,'나른한 대문호의 휴식처'],
+  ['goldstatue','🏆','황금 깃펜을 든 작가 황금 동상',1,2,'받침대 명판: 이 구역의 마감왕'],
+  ['jailbooth','⛓️','담당자 늑대의 감금 집필 부스',2,2,'완고 전 퇴실 불가'],
+  ['champagne','🥂','정산일 샴페인 타워 & 코인 분수',2,2,'정산일엔 샴페인이 끝없이 흘러요'],
+  ['hellrug','🔥','마감 D-DAY 지옥불 온돌 러그',2,2,'가구 밑에 깔 수 있어요. 발바닥이 뜨거워요','floor'],
+  ['wolfbarrier','🛡️','담당자 늑대 접근 금지 결계기',1,2,'다가오는 담당자를 찌릿 튕겨 내요'],
+].map(([code,emoji,name,w,h,about,layer],i)=>({code,emoji,name,w,h,about,price:0,active:false,category:'furniture',sort:1000+i,lotto:true,...(layer?{layer}:{})}));
+DEFAULT_SHOP.push(...LOTTO_FURN);
+LOTTO_FURN.forEach(x=>FURN_IMG.add(x.code));
+const LOTTO_TALL = new Set(['ashfire','wolftable','floattea']);   // 2×1 인데 그림이 높아서 위로 더 크게 그려요
+const lottoOf = code => LOTTO_FURN.find(x=>x.code===code);
+// 당첨표 — 같은 그림 3개 (확률은 play_lotto 와 같아요, 나머지 55%는 꽝)
+const LOTTO_PRIZES = [
+  {kind:'furn',  sym:'👑', label:'이번 주 전설 가구 1개', rate:2},
+  {kind:'x10',   sym:'💎', label:'🪙 300 (10배)', rate:1},
+  {kind:'x5',    sym:'💰', label:'🪙 150 (5배)', rate:3},
+  {kind:'back',  sym:'🎟️', label:'🪙 30 (본전)', rate:13},
+  {kind:'stars', sym:'⭐', label:'✨ 별조각 2개', rate:10},
+  {kind:'seed',  sym:'🌰', label:'🌰 이름 모를 씨앗 1봉투', rate:9},
+  {kind:'bait',  sym:'🎣', label:'🎣 반짝 미끼 1개', rate:7},
+];
+// 꽝 쪽지 — 담당자 늑대의 잔소리 (숲지기가 마음대로 고쳐도 돼요)
+const WOLF_NAG = [
+  '다음 편은 언제 주시나요?',
+  '복권 긁을 시간에 한 줄 더 쓰시면 됩니다.',
+  '꽝이네요. 원고는 꽝이 아니길 바랍니다.',
+  '운은 원고에 쓰시는 걸로 하죠.',
+  '수정고는 오늘 안에 부탁드려요.',
+  '작업실 불이 꺼져 있던데요. 여기서 뭐 하세요?',
+  '독자님들이 기다리고 계십니다.',
+  '한 장 더 긁으실 거면 한 화 더 쓰고 오세요.',
+  '오늘 분량은 채우셨나요? 확인하겠습니다.',
+  '연재 공지는 올리셨나요?',
+  '이 복권, 원고료에서 까도 될까요?',
+  '마감은 복권처럼 긁는다고 사라지지 않습니다.',
+];
+let LOTTO = null, LOTTO_CUR = null;   // LOTTO: {plays_today, week:[code], dex:[code]} · LOTTO_CUR: 지금 긁는 복권
+
+async function refreshLotto(){ try{ LOTTO = await api.lotto(); if(Array.isArray(LOTTO)) LOTTO = LOTTO[0]; }catch(e){ LOTTO = null; } }
+function lottoWeekEnds(){   // 다음 금요일 0시 (한국 시간)
+  const k = new Date(Date.now()+9*3600e3), dow = k.getUTCDay(), add = ((5-dow+7)%7)||7;
+  return Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate()+add) - 9*3600e3;
+}
+function lottoCells(r){
+  const p = LOTTO_PRIZES.find(x=>x.kind===(r.kind==='baitcoin'?'bait':r.kind));
+  if(p) return [p.sym,p.sym,p.sym];
+  const syms = LOTTO_PRIZES.map(x=>x.sym), pick = () => syms[Math.floor(Math.random()*syms.length)];
+  let a = pick(), b = pick(), c = pick();
+  if(Math.random()<.45){ const tease = Math.random()<.5 ? '👑' : pick(); a = tease; b = tease; while(c===tease) c = pick(); }   // 아깝다!
+  while(a===b && b===c) c = pick();
+  return [a,b,c].sort(()=>Math.random()-.5);
+}
+function lottoPrizeText(r){
+  const it = r.item ? lottoOf(r.item) : null;
+  if(r.kind==='furn') return r.dup ? `「${it?it.name:'전설 가구'}」${jo(it?it.name:'가구','은','는')} 이미 있어서 🪙 ${r.amount}코인으로 바꿔 드렸어요` : `전설 가구 「${it?it.name:''}」 당첨!`;
+  if(r.kind==='x10') return `💎 대박! 🪙 ${r.amount}코인 당첨!`;
+  if(r.kind==='x5') return `💰 🪙 ${r.amount}코인 당첨!`;
+  if(r.kind==='back') return `🎟️ 본전! 🪙 ${r.amount}코인을 돌려받았어요`;
+  if(r.kind==='stars') return `✨ 별조각 ${r.amount}개를 받았어요`;
+  if(r.kind==='seed') return `🌰 이름 모를 씨앗 ${r.amount}봉투를 받았어요`;
+  if(r.kind==='bait') return `🎣 반짝 미끼 ${r.amount}개를 받았어요 (호숫가 미끼 상자)`;
+  if(r.kind==='baitcoin') return `🎣 반짝 미끼 대신 🪙 ${r.amount}코인을 받았어요`;
+  return '';
+}
+
+function renderLotto(){
+  const box = document.getElementById('lottoBox'); if(!box) return;
+  const L = LOTTO || {plays_today:0, week:[], dex:[]};
+  const left = Math.max(0, LOTTO_PER_DAY - (L.plays_today||0)), dex = new Set(L.dex||[]);
+  const cur = LOTTO_CUR, scratching = cur && !cur.revealed;
+  const days = Math.max(1, Math.ceil((lottoWeekEnds()-Date.now())/86400e3));
+  const cells = cur ? cur.cells.map(s=>`<div class="t-cell ${cur.revealed && cur.res.kind!=='miss'?'hit':''}">${s}</div>`).join('')
+                    : '<div class="t-cell blank">?</div>'.repeat(3);
+  const week = (L.week||[]).map(lottoOf).filter(Boolean);
+  const card = (it, tag) => { const have = dex.has(it.code);
+    return `<div class="lw ${have?'have':'lock'}" title="${esc(it.about)}">${tag?`<span class="wk">이번 주</span>`:''}${have?'<span class="ok">✓</span>':''}
+      <img src="furn/${it.code}.webp" alt="" draggable="false" loading="lazy"><div class="nm">${esc(it.name)}</div><div class="sz">${it.w}×${it.h}칸${it.layer==='floor'?' · 바닥':''}</div></div>`; };
+  let result = '';
+  if(cur && cur.revealed){
+    if(cur.res.kind==='miss') result = `<div class="wolf-note"><img src="bg/Wolf_Watcher.webp" alt=""><div><b>담당자의 쪽지</b><span>${esc(cur.nag)}</span></div></div>`;
+    else result = `<div class="t-win">${esc(lottoPrizeText(cur.res))}</div>`;
+  } else if(scratching) result = `<p class="small" style="margin:0">은박을 손가락이나 마우스로 문질러 보세요</p>`;
+  box.innerHTML = `
+    <div class="panel">
+      <div class="lotto-head">
+        <div><h3>🎟️ 마감 스크래치 복권</h3><p class="small" style="margin:.15rem 0 0">글이 막힐 때 5초만 머리 식혀요. 같은 그림 3개가 나오면 당첨!</p></div>
+        <div class="lotto-left">오늘 남은 복권 <span class="dots">${'🎟️'.repeat(left)}${'·'.repeat(LOTTO_PER_DAY-left)}</span> ${left}/${LOTTO_PER_DAY}</div>
+      </div>
+      <div class="lotto-wrap">
+        <div>
+          <div class="ticket">
+            <div class="t-top"><span class="t-title">마감 복권</span><span class="t-no">담당자 늑대 발행 · 한 장 🪙 ${LOTTO_PRICE}</span></div>
+            <div class="t-play"><div class="t-cells">${cells}</div>${scratching?'<canvas class="t-foil" id="lottoFoil" aria-label="복권 은박"></canvas>':''}</div>
+            <p class="t-rule">같은 그림 3개 = 당첨 · 하루 ${LOTTO_PER_DAY}장 · 새벽 12시에 다시 채워져요</p>
+          </div>
+          <div class="t-btns">
+            ${scratching
+              ? `<button class="pull" id="lottoAll" type="button">✨ 한 번에 다 긁기</button>`
+              : `<button class="pull" id="lottoBuy" type="button" ${left<1||ME.coins<LOTTO_PRICE?'disabled':''}>${left<1?'오늘은 다 긁었어요':`🪙 ${LOTTO_PRICE} · 한 장 사기`}</button>`}
+          </div>
+          <div class="t-result">${result}</div>
+        </div>
+        <div>
+          <ul class="prize-table">
+            ${LOTTO_PRIZES.map(p=>`<li class="${p.kind==='furn'?'top':''}"><span class="sym">${p.sym.repeat(3)}</span><span class="lb">${esc(p.label)}</span><span class="rt">${p.rate}%</span></li>`).join('')}
+            <li><span class="sym">🐺</span><span class="lb">그 밖엔 꽝 · 담당자의 잔소리 쪽지</span><span class="rt">55%</span></li>
+          </ul>
+          <p class="small" style="margin:.5rem 0 0">전설 가구는 상점에서 팔지 않아요. 이미 가진 가구가 또 나오면 🪙 ${LOTTO_DUP_COIN}코인으로 바꿔 드려요.</p>
+        </div>
+      </div>
+      <div class="lotto-week">
+        <h4>👑 이번 주 전설 가구</h4>
+        <p class="small" style="margin:0">금요일 0시에 다음 가구들로 바뀌어요 · ${days}일 남았어요</p>
+        <div class="lw-row">${week.length ? week.map(it=>card(it,false)).join('') : '<p class="small">불러오는 중이에요</p>'}</div>
+      </div>
+      <details class="lotto-dex">
+        <summary>📖 전설 가구 도감 <span class="small">${LOTTO_FURN.filter(x=>dex.has(x.code)).length} / ${LOTTO_FURN.length}</span></summary>
+        <div class="lw-row">${LOTTO_FURN.map(it=>card(it, (L.week||[]).includes(it.code))).join('')}</div>
+      </details>
+    </div>`;
+  if(scratching) setupFoil();
+}
+
+function setupFoil(){
+  const cv = document.getElementById('lottoFoil'); if(!cv) return;
+  const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio||1);
+  cv.width = Math.max(1, Math.round(r.width*dpr)); cv.height = Math.max(1, Math.round(r.height*dpr));
+  const g = cv.getContext('2d'), W = cv.width, H = cv.height;
+  const gr = g.createLinearGradient(0,0,W,H);
+  gr.addColorStop(0,'#B9BCC6'); gr.addColorStop(.35,'#E9EBF0'); gr.addColorStop(.55,'#A9ADB9'); gr.addColorStop(.8,'#DADDE4'); gr.addColorStop(1,'#9EA2AE');
+  g.fillStyle = gr; g.fillRect(0,0,W,H);
+  g.fillStyle = 'rgba(255,255,255,.35)';
+  for(let i=0;i<70;i++){ const x=Math.random()*W, y=Math.random()*H, s=(1+Math.random()*2.2)*dpr;   // 반짝이 가루
+    g.beginPath(); g.moveTo(x,y-s*2); g.lineTo(x+s*.6,y); g.lineTo(x,y+s*2); g.lineTo(x-s*.6,y); g.closePath(); g.fill(); }
+  g.fillStyle = 'rgba(70,72,88,.55)'; g.font = `${Math.round(18*dpr)}px Jua, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('✦ 여기를 긁어 주세요 ✦', W/2, H/2);
+  g.globalCompositeOperation = 'destination-out';
+  let down = false, last = null, moves = 0;
+  const pt = e => { const b = cv.getBoundingClientRect(); return [(e.clientX-b.left)*dpr, (e.clientY-b.top)*dpr]; };
+  const rub = (x,y) => { g.lineWidth = 34*dpr; g.lineCap = 'round'; g.beginPath(); if(last){ g.moveTo(last[0],last[1]); g.lineTo(x,y); g.stroke(); } else { g.arc(x,y,17*dpr,0,Math.PI*2); g.fill(); } last = [x,y]; };
+  const cleared = () => { const d = g.getImageData(0,0,W,H).data; let n=0, t=0; for(let i=3;i<d.length;i+=4*24){ t++; if(d[i]<40) n++; } return n/t; };
+  cv.addEventListener('pointerdown', e=>{ down = true; last = null; try{ cv.setPointerCapture(e.pointerId); }catch(_){} rub(...pt(e)); });
+  cv.addEventListener('pointermove', e=>{ if(!down) return; rub(...pt(e)); if(++moves%8===0 && cleared()>.55) revealLotto(); });
+  const up = () => { down = false; last = null; if(cleared()>.55) revealLotto(); };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+}
+
+async function revealLotto(){
+  const cur = LOTTO_CUR; if(!cur || cur.revealed) return;
+  cur.revealed = true;
+  const cv = document.getElementById('lottoFoil'); if(cv) cv.classList.add('gone');
+  await new Promise(res=>setTimeout(res, 380));
+  await Promise.all([refreshMine(), refreshLotto()]);
+  renderTop(); renderLotto(); renderBag();
+  const r = cur.res;
+  if(r.kind==='furn' && !r.dup){
+    const it = lottoOf(r.item);
+    const d = document.getElementById('lottoWinDlg');
+    document.getElementById('lottoWinArt').innerHTML = `<img src="furn/${it.code}.webp" alt="">`;
+    document.getElementById('lottoWinName').textContent = it.name;
+    document.getElementById('lottoWinMsg').textContent = `👑 전설 가구 당첨! (${it.w}×${it.h}칸)\n${it.about}\n\n가방에 넣어 뒀어요. 우리 집에 놓아 보세요!`;
+    d.showModal();
+  } else if(r.kind==='x10') petParty('💎', `대박!\n🪙 ${r.amount}코인 당첨이에요!`);
+}
+
+document.addEventListener('click', e=>{
+  if(e.target.closest('#lottoBuy')) return act(async()=>{
+    const r = await api.playLotto(), res = Array.isArray(r) ? r[0] : r;
+    LOTTO_CUR = {res, cells: lottoCells(res), revealed:false, nag: WOLF_NAG[Math.floor(Math.random()*WOLF_NAG.length)]};
+    if(LOTTO) LOTTO.plays_today = res.plays_today;
+    if(res.coins_paid!=null){ ME.coins = res.coins_paid; renderTop(); }   // 결과는 긁은 뒤에 보여 줘요
+    renderLotto();
+  });
+  if(e.target.closest('#lottoAll')) return revealLotto();
+  if(e.target.closest('#lottoWinOk')){ document.getElementById('lottoWinDlg').close(); document.querySelector('[data-tab="home"]').click(); window.scrollTo({top:0, behavior:'smooth'}); }
+});
+
 /* ---------- 담당자의 보따리 ---------- */
 let GACHA = [], BOXES = [], curBox = 'basic';
 try{ curBox = localStorage.getItem('majam-gacha-box') || 'basic'; }catch(e){}
@@ -4873,7 +5162,8 @@ document.addEventListener('click', e=>{
 document.querySelector('.tabs').addEventListener('click', e=>{
   const b = e.target.closest('button[data-tab]'); if(!b) return;
   document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b));
-  ['home','road','plaza','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
+  ['home','road','plaza','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
+  if(b.dataset.tab==='lotto'){ renderLotto(); refreshLotto().then(renderLotto); }
   if(b.dataset.tab==='admin') renderAdmin();
   if(b.dataset.tab==='plaza'){ refreshPlaza().then(renderPlaza); renderBoard(); refreshBoard().then(renderBoard); }
   if(b.dataset.tab==='gacha') refreshGacha().then(renderGacha);
