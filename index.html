@@ -1527,6 +1527,44 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 .lodge-empty{opacity:.8}
 .pdx .to-lodge{display:block;font-size:.72rem;opacity:.8;margin-top:.15rem}
 :root[data-mode="day"] .lodge-pet{background:rgba(255,255,255,.7)}
+
+/* ===== 🐠 마당 어항 (10-13) ===== */
+.tank-box{margin-top:1rem}
+.tank-title{margin:.2rem 0 .5rem;font-family:"Jua",sans-serif;font-weight:400}
+.tank{position:relative;width:100%;aspect-ratio:16/9;max-height:440px;border-radius:18px;overflow:hidden;background:#1E5A6E center/cover no-repeat;
+  border:6px solid #8EC9D6;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),inset 0 -30px 40px rgba(0,30,50,.18),0 10px 24px rgba(0,0,0,.28)}
+.tank::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.18),transparent 30%,transparent 70%,rgba(255,255,255,.08))}
+.tank .tf{position:absolute;width:var(--w);aspect-ratio:3/2;padding:0;border:0;background:none;cursor:pointer;transition-property:left,top;transition-timing-function:ease-in-out;z-index:2}
+.tank .tf-body{display:block;width:100%;height:100%;animation:tfbob var(--bd,3s) ease-in-out var(--bdl,0s) infinite alternate}
+.tank .tf img{width:100%;height:100%;object-fit:contain;transition:transform .6s;filter:drop-shadow(0 3px 3px rgba(0,30,50,.3))}
+.tank .tf.flip img{transform:scaleX(-1)}
+@keyframes tfbob{from{transform:translateY(-3px) rotate(-1.5deg)}to{transform:translateY(4px) rotate(1.5deg)}}
+.tank-bubbles{position:absolute;inset:0;pointer-events:none;z-index:1}
+.tank-bubbles i{position:absolute;bottom:-12px;width:var(--s);height:var(--s);border-radius:50%;border:1.5px solid rgba(255,255,255,.75);background:rgba(255,255,255,.15);animation:tbub var(--d) linear var(--dl) infinite}
+@keyframes tbub{from{transform:translate(0,0);opacity:0}10%{opacity:.9}50%{transform:translate(6px,-55cqh)}to{transform:translate(-4px,-110cqh);opacity:0}}
+.tank{container-type:size}
+.tank-empty{position:absolute;left:0;right:0;top:42%;text-align:center;color:#fff;text-shadow:0 1px 4px rgba(0,30,50,.8);margin:0}
+.tf-tip{position:absolute;z-index:5;width:140px;padding:.35rem .5rem;border-radius:12px;background:#FFF6E2;color:#4A3420;border:2px solid #8A6142;font-size:.78rem;line-height:1.4;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none;animation:popin .25s}
+.tank-lead{margin:.45rem 0 .5rem}
+.tk-pick,.tk-skins{margin-top:.5rem;border:1px solid var(--line);border-radius:14px;padding:.45rem .7rem}
+.tk-pick summary,.tk-skins summary{cursor:pointer;font-family:"Jua",sans-serif}
+.tk-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:.45rem;margin-top:.5rem;max-height:340px;overflow-y:auto}
+.tk-row{display:flex;align-items:center;gap:.45rem;padding:.3rem .45rem;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04)}
+.tk-row .fsh{width:54px;height:auto;flex:none}
+.tk-row:not(.ok) .fsh{filter:grayscale(.7);opacity:.6}
+.tk-row.on{border-color:#8EC9D6;box-shadow:0 0 0 1px #8EC9D6}
+.tk-nm{flex:1;display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.tk-nm b{white-space:nowrap}.tk-nm .small{white-space:nowrap}
+.tk-lock{opacity:.6}
+.tk-skin-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;margin-top:.5rem}
+.tk-skin{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.4rem;border:1px solid var(--line);border-radius:12px;text-align:center}
+.tk-skin img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px}
+.tk-skin.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.tk-use{color:var(--accent)}
+#visitGarden .tank-title{margin-top:.9rem}
+:root[data-mode="day"] .tk-row{background:rgba(255,255,255,.7)}
+@media (prefers-reduced-motion:reduce){.tank .tf-body,.tank-bubbles i{animation:none}}
+@media (max-width:600px){.tank{border-width:4px;border-radius:14px}.tk-list{grid-template-columns:1fr}.tk-skin-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -1634,6 +1672,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <div class="room-tabs" id="roomTabs"></div>
       <div class="room-wrap"><div class="room" id="room"></div></div>
       <div class="garden" id="gardenBox" hidden></div>
+      <div class="tank-box" id="tankBox" hidden></div>
       <p class="hint small" id="hint"></p>
     </div>
     <div class="panel home-side">
@@ -3267,6 +3306,21 @@ const demoApi = (() => {
     async mainPet(){ const P = this.pstate(), yp = P.pets.filter(x=>!x.lodge), mp = yp.find(x=>x.id===P.main) || yp[0]; return mp ? mp.id : null; },
     async setMainPet(id){ const P = this.pstate(); if(!P.pets.some(x=>x.id===id && !x.lodge)) fail('마당에 있는 친구만 대표로 정할 수 있어요'); P.main = id; persist(); },
     async petsOf(id){ this.pstate(); const o = st.others.find(x=>x.discord_id===id); return o && o.pet ? [{...o.pet}] : []; },
+    // 🐠 어항 (10-13) — 미리보기는 이 브라우저에만 저장
+    tstate(){ let t; try{ t = JSON.parse(localStorage.getItem('majam-demo-tank')||'null'); }catch(e){} return t || {skin:'sand', skins:['sand'], fish:[]}; },
+    tsave(t){ try{ localStorage.setItem('majam-demo-tank', JSON.stringify(t)); }catch(e){} },
+    async tankMine(){ const t = this.tstate(), d = st.fdex||{}; return {skin:t.skin, skins:t.skins.slice(), fish:t.fish.map(c=>({code:c, caught:d[c]?d[c].caught:0, best_cm:d[c]?d[c].best:null}))}; },
+    async tankOf(id){ const o = st.others.find(x=>x.discord_id===id); if(!o) return {skin:'sand', fish:[]};
+      const k = [...String(id)].reduce((a,c)=>a+c.charCodeAt(0),0), pool = FISH_DEFAULT.filter((f,i)=>(i+k)%4===0).slice(0, 2+k%5);
+      return {skin: k%2 ? 'castle' : 'sand', fish: pool.map(f=>({code:f.code, caught:TANK_NEED[f.tier]+k%7, best_cm:Math.round((f.min_cm+(f.max_cm-f.min_cm)*.7)*10)/10}))}; },
+    async tankAdd(code){ const t = this.tstate(), f = FISH_DEFAULT.find(x=>x.code===code), d = (st.fdex||{})[code];
+      if(!f) fail('없는 물고기예요'); if(t.fish.includes(code)) fail('이미 어항에 있어요'); if(t.fish.length>=TANK_MAX) fail(`어항에는 ${TANK_MAX}마리까지 넣을 수 있어요`);
+      if(!d || d.caught < TANK_NEED[f.tier]) fail(`${f.name}${jo(f.name,'은','는')} ${TANK_NEED[f.tier]}번 잡으면 넣을 수 있어요`);
+      t.fish.push(code); this.tsave(t); },
+    async tankRemove(code){ const t = this.tstate(); t.fish = t.fish.filter(c=>c!==code); this.tsave(t); },
+    async tankBuySkin(code){ const t = this.tstate(), k = TANK_SKINS.find(x=>x.code===code); if(!k) fail('없는 어항이에요'); if(t.skins.includes(code)) fail('이미 있는 어항이에요');
+      if(st.me.coins<k.price) fail('코인이 부족해요'); st.me.coins-=k.price; persist(); t.skins.push(code); t.skin = code; this.tsave(t); return st.me.coins; },
+    async tankSetSkin(code){ const t = this.tstate(); if(!t.skins.includes(code)) fail('먼저 어항을 사 주세요'); t.skin = code; this.tsave(t); },
     async finishTour(){ if(st.me.tour_done) return st.me.coins; st.me.tour_done = true; st.me.coins += TOUR_GIFT; persist(); return st.me.coins; },
     async logTab(t){ st.tabStat = st.tabStat || {}; const d = this.fday(); (st.tabStat[d] ||= {})[t] = (st.tabStat[d][t]||0)+1; },
     async tabStats(days){   // 미리보기용 가짜 기록 + 이 브라우저에서 연 것
@@ -3506,6 +3560,12 @@ const supaApi = (() => {
     async setMainPet(id){ ok(await sb.rpc('set_main_pet', {p_id:id})); },
     async lodgePet(id, inLodge){ ok(await sb.rpc('lodge_pet', {p_id:id, p_in:!!inLodge})); },   // 🏡 펫 숙소 (lodge.sql)
     async petsOf(id){ return ok(await sb.rpc('get_pets_of', {p_discord_id:id})); },
+    async tankMine(){ return ok(await sb.rpc('get_my_tank')); },                       // 🐠 어항 (tank.sql)
+    async tankOf(id){ return ok(await sb.rpc('get_tank_of', {p_discord_id:id})); },
+    async tankAdd(code){ ok(await sb.rpc('tank_add_fish', {p_code:code})); },
+    async tankRemove(code){ ok(await sb.rpc('tank_remove_fish', {p_code:code})); },
+    async tankBuySkin(code){ return ok(await sb.rpc('buy_tank_skin', {p_skin:code})); },
+    async tankSetSkin(code){ ok(await sb.rpc('set_tank_skin', {p_skin:code})); },
     async lotto(){ return ok(await sb.rpc('get_lotto')); },
     async playLotto(){ return ok(await sb.rpc('play_lotto')); },
     async trucks(){ return ok(await sb.rpc('get_trucks')) || []; },
@@ -3739,7 +3799,8 @@ function renderMyHouse(){
   document.querySelector('#tab-home .room-wrap').hidden = inGarden;
   document.getElementById('hint').hidden = inGarden;
   document.getElementById('gardenBox').hidden = !inGarden;
-  if(inGarden) renderGarden();
+  document.getElementById('tankBox').hidden = !inGarden;
+  if(inGarden){ renderGarden(); renderTank(); }
 }
 function renderRoomTabs(){
   const names = myRooms(), el = document.getElementById('roomTabs'); if(!el) return;
@@ -5095,6 +5156,106 @@ document.addEventListener('click', e=>{
   });
 });
 
+
+/* ---------- 🐠 마당 어항 (10-13) — tank.sql ----------
+   흔함 10번 · 귀함 5번 · 전설 1번 잡은 물고기를 넣을 수 있어요. 넣어도 잡은 횟수·코인은 그대로.
+   물고기 그림은 머리가 왼쪽을 본다고 보고, 오른쪽으로 갈 때 뒤집어요. 반대로 그린 그림은 FISH_FACE_RIGHT 에 넣어 주세요. */
+const TANK_NEED = {common:10, rare:5, legend:1}, TANK_MAX = 12;   // tank.sql 과 같아야 해요
+const TANK_SKINS = [
+  {code:'sand',   name:'모래 바닷속',   price:0,   img:'tank/sand.webp'},
+  {code:'castle', name:'모래성 바닷속', price:300, img:'tank/castle.webp'},
+];
+const FISH_FACE_RIGHT = new Set([]);
+let TANK = null;
+async function refreshTank(){ try{ TANK = await api.tankMine(); }catch(e){ TANK = null; } }
+const tankSkinOf = code => TANK_SKINS.find(k=>k.code===code) || TANK_SKINS[0];
+const tankFishW = f => Math.max(8, Math.min(22, 9 + 4*Math.log10(Math.max(.5, +f.max_cm || 20))));   // 어항 너비의 % (작은 송사리 ~ 큰 고래)
+function tankHTML(t, owner){
+  const sk = tankSkinOf(t && t.skin), list = (t && t.fish) || [];
+  return `<div class="tank" style="background-image:url(${sk.img})" data-owner="${esc(owner||'')}">
+    <div class="tank-bubbles" aria-hidden="true">${Array.from({length:9},(_,i)=>`<i style="left:${(6+i*11+(i*37)%7).toFixed(0)}%;--d:${(5+(i*13)%6).toFixed(1)}s;--dl:-${((i*29)%9).toFixed(1)}s;--s:${(4+(i*7)%7)}px"></i>`).join('')}</div>
+    ${list.map((x,i)=>{ const f = fishOf(x.code); if(!f) return '';
+      return `<button class="tf" type="button" data-tfish="${x.code}" data-caught="${+x.caught||0}" data-best="${x.best_cm==null?'':x.best_cm}" style="--w:${tankFishW(f).toFixed(1)}%;left:${(8+(i*29)%70)}%;top:${(14+(i*17)%52)}%" title="${esc(f.name)}"><span class="tf-body" style="--bd:${(2.6+(i%4)*.5).toFixed(1)}s;--bdl:-${(i*.7%3).toFixed(1)}s"><img src="fish/${x.code}.webp" alt="${esc(f.name)}" draggable="false"></span></button>`; }).join('')}
+    ${list.length ? '' : `<p class="tank-empty">아직 텅 빈 어항이에요</p>`}
+  </div>`;
+}
+// 🏊 헤엄치기: 물고기마다 다음 자리를 골라 천천히 옮겨 가요 (양옆·대각선, 가끔 멈춤)
+const SWIM = new WeakSet();
+function startSwim(tank){
+  if(!tank || SWIM.has(tank)) return; SWIM.add(tank);
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  tank.querySelectorAll('.tf').forEach((el, i)=>{
+    const f = fishOf(el.dataset.tfish), big = f ? tankFishW(f) : 12, faceR = FISH_FACE_RIGHT.has(el.dataset.tfish);
+    let x = parseFloat(el.style.left), y = parseFloat(el.style.top);
+    const face = dx => { if(Math.abs(dx) < .5) return; el.classList.toggle('flip', faceR ? dx < 0 : dx > 0); };
+    face(Math.random() < .5 ? 1 : -1);
+    const step = () => {
+      if(!tank.isConnected) return;
+      if(document.hidden || calm || Math.random() < .18){ setTimeout(step, 2000 + Math.random()*3000); return; }   // 잠깐 쉬기
+      const maxX = 96 - big, kind = Math.random();
+      let nx = kind < .5 ? x + (Math.random() < .5 ? -1 : 1) * (12 + Math.random()*30)        // 양옆
+                         : 4 + Math.random()*(maxX-4);                                       // 대각선 아무 데나
+      let ny = kind < .5 ? y + (Math.random()-.5)*8 : 10 + Math.random()*58;
+      nx = Math.max(3, Math.min(maxX, nx)); ny = Math.max(8, Math.min(70, ny));
+      const dist = Math.hypot(nx-x, (ny-y)*1.6), speed = 2.2 + Math.random()*2.6 - big*.06;   // 큰 물고기는 느긋하게
+      const dur = Math.max(2.5, dist / Math.max(1.2, speed));
+      face(nx - x); el.style.transitionDuration = dur.toFixed(1)+'s'; el.style.left = nx.toFixed(1)+'%'; el.style.top = ny.toFixed(1)+'%';
+      x = nx; y = ny; setTimeout(step, dur*1000 + 300 + Math.random()*1500);
+    };
+    setTimeout(step, 400 + i*350 + Math.random()*900);
+  });
+}
+// 물고기를 누르면 기록 말풍선
+document.addEventListener('click', e=>{
+  const b = e.target.closest('.tf'); if(!b) return;
+  const f = fishOf(b.dataset.tfish), tank = b.closest('.tank'); if(!f || !tank) return;
+  tank.querySelectorAll('.tf-tip').forEach(t=>t.remove());
+  const tip = document.createElement('div'); tip.className = 'tf-tip';
+  tip.innerHTML = `<b>${esc(f.name)}</b> <span class="rb ${f.tier}">${FISH_TIER[f.tier].label}</span><br>${b.dataset.best?`최고 ${cm(b.dataset.best)} · `:''}${b.dataset.caught}마리 잡음`;
+  const r = b.getBoundingClientRect(), tr = tank.getBoundingClientRect();
+  tip.style.left = Math.max(4, Math.min(tr.width-150, r.left - tr.left + r.width/2 - 70)) + 'px'; tip.style.top = Math.max(4, r.top - tr.top - 52) + 'px';
+  tank.appendChild(tip); setTimeout(()=>tip.remove(), 3200);
+});
+function renderTank(){
+  const box = document.getElementById('tankBox'); if(!box || box.hidden) return;
+  const t = TANK || {skin:'sand', skins:['sand'], fish:[]}, inTank = new Set((t.fish||[]).map(x=>x.code)), coins = ME ? ME.coins : 0;
+  const caughtOf = c => { const d = FDEX.find(x=>x.code===c); return d ? (+d.caught||0) : 0; };
+  const rows = FISH_DEFAULT.filter(f=>caughtOf(f.code) > 0)
+    .map(f=>({f, n:caughtOf(f.code), need:TANK_NEED[f.tier], in:inTank.has(f.code)}))
+    .sort((a,b)=>(b.in-a.in) || ((b.n>=b.need)-(a.n>=a.need)) || (b.n/b.need - a.n/a.need));
+  const full = inTank.size >= TANK_MAX;
+  const pick = rows.length ? rows.map(({f,n,need,in:on})=>`<div class="tk-row ${on?'on':''} ${n>=need?'ok':''}">${fishSvg(f.code)}<span class="tk-nm"><b>${esc(f.name)}</b><span class="small">${n>=need?`${n}마리 잡음`:`${n} / ${need}마리 · ${need-n}마리 더`}</span></span>
+      ${on ? `<button class="mini" data-tank-out="${f.code}">꺼내기</button>`
+           : n>=need ? `<button class="mini ask-yes" data-tank-in="${f.code}" ${full?'disabled title="어항이 꽉 찼어요"':''}>🐠 넣기</button>`
+           : `<span class="tk-lock">🔒</span>`}</div>`).join('')
+    : `<p class="small">호숫가에서 물고기를 잡아 오면 여기에 떠요. 흔함은 ${TANK_NEED.common}번, 귀함은 ${TANK_NEED.rare}번, 전설은 ${TANK_NEED.legend}번 잡으면 넣을 수 있어요.</p>`;
+  const skins = TANK_SKINS.map(k=>{ const own = (t.skins||['sand']).includes(k.code), use = t.skin===k.code;
+    return `<div class="tk-skin ${use?'on':''}"><img src="${k.img}" alt="" loading="lazy"><span>${esc(k.name)}</span>
+      ${use ? `<span class="small tk-use">쓰는 중</span>` : own ? `<button class="mini" data-tank-skin="${k.code}">고르기</button>`
+            : `<button class="mini ask-yes" data-tank-buy="${k.code}" ${coins<k.price?'disabled':''}>🪙 ${k.price.toLocaleString()}</button>`}</div>`; }).join('');
+  const key = JSON.stringify([t, rows.map(r=>[r.f.code,r.n]), coins>=300]);
+  if(box._key === key) return; box._key = key;
+  const openPick = box.querySelector('details.tk-pick') ? box.querySelector('details.tk-pick').open : false;
+  const openSkin = box.querySelector('details.tk-skins') ? box.querySelector('details.tk-skins').open : false;
+  box.innerHTML = `<h3 class="tank-title">🐠 우리 집 어항 <span class="small">${inTank.size} / ${TANK_MAX}마리</span></h3>
+    ${tankHTML(t, ME && ME.display_name)}
+    <p class="small tank-lead">물고기를 누르면 기록을 볼 수 있어요. 마당을 구경 온 이웃도 어항을 볼 수 있어요.</p>
+    <details class="tk-pick" ${openPick?'open':''}><summary>🐟 어항에 넣을 물고기 <span class="small">흔함 ${TANK_NEED.common}번 · 귀함 ${TANK_NEED.rare}번 · 전설 ${TANK_NEED.legend}번 잡으면</span></summary><div class="tk-list">${pick}</div></details>
+    <details class="tk-skins" ${openSkin?'open':''}><summary>🎨 어항 꾸미기</summary><div class="tk-skin-list">${skins}</div></details>`;
+  startSwim(box.querySelector('.tank'));
+}
+document.addEventListener('click', e=>{
+  const a = e.target.closest('[data-tank-in],[data-tank-out],[data-tank-buy],[data-tank-skin]'); if(!a) return;
+  act(async()=>{
+    const done = async()=>{ await refreshTank(); const b = document.getElementById('tankBox'); if(b) b._key = null; renderTank(); };
+    if(a.dataset.tankIn){ const f = fishOf(a.dataset.tankIn); await api.tankAdd(f.code); await done(); toast(`🐠 ${f.name}${jo(f.name,'이','가')} 어항에서 헤엄쳐요!`); }
+    else if(a.dataset.tankOut){ const f = fishOf(a.dataset.tankOut); if(!(await ask(`${f.name}${jo(f.name,'을','를')} 어항에서 꺼낼까요?\n잡은 기록은 그대로라 언제든 다시 넣을 수 있어요.`))) return; await api.tankRemove(f.code); await done(); }
+    else if(a.dataset.tankBuy){ const k = TANK_SKINS.find(x=>x.code===a.dataset.tankBuy); if(!(await ask(`「${k.name}」 어항을 살까요? 🪙 ${k.price.toLocaleString()}코인이 들어요.`))) return;
+      await api.tankBuySkin(k.code); await Promise.all([refreshMine(), done()]); renderTop(); toast(`🎨 「${k.name}」 어항으로 바꿨어요!`); }
+    else if(a.dataset.tankSkin){ await api.tankSetSkin(a.dataset.tankSkin); await done(); }
+  });
+});
+
 /* ---------- 🎟️ 마감 스크래치 복권 (lotto.sql) ---------- */
 const LOTTO_PRICE = 30, LOTTO_PER_DAY = 5, LOTTO_DUP_COIN = 120, LOTTO_WEEK_N = 5;   // lotto.sql 의 play_lotto 와 같아야 해요
 // 전설 가구 — furn/코드.webp · 새 가구를 넣을 땐 여기 + lotto.sql 의 lotto_items 둘 다
@@ -5796,7 +5957,7 @@ async function cabsFor(owner, list){
 }
 async function refreshVillage(){ VILLAGE = await api.village(); }
 async function loadAll(){
-  await Promise.all([refreshMine(), refreshVillage(), refreshPlaza(), refreshGacha(), refreshGarden(), refreshLake(), refreshTree(), refreshBanners(), refreshBoard(), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPets(), refreshPetsOn(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
+  await Promise.all([refreshMine(), refreshVillage(), refreshPlaza(), refreshGacha(), refreshGarden(), refreshLake(), refreshTank(), refreshTree(), refreshBanners(), refreshBoard(), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPets(), refreshPetsOn(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
   refreshStreak();
   MAIL_BOOT_UNTIL = Date.now() + 10000; renderMailBadge();   // 들어오자마자 온 소식은 우편함을 한 번만 열어 보여 줘요
   renderPlaza(); celebratePlaza(); renderGacha(); renderBanners(); renderFloatDrops(); renderBoard();
@@ -5858,7 +6019,7 @@ document.addEventListener('click', e=>{
   });
 
   const gt = e.target.closest('[data-garden]');
-  if(gt){ inGarden=true; saveGardenTab(); selected=null; rotated=0; hover=null; setHint(); renderMyHouse(); renderBag(); refreshGarden().then(renderMyHouse); return; }
+  if(gt){ inGarden=true; saveGardenTab(); selected=null; rotated=0; hover=null; setHint(); renderMyHouse(); renderBag(); Promise.all([refreshGarden(), refreshLake(), refreshTank()]).then(renderMyHouse); return; }
 
   const sd = e.target.closest('[data-seeds]');
   if(sd) return act(async()=>{
@@ -6113,9 +6274,9 @@ async function openVisit(id){
   room.innerHTML = '<span class="small">불러오는 중…</span>';
   dlg.showModal();
   try{
-    const [list, info, garden, fishBest, vpets] = await Promise.all([api.placements(id), api.house(id).catch(()=>null), api.garden(id).catch(()=>[]), api.fishBest(id).catch(()=>null), api.petsOf(id).catch(()=>[])]);
+    const [list, info, garden, fishBest, vpets, vtank] = await Promise.all([api.placements(id), api.house(id).catch(()=>null), api.garden(id).catch(()=>[]), api.fishBest(id).catch(()=>null), api.petsOf(id).catch(()=>[]), api.tankOf(id).catch(()=>null)]);
     const h = info || {room_blocks:0, room_names:['거실']};
-    VISIT = {p, list, info:h, garden:garden||[], fishBest, pets:vpets||[], cabs: await cabsFor(id, list), room:0, raid: await api.raidStatus().catch(()=>null)};
+    VISIT = {p, list, info:h, garden:garden||[], fishBest, pets:vpets||[], tank:vtank, cabs: await cabsFor(id, list), room:0, raid: await api.raidStatus().catch(()=>null)};
     renderVisit();
   }catch(e){
     console.error('집 구경 오류', e);
@@ -6128,7 +6289,7 @@ function renderVisit(){
   if(!VISIT) return;
   const {p, list, info, cabs} = VISIT, names = (info.room_names && info.room_names.length) ? info.room_names : ['거실'];
   const cur = roomOf(p.total_minutes, info.room_blocks||0);
-  const hasGarden = gardenSlots(p.total_minutes) > 0;
+  const hasGarden = gardenSlots(p.total_minutes) > 0 || !!(VISIT.tank && VISIT.tank.fish && VISIT.tank.fish.length);
   document.getElementById('visitTabs').innerHTML = (names.length>1 || hasGarden)
     ? names.map((n,k)=>`<button class="rtab ${k===VISIT.room?'on':''}" data-vroom="${k}">${esc(n)}</button>`).join('')
       + (hasGarden ? `<button class="rtab garden-tab ${VISIT.room==='g'?'on':''}" data-vroom="g">🌷 마당</button>` : '')
@@ -6137,8 +6298,10 @@ function renderVisit(){
   room.parentElement.hidden = VISIT.room==='g'; vg.hidden = VISIT.room!=='g';
   if(VISIT.room==='g'){
     const blooms = VISIT.garden.filter(x=>x.stage==='bloom').length;
-    vg.innerHTML = gardenBedHTML(VISIT.garden, p.total_minutes, false)
-      + `<p class="small" style="text-align:center;margin:.5rem 0 0">${VISIT.garden.length ? `화단에서 ${VISIT.garden.length}송이가 자라는 중이에요${blooms?` · 활짝 핀 꽃 ${blooms}송이`:''}` : '아직 아무것도 안 심었어요'}</p>`;
+    vg.innerHTML = (gardenSlots(p.total_minutes) > 0 ? gardenBedHTML(VISIT.garden, p.total_minutes, false)
+      + `<p class="small" style="text-align:center;margin:.5rem 0 0">${VISIT.garden.length ? `화단에서 ${VISIT.garden.length}송이가 자라는 중이에요${blooms?` · 활짝 핀 꽃 ${blooms}송이`:''}` : '아직 아무것도 안 심었어요'}</p>` : '')
+      + (VISIT.tank && VISIT.tank.fish && VISIT.tank.fish.length ? `<h4 class="tank-title">🐠 ${esc(p.display_name)}님의 어항 <span class="small">${VISIT.tank.fish.length}마리</span></h4>${tankHTML(VISIT.tank, p.display_name)}` : '');
+    startSwim(vg.querySelector('.tank'));
   }
   room.style.gridTemplateColumns = `repeat(${cur.cols}, var(--tile))`;
   room.style.gridTemplateRows = `repeat(${cur.rows + (info.room_blocks?EXTRA_ROWS:0)}, var(--tile))`;
@@ -6596,6 +6759,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑰</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑱</p>
 </body>
 </html>
