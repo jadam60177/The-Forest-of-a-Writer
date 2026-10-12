@@ -5237,10 +5237,12 @@ document.addEventListener('click', e=>{
   tip.style.left = Math.max(4, Math.min(tr.width-150, r.left - tr.left + r.width/2 - 70)) + 'px'; tip.style.top = Math.max(4, r.top - tr.top - 52) + 'px';
   tank.appendChild(tip); setTimeout(()=>tip.remove(), 3200);
 });
+let TANK_FDEX_AT = 0;
 function renderTank(){
   const box = document.getElementById('tankBox'); if(!box || box.hidden) return;
+  if(Date.now() - TANK_FDEX_AT > 60e3){ TANK_FDEX_AT = Date.now(); Promise.all([refreshLake(), refreshTank()]).then(()=>{ box._key = null; renderTank(); }); }
   const t = TANK || {skin:'sand', skins:['sand'], fish:[]}, inTank = new Set((t.fish||[]).map(x=>x.code)), coins = ME ? ME.coins : 0;
-  const caughtOf = c => { const d = FDEX.find(x=>x.code===c); return d ? (+d.caught||0) : 0; };
+  const caughtOf = c => { const d = FDEX.find(x=>x.code===c); return d && (d.have || d.best_cm!=null || +d.caught>0) ? Math.max(1, +d.caught||0) : 0; };   // (10-13) 처음 잡은 물고기는 기록이 0으로 남을 수 있어서 최소 1마리로
   const rows = FISH_DEFAULT.filter(f=>caughtOf(f.code) > 0)
     .map(f=>({f, n:caughtOf(f.code), need:TANK_NEED[f.tier], in:inTank.has(f.code)}))
     .sort((a,b)=>(b.in-a.in) || ((b.n>=b.need)-(a.n>=a.need)) || (b.n/b.need - a.n/a.need));
@@ -6797,6 +6799,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㉓</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㉔</p>
 </body>
 </html>
