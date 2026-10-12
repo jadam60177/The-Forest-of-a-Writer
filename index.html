@@ -928,7 +928,7 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .village-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
 .village-head .fold-btn{margin-left:auto;white-space:nowrap}
 .village.folded{min-height:0!important;height:auto!important;padding-bottom:2.2rem!important}
-.village.folded > :not(.village-head):not(#bannerBox):not(.houses){display:none!important}
+.village.folded > :not(.village-head):not(#bannerBox):not(.houses):not(.vtrucks){display:none!important}
 .village.folded::after{height:40px}
 .village.folded .houses .house.fold-hide{display:none}
 .bag-box .items{margin-top:.25rem}
@@ -1098,13 +1098,13 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 @media (prefers-reduced-motion:reduce){.truck .fox{animation:none}}
 /* ===== 🚚 마을 나무 아래 간식차 (10-12 밤) — 집 줄은 반 칸쯤 내려서 자리를 만들어요 ===== */
 .houses{margin-top:calc(4.5rem + 150px)}
-.vtrucks{position:absolute;left:0;right:0;z-index:1;pointer-events:none;height:150px;
-  top:calc(var(--bh,0px) - 100px + max(100vw,1500px) * .2494 - 128px)}
+.vtrucks{position:absolute;left:0;right:0;z-index:1;pointer-events:none;height:225px;
+  top:calc(var(--bh,0px) - 100px + max(100vw,1500px) * .2494 - 203px)}
 .vtruck{position:absolute;bottom:0;display:flex;align-items:flex-end;pointer-events:auto}
 .vtruck.coffee{left:max(2%, calc(50% - 600px))}
 .vtruck.dessert{right:max(2%, calc(50% - 600px));flex-direction:row-reverse}
-.vtruck .vcar{height:118px;width:auto;filter:drop-shadow(0 4px 5px rgba(0,0,0,.35))}
-.vtruck .vfox{height:78px;width:auto;margin:0 -10px;position:relative;z-index:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));animation:floaty 3s ease-in-out infinite}
+.vtruck .vcar{height:177px;width:auto;filter:drop-shadow(0 4px 5px rgba(0,0,0,.35))}
+.vtruck .vfox{height:117px;width:auto;margin:0 -15px;position:relative;z-index:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));animation:floaty 3s ease-in-out infinite}
 .vtruck.dessert .vfox{transform:scaleX(-1);animation:none}
 .vtruck .vpill{position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);white-space:nowrap;z-index:2;
   font:inherit;font-size:.82rem;padding:.25rem .7rem;border-radius:999px;border:2px solid #6E4A2E;background:#FFF7E3;color:#5A3A22;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.3)}
@@ -1112,10 +1112,20 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 .vtruck .vpill.done{cursor:default;opacity:.85;background:#EADFC8}
 @media (max-width:600px){
   .houses{margin-top:calc(4.5rem + 64px)}
-  .vtrucks{top:calc(var(--bh,0px) + 249px - 86px);height:100px}
-  .vtruck .vcar{height:72px} .vtruck .vfox{height:50px;margin:0 -6px}
+  .vtrucks{top:calc(var(--bh,0px) + 249px - 126px);height:140px}
+  .vtruck .vcar{height:100px} .vtruck .vfox{height:70px;margin:0 -8px}
   .vtruck .vpill{font-size:.72rem;padding:.15rem .5rem;bottom:-12px}
 }
+/* 간식차 말풍선은 여우 머리 위로 (10-13) — 아래에 두면 집 줄에 가려 눌리지 않았어요 */
+.vtruck .vpill{bottom:auto;top:-.5rem;left:auto;right:auto;transform:none;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+.vtruck.coffee .vpill{left:-2px}
+.vtruck.dessert .vpill{right:-2px}
+.vtruck .vpill::after{content:"";position:absolute;bottom:-8px;border:7px solid transparent;border-top-color:#6E4A2E;border-bottom:0}
+.vtruck .vpill::before{content:"";position:absolute;bottom:-5px;z-index:1;border:5px solid transparent;border-top-color:#FFF7E3;border-bottom:0}
+.vtruck.coffee .vpill::after{left:22px}.vtruck.coffee .vpill::before{left:24px}
+.vtruck.dessert .vpill::after{right:22px}.vtruck.dessert .vpill::before{right:24px}
+.vtruck .vpill:hover::before{border-top-color:#FFE7A8}
+@media (max-width:600px){.vtruck .vpill{top:-.6rem}.vtruck.coffee .vpill::after{left:14px}.vtruck.coffee .vpill::before{left:16px}.vtruck.dessert .vpill::after{right:14px}.vtruck.dessert .vpill::before{right:16px}}
 @media (prefers-reduced-motion:reduce){.vtruck .vfox{animation:none}}
 /* ===== 🐟 흔함·귀함 물고기 그림 (10-13) ===== */
 .zoom-art img.zfish{display:block;width:100%;max-width:420px;height:auto;max-height:46vh;object-fit:contain;margin:0 auto;filter:drop-shadow(0 4px 6px rgba(10,20,40,.35))}
@@ -4931,11 +4941,10 @@ function renderVillageTrucks(){
   el.innerHTML = ['coffee','dessert'].map(kind=>{
     const t = TRUCKS.find(x=>x.kind===kind); if(!t) return '';
     const K = TRUCK_KIND[kind], done = t.my_reward!=null;
-    return `<div class="vtruck ${kind}">
+    return `<div class="vtruck ${kind}" ${done?`title="오늘은 ${kind==='coffee'?'벌써 마셨어요':'벌써 먹었어요'}"`:''}>
         <img class="vfox" src="bg/fox_npc.webp" alt="" draggable="false">
         <img class="vcar" src="${K.img}" alt="${K.name}" draggable="false">
-        ${done ? `<span class="vpill done">${kind==='coffee'?'☕ 마셨어요':'😋 먹었어요'}</span>`
-               : `<button class="vpill" type="button" data-claim-truck="${t.id}" data-kind="${kind}">${K.verb}</button>`}
+        ${done ? '' : `<button class="vpill" type="button" data-claim-truck="${t.id}" data-kind="${kind}">${K.verb}</button>`}
       </div>`;
   }).join('');
   el.classList.toggle('has', TRUCKS.length>0);
@@ -5982,6 +5991,6 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑤</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑥</p>
 </body>
 </html>
