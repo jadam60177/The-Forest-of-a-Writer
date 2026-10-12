@@ -930,6 +930,8 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .village.folded{min-height:0!important;height:auto!important;padding-bottom:2.2rem!important}
 .village.folded > :not(.village-head):not(#bannerBox):not(.houses):not(.vtrucks){display:none!important}
 .village.folded::after{height:40px}
+/* 현수막이 없으면 그림을 위로 100px 올리던 탓에 밤 하늘의 달이 잘렸어요 (10-13) — 현수막 높이만큼 하늘 자리를 비워 둬요 */
+@media (min-width:601px){ .village.nobanner{--bh:100px !important;padding-top:calc(1.25rem + 100px)} }
 .village.folded .houses .house.fold-hide{display:none}
 .bag-box .items{margin-top:.25rem}
 .sell-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.1rem 0 .4rem}
@@ -4102,6 +4104,7 @@ const hashN = s => { let h=0; for(const ch of String(s)) h=(h*31+ch.charCodeAt(0
 function renderBanners(){
   const el = document.getElementById('bannerBox'); if(!el) return;
   const vil = el.closest('.village'), setBh = ()=>{ if(!vil) return;
+    vil.classList.toggle('nobanner', el.hidden);   // 현수막이 없을 때도 하늘(달)이 잘리지 않게 자리를 비워 둬요
     const bh = el.hidden ? '0px' : (el.offsetHeight + 10) + 'px'; if(vil.style.getPropertyValue('--bh') === bh) return;
     vil.style.setProperty('--bh', bh);
     const fd = document.getElementById('floatDrops'); if(fd && fd.children.length && typeof renderFloatDrops==='function'){ fd.innerHTML=''; renderFloatDrops(); }   /* 물방울 자리도 다시 */ };
@@ -6322,6 +6325,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑩ · 낮 숲</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑪ · 낮 숲</p>
 </body>
 </html>
