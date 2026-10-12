@@ -2806,9 +2806,12 @@ function renderTop(){
 const VORDER_MIN = 5;
 const villageCols = () => { const h = document.getElementById('houses'); if(!h || !h.offsetWidth) return 5;
   return Math.max(1, getComputedStyle(h).gridTemplateColumns.split(' ').filter(Boolean).length); };
+// 섞기용 해시 (hashN 은 끝 글자만 바뀌면 순서가 그대로라서 따로 써요)
+const mixN = s => { let h = 2166136261; for(const ch of String(s)){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  h ^= h>>>16; h = Math.imul(h, 0x85ebca6b); h ^= h>>>13; h = Math.imul(h, 0xc2b2ae35); h ^= h>>>16; return h>>>0; };
 function villageOrder(list){
   const seed = Math.floor(Date.now()/(VORDER_MIN*60e3));
-  const key = id => hashN(id + ':' + seed);
+  const key = id => mixN(id + ':' + seed);
   const me = list.find(p=>isMe(p) && !p.removed);
   const others = list.filter(p=>p!==me && !p.removed).sort((a,b)=>key(a.discord_id)-key(b.discord_id));
   const st = p => stageIdx(p.total_minutes), gone = p => (p.decay||0)>=3 && st(p)<STURDY;   // 날아간 집은 뒤로
@@ -3624,9 +3627,9 @@ const NET_EXTRA_PRICE = [30, 50, 70, 200, 250];   // 하루 5번 다 걷은 뒤 
 const FISH_TIER = {common:{label:'흔함'}, rare:{label:'귀함'}, legend:{label:'전설'}};
 // 🎣 미끼 (bait.sql 과 같아요) — 한 번 던질 때 1개 쓰고 사라져요
 const BAITS = [
-  {code:'shiny',  name:'반짝 미끼', price:40,  img:'goods/bait_shiny.webp',  about:'귀한 물고기가 더 잘 걸려요.'},
-  {code:'chubby', name:'통통 미끼', price:120, img:'goods/bait_chubby.webp', about:'작은 물고기가 덜 걸려요.'},
-  {code:'legend', name:'전설 미끼', price:300, img:'goods/bait_legend.webp', about:'전설의 물고기가 더 잘 걸려요· 하루 1개만 살 수 있어요', daily:1},
+  {code:'shiny',  name:'반짝 미끼', price:40,  img:'goods/bait_shiny.webp',  about:'귀한 물고기가 더 잘 걸려요 (귀함 18% → 25%)'},
+  {code:'chubby', name:'통통 미끼', price:120, img:'goods/bait_chubby.webp', about:'작은 물고기가 덜 걸려요 (최소 크기만 올라가요)'},
+  {code:'legend', name:'전설 미끼', price:300, img:'goods/bait_legend.webp', about:'전설의 물고기가 더 잘 걸려요 (전설 4.5% → 6.5%) · 하루 1개만 살 수 있어요', daily:1},
 ];
 const BAIT_RATE = {none:{legend:4.5, rare:18}, shiny:{legend:4.5, rare:25}, legend:{legend:6.5, rare:18}, chubby:{legend:4.5, rare:18}};
 const BAIT_MIN_UP = .3;   // 통통 미끼: 크기 범위 아래 30% 는 안 나와요
