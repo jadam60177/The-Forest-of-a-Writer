@@ -4803,7 +4803,7 @@ function renderVillageTrucks(){
 document.addEventListener('click', e=>{
   const c = e.target.closest('[data-call-truck]');
   if(c){ const kind = c.dataset.callTruck, K = TRUCK_KIND[kind];
-    if(!confirm(`🪙 ${K.price}코인을 결제하고 ${K.name}를 부를까요?\n오늘 자정까지 광장과 마을에 머물고, 디코에도 알림이 가요.`)) return;
+    if(!confirm(`🪙 ${K.price}코인을 결제하고 ${K.name}를 부를까요?\n오늘 자정까지 광장과 마을에 머물러요.`)) return;
     return act(async()=>{ const r = await api.callTruck(kind); if(r && r.coins!=null) ME.coins = r.coins;
       await refreshTrucks(); renderTop(); renderTrucks(); petParty(kind==='coffee'?'☕':'🍰', `${K.name}를 불렀어요!\n오늘 자정까지 광장에 있어요`); }); }
   const g = e.target.closest('[data-claim-truck]');
