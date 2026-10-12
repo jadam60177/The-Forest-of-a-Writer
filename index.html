@@ -1124,6 +1124,61 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 .plot.bloom.secret img.gstage.bloomimg{filter:drop-shadow(0 0 10px rgba(200,180,255,.55)) drop-shadow(0 3px 4px rgba(0,0,0,.35))}
 .gdx img.gdximg{width:46px;height:46px;object-fit:cover;object-position:50% 0;transform:scale(1.55);transform-origin:50% 12%}
 .zoom-art img.zbloom{display:block;width:100%;max-width:300px;height:auto;margin:0 auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))}
+
+/* ===== 📱 폰: 탭을 화면 아래 고정 줄로 · 🔍 상점 찾기 · 📬 우편함 (10-13) ===== */
+.tab-sh{display:none}
+.tab-ic{display:inline-block;margin-right:.3rem}
+.tabs button{position:relative}
+.tab-badge{margin-left:.35rem;font-size:.78em;padding:.05rem .4rem;border-radius:99px;background:rgba(255,206,92,.22);border:1px solid rgba(255,206,92,.55)}
+@media (max-width:600px){
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;
+    padding:.3rem .2rem calc(.3rem + env(safe-area-inset-bottom,0px));background:rgba(14,17,34,.95);border-top:1px solid var(--line);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow-x:auto;scrollbar-width:none;box-shadow:0 -6px 20px rgba(0,0,0,.35)}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{display:flex;flex-direction:column;align-items:center;gap:.05rem;padding:.35rem 0 .2rem;border:0;border-radius:12px;background:transparent;box-shadow:none;font-size:.68rem;color:var(--muted);transform:none!important}
+  .tabs button:hover{background:transparent}
+  .tabs button .tab-ic{margin:0;font-size:1.3rem;line-height:1.15;transition:transform .15s}
+  .tabs button .tab-tx{display:none}
+  .tabs button .tab-sh{display:block;max-width:100%;overflow:hidden;font-family:"Jua",sans-serif;font-size:.64rem;letter-spacing:-.02em;white-space:nowrap}
+  .tabs button[aria-selected="true"]{background:transparent;color:var(--accent);box-shadow:none;border:0}
+  .tabs button[aria-selected="true"] .tab-ic{transform:translateY(-2px);filter:drop-shadow(0 0 8px rgba(255,190,80,.75))}
+  .tabs button[aria-selected="true"]::after{content:"";position:absolute;top:-.3rem;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--accent);box-shadow:0 0 8px rgba(255,190,80,.7)}
+  .tabs .drop-badge,.tabs .tab-badge{position:absolute;top:0;right:1px;margin:0;font-size:.58rem;padding:0 .25rem;line-height:1.45;background:#2A6E78;color:#E9FFF9;border:0}
+  body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+  .top .lbl{display:none}
+}
+.shop-tools{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin:0 0 .6rem}
+.shop-tools input[type=search]{flex:1 1 9rem;min-width:0;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);border-radius:999px;padding:.4rem .85rem;font:inherit;font-size:.9rem}
+.shop-tools input[type=search]:focus{outline:2px solid var(--accent);outline-offset:1px}
+.shop-tools select{border:1px solid var(--line);background:rgba(36,42,78,.85);color:var(--ink);border-radius:999px;padding:.38rem .7rem;font:inherit;font-size:.85rem}
+.shop-chk{display:inline-flex;align-items:center;gap:.3rem;font-size:.85rem;color:var(--muted);cursor:pointer;white-space:nowrap}
+.shop-chk input{accent-color:#F2AA45;width:1rem;height:1rem;margin:0}
+.shop-note{grid-column:1/-1;margin:0 0 .1rem;font-size:.82rem;color:var(--muted)}
+.shop-tabs.searching .shop-tab{opacity:.45}
+.shop-tab.new{color:#FFE29A;border-color:rgba(255,206,92,.6)}
+.shop-tab.new.on{color:#3A2600}
+.item .nwb{position:absolute;top:.3rem;left:.3rem;background:#E9584A;color:#fff;border-radius:999px;padding:0 .4rem;font-size:.62rem;line-height:1.6;font-family:"Jua",sans-serif;box-shadow:0 0 8px rgba(233,88,74,.5)}
+.mail-btn{position:relative}
+.mail-dot{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#E9584A;color:#fff;font-size:.7rem;line-height:18px;font-family:"Jua",sans-serif;text-align:center;box-shadow:0 0 0 2px rgba(18,21,38,.9)}
+.mail-btn.ring{animation:mailring .8s ease-in-out 2}
+@keyframes mailring{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+#mailDlg{width:min(92vw,520px)}
+.mail-list{max-height:min(62vh,560px);overflow-y:auto;padding-right:.2rem}
+.ml-day{margin:.9rem 0 .35rem;padding-bottom:.25rem;border-bottom:1px dashed var(--line);font-family:"Jua",sans-serif;color:var(--accent)}
+.ml-day:first-child{margin-top:0}
+.ml{display:grid;grid-template-columns:2.4rem minmax(0,1fr) auto;gap:.6rem;align-items:start;padding:.55rem .5rem;border-radius:12px;border:1px solid transparent}
+.ml + .ml{margin-top:.25rem}
+.ml.new{background:rgba(255,206,92,.08);border-color:rgba(255,206,92,.35)}
+.ml .ic{width:2.4rem;height:2.4rem;border-radius:50%;display:grid;place-items:center;font-size:1.3rem;background:rgba(255,255,255,.06)}
+.ml b{display:block;font-family:"Jua",sans-serif;font-weight:400;font-size:.98rem;line-height:1.35}
+.ml p{margin:.15rem 0 0;font-size:.82rem;color:var(--muted);white-space:pre-line}
+.ml .side{text-align:right;font-size:.72rem;color:var(--muted);white-space:nowrap}
+.ml .coin-chip{display:inline-block;margin-bottom:.15rem;font-family:"Jua",sans-serif;font-size:.85rem;color:#9BE3B0}
+.ml .nw{display:inline-block;margin-left:.35rem;padding:0 .35rem;border-radius:99px;background:#E9584A;color:#fff;font-size:.62rem;font-family:"Jua",sans-serif;vertical-align:.12em}
+.ml-empty{text-align:center;color:var(--muted);padding:1.5rem 0}
+.ml-foot{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.7rem;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){.mail-btn.ring{animation:none}}
 </style>
 </head>
 <body>
@@ -1161,7 +1216,8 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
       <button class="voice-btn" id="voiceBtn">🎧 작업 채널 들어가기</button>
       <button class="ghost" id="ffBtn" title="미리보기용: 누적 작업 시간 +5시간">⏩ +5시간</button>
     </span>
-    <button class="ghost" id="noteBtn">✉️ 쪽지</button>
+    <button class="ghost mail-btn" id="mailBtn" aria-label="우편함">📬<span class="lbl"> 우편함</span><span class="mail-dot" id="mailDot" hidden></span></button>
+    <button class="ghost" id="noteBtn" aria-label="숲지기에게 쪽지">✉️<span class="lbl"> 쪽지</span></button>
     <button class="ghost" id="logoutBtn">나가기</button>
   </div>
 </header>
@@ -1193,15 +1249,15 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
   <div class="demo-note" id="demoNote" hidden>미리보기 모드예요. 데이터베이스를 연결하기 전이라 가짜 이웃들과 함께 움직이고, 1초를 작업 1분으로 계산해요. 연결하면 이 안내와 위의 미리보기 버튼은 사라지고, 디스코드 봇이 잰 시간이 들어와요.</div>
 
   <div class="tabs" role="tablist">
-    <button role="tab" aria-selected="true" data-tab="home">우리 집 꾸미기</button>
-    <button role="tab" aria-selected="false" data-tab="road">🎨 집 꾸미기</button>
-    <button role="tab" aria-selected="false" data-tab="plaza">🏘️ 마을 광장</button>
-    <button role="tab" aria-selected="false" data-tab="lotto">🎟️ 복권</button>
-    <button role="tab" aria-selected="false" data-tab="tree">🌳 세계수</button>
-    <button role="tab" aria-selected="false" data-tab="lake">🎣 호숫가</button>
-    <button role="tab" aria-selected="false" data-tab="pet">🐾 펫</button>
-    <button role="tab" aria-selected="false" data-tab="gacha">🎁 담당자의 보따리</button>
-    <button role="tab" aria-selected="false" data-tab="admin" id="adminTabBtn" hidden>🔒 숲지기 전용</button>
+    <button role="tab" aria-selected="true" data-tab="home" aria-label="우리 집 꾸미기"><span class="tab-ic" aria-hidden="true">🏡</span><span class="tab-tx" aria-hidden="true">우리 집 꾸미기</span><span class="tab-sh" aria-hidden="true">우리 집</span></button>
+    <button role="tab" aria-selected="false" data-tab="road" aria-label="집 꾸미기"><span class="tab-ic" aria-hidden="true">🎨</span><span class="tab-tx" aria-hidden="true">집 꾸미기</span><span class="tab-sh" aria-hidden="true">꾸미기</span></button>
+    <button role="tab" aria-selected="false" data-tab="plaza" aria-label="마을 광장"><span class="tab-ic" aria-hidden="true">🏘️</span><span class="tab-tx" aria-hidden="true">마을 광장</span><span class="tab-sh" aria-hidden="true">광장</span></button>
+    <button role="tab" aria-selected="false" data-tab="lotto" aria-label="복권"><span class="tab-ic" aria-hidden="true">🎟️</span><span class="tab-tx" aria-hidden="true">복권</span><span class="tab-sh" aria-hidden="true">복권</span></button>
+    <button role="tab" aria-selected="false" data-tab="tree" aria-label="세계수"><span class="tab-ic" aria-hidden="true">🌳</span><span class="tab-tx" aria-hidden="true">세계수</span><span class="tab-sh" aria-hidden="true">세계수</span></button>
+    <button role="tab" aria-selected="false" data-tab="lake" aria-label="호숫가"><span class="tab-ic" aria-hidden="true">🎣</span><span class="tab-tx" aria-hidden="true">호숫가</span><span class="tab-sh" aria-hidden="true">호숫가</span></button>
+    <button role="tab" aria-selected="false" data-tab="pet" aria-label="펫"><span class="tab-ic" aria-hidden="true">🐾</span><span class="tab-tx" aria-hidden="true">펫</span><span class="tab-sh" aria-hidden="true">펫</span></button>
+    <button role="tab" aria-selected="false" data-tab="gacha" aria-label="담당자의 보따리"><span class="tab-ic" aria-hidden="true">🎁</span><span class="tab-tx" aria-hidden="true">담당자의 보따리</span><span class="tab-sh" aria-hidden="true">보따리</span></button>
+    <button role="tab" aria-selected="false" data-tab="admin" id="adminTabBtn" hidden aria-label="숲지기 전용"><span class="tab-ic" aria-hidden="true">🔒</span><span class="tab-tx" aria-hidden="true">숲지기 전용</span><span class="tab-sh" aria-hidden="true">숲지기</span><span class="tab-badge" hidden></span></button>
   </div>
 
   <section id="tab-home" class="grid2">
@@ -1232,11 +1288,19 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
         <summary><span class="jua">🛒 가구 상점</span> <span class="small" id="shopCount"></span></summary>
         <div class="shop-tabs" role="tablist">
           <button class="shop-tab lim" data-shoptab="limited" role="tab" id="limTab" hidden></button>
+          <button class="shop-tab new" data-shoptab="new" role="tab" id="newTab" hidden></button>
           <button class="shop-tab" data-shoptab="furniture" role="tab">🪑 가구 <span id="cntF"></span></button>
           <button class="shop-tab" data-shoptab="wall" role="tab">🧱 벽 <span id="cntW"></span></button>
           <button class="shop-tab" data-shoptab="window" role="tab">🪟 창문·커튼 <span id="cntN"></span></button>
           <button class="shop-tab" data-shoptab="rug" role="tab">🧶 러그 <span id="cntR"></span></button>
           <button class="shop-tab" data-shoptab="accessory" role="tab">✨ 소품 <span id="cntA"></span></button>
+        </div>
+        <div class="shop-tools">
+          <input type="search" id="shopQ" placeholder="🔍 이름으로 찾기" autocomplete="off" aria-label="가구 이름으로 찾기">
+          <select id="shopSort" aria-label="정렬">
+            <option value="base">기본 순서</option><option value="cheap">싼 순</option><option value="pricey">비싼 순</option><option value="name">가나다순</option>
+          </select>
+          <label class="shop-chk"><input type="checkbox" id="shopNotOwned"> 안 산 것만</label>
         </div>
         <div class="items" id="shop"></div>
       </details>
@@ -1446,6 +1510,14 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
   <div class="party-emoji">🎉</div>
   <p id="partyMsg"></p>
   <button class="mini ask-yes" id="partyOk">고마워요!</button>
+</dialog>
+
+<dialog class="visit" id="mailDlg">
+  <button class="mini visit-close" id="mailClose">닫기</button>
+  <h3 style="margin:0 0 .15rem">📬 우편함</h3>
+  <p class="small" style="margin:0 0 .7rem" id="mailSub"></p>
+  <div id="mailList" class="mail-list"></div>
+  <div class="ml-foot"><span class="small">소식은 30일 동안 보관돼요</span><button class="mini" id="mailClear">읽은 소식 비우기</button></div>
 </dialog>
 
 <dialog class="visit" id="coinDlg">
@@ -3709,33 +3781,20 @@ document.addEventListener('click', e=>{
     }
   });
 });
-async function showTreatNotices(tries){
+async function showTreatNotices(){   // 📬 우편함으로 모아요
   try{
-    const d = document.getElementById('party'), pe = d.querySelector('.party-emoji');
-    if(d.open){ if((tries||0)<20) d.addEventListener('close', ()=>setTimeout(()=>showTreatNotices((tries||0)+1), 400), {once:true}); return; }
     const list = await api.treatNotices(); if(!list || !list.length) return;
-    if(d.open){ d.addEventListener('close', ()=>setTimeout(()=>showTreatNotices((tries||0)+1), 400), {once:true}); return; }
-    const lines = list.slice(0, 10).map(x=>{ const t = treatOf(x.kind);
-      return `${t.emoji} ${x.sender}님이 ${x.pet_name}에게 ${t.name}${jo(t.name,'을','를')} 주셨어요${x.n>1?` (×${x.n})`:''}`; });
-    if(list.length>10) lines.push(`… 그리고 ${list.length-10}번 더`);
-    pe.textContent = '🐾';
-    document.getElementById('partyMsg').textContent = `우리 펫이 간식을 받았어요!\n\n${lines.join('\n')}`;
-    document.getElementById('partyOk').onclick = ()=>{ d.close(); pe.textContent = '🎉'; };
-    d.showModal(); await api.treatNoticesSeen();
+    mailAdd(list.map(x=>{ const t = treatOf(x.kind);
+      return {icon:t.emoji, title:`${x.sender}님이 ${x.pet_name}에게 ${t.name}${jo(t.name,'을','를')} 주셨어요${x.n>1?` (×${x.n})`:''}`, body:'우리 펫이 엄청 좋아했어요.'}; }));
+    await api.treatNoticesSeen();
   }catch(e){}
 }
-async function showFlowerNotices(){
+async function showFlowerNotices(){   // 📬 우편함으로 모아요
   try{
     const list = await api.flowerNotices(); if(!list || !list.length) return;
-    const lines = list.map(x=>{ const g = FLOWER_GIFTS.find(y=>y.kind===x.kind)||FLOWER_GIFTS[1];
-      return `${g.emoji} ${x.sender}님이 ${g.name}${jo(g.name,'을','를')} 보냈어요${x.note?`\n   "${x.note}"`:''}`; });
-    const d = document.getElementById('party'), pe = d.querySelector('.party-emoji');
-    if(d.open) return;   // 다른 축하 창이 떠 있으면 다음에 보여 줘요
-    pe.textContent = '💐';
-    const got = list.reduce((a,x)=>a+((FLOWER_GIFTS.find(y=>y.kind===x.kind)||{gift:0}).gift),0);
-    document.getElementById('partyMsg').textContent = `우리 집 앞에 꽃이 피었어요!\n\n${lines.join('\n')}\n\n꽃과 함께 🪙 ${got}코인도 받았어요. (꽃은 하루 동안 피어 있어요)`;
-    document.getElementById('partyOk').onclick = ()=>{ d.close(); pe.textContent = '🎉'; };
-    d.showModal(); await api.flowerNoticesSeen();
+    mailAdd(list.map(x=>{ const g = FLOWER_GIFTS.find(y=>y.kind===x.kind)||FLOWER_GIFTS[1];
+      return {icon:g.emoji, title:`${x.sender}님이 ${g.name}${jo(g.name,'을','를')} 보냈어요`, body:(x.note?`"${x.note}"\n`:'') + '우리 집 앞에 하루 동안 피어 있어요.', coin:g.gift}; }));
+    await api.flowerNoticesSeen();
   }catch(e){}
 }
 
@@ -3978,7 +4037,7 @@ document.addEventListener('click', async e=>{
     try{
       const r = await api.pourDrops(n); const x = Array.isArray(r) ? r[0] : r;
       await Promise.all([refreshTree(), refreshMine()]); renderTop(); box_reset(); renderTree();
-      if(x && x.grown){ showGifts(); }
+      if(x && x.grown){ showGifts().then(n=>{ if(n) openMail(); }); }
       else toast('💧 세계수에 물을 줬어요');
     }catch(err){ toast(err.message||'물을 주지 못했어요'); renderTree(); }
   }
@@ -4861,14 +4920,10 @@ function renderTrucks(){
   renderVillageTrucks();
 }
 // 결제한 사람에게: 자정에 떠난 차에 몇 명이 다녀갔는지 (한 번만)
-async function showTruckReport(){
+async function showTruckReport(){   // 📬 우편함으로 모아요
   let list = []; try{ list = (await api.truckReport()) || []; }catch(e){ return; }
-  list.forEach((r,i)=>setTimeout(()=>{
-    const coffee = r.kind==='coffee', n = +r.n||0;
-    petParty(coffee?'☕':'🍰', n
-      ? `${coffee?'커피차':'디저트차'}가 떠났어요\n주민 ${n}명이 ${coffee?'커피를 마시고':'디저트를 먹고'} 갔어요. 고마워요!`
-      : `${coffee?'커피차':'디저트차'}가 떠났어요\n이번엔 아무도 못 들렀어요. 다음엔 꼭!`);
-  }, 1500 + i*3500));
+  mailAdd(list.map(r=>{ const coffee = r.kind==='coffee', n = +r.n||0, nm = coffee?'커피차':'디저트차';
+    return {icon:coffee?'☕':'🍰', title:`내가 부른 ${nm}가 떠났어요`, body: n ? `주민 ${n}명이 ${coffee?'커피를 마시고':'디저트를 먹고'} 갔어요. 고마워요!` : '이번엔 아무도 못 들렀어요. 다음엔 꼭!'}; }));
 }
 // 마을(숲 그림의 나무 아래)에도 와 있는 간식차를 세워 둬요 — 누르면 바로 마시기·먹기
 function renderVillageTrucks(){
@@ -5059,20 +5114,16 @@ function renderPlaza(){
     <p class="small" style="margin:0">내가 이 건물에 보탠 코인: 🪙 ${(cur.my_amount||0).toLocaleString()} · 보탠 코인은 돌려받을 수 없어요. 완공에 필요한 만큼만 빠져나가요.</p>
     ${bx?`<p class="small" style="margin:.7rem 0 .1rem">완공되면 담당자의 보따리 탭에 새 보따리가 열려요</p><div class="unlock-list"><span>${bx.emoji} ${esc(bx.name)} · 소품 ${GACHA_DEFAULT.filter(g=>g.gacha_box===bx.code).length}종</span></div>`:''}`;
 }
-function celebratePlaza(){
+function celebratePlaza(){   // 📬 새로 지어진 건물 소식은 우편함으로 (새로 생긴 개수를 돌려줘요)
   const seenKey = 'majam-plaza-seen';
   const built = PLAZA.filter(b=>b.built_at).map(b=>b.code);
   let seen = null; try{ seen = JSON.parse(localStorage.getItem(seenKey)||'null'); }catch(e){}
   try{ localStorage.setItem(seenKey, JSON.stringify(built)); }catch(e){}
-  if(!seen) return;
+  if(!seen) return 0;
   const fresh = PLAZA.filter(b=>b.built_at && !seen.includes(b.code));
-  if(!fresh.length) return;
-  const b = fresh[fresh.length-1], bx = plazaBox(b.code);
-  document.getElementById('partyMsg').textContent =
-    `광장에 ${b.emoji} ${b.name}${jo(b.name,'이','가')} 생겼어요!\n다 같이 벽돌을 나른 덕분이에요.` + (bx?`\n\n담당자의 보따리 탭에 ${bx.emoji} ${bx.name}가 새로 열렸어요!`:'');
-  const d = document.getElementById('party');
-  document.getElementById('partyOk').onclick = ()=>d.close();
-  if(!d.open) d.showModal();
+  mailAdd(fresh.map(b=>{ const bx = plazaBox(b.code);
+    return {icon:b.emoji, title:`광장에 ${b.name}${jo(b.name,'이','가')} 생겼어요!`, body:'다 같이 벽돌을 나른 덕분이에요.' + (bx?`\n담당자의 보따리 탭에 ${bx.emoji} ${bx.name}가 새로 열렸어요.`:'')}; }));
+  return fresh.length;
 }
 document.getElementById('plazaWork').addEventListener('click', async e=>{
   const g = e.target.closest('[data-give]'); if(!g) return;
@@ -5083,8 +5134,9 @@ document.getElementById('plazaWork').addEventListener('click', async e=>{
   try{
     const r = await api.givePlaza(n);
     await Promise.all([refreshMine(), refreshPlaza(), refreshGacha(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
-    renderTop(); renderBag(); renderPlaza(); renderGacha(); celebratePlaza();
-    if(!document.getElementById('party').open) toast('🧱 벽돌을 날랐어요! 광장이 조금 더 올라갔어요');
+    renderTop(); renderBag(); renderPlaza(); renderGacha();
+    if(celebratePlaza()) openMail();   // 내 벽돌로 완공되면 바로 보여 줘요
+    else toast('🧱 벽돌을 날랐어요! 광장이 조금 더 올라갔어요');
   }catch(err){ toast(err.message||'보내지 못했어요'); g.disabled=false; }
 });
 
@@ -5138,18 +5190,40 @@ function renderBag(){
   lt.hidden = !lim.length;
   if(lim.length) lt.innerHTML = `${esc(lim[0].season || '⏰ 한정')} <span>${lim.length}</span>`;
   if(shopTab==='limited' && !lim.length) shopTab = 'furniture';
-  document.querySelectorAll('[data-shoptab]').forEach(b=>{ const on=b.dataset.shoptab===shopTab; b.classList.toggle('on',on); b.setAttribute('aria-selected',on); });
+  const news = [...lim, ...regular].filter(isNewItem), nt = document.getElementById('newTab');
+  nt.hidden = !news.length; if(news.length) nt.innerHTML = `✨ 새 가구 <span>${news.length}</span>`;
+  if(shopTab==='new' && !news.length) shopTab = 'furniture';
+  const q = shopQ.trim().replace(/\s+/g,'');
+  document.querySelector('.shop-tabs').classList.toggle('searching', !!q);
+  document.querySelectorAll('[data-shoptab]').forEach(b=>{ const on=!q && b.dataset.shoptab===shopTab; b.classList.toggle('on',on); b.setAttribute('aria-selected',on); });
   let limNote = '';
-  if(shopTab==='limited'){
+  if(!q && shopTab==='limited'){
     const end = Math.min(...lim.map(x=>new Date(x.limited_until).getTime()));
     const last = new Date(end - 1), dday = Math.ceil((end - Date.now())/86400000);
     const dateTxt = `${last.toLocaleDateString('ko-KR',{month:'long', day:'numeric', timeZone:'Asia/Seoul'})}까지`;
     limNote = `<p class="lim-note">${esc(lim[0].season||'')} 한정 · ⏰ ${dateTxt} · ${dday<=1?'오늘 마감!':'D-'+(dday-1)}<br><span>기간이 끝나면 상점에서 사라져요. 산 건 계속 갖고 있어요.</span></p>`;
   }
-  document.getElementById('shop').innerHTML = limNote + (shopTab==='limited'?lim:shopTab==='accessory'?accs:shopTab==='wall'?walls:shopTab==='window'?wins:shopTab==='rug'?rugs:furn).map(s=>{ const own = ownedCount(s.code); return ''+
-    `<button class="item ${own?'owned':''}" data-buy="${esc(s.code)}" ${ME.coins<s.price?'disabled':''}>${own?`<span class="own" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${own}</span>`:''}<span class="em">${ico(s)}</span><span class="t">${esc(s.name)} · ${sizeText(s)}</span><span class="p">🪙 ${s.price}</span></button>`; }
+  if(!q && shopTab==='new') limNote = `<p class="shop-note">✨ 새로 들어온 가구예요. ${new Date(new Date(SHOP_NEW_UNTIL).getTime()-1).toLocaleDateString('ko-KR',{month:'long', day:'numeric', timeZone:'Asia/Seoul'})}까지 NEW 표시가 붙어 있어요.</p>`;
+  let list = q ? [...lim, ...regular].filter(x=>String(x.name||'').replace(/\s+/g,'').includes(q))
+    : (shopTab==='new'?news:shopTab==='limited'?lim:shopTab==='accessory'?accs:shopTab==='wall'?walls:shopTab==='window'?wins:shopTab==='rug'?rugs:furn);
+  if(shopNotOwned) list = list.filter(x=>!ownedCount(x.code));
+  if(shopSort==='cheap') list = [...list].sort((a,b)=>a.price-b.price);
+  else if(shopSort==='pricey') list = [...list].sort((a,b)=>b.price-a.price);
+  else if(shopSort==='name') list = [...list].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ko'));
+  if(q) limNote = `<p class="shop-note">「${esc(shopQ.trim())}」 찾은 물건 ${list.length}개 · 모든 칸에서 찾았어요</p>`;
+  const empty = list.length ? '' : `<p class="empty" style="grid-column:1/-1">${q ? '찾는 물건이 없어요. 다른 이름으로 찾아볼까요?' : shopNotOwned ? '이 칸 물건은 벌써 다 갖고 있어요!' : '아직 물건이 없어요.'}</p>`;
+  document.getElementById('shop').innerHTML = limNote + empty + list.map(s=>{ const own = ownedCount(s.code); return ''+
+    `<button class="item ${own?'owned':''}" data-buy="${esc(s.code)}" ${ME.coins<s.price?'disabled':''}>${isNewItem(s)?'<span class="nwb">NEW</span>':''}${own?`<span class="own" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${own}</span>`:''}<span class="em">${ico(s)}</span><span class="t">${esc(s.name)} · ${sizeText(s)}</span><span class="p">🪙 ${s.price}</span></button>`; }
   ).join('');
 }
+
+// ✨ 새로 들어온 가구 — 이 날짜 전까지 상점에 NEW 표시와 「새 가구」 칸이 보여요. 다음에 가구를 넣을 땐 SHOP_NEW 에 코드를 더해 주세요
+const SHOP_NEW_UNTIL = '2026-10-27T00:00:00+09:00';
+const SHOP_NEW = new Set(NEW_FURN66.map(r=>r[0]));
+const isNewItem = it => SHOP_NEW.has(it.code) && Date.now() < new Date(SHOP_NEW_UNTIL).getTime();
+// 🔍 상점 찾기·정렬 (찾는 말은 저장하지 않고, 정렬·안 산 것만은 기억해요)
+let shopQ = '', shopSort = 'base', shopNotOwned = false;
+try{ shopSort = localStorage.getItem('majam-shop-sort') || 'base'; shopNotOwned = localStorage.getItem('majam-shop-notowned') === '1'; }catch(e){}
 
 const SHOP_WALL = new Set(['screen']);                 // 벽 칸에 같이 보일 가구 (병풍)
 const SHOP_WIN = new Set(['wall_curtain','wall_bamboo']);   // 창문·커튼 칸에 같이 보일 것 (커튼 칸막이·대나무 발)   // 창문·벽 칸에 같이 보일 가구
@@ -5184,29 +5258,18 @@ function renderGiftForm(){
   document.getElementById('giftReasons').innerHTML = GIFT_REASONS.map(([r,n])=>`<button class="mini" data-reason="${r}" data-amount="${n}">${r} · 🪙${n}</button>`).join('');
 }
 
-async function showGifts(){
+async function showGifts(){   // 📬 우편함으로 모아요 (넣은 개수를 돌려줘요)
   try{
-    const list = await api.myGifts();
-    if(!list || !list.length) return;
-    const total = list.reduce((a,g)=>a+g.amount,0);
-    const fire = list.length===1 && list[0].reason.startsWith('🔥');
-    if(fire){ const n = parseInt(list[0].reason.replace(/[^0-9]/g,''),10)||1, c = ((n-1)%14)+1, next = streakReward(n+1);
-      document.querySelector('#party .party-emoji').textContent = '🔥'; }
-    const msg = fire
-      ? (()=>{ const n = parseInt(list[0].reason.replace(/[^0-9]/g,''),10)||1, c = ((n-1)%14)+1;
-          return `연속 출석 ${n}일째!\n오늘도 숲에 와 줘서 고마워요.\n\n${c}일차 보상 🪙 ${list[0].amount}코인을 받았어요.${c===14?'\n14일 한 바퀴 완주! 내일부터 새 바퀴가 시작돼요.':`\n내일 오면 🪙 ${streakReward(n+1)}코인!`}`; })()
-      : list.length===1 && list[0].reason.startsWith('🌳')
-      ? `🌳 세계수가 다 자랐어요!\n다 같이 물을 준 덕분이에요.\n물을 준 주민 모두에게 🪙 ${list[0].amount}코인이 도착했어요.`
-      : list.length===1
-      ? `「${list[0].reason}」 축하해요!\n숲지기가 🪙 ${list[0].amount}코인을 보냈어요.`
-      : list.map(g=>`「${g.reason}」 🪙 ${g.amount}`).join('\n') + `\n\n축하 코인 🪙 ${total}개가 도착했어요!`;
-    document.getElementById('partyMsg').textContent = msg;
-    const d = document.getElementById('party');
-    document.getElementById('partyOk').onclick = ()=>{ d.close(); document.querySelector('#party .party-emoji').textContent = '🎉'; };
-    if(!d.open) d.showModal();
+    const list = await api.myGifts(); if(!list || !list.length) return 0;
+    mailAdd(list.map(g=>{ const r = String(g.reason||'');
+      if(r.startsWith('🔥')){ const n = parseInt(r.replace(/[^0-9]/g,''),10)||1, c = ((n-1)%14)+1;
+        return {icon:'🔥', title:`연속 출석 ${n}일째!`, body:`오늘도 숲에 와 줘서 고마워요. ${c}일차 보상을 받았어요.` + (c===14 ? '\n14일 한 바퀴 완주! 내일부터 새 바퀴가 시작돼요.' : `\n내일 오면 🪙 ${streakReward(n+1)}코인!`), coin:g.amount}; }
+      if(r.startsWith('🌳')) return {icon:'🌳', title:'세계수가 다 자랐어요!', body:'다 같이 물을 준 덕분이에요. 물을 준 주민 모두에게 코인이 도착했어요.', coin:g.amount};
+      return {icon:'🎉', title:`「${r}」 축하해요!`, body:'숲지기가 축하 코인을 보냈어요.', coin:g.amount}; }));
     await api.giftsSeen();
     refreshStreak();
-  }catch(e){}
+    return list.length;
+  }catch(e){ return 0; }
 }
 
 let NOTES = [];
@@ -5219,7 +5282,7 @@ async function refreshNotes(){
   if(!ME || !ME.is_admin) return;
   try{ NOTES = (await api.notes()) || []; }catch(e){ NOTES = []; }
   const unread = NOTES.filter(n=>!n.read).length;
-  document.getElementById('adminTabBtn').textContent = unread ? `🔒 숲지기 전용 ✉️${unread}` : '🔒 숲지기 전용';
+  { const ab = document.getElementById('adminTabBtn'), bd = ab.querySelector('.tab-badge'); bd.hidden = !unread; bd.textContent = unread ? `✉️${unread}` : ''; ab.setAttribute('aria-label', unread ? `숲지기 전용 · 안 읽은 쪽지 ${unread}통` : '숲지기 전용'); }
   document.getElementById('inboxCount').textContent = NOTES.length ? `안 읽은 쪽지 ${unread}통 · 전체 ${NOTES.length}통` : '';
   document.getElementById('inbox').innerHTML = NOTES.length ? NOTES.map(n=>`
     <div class="note ${n.read?'':'unread'}">
@@ -5304,15 +5367,14 @@ async function refreshVillage(){ VILLAGE = await api.village(); }
 async function loadAll(){
   await Promise.all([refreshMine(), refreshVillage(), refreshPlaza(), refreshGacha(), refreshGarden(), refreshLake(), refreshTree(), refreshBanners(), refreshBoard(), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPets(), refreshPetsOn(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
   refreshStreak();
+  MAIL_BOOT_UNTIL = Date.now() + 10000; renderMailBadge();   // 들어오자마자 온 소식은 우편함을 한 번만 열어 보여 줘요
   renderPlaza(); celebratePlaza(); renderGacha(); renderBanners(); renderFloatDrops(); renderBoard();
   refreshTrucks().then(renderTrucks); showTruckReport();
   setInterval(()=>refreshTrucks().then(renderTrucks), 5*60e3);
   renderTop(); renderVillage(); renderMyHouse(); renderBag(); renderRoad(); setHint();
   document.getElementById('adminTabBtn').hidden = !ME.is_admin;
   renderAdmin();
-  showGifts();
-  showRaids();
-  setTimeout(showFlowerNotices, 1200);
+  showGifts(); showRaids(); showFlowerNotices(); showTreatNotices();
   refreshEvents();
   refreshNotes();
 }
@@ -5543,6 +5605,7 @@ document.addEventListener('click', e=>{
 
 document.querySelector('.tabs').addEventListener('click', e=>{
   const b = e.target.closest('button[data-tab]'); if(!b) return;
+  if(matchMedia('(max-width:600px)').matches){ const m = document.querySelector('main'); if(m.getBoundingClientRect().top < 0) m.scrollIntoView({block:'start'}); }
   document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b));
   ['home','road','plaza','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
   if(b.dataset.tab==='lotto'){ renderLotto(); refreshLotto().then(renderLotto); }
@@ -5573,8 +5636,16 @@ const shopBox = document.getElementById('shopBox');
 document.querySelector('.shop-tabs').addEventListener('click', e=>{
   const b = e.target.closest('[data-shoptab]'); if(!b) return;
   shopTab = b.dataset.shoptab; try{ localStorage.setItem('majam-shop-tab', shopTab); }catch(e){}
+  if(shopQ){ shopQ = ''; document.getElementById('shopQ').value = ''; }
   renderBag();
 });
+{ const qi = document.getElementById('shopQ'), so = document.getElementById('shopSort'), no = document.getElementById('shopNotOwned'); let qt;
+  so.value = shopSort; no.checked = shopNotOwned;
+  qi.addEventListener('input', ()=>{ clearTimeout(qt); qt = setTimeout(()=>{ shopQ = qi.value; renderBag(); }, 150); });
+  qi.addEventListener('keydown', e=>{ if(e.key==='Escape' && qi.value){ e.stopPropagation(); qi.value = ''; shopQ = ''; renderBag(); } });
+  so.addEventListener('change', ()=>{ shopSort = so.value; try{ localStorage.setItem('majam-shop-sort', shopSort); }catch(e){} renderBag(); });
+  no.addEventListener('change', ()=>{ shopNotOwned = no.checked; try{ localStorage.setItem('majam-shop-notowned', shopNotOwned?'1':'0'); }catch(e){} renderBag(); });
+}
 try{ shopBox.open = localStorage.getItem('majam-shop-open') === '1'; }catch(e){}
 shopBox.addEventListener('toggle', ()=>{ try{ localStorage.setItem('majam-shop-open', shopBox.open?'1':'0'); }catch(e){} });
 
@@ -5660,17 +5731,12 @@ document.getElementById('visitRaid').addEventListener('click', async e=>{
     const d = document.getElementById('raidDlg'); document.getElementById('raidOk').onclick = ()=>d.close(); d.showModal();
   }catch(err){ toast(err.message||'서리하지 못했어요'); renderRaidBtn(); }
 });
-async function showRaids(){
+async function showRaids(){   // 📬 우편함으로 모아요
   try{
-    const list = await api.raidNotices();
-    if(!list || !list.length) return;
-    const lines = list.map(x=> x.success
-      ? `🍑 ${x.thief_name}님이 우리 집 마당에서 과일을 서리해 갔어요`
-      : `🐺 ${x.thief_name}님이 서리하다 담당자한테 걸려 도망갔어요`);
-    document.getElementById('raidEmoji').textContent = '🏡';
-    document.getElementById('raidMsg').textContent = `집을 비운 사이에…\n\n${lines.join('\n')}\n\n(우리 집 코인은 그대로예요)`;
-    const d = document.getElementById('raidDlg'); document.getElementById('raidOk').onclick = ()=>d.close();
-    if(!d.open) d.showModal();
+    const list = await api.raidNotices(); if(!list || !list.length) return;
+    mailAdd(list.map(x=> x.success
+      ? {icon:'🍑', title:`${x.thief_name}님이 우리 마당 과일을 서리해 갔어요`, body:'집을 비운 사이에 생긴 일이에요. 우리 집 코인은 그대로예요.'}
+      : {icon:'🐺', title:`${x.thief_name}님이 서리하다 담당자한테 걸렸어요`, body:'빈손으로 도망갔대요. 우리 집 코인은 그대로예요.'}));
     await api.raidSeen();
   }catch(e){}
 }
@@ -5822,6 +5888,63 @@ async function openCoinLog(){
         return `<div class="cl-row"><span class="tm">${t}</span><span class="rs">${esc(r.reason)}</span><span class="dl ${r.delta>0?'up':'down'}">${r.delta>0?'+':'−'}${Math.abs(r.delta).toLocaleString()}<small>남은 🪙 ${(+r.balance).toLocaleString()}</small></span></div>`; }).join('');
   }).join('');
 }
+
+/* ---------- 📬 우편함 (10-13) — 축하 코인·꽃·간식·서리·간식차·광장 소식을 팝업 대신 한곳에 모아요 ---------- */
+const MAIL_MAX = 80, MAIL_DAYS = 30;
+let MAIL = null, mailFresh = 0, mailTimer = null, MAIL_BOOT_UNTIL = 0;
+const mailKey = () => 'majam-mail-' + (DEMO ? 'demo' : (supaApi.myId() || 'me'));
+function mailLoad(){
+  if(!MAIL){ try{ MAIL = JSON.parse(localStorage.getItem(mailKey()) || '[]'); }catch(e){ MAIL = []; } if(!Array.isArray(MAIL)) MAIL = []; }
+  const cut = Date.now() - MAIL_DAYS*864e5; MAIL = MAIL.filter(m=>m && m.t > cut);
+  return MAIL;
+}
+function mailSave(){ try{ localStorage.setItem(mailKey(), JSON.stringify(MAIL.slice(0, MAIL_MAX))); }catch(e){} }
+function mailAdd(items){
+  items = (items||[]).filter(Boolean); if(!items.length) return;
+  mailLoad(); const t = Date.now();
+  items.slice().reverse().forEach((x,i)=>MAIL.unshift({id:`${t}-${i}-${Math.random().toString(36).slice(2,7)}`, t, read:false, ...x}));
+  MAIL = MAIL.slice(0, MAIL_MAX); mailSave(); mailFresh += items.length; renderMailBadge();
+  if(document.getElementById('mailDlg').open) renderMail();
+  clearTimeout(mailTimer); mailTimer = setTimeout(mailNotify, 700);   // 여러 소식이 한꺼번에 와도 한 번만 알려요
+}
+function renderMailBadge(){
+  const n = mailLoad().filter(m=>!m.read).length, d = document.getElementById('mailDot'); if(!d) return;
+  d.hidden = !n; d.textContent = n > 99 ? '99+' : n;
+  document.getElementById('mailBtn').setAttribute('aria-label', n ? `우편함 · 안 읽은 소식 ${n}통` : '우편함');
+}
+function mailNotify(){
+  const n = mailFresh; mailFresh = 0; if(!n) return;
+  if(document.getElementById('mailDlg').open){ renderMail(); return; }
+  if(Date.now() < MAIL_BOOT_UNTIL && !document.querySelector('dialog[open]')){ MAIL_BOOT_UNTIL = 0; openMail(); return; }
+  const b = document.getElementById('mailBtn'); b.classList.remove('ring'); void b.offsetWidth; b.classList.add('ring');
+  toast(`📬 새 소식 ${n}통이 왔어요 · 우편함에서 볼 수 있어요`);
+}
+function renderMail(){
+  const list = mailLoad(), box = document.getElementById('mailList'), n = list.filter(m=>!m.read).length;
+  document.getElementById('mailSub').textContent = list.length ? (n ? `새 소식 ${n}통 · 모두 ${list.length}통` : `모두 ${list.length}통`) : '';
+  document.getElementById('mailClear').hidden = !list.length;
+  if(!list.length){ box.innerHTML = '<p class="ml-empty">아직 온 소식이 없어요.<br><span class="small">축하 코인, 꽃, 펫 간식 같은 소식이 오면 여기 모여요.</span></p>'; return; }
+  const kst = t => new Date(t + 9*3600e3).toISOString();
+  const today = kst(Date.now()).slice(0,10), yest = kst(Date.now()-864e5).slice(0,10);
+  const dayName = k => k===today ? '오늘' : k===yest ? '어제' : `${+k.slice(5,7)}월 ${+k.slice(8,10)}일`;
+  let html = '', last = '';
+  list.forEach(m=>{ const k = kst(m.t).slice(0,10);
+    if(k!==last){ html += `<div class="ml-day">${dayName(k)}</div>`; last = k; }
+    html += `<div class="ml ${m.read?'':'new'}"><span class="ic" aria-hidden="true">${esc(m.icon||'📬')}</span><div><b>${esc(m.title)}${m.read?'':'<span class="nw">NEW</span>'}</b>${m.body?`<p>${esc(m.body)}</p>`:''}</div>`
+      + `<div class="side">${m.coin?`<span class="coin-chip">+🪙 ${(+m.coin).toLocaleString()}</span><br>`:''}${kst(m.t).slice(11,16)}</div></div>`; });
+  box.innerHTML = html;
+}
+function openMail(){
+  renderMail(); const d = document.getElementById('mailDlg'); if(!d.open) d.showModal();
+  mailLoad().forEach(m=>{ m.read = true; }); mailSave(); renderMailBadge();   // NEW 표시는 이번에 열었을 때만 보여요
+}
+document.getElementById('mailBtn').addEventListener('click', openMail);
+document.getElementById('mailClose').onclick = ()=>document.getElementById('mailDlg').close();
+document.getElementById('mailDlg').addEventListener('click', e=>{ if(e.target.id==='mailDlg') e.target.close(); });
+document.getElementById('mailClear').addEventListener('click', async ()=>{
+  if(!(await ask('읽은 소식을 모두 비울까요?'))) return;
+  MAIL = mailLoad().filter(m=>!m.read); mailSave(); renderMail(); renderMailBadge();
+});
 document.getElementById('coin').addEventListener('click', openCoinLog);
 document.getElementById('coinClose').onclick = ()=>document.getElementById('coinDlg').close();
 document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id==='coinDlg') e.target.close(); });
@@ -5859,6 +5982,6 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ④</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑤</p>
 </body>
 </html>
