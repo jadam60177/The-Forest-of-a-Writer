@@ -1574,6 +1574,12 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 .ticket.tbg .t-play{left:13.67%;width:72.62%;top:35.16%;height:30.63%}
 .ticket.tbg .t-cells{column-gap:2.7%}
 .ticket.tbg .t-rule{left:15%;right:18%;top:70.5%;height:13%}
+
+/* ===== ❓ 안내 다시 보기 · 안내 동그라미로 건너뛰기 (10-13) ===== */
+#tourCard .tc-dots{display:flex;flex-wrap:wrap;gap:1px;align-items:center;max-width:55%}
+#tourCard .tc-dot{border:0;background:none;padding:0 1px;font:inherit;font-size:.7rem;line-height:1;color:inherit;opacity:.55;cursor:pointer}
+#tourCard .tc-dot:hover{opacity:1}
+#tourCard .tc-dots b{font-size:.7rem}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -1621,6 +1627,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
     </span>
     <button class="ghost mail-btn" id="mailBtn" aria-label="우편함">📬<span class="lbl"> 우편함</span><span class="mail-dot" id="mailDot" hidden></span></button>
     <button class="ghost mode-btn" id="modeBtn" aria-label="낮·밤 화면 고르기"><span id="modeIco">🌗</span><span class="lbl" id="modeLbl"> 자동</span></button>
+    <button class="ghost" id="guideBtn" aria-label="숲 안내 다시 보기" title="숲 안내 다시 보기">❓<span class="lbl"> 안내</span></button>
     <button class="ghost" id="noteBtn" aria-label="숲지기에게 쪽지">✉️<span class="lbl"> 쪽지</span></button>
     <button class="ghost" id="logoutBtn">나가기</button>
   </div>
@@ -6674,14 +6681,23 @@ document.getElementById('statRange').addEventListener('click', e=>{
 /* ---------- 🐺 신입 주민 안내 (10-13) — 처음 들어온 주민에게 담당자가 숲을 짚어 주고 입주 선물을 줘요 ---------- */
 const TOUR_GIFT = 500;   // tour.sql 의 finish_tour 와 같아요
 const TOUR = [
-  {title:'어서 오세요, 작가님!', text:'마감의 숲 담당자입니다.\n처음 오셨으니 숲을 잠깐 안내해 드릴게요. 금방 끝나요!'},
-  {tab:'village', el:'.house.me', title:'작가님 집이에요', text:'디스코드 「작업실」 음성 채널에 들어와 있으면 집에 불이 켜지고, 1분마다 🪙 코인이 쌓여요. 오래 있을수록 집도 점점 커져요.'},
-  {el:'#coin', title:'모은 코인', text:'코인은 여기 보여요. 누르면 언제 얼마나 받았는지 내역도 볼 수 있어요.'},
+  {title:'어서 오세요, 작가님!', text:'마감의 숲 담당자입니다.\n숲을 한 바퀴 안내해 드릴게요. 아래 동그라미를 누르면 보고 싶은 곳으로 바로 갈 수도 있어요.'},
+  {tab:'village', el:'.house.me', title:'작가님 집이에요', text:'디스코드 「작업실」 음성 채널에 들어와 있으면 집에 불이 켜지고, 1분마다 🪙 코인이 쌓여요. 오래 있을수록 집도 점점 커져요.\n이웃 집을 누르면 구경하고 꽃도 보낼 수 있어요.'},
+  {el:'#coin', title:'모은 코인', text:'코인은 여기 보여요. 누르면 언제 얼마나 받았는지 내역도 볼 수 있어요.\n하루 1분이라도 들어오면 🔥 연속 출석 보너스도 붙어요.'},
   {tab:'home', el:'#room', title:'우리 집 안', text:'가구를 놓아서 방을 꾸며요. 놓은 가구를 누르면 다시 가방으로 돌아오니까 마음껏 옮겨 보세요.'},
-  {tab:'home', el:'#shopOpen', title:'가구 상점', text:'가구는 여기서 사요. 산 가구는 가방에 들어가고, 가방에서 고른 뒤 방 칸을 누르면 놓여요.'},
-  {el:'.tabs', title:'숲 둘러보기', text:'광장, 복권, 세계수, 호숫가, 펫, 보따리까지 숲 곳곳에 놀 거리가 있어요. 마을에서 이웃 집을 누르면 구경하고 꽃도 보낼 수 있어요.'},
+  {tab:'home', el:'#shopOpen', title:'가구 상점', text:'가구는 여기서 사요. 산 가구는 가방에 들어가고, 가방에서 고른 뒤 방 칸을 누르면 놓여요. 안 쓰는 가구는 되팔 수도 있어요.'},
+  {tab:'home', el:'#roomTabs .garden-tab', title:'🌷 마당 · 화단과 어항', text:'방 이름 옆 「마당」을 누르면 화단과 어항이 나와요.\n씨앗을 심으면 작업실에 있는 동안 자라서 꽃이 피고, 호숫가에서 많이 잡은 물고기는 어항에 넣어 헤엄치게 할 수 있어요.'},
+  {tab:'road', el:'#tab-road', title:'🎨 집 겉모습', text:'집이 커지는 단계를 미리 보고, 집 스타일을 골라 꾸밀 수 있어요. 지나온 집 모습으로 되돌려 둘 수도 있어요.'},
+  {tab:'plaza', el:'.plaza-scene', title:'🏘️ 마을 광장', text:'주민들이 코인을 모아 건물을 하나씩 지어요.\n동물 보호소가 지어지면 펫을, 꽃집이 지어지면 씨앗을 살 수 있어요. 간식차가 오면 커피도 얻어 마실 수 있어요.'},
+  {tab:'lotto', el:'#lottoBox', title:'🎟️ 마감 복권', text:'한 장 🪙30, 하루 5장까지 긁을 수 있어요.\n같은 그림 3개가 나오면 당첨! 이번 주 전설 가구도 나와요.'},
+  {tab:'tree', el:'#treeBox', title:'🌳 세계수', text:'작업실에 있으면 주머니에 물방울이 모이고, 세계수 둘레에 떠오르는 물방울도 주울 수 있어요.\n다 같이 물을 줘서 나무가 다 자라면, 물을 준 주민 모두 코인을 받아요.'},
+  {tab:'lake', el:'#lakeBox', title:'🎣 호숫가', text:'어망을 던져 두고 1시간 뒤에 걷으면 물고기가 1~2마리 걸려요.\n처음 잡거나 내 기록보다 크면 코인을 더 받아요. 미끼를 달면 귀한 물고기가 더 잘 나와요.'},
+  {tab:'pet', el:'#petBox .pet-yard', title:'🐾 펫', text:'광장에 보호소가 생기면 도감 칸을 열고 펫을 입양할 수 있어요.\n밥 주고, 쓰다듬고, 놀아 주면 친밀도가 올라 코인을 받고, 다 크면 모습도 바뀌어요. 산책을 보내면 선물을 물어 와요.\n마당 칸이 꽉 차면 🏡 펫 숙소에서 쉬게 할 수 있어요.'},
+  {tab:'gacha', el:'.gacha-inner', title:'🎁 담당자의 보따리', text:'코인으로 보따리를 열면 상점에 없는 소품이 나와요. 열 때마다 ✨ 별조각이 모이고, 별조각으로 갖고 싶은 소품을 바꿀 수도 있어요.'},
   {el:'#mailBtn', title:'우편함', text:'이웃이 보낸 꽃이나 선물 소식은 여기 모여요.'},
+  {el:'#modeBtn', title:'낮·밤 화면', text:'누를 때마다 자동 → 낮 → 밤으로 바뀌어요. 자동이면 시간에 맞춰 숲에 아침과 밤이 와요.'},
   {el:'#noteBtn', title:'숲지기에게 쪽지', text:'궁금한 게 있거나 갖고 싶은 가구가 있으면 숲지기에게 쪽지를 보내 주세요. 고장 신고도 환영이에요.'},
+  {el:'#guideBtn', title:'안내 다시 보기', text:'이 안내는 언제든 여기 ❓ 버튼으로 다시 볼 수 있어요.'},
   {gift:true, title:'입주 선물이에요!', text:`숲에 온 기념으로 🪙 ${TOUR_GIFT}코인을 드릴게요. 첫 가구 사러 가 보세요.\n…그리고 원고도 기다리고 있겠습니다.`},
 ];
 let TOUR_I = -1, TOUR_PREVIEW = false, TOUR_EL = null;
@@ -6693,6 +6709,7 @@ function tourEls(){
     const a = b.dataset.tour;
     if(a==='next') tourGo(TOUR_I+1); else if(a==='prev') tourGo(TOUR_I-1);
     else if(a==='skip') tourGo(TOUR.length-1); else if(a==='gift') finishTour();
+    else if(a==='go') tourGo(+b.dataset.k);
   });
 }
 function startTour(preview){
@@ -6712,12 +6729,13 @@ function tourGo(i){
     if(b && b.getAttribute('aria-selected')!=='true') b.dispatchEvent(Object.assign(new MouseEvent('click',{bubbles:true}), {tour:true})); }
   TOUR_EL = st.el ? [...document.querySelectorAll(st.el)].find(x=>x.getClientRects().length) || null : null;
   if(TOUR_EL && getComputedStyle(TOUR_EL).position!=='fixed') TOUR_EL.scrollIntoView({block:'center'});
-  const last = TOUR_I===TOUR.length-1, card = document.getElementById('tourCard');
-  card.innerHTML = `<div class="tc-body"><img src="bg/Wolf_Watcher.webp" alt="" draggable="false"><div><span class="tc-who">담당자</span><h4 id="tourTitle">${esc(st.title)}</h4><p>${esc(st.text)}</p></div></div>
-    <div class="tc-foot"><span class="tc-dots" aria-label="${TOUR_I+1} / ${TOUR.length}">${TOUR.map((_,k)=>k===TOUR_I?'<b>●</b>':'○').join('')}</span>
+  const last = TOUR_I===TOUR.length-1, card = document.getElementById('tourCard'), again = last && TOUR_PREVIEW;
+  const title = again ? '안내 끝!' : st.title, text = again ? '숲에서 즐겁게 놀다 가세요.\n…그리고 원고도 기다리고 있겠습니다.' : st.text;
+  card.innerHTML = `<div class="tc-body"><img src="bg/Wolf_Watcher.webp" alt="" draggable="false"><div><span class="tc-who">담당자</span><h4 id="tourTitle">${esc(title)}</h4><p>${esc(text)}</p></div></div>
+    <div class="tc-foot"><span class="tc-dots" aria-label="${TOUR_I+1} / ${TOUR.length}">${TOUR.map((t,k)=>k===TOUR_I?'<b>●</b>':`<button type="button" class="tc-dot" data-tour="go" data-k="${k}" title="${esc(t.title)}" aria-label="${k+1}. ${esc(t.title)}">○</button>`).join('')}</span>
       ${last ? '' : `<button class="mini" type="button" data-tour="skip">건너뛰기</button>`}
       ${TOUR_I>0 ? `<button class="mini" type="button" data-tour="prev">이전</button>` : ''}
-      ${last ? `<button class="mini tc-next" type="button" data-tour="gift">${TOUR_PREVIEW ? '안내 닫기 (미리보기)' : `🎁 선물 받기`}</button>` : `<button class="mini tc-next" type="button" data-tour="next">다음</button>`}</div>`;
+      ${last ? `<button class="mini tc-next" type="button" data-tour="gift">${TOUR_PREVIEW ? '안내 닫기' : `🎁 선물 받기`}</button>` : `<button class="mini tc-next" type="button" data-tour="next">다음</button>`}</div>`;
   requestAnimationFrame(()=>{ placeTour(); card.querySelector('.tc-next')?.focus({preventScroll:true}); });
 }
 function placeTour(){
@@ -6743,7 +6761,7 @@ document.addEventListener('keydown', e=>{
 });
 async function finishTour(){
   const b = document.querySelector('#tourCard [data-tour="gift"]'); if(b) b.disabled = true;
-  if(TOUR_PREVIEW){ endTour(); toast('🐺 안내 미리 보기를 마쳤어요. 선물은 진짜 신입 주민만 받아요'); return; }
+  if(TOUR_PREVIEW){ endTour(); return; }
   let got = true;
   try{ const c = await api.finishTour(); if(typeof c==='number') ME.coins = c; else await refreshMine(); ME.tour_done = true; }
   catch(e){ got = false; toast(e.message || '선물을 받지 못했어요. 잠시 뒤 다시 들어와 주세요'); }
@@ -6753,6 +6771,8 @@ async function finishTour(){
   petParty('🎁', `입주 선물 🪙 ${TOUR_GIFT}코인을 받았어요!\n우리 집 탭의 🛒 가구 상점에서\n첫 가구를 골라 보세요.`);
 }
 document.getElementById('tourReplay').addEventListener('click', ()=>startTour(true));
+// ❓ 안내 다시 보기 (10-13) — 이미 선물을 받은 주민은 선물 없이, 아직이면 끝에서 선물도 받아요
+document.getElementById('guideBtn').addEventListener('click', ()=>startTour(!(ME && ME.tour_done===false)));
 
 /* ☀️🌙 낮·밤 화면 고르기 — 자동이면 1분마다 시간을 보고 바꿔요 */
 const MODE_INFO = {auto:['🌗','자동'], day:['☀️','낮'], night:['🌙','밤']};
@@ -6777,6 +6797,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㉒</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㉓</p>
 </body>
 </html>
