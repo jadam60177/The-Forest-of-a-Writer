@@ -1021,7 +1021,7 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .wolf-note span{font-size:.98rem}
 .prize-table{list-style:none;margin:0;padding:0;display:grid;gap:.3rem}
 .prize-table li{display:flex;align-items:center;gap:.55rem;padding:.35rem .55rem;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
-.prize-table .sym{font-size:1.15rem;letter-spacing:.05em;flex:none;width:4.6rem}
+.prize-table .sym{font-size:1.15rem;letter-spacing:.05em;flex:none;width:auto;min-width:4.6rem;white-space:nowrap}   /* (10-13) 그림 3개가 한 줄로 */
 .prize-table .lb{flex:1;font-size:.93rem}
 .prize-table .rt{font-size:.78rem;color:var(--muted)}
 .prize-table li.top{background:linear-gradient(90deg,rgba(255,206,92,.2),rgba(255,206,92,.04));border-color:rgba(255,206,92,.45)}
@@ -3400,8 +3400,8 @@ const demoApi = (() => {
       if(st.me.coins<LOTTO_PRICE) fail('코인이 부족해요');
       L.n++; st.me.coins -= LOTTO_PRICE; const paid = st.me.coins;
       const r = Math.random()*100; let kind = 'miss', amount = 0, item = null, dup = false;
-      if(r<2) kind='furn'; else if(r<3){ kind='x10'; amount=300; } else if(r<6){ kind='x5'; amount=150; } else if(r<19){ kind='back'; amount=30; }
-      else if(r<29){ kind='stars'; amount=2; } else if(r<38){ kind='seed'; amount=1; } else if(r<45){ kind='bait'; amount=1; }
+      if(r<5) kind='furn'; else if(r<8){ kind='x10'; amount=300; } else if(r<14){ kind='x5'; amount=150; } else if(r<27){ kind='back'; amount=30; }
+      else if(r<37){ kind='stars'; amount=2; } else if(r<46){ kind='seed'; amount=1; } else if(r<53){ kind='bait'; amount=1; }
       if(kind==='furn'){ const w = this.lweek(); item = w[Math.floor(Math.random()*w.length)];
         if(L.dex.includes(item)){ dup = true; amount = LOTTO_DUP_COIN; } else { L.dex.push(item); st.inv[item] = (st.inv[item]||0)+1; } }
       if(['x10','x5','back'].includes(kind) || dup) st.me.coins += amount;
@@ -5303,11 +5303,11 @@ DEFAULT_SHOP.push(...LOTTO_FURN);
 LOTTO_FURN.forEach(x=>FURN_IMG.add(x.code));
 const LOTTO_TALL = new Set(['ashfire','wolftable','floattea']);   // 2×1 인데 그림이 높아서 위로 더 크게 그려요
 const lottoOf = code => LOTTO_FURN.find(x=>x.code===code);
-// 당첨표 — 같은 그림 3개 (확률은 play_lotto 와 같아요, 나머지 55%는 꽝)
+// 당첨표 — 같은 그림 3개 (확률은 play_lotto 와 같아요, 나머지 47%는 꽝) · (10-13) 전설 2→5 · 10배 1→3 · 5배 3→6
 const LOTTO_PRIZES = [
-  {kind:'furn',  sym:'👑', label:'이번 주 전설 가구 1개', rate:2},
-  {kind:'x10',   sym:'💎', label:'🪙 300 (10배)', rate:1},
-  {kind:'x5',    sym:'💰', label:'🪙 150 (5배)', rate:3},
+  {kind:'furn',  sym:'👑', label:'이번 주 전설 가구 1개', rate:5},
+  {kind:'x10',   sym:'💎', label:'🪙 300 (10배)', rate:3},
+  {kind:'x5',    sym:'💰', label:'🪙 150 (5배)', rate:6},
   {kind:'back',  sym:'🎟️', label:'🪙 30 (본전)', rate:13},
   {kind:'stars', sym:'⭐', label:'✨ 별조각 2개', rate:10},
   {kind:'seed',  sym:'🌰', label:'🌰 이름 모를 씨앗 1봉투', rate:9},
@@ -5397,7 +5397,7 @@ function renderLotto(){
         <div>
           <ul class="prize-table">
             ${LOTTO_PRIZES.map(p=>`<li class="${p.kind==='furn'?'top':''}"><span class="sym">${p.sym.repeat(3)}</span><span class="lb">${esc(p.label)}</span><span class="rt">${p.rate}%</span></li>`).join('')}
-            <li><span class="sym">🐺</span><span class="lb">그 밖엔 꽝 · 담당자의 잔소리 쪽지</span><span class="rt">55%</span></li>
+            <li><span class="sym">🐺</span><span class="lb">그 밖엔 꽝 · 담당자의 잔소리 쪽지</span><span class="rt">47%</span></li>
           </ul>
           <p class="small" style="margin:.5rem 0 0">전설 가구는 상점에서 팔지 않아요. 이미 가진 가구가 또 나오면 🪙 ${LOTTO_DUP_COIN}코인으로 바꿔 드려요.</p>
         </div>
@@ -6777,6 +6777,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㉑</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㉒</p>
 </body>
 </html>
