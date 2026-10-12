@@ -950,7 +950,8 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .bait.none{justify-content:center}
 .bait.none .ico{font-size:1.9rem;line-height:52px;height:52px}
 .bait .buy{margin-top:.15rem;font-size:.72rem;padding:.12rem .45rem;border-radius:999px;border:1px solid rgba(255,206,92,.6);background:transparent;color:#FFCE5C;font:inherit;font-size:.72rem;cursor:pointer}
-.bait .buy:disabled{opacity:.4;cursor:default}
+.bait .buy.sold{opacity:.45}
+.bait .buy{padding:.3rem .7rem;font-size:.8rem;min-height:30px}
 .bait-about{font-size:.76rem;opacity:.85;margin:.35rem 0 0;text-align:center;min-height:1.1em}
 .bait-net{display:flex;align-items:center;justify-content:center;gap:.25rem;font-size:.85rem;margin:.35rem 0 0;width:100%}
 .bait-net img{width:24px;height:24px;object-fit:contain}
@@ -3819,7 +3820,7 @@ function renderLake(){
     <div class="bait-list">
       <div class="bait none ${!LAKE_BAIT?'on':''}" data-bait="" role="button" tabindex="0"><span class="ico">🪝</span><b>미끼 없이</b><span class="q">그냥 던지기</span></div>
       ${BAITS.map(b=>{ const q = binv[b.code]||0, sold = b.daily && (BAITS_ME.legend_today||0)>=b.daily;
-        return `<div class="bait ${LAKE_BAIT===b.code?'on':''}" data-bait="${b.code}" role="button" tabindex="0" title="${esc(b.about)}"><img src="${b.img}" alt=""><b>${b.name}</b><span class="q">${q}개 있음</span><button class="buy" data-buybait="${b.code}" ${sold||(ME&&ME.coins<b.price)?'disabled':''}>${sold?'오늘 다 샀어요':`🪙 ${b.price} 사기`}</button></div>`; }).join('')}
+        return `<div class="bait ${LAKE_BAIT===b.code?'on':''}" data-bait="${b.code}" role="button" tabindex="0" title="${esc(b.about)}"><img src="${b.img}" alt=""><b>${b.name}</b><span class="q">${q}개 있음</span><button type="button" class="buy ${sold?'sold':''}" data-buybait="${b.code}">${sold?'오늘 다 샀어요':`🪙 ${b.price} 사기`}</button></div>`; }).join('')}
     </div><p class="bait-about">${LAKE_BAIT ? esc(baitOf(LAKE_BAIT).about) : '미끼를 고르면 다음 어망에 달아요'}</p></div>` : '';
   const pend = FPENDING.map(p=>{ const f = fishOf(p.fish), tr = itemOf(TRIBUTE[p.fish]);
     return `<div class="lcard legend wide">${fishSvg(p.fish)}<b>${esc(f.name)}</b><span>${cm(p.size_cm)} · 전설의 물고기!</span>
@@ -3890,17 +3891,26 @@ function wolfHappyLines(){
   try{ const w = JSON.parse(localStorage.getItem('majam-wolf-happy')||'null'); if(w && w.until > Date.now()) return WOLF_HAPPY[w.code]; }catch(e){}
   return null;
 }
-document.addEventListener('click', async e=>{
-  const bb = e.target.closest('[data-buybait]');
-  if(bb) return act(async()=>{
-    const b = baitOf(bb.dataset.buybait); if(!b) return;
+let BAIT_BUSY = false;
+async function buyBaitFlow(code){
+  const b = baitOf(code); if(!b || BAIT_BUSY) return;
+  if(b.daily && BAITS_ME && (BAITS_ME.legend_today||0) >= b.daily){ toast(`${b.name}${jo(b.name,'은','는')} 하루에 ${b.daily}개만 살 수 있어요. 새벽 12시에 다시 와요`); return; }
+  if(ME && typeof ME.coins === 'number' && ME.coins < b.price){ toast(`코인이 부족해요 (🪙 ${b.price}코인 필요)`); return; }
+  BAIT_BUSY = true;
+  try{
     if(!(await ask(`${b.name}${jo(b.name,'을','를')} 하나 살까요? 🪙 ${b.price}코인이 들어요.\n${b.about}`))) return;
     const c = await api.buyBait(b.code); if(typeof c === 'number') ME.coins = c;
-    LAKE_BAIT = b.code; await Promise.all([refreshMine(), refreshLake()]); renderTop(); renderLake(); toast(`🎣 ${b.name}${jo(b.name,'을','를')} 샀어요! 미끼 상자에 넣어 뒀어요`);
-  });
+    LAKE_BAIT = b.code; await Promise.all([refreshMine(), refreshLake()]); renderTop(); renderLake();
+    toast(`🎣 ${b.name}${jo(b.name,'을','를')} 샀어요! 미끼 상자에 넣어 뒀어요`);
+  }catch(err){ const m = err.message||''; toast(/schema cache|buy_bait/.test(m) ? '미끼 가게 SQL(bait.sql)을 아직 안 돌린 것 같아요' : (m||'미끼를 사지 못했어요')); }
+  finally{ BAIT_BUSY = false; }
+}
+document.addEventListener('click', async e=>{
+  const bb = e.target.closest('[data-buybait]');
+  if(bb){ e.preventDefault(); buyBaitFlow(bb.dataset.buybait); return; }
   const bs = e.target.closest('[data-bait]');
   if(bs){ const code = bs.dataset.bait || null;
-    if(code && !((BAITS_ME && BAITS_ME.inv && BAITS_ME.inv[code])>0)){ toast('아직 그 미끼가 없어요. 🪙 사기를 눌러 주세요'); return; }
+    if(code && !((BAITS_ME && BAITS_ME.inv && BAITS_ME.inv[code])>0)){ buyBaitFlow(code); return; }   // 없는 미끼 칸을 누르면 바로 사기
     LAKE_BAIT = code; renderLake(); return; }
   const bn = e.target.closest('#buyNetBtn');
   if(bn) return act(async()=>{
