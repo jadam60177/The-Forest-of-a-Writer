@@ -1566,6 +1566,14 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 :root[data-mode="day"] .tk-row{background:rgba(255,255,255,.7)}
 @media (prefers-reduced-motion:reduce){.tank .tf-body,.tank-bubbles i{animation:none}}
 @media (max-width:600px){.tank{border-width:4px;border-radius:14px}.tk-list{grid-template-columns:1fr}.tk-skin-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ===== 🎟️ 복권 새 그림 낮·밤 (10-13) — bg/lotto2.webp(밤) · bg/lotto2_day.webp(낮), 2400×1792 기준 칸 위치 ===== */
+.ticket.tbg{aspect-ratio:2400/1792;background:url(bg/lotto2.webp) center/100% 100% no-repeat,#1B203E}
+:root[data-mode="day"] .ticket.tbg{background:url(bg/lotto2_day.webp) center/100% 100% no-repeat,#7FC4F0}
+.ticket.tbg .t-top{left:24%;right:24%;top:16.5%;height:12.5%}
+.ticket.tbg .t-play{left:13.67%;width:72.62%;top:35.16%;height:30.63%}
+.ticket.tbg .t-cells{column-gap:2.7%}
+.ticket.tbg .t-rule{left:15%;right:18%;top:70.5%;height:13%}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -6769,6 +6777,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑳</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㉑</p>
 </body>
 </html>
