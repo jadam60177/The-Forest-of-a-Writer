@@ -1514,6 +1514,19 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 :root[data-mode="day"] .raid-btn{background:#FFF1E2;color:#9A4A1E;border-color:#E9A065}
 :root[data-mode="day"] .board-form input,:root[data-mode="day"] #noteBody,:root[data-mode="day"] .gift select,:root[data-mode="day"] .gift input{background:#FFFFFF}
 :root[data-mode="day"] table.admin tr.d3 td{background:rgba(180,81,62,.1)}
+
+/* ===== 🏡 펫 숙소 (10-13) ===== */
+.pet-info .lodge-go{align-self:center;font-size:.78rem;opacity:.85}
+.panel.lodge{margin-top:1rem}
+.lodge-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:.6rem}
+.lodge-pet{display:flex;flex-direction:column;align-items:center;gap:.2rem;text-align:center;padding:.6rem .4rem .7rem;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.05)}
+.lodge-pet .lp-art{width:84px;height:84px;display:grid;place-items:center}
+.lodge-pet .lp-art img,.lodge-pet .lp-art svg{max-width:100%;max-height:100%}
+.lodge-pet b{font-family:"Jua",sans-serif;font-weight:400}
+.lodge-pet .mini{font-size:.78rem;margin-top:.15rem}
+.lodge-empty{opacity:.8}
+.pdx .to-lodge{display:block;font-size:.72rem;opacity:.8;margin-top:.15rem}
+:root[data-mode="day"] .lodge-pet{background:rgba(255,255,255,.7)}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -3221,17 +3234,20 @@ const demoApi = (() => {
       if(!this.shelterBuilt()) fail('광장에 동물 보호소가 지어지면 열 수 있어요'); if(P.dex.includes(code)) fail('이미 열린 칸이에요');
       if(st.me.coins<price) fail('코인이 부족해요'); st.me.coins-=price; P.dex.push(code); persist(); return st.me.coins; },
     async adoptPet(code, name){ const P = this.pstate(), s = petOf(code), price = PET_TIER[s.tier].adopt;
-      if(!P.dex.includes(code)) fail('먼저 도감 칸을 열어 주세요'); if(P.pets.length>=P.slots) fail('키우는 칸이 꽉 찼어요. 칸을 늘려 주세요');
+      if(!P.dex.includes(code)) fail('먼저 도감 칸을 열어 주세요'); const lodge = P.pets.filter(x=>!x.lodge).length>=P.slots;   // 마당이 꽉 차면 숙소로 (10-13)
       if(st.me.coins<price) fail('코인이 부족해요'); st.me.coins-=price;
-      P.pets.push({id:P.nid++, code, name:(name||s.name).slice(0,10), affection:0, last_cared:new Date().toISOString(), fed:0, patted:0, played:0, day:this.fday(), event_at:new Date().toISOString()}); persist(); return st.me.coins; },
+      P.pets.push({id:P.nid++, code, name:(name||s.name).slice(0,10), affection:0, last_cared:new Date().toISOString(), fed:0, patted:0, played:0, day:this.fday(), event_at:new Date().toISOString(), lodge}); persist(); return st.me.coins; },
+    async lodgePet(id, inLodge){ const P = this.pstate(), p = P.pets.find(x=>x.id===id); if(!p) fail('내 펫이 아니에요');
+      if(!inLodge && p.lodge && P.pets.filter(x=>!x.lodge).length>=P.slots) fail('마당이 꽉 찼어요. 먼저 다른 친구를 숙소에 보내 주세요');
+      p.lodge = !!inLodge; if(inLodge && P.main===id) P.main = null; if(!inLodge) p.last_cared = new Date().toISOString(); persist(); },
     async buyPetSlot(){ const P = this.pstate(); if(P.slots>=PET_MAX) fail(`펫은 ${PET_MAX}마리까지 키울 수 있어요`);
       const price = PET_SLOT_PRICE[P.slots]; if(st.me.coins<price) fail('코인이 부족해요'); st.me.coins-=price; P.slots++; persist(); return st.me.coins; },
-    async carePet(id, kind){ const P = this.pstate(), p = P.pets.find(x=>x.id===id), c = PET_CARE[kind]; if(!p) fail('내 펫이 아니에요');
+    async carePet(id, kind){ const P = this.pstate(), p = P.pets.find(x=>x.id===id), c = PET_CARE[kind]; if(!p) fail('내 펫이 아니에요'); if(p.lodge) fail('숙소에 있는 친구는 마당으로 데려와야 돌볼 수 있어요');
       if((p[c.key]||0)>=c.max) fail('오늘은 충분히 했어요. 새벽 12시에 다시 할 수 있어요');
       const o = petLevel(p.affection); p[c.key]=(p[c.key]||0)+1; p.affection+=c.gain; p.last_cared=new Date().toISOString();
       const n = petLevel(p.affection), reward = n>o ? n*20 : 0, trace = o<10 && n>=10; st.me.coins+=reward; if(trace) P.traces=(P.traces||0)+1; persist();
       return {affection:p.affection, level:n, level_up:n>o, reward, coins:st.me.coins, trace}; },
-    async petEvent(id, choice){ const P = this.pstate(), p = P.pets.find(x=>x.id===id); if(!p) fail('내 펫이 아니에요');
+    async petEvent(id, choice){ const P = this.pstate(), p = P.pets.find(x=>x.id===id); if(!p) fail('내 펫이 아니에요'); if(p.lodge) fail('숙소에 있는 친구는 마당으로 데려와야 산책할 수 있어요');
       if(new Date(p.event_at)>Date.now()) fail('아직 산책 갈 시간이 아니에요');
       const r = Math.random(), lv = petLevel(p.affection), pool = ['letter','envelope','ribbon','yarn','socks','mapleleaf']; let out;
       if(choice===0) out = r<.7?{kind:'seeds',amount:1+Math.floor(Math.random()*2)}: r<.95?{kind:'coins',amount:20}:{kind:'item',item:'clover'};
@@ -3246,10 +3262,10 @@ const demoApi = (() => {
       return {...out, coins:st.me.coins}; },
     async renamePet(id, name){ const p = this.pstate().pets.find(x=>x.id===id); if(p) p.name = name.slice(0,10); persist(); },
     async petsOn(){ const P = this.pstate(), out = st.others.filter(o=>o.pet && !o.removed).map(o=>({discord_id:o.discord_id, ...o.pet}));
-      const mp = P.pets.find(x=>x.id===P.main) || P.pets[0];
+      const yp = P.pets.filter(x=>!x.lodge), mp = yp.find(x=>x.id===P.main) || yp[0];
       if(mp) out.push({discord_id:'me', pet_code:mp.code, name:mp.name, sad:petMood(mp)==='sad', level:petLevel(mp.affection)}); return out; },
-    async mainPet(){ const P = this.pstate(), mp = P.pets.find(x=>x.id===P.main) || P.pets[0]; return mp ? mp.id : null; },
-    async setMainPet(id){ const P = this.pstate(); if(!P.pets.some(x=>x.id===id)) fail('내 펫이 아니에요'); P.main = id; persist(); },
+    async mainPet(){ const P = this.pstate(), yp = P.pets.filter(x=>!x.lodge), mp = yp.find(x=>x.id===P.main) || yp[0]; return mp ? mp.id : null; },
+    async setMainPet(id){ const P = this.pstate(); if(!P.pets.some(x=>x.id===id && !x.lodge)) fail('마당에 있는 친구만 대표로 정할 수 있어요'); P.main = id; persist(); },
     async petsOf(id){ this.pstate(); const o = st.others.find(x=>x.discord_id===id); return o && o.pet ? [{...o.pet}] : []; },
     async finishTour(){ if(st.me.tour_done) return st.me.coins; st.me.tour_done = true; st.me.coins += TOUR_GIFT; persist(); return st.me.coins; },
     async logTab(t){ st.tabStat = st.tabStat || {}; const d = this.fday(); (st.tabStat[d] ||= {})[t] = (st.tabStat[d][t]||0)+1; },
@@ -3488,6 +3504,7 @@ const supaApi = (() => {
     async petsOn(){ return ok(await sb.rpc('get_pets_on')); },
     async mainPet(){ return ok(await sb.rpc('get_main_pet')); },
     async setMainPet(id){ ok(await sb.rpc('set_main_pet', {p_id:id})); },
+    async lodgePet(id, inLodge){ ok(await sb.rpc('lodge_pet', {p_id:id, p_in:!!inLodge})); },   // 🏡 펫 숙소 (lodge.sql)
     async petsOf(id){ return ok(await sb.rpc('get_pets_of', {p_discord_id:id})); },
     async lotto(){ return ok(await sb.rpc('get_lotto')); },
     async playLotto(){ return ok(await sb.rpc('play_lotto')); },
@@ -4929,6 +4946,7 @@ function petArt(code, mood='ok', cls='', grown=false){
 
 let PETS = null, PETS_ON = {};
 async function refreshPets(){ try{ const r = await api.pets(); PETS = (r && r.pets) ? r : null; }catch(e){ PETS = null; }
+  if(PETS){ PETS.all = PETS.pets; PETS.pets = PETS.all.filter(p=>!p.lodge); PETS.lodge = PETS.all.filter(p=>p.lodge); }   // 🏡 마당(pets) · 숙소(lodge) 나누기 (10-13)
   if(PETS){ try{ PETS.main = await api.mainPet(); }catch(e){ PETS.main = null; } } }   // 대표 펫 (mainpet.sql 전이면 그냥 없음)
 async function refreshPetsOn(){ try{ const r = (await api.petsOn()) || []; PETS_ON = {}; r.forEach(x=>{ PETS_ON[x.discord_id] = x; }); }catch(e){ PETS_ON = {}; } }
 const shelterOpen = () => PETS ? !!PETS.open : !!(PLAZA.find(b=>b.code==='shelter')||{}).built_at;
@@ -4949,6 +4967,7 @@ function petCardHTML(p){
     <div class="pet-info">
       <h4>${esc(p.name)} <button class="ren" data-petren="${p.id}" title="이름 바꾸기">✏️</button> <span class="rb ${s.tier}">${PET_TIER[s.tier].label}</span></h4>
       ${PETS && PETS.pets && PETS.pets.length>1 ? (PETS.main===p.id ? `<p class="pet-main on">⭐ 대표 펫 · 마을 우리 집 앞에 나와 있어요</p>` : `<button class="mini pet-main" data-mainpet="${p.id}">⭐ 대표로 정하기</button>`) : ''}
+      <button class="mini lodge-go" data-lodge="${p.id}" title="숙소에서는 돌보지 않아도 돼요. 친밀도는 그대로예요">🏡 숙소에 보내기</button>
       <p class="small" style="margin:0">${esc(s.name)} ${petGrown(lv)?'· 다 컸어요':`· 아기 (Lv.${PET_GROW_LV}에 자라요)`} · ${mood==='sad'?'🌧️ 오래 못 봐서 시무룩해요. 돌봐 주면 금방 기운 차려요':mood==='happy'?'😊 오늘 기분 최고예요':'오늘 아직 못 만났어요'}</p>
       <div class="pet-heart"><div class="ph-top"><span>💗 친밀도 Lv.${lv}</span><span class="small">${hi?`다음 단계까지 ${hi-p.affection}`:'최고 단계!'}</span></div><div class="bar"><span style="width:${pct}%"></span></div></div>
       <div class="pet-cares">${care}</div>
@@ -4957,14 +4976,14 @@ function petCardHTML(p){
 }
 function renderPets(){
   const box = document.getElementById('petBox'); if(!box) return;
-  const open = shelterOpen(), P = PETS || {slots:1, dex:[], pets:[]}, dex = new Set(P.dex||[]), coins = ME ? ME.coins : 0;
+  const open = shelterOpen(), P = PETS || {slots:1, dex:[], pets:[], lodge:[], all:[]}, dex = new Set(P.dex||[]), coins = ME ? ME.coins : 0, LG = P.lodge||[], ALL = P.all||P.pets||[];
   let yard = '';
   if(!open) yard = `<div class="locked-note">🏘️ 마을 광장에 🐾 동물 보호소가 지어지면 펫을 입양할 수 있어요</div>`;
   else {
     for(let k=0;k<PET_MAX;k++){
       const p = (P.pets||[])[k];
       if(p) yard += petCardHTML(p);
-      else if(k < P.slots) yard += `<div class="pet-card empty"><p>🐾 빈 자리예요<br><span class="small">아래 도감에서 칸을 열고 입양해 보세요</span></p></div>`;
+      else if(k < P.slots) yard += `<div class="pet-card empty"><p>🐾 빈 자리예요<br><span class="small">${LG.length?'아래 🏡 펫 숙소에서 데려오거나, 도감에서 입양해 보세요':'아래 도감에서 칸을 열고 입양해 보세요'}</span></p></div>`;
       else if(k === P.slots) yard += `<div class="pet-card empty lock"><p>🔒 키우는 칸 늘리기</p><button class="mini ask-yes" data-petslot ${coins<PET_SLOT_PRICE[P.slots]?'disabled':''}>🪙 ${PET_SLOT_PRICE[P.slots].toLocaleString()}</button></div>`;
     }
   }
@@ -4973,15 +4992,22 @@ function renderPets(){
       ? `도감 열기 ✨요정의 흔적 1개 · 입양 🪙 ${PET_TIER[t].adopt.toLocaleString()}</span></h4><p class="small fairy-note">요정의 흔적은 펫이 <b>친밀도 Lv.10</b>이 되면 하나 생기고, 산책하다 아주 가끔 물어 오기도 해요. 지금 가진 흔적 <b>✨ ${traces}개</b>`
       : `도감 열기 🪙 ${PET_TIER[t].open.toLocaleString()} · 입양 🪙 ${PET_TIER[t].adopt.toLocaleString()}`}</${t==='fairy'?'p':'span></h4'}><div class="pet-dex ${t==='fairy'?'fairy-dex':''}">`
     + PETS_DEFAULT.filter(s=>s.tier===t).map(s=>{
-      const has = dex.has(s.code), mine = (P.pets||[]).filter(p=>p.code===s.code).length, grownMine = (P.pets||[]).some(p=>p.code===s.code && petGrown(petLevel(p.affection))), full = (P.pets||[]).length >= P.slots;
+      const has = dex.has(s.code), mine = ALL.filter(p=>p.code===s.code).length, grownMine = ALL.some(p=>p.code===s.code && petGrown(petLevel(p.affection))), full = (P.pets||[]).length >= P.slots;
       return has
         ? `<div class="pdx open"><span class="pdx-pics">${petArt(s.code,'ok')}${grownMine?petArt(s.code,'ok','',true):petArt(s.code,'ok','shadow',true)}</span><b>${esc(s.name)}</b><span class="small">${esc(s.about)}</span>
-            ${mine?`<span class="have">키우는 중</span>`:''}<button class="mini ask-yes" data-adopt="${s.code}" ${(!open||full||coins<PET_TIER[t].adopt)?'disabled':''} title="${full?'키우는 칸이 꽉 찼어요':''}">입양 🪙 ${PET_TIER[t].adopt}</button></div>`
+            ${mine?`<span class="have">키우는 중</span>`:''}<button class="mini ask-yes" data-adopt="${s.code}" ${(!open||coins<PET_TIER[t].adopt)?'disabled':''} title="${full?'마당이 꽉 차서 펫 숙소로 가요':''}">입양 🪙 ${PET_TIER[t].adopt}</button>${full&&open?`<span class="small to-lodge">🏡 숙소로 가요</span>`:''}</div>`
         : t==='fairy'
           ? `<div class="pdx ${peek()?'peek':''}">${peekPet(s)}<button class="mini" data-petdex="${s.code}" ${(!open||traces<1)?'disabled':''}>✨ 흔적으로 열기</button></div>`
           : `<div class="pdx ${peek()?'peek':''}">${peekPet(s)}<button class="mini" data-petdex="${s.code}" ${(!open||coins<PET_TIER[t].open)?'disabled':''}>칸 열기 🪙 ${PET_TIER[t].open.toLocaleString()}</button></div>`;
     }).join('') + `</div>`).join('');
-  const html = `<div class="pet-yard"><h3>🐾 우리 집 펫 <span class="small">${open?`${(P.pets||[]).length} / ${P.slots}마리`:''}</span></h3><div class="pet-cards">${yard}</div></div>
+  const yardFull = (P.pets||[]).length >= P.slots;
+  const lodgeHTML = !open ? '' : `<div class="panel lodge"><h3 style="margin:0 0 .2rem">🏡 펫 숙소 <span class="small">${LG.length}마리</span></h3>
+    <p class="small" style="margin:0 0 .6rem">숙소에서 지내는 친구는 돌보지 않아도 시무룩해지지 않아요. 친밀도도 그대로예요. 마당이 꽉 찼을 때 입양하면 여기로 와요.</p>
+    ${LG.length ? `<div class="lodge-list">${LG.map(p=>{ const s = petOf(p.code), lv = petLevel(p.affection);
+      return `<div class="lodge-pet"><div class="lp-art">${petArt(p.code,'ok','',petGrown(lv))}</div><b>${esc(p.name)}</b><span class="small"><span class="rb ${s.tier}">${PET_TIER[s.tier].label}</span> 💗 Lv.${lv}</span>
+        <button class="mini ${yardFull?'':'ask-yes'}" data-unlodge="${p.id}" ${yardFull?'disabled':''} title="${yardFull?'마당이 꽉 찼어요. 먼저 다른 친구를 숙소에 보내 주세요':''}">🐾 마당으로 데려오기</button></div>`; }).join('')}</div>`
+      : `<p class="small lodge-empty">아직 숙소에서 지내는 친구가 없어요.</p>`}</div>`;
+  const html = `<div class="pet-yard"><h3>🐾 우리 집 펫 <span class="small">${open?`마당 ${(P.pets||[]).length} / ${P.slots}마리${LG.length?` · 숙소 ${LG.length}마리`:''}`:''}</span></h3><div class="pet-cards">${yard}</div></div>${lodgeHTML}
     <div class="panel"><h3 style="margin:0 0 .2rem">📖 펫 도감 <span class="small">${dex.size} / ${PETS_DEFAULT.length}</span></h3>
     <p class="small" style="margin:0 0 .6rem">도감 칸을 열어야 그 친구를 입양할 수 있어요. 돌봐 주면 친밀도가 오르고, 단계가 오를 때마다 코인을 받아요. 7일 넘게 못 보면 시무룩해지니 가끔 들러 주세요!</p><div class="dex-scroll">${dexHTML}</div></div>`;
   const key = html.replace(/\d+분/g,'');
@@ -5031,14 +5057,29 @@ document.addEventListener('click', e=>{
     const s = petOf(ad.dataset.adopt), price = PET_TIER[s.tier].adopt;
     const name = await askText(`${s.name}${jo(s.name,'을','를')} 입양할까요? 🪙 ${price.toLocaleString()}코인이 들어요.\n이름을 지어 주세요 (10자까지)`, s.name);
     if(name==null) return;
+    const wasFull = !!PETS && (PETS.pets||[]).length >= PETS.slots;
     await api.adoptPet(s.code, name); await Promise.all([refreshPets(), refreshMine(), refreshPetsOn()]); renderTop(); renderPets(); renderVillage();
-    petParty('🏡', `${name}${jo(name,'이','가')} 우리 집에 왔어요!\n밥도 주고 쓰다듬어 주세요. 바로 첫 산책도 갈 수 있어요.`);
+    if(wasFull) petParty('🏡', `${name}${jo(name,'이','가')} 우리 집에 왔어요!\n마당이 꽉 차서 지금은 🏡 펫 숙소에서 지내요.\n숙소에서 언제든 마당으로 데려올 수 있어요.`);
+    else petParty('🏡', `${name}${jo(name,'이','가')} 우리 집에 왔어요!\n밥도 주고 쓰다듬어 주세요. 바로 첫 산책도 갈 수 있어요.`);
   });
   const sl = e.target.closest('[data-petslot]');
   if(sl) return act(async()=>{
     const price = PET_SLOT_PRICE[(PETS||{slots:1}).slots];
     if(!(await ask(`펫 키우는 칸을 하나 늘릴까요? 🪙 ${price.toLocaleString()}코인이 들어요.`))) return;
     await api.buyPetSlot(); await Promise.all([refreshPets(), refreshMine()]); renderTop(); renderPets(); toast('🐾 키우는 칸이 늘었어요!');
+  });
+  const lg = e.target.closest('[data-lodge]');
+  if(lg) return act(async()=>{
+    const p = PETS.pets.find(x=>x.id===+lg.dataset.lodge); if(!p) return;
+    if(!(await ask(`${p.name}${jo(p.name,'을','를')} 펫 숙소에 보낼까요?\n숙소에서는 돌보지 않아도 되고, 친밀도는 그대로예요. 언제든 다시 데려올 수 있어요.`))) return;
+    await api.lodgePet(p.id, true); await Promise.all([refreshPets(), refreshPetsOn()]); renderPets(); renderVillage();
+    toast(`🏡 ${p.name}${jo(p.name,'이','가')} 숙소에서 쉬어요`);
+  });
+  const ul = e.target.closest('[data-unlodge]');
+  if(ul) return act(async()=>{
+    const p = (PETS.lodge||[]).find(x=>x.id===+ul.dataset.unlodge); if(!p) return;
+    await api.lodgePet(p.id, false); await Promise.all([refreshPets(), refreshPetsOn()]); renderPets(); renderVillage();
+    toast(`🐾 ${p.name}${jo(p.name,'이','가')} 마당에 나왔어요!`);
   });
   const mp = e.target.closest('[data-mainpet]');
   if(mp) return act(async()=>{
@@ -6544,6 +6585,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑮</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑯</p>
 </body>
 </html>
