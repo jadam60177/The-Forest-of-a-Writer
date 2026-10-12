@@ -1117,6 +1117,8 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
   .vtruck .vpill{font-size:.72rem;padding:.15rem .5rem;bottom:-12px}
 }
 @media (prefers-reduced-motion:reduce){.vtruck .vfox{animation:none}}
+/* ===== 🐟 흔함·귀함 물고기 그림 (10-13) ===== */
+.zoom-art img.zfish{display:block;width:100%;max-width:420px;height:auto;max-height:46vh;object-fit:contain;margin:0 auto;filter:drop-shadow(0 4px 6px rgba(10,20,40,.35))}
 </style>
 </head>
 <body>
@@ -4057,7 +4059,10 @@ let FISH_CID = 0;
 const fishArt = code => (FISH_ART[code] || fishBody({c:'#8DB8E0',b:'#F1EEE8',d:'#5E7290',h:11})).replace(/__CID__/g, () => 'fcl' + FISH_CID);
 const fishArtNew = code => { FISH_CID++; return fishArt(code); };
 // 🎣 그림 파일이 있는 물고기 (fish 폴더: 코드.webp 는 배경 없는 그림, 코드_full.webp 는 크게 보기용 원래 그림)
-const FISH_IMG = new Set(['whale','editeel','revmack','endfish','cmtfish','typodamsel','slumpton','favcarp','submitwhale','royaltysalmon']);
+const FISH_FULL = new Set(['whale','editeel','revmack','endfish','cmtfish','typodamsel','slumpton','favcarp','submitwhale','royaltysalmon']);   // 크게 보기용 배경 그림(_full)이 있는 전설
+// 흔함·귀함 26종도 제미나이 그림으로 (10-13, fish/코드.webp 300×200 투명)
+const FISH_IMG = new Set([...FISH_FULL, 'medaka','pchub','crucian','loach','minnow','sandgoby','bitter','bluegill','catfish','carp','goldfish','smelt','dchub','bagrid','snakehead','rbitter',
+  'mandarin','masu','rainbow','ayu','lenok','gmochi','sturgeon','koi','goldcarp','eel']);
 const fishSvg = (code, cls='') => FISH_IMG.has(code)
   ? `<img class="fsh ${cls}" src="fish/${code}.webp" alt="" draggable="false" loading="lazy">`
   : `<svg class="fsh ${cls}" viewBox="0 0 96 64" aria-hidden="true">${fishArtNew(code)}</svg>`;
@@ -4144,9 +4149,10 @@ function openZoom(kind, code){
   let name, badge, meta;
   if(kind==='fish'){
     const f = fishOf(code), rb = f.tier==='legend'?'legend':f.tier==='rare'?'rare':'common';
-    art.className = 'zoom-art ' + f.tier + (FISH_IMG.has(code) ? ' full' : '');
-    art.innerHTML = FISH_IMG.has(code)
+    art.className = 'zoom-art ' + f.tier + (FISH_FULL.has(code) ? ' full' : '');
+    art.innerHTML = FISH_FULL.has(code)
       ? `<img src="fish/${code}_full.webp" alt="" onerror="this.onerror=null;this.src='fish/${code}.webp'">`
+      : FISH_IMG.has(code) ? `<img class="zfish" src="fish/${code}.webp" alt="">`
       : `<svg viewBox="0 0 96 64" aria-hidden="true">${fishArtNew(code)}</svg>`;
     name = f.name; badge = `<span class="rb ${rb}">${FISH_TIER[f.tier].label}</span>`;
     meta = (FISH_ABOUT[code] ? `<span class="zoom-about">${esc(FISH_ABOUT[code])}</span>\n` : '')
@@ -5774,6 +5780,6 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-12 밤판 ④</p>
+<p class="site-ver">마감의 숲 · 10-13 판</p>
 </body>
 </html>
