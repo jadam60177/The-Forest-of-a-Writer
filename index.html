@@ -1067,6 +1067,15 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 /* ===== 🛒 상점 칸 나누기 (10-12) ===== */
 .shop-tabs{flex-wrap:wrap}
 .shop-tab{flex:1 1 auto;white-space:nowrap;padding:.35rem .55rem}
+/* ===== 🪟 커튼 칸막이 늘려 그리기 · 긴 창문 (10-12 밤) ===== */
+.furn.stretchimg > img.fimg.fsvg{object-fit:fill}
+/* ===== 🧱 벽 개편 (10-12 밤) ===== */
+.furn.tilewall > img.fimg.fsvg{object-fit:fill}
+.furn.tilewall:has(> img.fimg){overflow:visible}
+/* ===== 🔄 그림 가구 방향 바꾸기 (10-12 밤 버그 제보) ===== */
+.furn.r2 > img.fimg.fsvg{transform:scaleX(-1)}
+.furn.wallimg > img.fimg.fsvg{filter:drop-shadow(0 1px 1.5px rgba(60,35,15,.45))}
+.site-ver{text-align:center;font-size:.7rem;opacity:.45;margin:1.2rem 0 .6rem}
 </style>
 </head>
 <body>
@@ -1644,8 +1653,8 @@ const RAINBOW_RUGS = [   // code, emoji, 이름, 바탕, 진한색, 밝은색
 const CARPET_FURN = [
   ['rug_round','🌸','동그란 꽃 러그',120,2,2,'floor'], ['rug_cloud','☁️','구름 러그',160,2,2,'floor'], ['rug_straw','🎋','왕골 돗자리',140,2,2,'floor'],
   ['rug_living','🟦','거실 러그',220,3,2,'floor'], ['rug_runner','🟥','복도 러그',150,3,1,'floor'], ['rug_persian','🧶','큰 페르시안 러그',450,3,3,'floor'],
-  ['wall_wood','🪵','나무 칸막이',80,1,2,'furniture'], ['wall_bamboo','🎍','대나무 발',90,1,2,'furniture'], ['wall_curtain','🎀','커튼 칸막이',100,1,2,'furniture'],
-  ['wall_brick','🧱','벽돌 벽',140,1,3,'furniture'], ['wall_white','⬜','하얀 벽',130,1,3,'furniture'], ['wall_arch','🚪','아치 벽',220,1,3,'furniture'],
+  ['wall_wood','🪵','나무 칸막이',80,1,2,'furniture'], ['wall_bamboo','🎍','대나무 발',90,1,2,'furniture'], ['wall_curtain','🎀','커튼 칸막이',100,1,1,'furniture'],
+  ['wall_brick','🧱','벽돌 벽',100,3,1,'furniture'], ['wall_white','⬜','하얀 벽',130,1,3,'furniture'], ['wall_arch','🚪','아치 벽',220,1,3,'furniture'],
   ...RAINBOW_RUGS.map(([code,emoji,name])=>[code,emoji,name,30,1,1,'floor']),
 ].map(([code,emoji,name,price,w,h,layer])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer}));
 DEFAULT_SHOP.splice(DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'), 0, ...CARPET_FURN);
@@ -1687,9 +1696,24 @@ const NEW_RUGS = [
   ["rug_acorn", "🌰", "도토리 러그", 1, 1, 40]
 ];
 NEW_RUGS.forEach(([code,emoji,name,w,h,price])=>{ DEFAULT_SHOP.splice(DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'), 0, {code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'floor'}); FLOOR_CODES.add(code); FURN_IMG.add(code); });
+// 🪟 긴 창문 (10-12 밤, newwindow.sql 과 같아요) — 1×1 커튼 창문 그림의 가운데를 늘린 그림
+[['window_2','🪟','긴 커튼 창문',180,1,2],['window_3','🪟','아주 긴 커튼 창문',250,1,3]].forEach(([code,emoji,name,price,w,h])=>{ DEFAULT_SHOP.splice(DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'), 0, {code,emoji,name,price,w,h,active:true,category:'furniture',icon:code}); FURN_IMG.add(code); });
+const TURN_IMG = new Set(['window_2','window_3']);   // 돌리면 그림도 같이 눕혀요
+const STRETCH_IMG = new Set();                        // 칸에 꽉 맞춰 늘려 그릴 그림 (지금은 없음)
+const NOTURN_IMG = new Set(['wall_curtain']);         // 1×1 커튼: 돌려도 그림은 안 눕혀요(좌우 반전만)
+// 🧱 벽 개편 (10-12 밤, newwalls.sql 과 같아요)
+// ① 예전 벽 4종은 그림이 두 장: furn/코드.webp = 옆모습(세로로 놓을 때) · furn/코드_h.webp = 앞모습(가로로 놓을 때·상점 그림)
+const WALL_H = new Set(['wall_arch','wall_white','wall_wood','wall_bamboo']);
+const WALL_TALL = new Set(['wall_arch','wall_bamboo']);   // 앞모습이 높은 벽은 가로로 놓으면 위로 더 크게
+// ② 납작한 타일 벽: 그림은 가로로 그려져 있고, 칸에 꽉 맞춰 그려요. 세로로 돌리면 그림도 같이 돌아가요
+const TILE_WALLS = [["wall_brick1", "🧱", "벽돌 벽", 40, 1, 1], ["wall_brick2", "🧱", "벽돌 벽", 70, 2, 1], ["wall_ivy1", "🌿", "담쟁이 나무 벽", 40, 1, 1], ["wall_ivy2", "🌿", "담쟁이 나무 벽", 70, 2, 1], ["wall_ivy3", "🌿", "담쟁이 나무 벽", 100, 3, 1], ["wall_stone1", "🪨", "돌담", 40, 1, 1], ["wall_stone2", "🪨", "돌담", 70, 2, 1], ["wall_stone3", "🪨", "돌담", 100, 3, 1], ["wall_log1", "🪵", "통나무 벽", 40, 1, 1], ["wall_log2", "🪵", "통나무 벽", 70, 2, 1], ["wall_log3", "🪵", "통나무 벽", 100, 3, 1], ["wall_log4", "🪵", "통나무 벽", 130, 4, 1], ["wall_sky1", "🟦", "하늘색 판자 벽", 40, 1, 1], ["wall_sky2", "🟦", "하늘색 판자 벽", 70, 2, 1], ["wall_sky3", "🟦", "하늘색 판자 벽", 100, 3, 1], ["wall_sky4", "🟦", "하늘색 판자 벽", 130, 4, 1], ["wall_timber1", "🏚️", "목조 회벽", 40, 1, 1], ["wall_timber2", "🏚️", "목조 회벽", 70, 2, 1], ["wall_timber3", "🏚️", "목조 회벽", 100, 3, 1], ["wall_timber4", "🏚️", "목조 회벽", 130, 4, 1], ["wall_sand1", "🟫", "사암 벽", 40, 1, 1], ["wall_sand2", "🟫", "사암 벽", 70, 2, 1], ["wall_sand3", "🟫", "사암 벽", 100, 3, 1], ["wall_sand4", "🟫", "사암 벽", 130, 4, 1], ["wall_hedge1", "🌳", "꽃 산울타리", 40, 1, 1], ["wall_hedge2", "🌳", "꽃 산울타리", 70, 2, 1], ["wall_hedge3", "🌳", "꽃 산울타리", 100, 3, 1], ["wall_hedge4", "🌳", "꽃 산울타리", 130, 4, 1]];
+{ const at = DEFAULT_SHOP.findIndex(x=>x.code==='wall_arch')+1; DEFAULT_SHOP.splice(at, 0, ...TILE_WALLS.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); }
+const TILE_WALL = new Set(['wall_brick', ...TILE_WALLS.map(r=>r[0])]);
+TILE_WALL.forEach(c=>FURN_IMG.add(c)); WALL_H.forEach(c=>FURN_IMG.add(c));
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
 const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp` : null;
-const ico = it => fimg(it) ? `<img class="fsvg fimg" src="${fimg(it)}" alt="" draggable="false" loading="lazy">` : (iconKey(it) && FURN_SVG[iconKey(it)]) ? `<svg class="fsvg" viewBox="${FURN_SVG[iconKey(it)].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[iconKey(it)].svg}</svg>` : (it ? it.emoji : '');
+const icoSrc = it => it && WALL_H.has(it.code) && fimg(it) ? `furn/${it.code}_h.webp` : fimg(it);   // 예전 벽 4종은 상점·가방에서 앞모습으로
+const ico = it => fimg(it) ? `<img class="fsvg fimg" src="${icoSrc(it)}" alt="" draggable="false" loading="lazy">` : (iconKey(it) && FURN_SVG[iconKey(it)]) ? `<svg class="fsvg" viewBox="${FURN_SVG[iconKey(it)].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[iconKey(it)].svg}</svg>` : (it ? it.emoji : '');
 const GACHA_BOXES = [
   {code:'basic', emoji:'🎁', name:'담당자의 보따리', about:'담당자가 숲 어딘가에 두고 간 보따리예요.', unlock_by:null, sort:0},
   {code:'campfire', emoji:'🏕️', name:'모닥불 보따리', about:'불가에 둘러앉은 밤의 소품들이 들어 있어요.', unlock_by:'campfire', sort:1},
@@ -3073,11 +3097,13 @@ function roomHTML(list, cur, {editable, cabs={}}){
     if(!rot && it.w!==it.h && f.w===it.h && f.h===it.w) rot = 1;
     // 칸막이처럼 가로 그림(_h)이 따로 있는 가구는 눕히지 않고 가로 그림으로 그려요
     const hKey = rot%2 && !fimg(it) && iconKey(it) && FURN_SVG[iconKey(it)+'_h'] ? iconKey(it)+'_h' : null;
-    const turn = rot%2 && fimg(it) && (floor || (iconKey(it) && FURN_SVG[iconKey(it)+'_h']));   // 그림 칸막이는 그림째 눕혀요
+    const stretch = !!fimg(it) && STRETCH_IMG.has(f.item_code);   // 커튼처럼 칸에 맞춰 늘려 그리는 그림 (돌려도 그림은 안 눕혀요)
+    const wallH = WALL_H.has(f.item_code) && !!fimg(it), tile = TILE_WALL.has(f.item_code) && !!fimg(it);
+    const turn = !stretch && !wallH && rot%2 && !!fimg(it);   // 그림 칸막이는 그림째 눕혀요
     if(hKey) rot = 0;
     const rs = rot%2 ? `;--rw:calc(${f.w}*var(--tile) + ${f.w-1}*3px - 4px);--rh:calc(${f.h}*var(--tile) + ${f.h-1}*3px - 4px)` : '';
-    const cls = `furn ${big?'big':''} ${f.w!==f.h?'long':''} ${turn?'turn':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${rot?'rot r'+rot:''}`;
-    const art = hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
+    const cls = `furn ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${rot?'rot r'+rot:''}`;
+    const art = wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
     html += editable
       ? `<button class="${cls}" data-pid="${f.id}" style="${style}${rs}" aria-label="${esc(it.name)} 치우기">${art}</button>`
@@ -4882,7 +4908,7 @@ function renderBag(){
   ).join('');
 }
 
-const SHOP_WALL = new Set(['window','screen']);   // 창문·벽 칸에 같이 보일 가구
+const SHOP_WALL = new Set(['window','window_2','window_3','screen']);   // 창문·벽 칸에 같이 보일 가구
 // 기타 칸: 가구로 분류돼 있지만 큰 가구는 아닌 것들 (나무·동물 집·놀이기구·광장 물건 등)
 const SHOP_ETC = new Set(['tree','monstera','telescope','camptent','fountain','carousel','cattower','aquarium','hammock','postbox','campfire','xmastree','cauldron','gramophone','plotboard']);
 function renderRoad(){
@@ -5587,5 +5613,6 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
 start();
 
 </script>
+<p class="site-ver">마감의 숲 · 10-12 밤판</p>
 </body>
 </html>
