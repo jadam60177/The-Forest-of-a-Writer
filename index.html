@@ -1261,6 +1261,26 @@ dialog.visit.shop-dlg{max-width:min(94vw,960px)}
   background:radial-gradient(ellipse at 50% 30%,rgba(255,206,92,.16),transparent 70%),linear-gradient(rgba(255,255,255,.05),rgba(255,214,150,.07))}
 body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;left:.15rem}
 
+/* 👁️ 숲지기 눈 · 📊 나들이 기록 (10-13) */
+.peek-row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .8rem}
+.road li.mystery.peek{cursor:default;border-style:dashed}
+.road li.mystery.peek svg{opacity:.8}
+.pdx.peek .pet{opacity:.75}
+.dex .cell.no.peek{opacity:1;font:inherit;color:inherit;border-style:dashed}
+.dex .cell.no.peek .fsh{opacity:.7}
+.gdx.peek{opacity:.6;border-style:dashed}
+.lw.lock.peek img{filter:none;opacity:.6}
+.stat-range{display:flex;gap:.35rem;margin:.2rem 0 .7rem}
+.ts-head{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem}
+.ts-big{font-family:"Jua",sans-serif;font-size:2rem;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.ts-list{display:grid;gap:.3rem;max-width:560px}
+.ts-row{display:grid;grid-template-columns:7.5rem minmax(0,1fr) 3.2rem;align-items:center;gap:.6rem;padding:.15rem .3rem;border-radius:8px}
+.ts-row:hover{background:rgba(255,206,92,.1)}
+.ts-name{font-size:.9rem;white-space:nowrap}
+.ts-track{height:12px;background:var(--line);border-radius:4px;overflow:hidden}
+.ts-bar{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0}
+.ts-n{text-align:right;font-variant-numeric:tabular-nums;font-family:"Jua",sans-serif}
+
 /* =========================================================
    ☀️ 낮 숲 테마 (10-13) — html 에 data-mode="day" 가 붙으면 켜져요
    밤 테마 위에 덮어써요. 그림은 bg/*_day.webp 를 써요
@@ -1650,6 +1670,14 @@ document.documentElement.setAttribute('data-mode', modeNow());
   </section>
 
   <section id="tab-admin" class="panel" hidden>
+    <div class="peek-row"><button class="mini" id="peekBtn" type="button" aria-pressed="false">👁️ 숨은 것 다 보기 · 꺼짐</button>
+      <span class="small">켜면 숲지기 화면에서만 아직 안 열린 집 단계·도감·전설 가구가 다 보여요. 주민들 화면은 그대로예요.</span></div>
+    <hr class="sep">
+    <h3>📊 숲 나들이 기록</h3>
+    <p class="small" style="margin-top:0">주민들이 어디를 얼마나 열어 봤는지 세어요. 누가 열었는지는 남기지 않고, 한 번 들어와서 같은 곳을 여러 번 눌러도 1번으로 세요. 숲지기 계정이 연 건 빼고 세요.</p>
+    <div class="stat-range" id="statRange" role="group" aria-label="기간"><button class="mini" data-srange="1">오늘</button><button class="mini" data-srange="7">7일</button><button class="mini" data-srange="30">30일</button></div>
+    <div id="tabStats" class="tab-stats"></div>
+    <hr class="sep">
     <h3>✉️ 받은 쪽지 <span class="small" id="inboxCount"></span></h3>
     <div id="inbox" class="inbox"></div>
     <hr class="sep">
@@ -3182,6 +3210,13 @@ const demoApi = (() => {
     async mainPet(){ const P = this.pstate(), mp = P.pets.find(x=>x.id===P.main) || P.pets[0]; return mp ? mp.id : null; },
     async setMainPet(id){ const P = this.pstate(); if(!P.pets.some(x=>x.id===id)) fail('내 펫이 아니에요'); P.main = id; persist(); },
     async petsOf(id){ this.pstate(); const o = st.others.find(x=>x.discord_id===id); return o && o.pet ? [{...o.pet}] : []; },
+    async logTab(t){ st.tabStat = st.tabStat || {}; const d = this.fday(); (st.tabStat[d] ||= {})[t] = (st.tabStat[d][t]||0)+1; },
+    async tabStats(days){   // 미리보기용 가짜 기록 + 이 브라우저에서 연 것
+      const out = [], base = {enter:14,village:13,home:9,road:3,plaza:6,lotto:8,tree:5,lake:7,pet:4,gacha:6,shop:5,mail:7,coinlog:2,visit:4};
+      for(let k=0;k<days;k++){ const d = new Date(Date.now()+9*3600e3-k*864e5).toISOString().slice(0,10);
+        Object.entries(base).forEach(([t,n])=>{ const v = Math.max(0, Math.round(n*(.6+((k*7+t.length*3)%9)/10))) + (((st.tabStat||{})[d]||{})[t]||0); if(v) out.push({d, tab_name:t, cnt:v}); }); }
+      return out;
+    },
     async adminList(){
       return st.others.filter(o=>!o.removed).map(o=>({discord_id:o.discord_id, display_name:o.display_name, total_minutes:o.total_minutes, in_voice:o.in_voice, away_days:o.in_voice?0:o.away})).sort((a,b)=>b.away_days-a.away_days);
     },
@@ -3333,6 +3368,8 @@ const supaApi = (() => {
     async house(id){ const r = ok(await sb.rpc('get_house', {p_discord_id:id})); return Array.isArray(r) ? r[0] : r; },
     async remove(id){ ok(await sb.rpc('remove_item_ex', {p_id:id})); },
     async adminList(){ return ok(await sb.rpc('admin_list')); },
+    async logTab(t){ await sb.rpc('log_tab', {p_tab:t}); },   // 실패해도 조용히 넘어가요 (tabstats.sql 전이어도 괜찮아요)
+    async tabStats(days){ return ok(await sb.rpc('admin_tab_stats', {p_days:days})); },
     async adminClear(id){ ok(await sb.rpc('admin_clear', {p_discord_id:id})); },
     async adminGift(id, amount, reason){ ok(await sb.rpc('admin_gift', {p_discord_id:id, p_amount:amount, p_reason:reason})); },
     async raidStatus(){ const r = ok(await sb.rpc('raid_status')); return Array.isArray(r) ? r[0] : r; },
@@ -3877,6 +3914,7 @@ function gardenDexHTML(){
   return `<h4 class="gdex-title">🌼 꽃 도감 <span class="small">${have} / ${list.length}</span></h4><div class="gdex">`
     + list.map(f=> f.have
       ? `<button class="gdx ${f.tier} zoomable" data-gzoom="${esc(f.code)}" title="${esc(f.name)} · 크게 보기">${bloomSrc(f.code) ? `<img class="gdximg" src="${bloomSrc(f.code)}" alt="" draggable="false" loading="lazy">` : gSvg(flowerArt(f),'14 4 68 68')}</button>`
+      : peek() ? `<span class="gdx ${f.tier} peek" title="👁️ ${esc(f.name)} · ${(GTIER[f.tier]||GTIER.wild).name} · 아직 못 피웠어요">${bloomSrc(f.code) ? `<img class="gdximg" src="${bloomSrc(f.code)}" alt="" draggable="false" loading="lazy">` : gSvg(flowerArt(f),'14 4 68 68')}</span>`
       : `<span class="gdx unknown" title="아직 못 본 꽃이에요${f.season?` (${esc(f.season)})`:''}">?</span>`).join('') + `</div>`;
 }
 function renderGarden(){
@@ -4570,6 +4608,7 @@ function renderFishDex(){
   document.getElementById('fishDexCount').textContent = `${have} / ${list.length}`;
   const html = list.map(f=> f.have
     ? `<button class="cell owned zoomable" data-fzoom="${esc(f.code)}" title="크게 보기">${fishSvg(f.code)}<span class="rb ${f.tier==='legend'?'legend':f.tier==='rare'?'rare':'common'}">${FISH_TIER[f.tier].label}</span><span class="t">${esc(f.name)}</span><span class="where">최고 ${cm(f.best_cm)} · ${f.caught}마리</span></button>`
+    : peek() ? `<button class="cell no peek zoomable" data-fzoom="${esc(f.code)}" title="숲지기 눈 · 크게 보기">${fishSvg(f.code)}<span class="rb ${f.tier==='legend'?'legend':f.tier==='rare'?'rare':'common'}">${FISH_TIER[f.tier].label}</span><span class="t">👁️ ${esc(f.name)}</span><span class="where">${cm(f.min_cm)}~${cm(f.max_cm)} · 아직 못 낚음</span></button>`
     : `<div class="cell no">${fishSvg(f.code,'shadow')}<span class="rb ${f.tier==='legend'?'legend':f.tier==='rare'?'rare':'common'}">${FISH_TIER[f.tier].label}</span><span class="t">???</span><span class="where">${cm(f.min_cm)}~${cm(f.max_cm)}</span></div>`).join('');
   const key = html.replace(/fcl\d+/g,''); if(el._html !== key){ el.innerHTML = html; el._html = key; }
 }
@@ -4896,8 +4935,8 @@ function renderPets(){
         ? `<div class="pdx open"><span class="pdx-pics">${petArt(s.code,'ok')}${grownMine?petArt(s.code,'ok','',true):petArt(s.code,'ok','shadow',true)}</span><b>${esc(s.name)}</b><span class="small">${esc(s.about)}</span>
             ${mine?`<span class="have">키우는 중</span>`:''}<button class="mini ask-yes" data-adopt="${s.code}" ${(!open||full||coins<PET_TIER[t].adopt)?'disabled':''} title="${full?'키우는 칸이 꽉 찼어요':''}">입양 🪙 ${PET_TIER[t].adopt}</button></div>`
         : t==='fairy'
-          ? `<div class="pdx">${petArt(s.code,'ok','shadow')}<b>???</b><button class="mini" data-petdex="${s.code}" ${(!open||traces<1)?'disabled':''}>✨ 흔적으로 열기</button></div>`
-          : `<div class="pdx">${petArt(s.code,'ok','shadow')}<b>???</b><button class="mini" data-petdex="${s.code}" ${(!open||coins<PET_TIER[t].open)?'disabled':''}>칸 열기 🪙 ${PET_TIER[t].open.toLocaleString()}</button></div>`;
+          ? `<div class="pdx ${peek()?'peek':''}">${peekPet(s)}<button class="mini" data-petdex="${s.code}" ${(!open||traces<1)?'disabled':''}>✨ 흔적으로 열기</button></div>`
+          : `<div class="pdx ${peek()?'peek':''}">${peekPet(s)}<button class="mini" data-petdex="${s.code}" ${(!open||coins<PET_TIER[t].open)?'disabled':''}>칸 열기 🪙 ${PET_TIER[t].open.toLocaleString()}</button></div>`;
     }).join('') + `</div>`).join('');
   const html = `<div class="pet-yard"><h3>🐾 우리 집 펫 <span class="small">${open?`${(P.pets||[]).length} / ${P.slots}마리`:''}</span></h3><div class="pet-cards">${yard}</div></div>
     <div class="panel"><h3 style="margin:0 0 .2rem">📖 펫 도감 <span class="small">${dex.size} / ${PETS_DEFAULT.length}</span></h3>
@@ -5064,9 +5103,9 @@ function renderLotto(){
   const cells = cur ? cur.cells.map(s=>`<div class="t-cell ${cur.revealed && cur.res.kind!=='miss'?'hit':''}">${s}</div>`).join('')
                     : '<div class="t-cell blank">?</div>'.repeat(3);
   const week = (L.week||[]).map(lottoOf).filter(Boolean);
-  const card = (it, tag) => { const have = dex.has(it.code);
-    return `<div class="lw ${have?'have':'lock'}" ${have?`title="${esc(it.about)}"`:''}>${tag?`<span class="wk">이번 주</span>`:''}${have?'<span class="ok">✓</span>':''}
-      <img src="furn/${it.code}.webp" alt="" draggable="false" loading="lazy"><div class="nm">${have?esc(it.name):'？？？'}</div><div class="sz">${it.w}×${it.h}칸${it.layer==='floor'?' · 바닥':''}</div></div>`; };
+  const card = (it, tag) => { const have = dex.has(it.code), pk = !have && peek();
+    return `<div class="lw ${have?'have':'lock'} ${pk?'peek':''}" ${have||pk?`title="${esc(it.about)}"`:''}>${tag?`<span class="wk">이번 주</span>`:''}${have?'<span class="ok">✓</span>':''}
+      <img src="furn/${it.code}.webp" alt="" draggable="false" loading="lazy"><div class="nm">${have?esc(it.name):pk?'👁️ '+esc(it.name):'？？？'}</div><div class="sz">${it.w}×${it.h}칸${it.layer==='floor'?' · 바닥':''}</div></div>`; };
   let result = '';
   if(cur && cur.revealed){
     if(cur.res.kind==='miss') result = `<div class="wolf-note"><img src="bg/Wolf_Watcher.webp" alt=""><div><b>담당자의 쪽지</b><span>${esc(cur.nag)}</span></div></div>`;
@@ -5296,7 +5335,7 @@ function renderGacha(){
   document.getElementById('dexCount').textContent = `${list.filter(g=>g.owned).length} / ${list.length}`;
   document.getElementById('dexAll').textContent = `· 전체 ${GACHA.filter(g=>g.owned).length} / ${GACHA.length}`;
   document.getElementById('dex').innerHTML = list.map(g=>{
-    const cost = RARITY[g.rarity].cost, hide = !box.unlocked && !g.owned;
+    const cost = RARITY[g.rarity].cost, hide = !box.unlocked && !g.owned && !peek();
     const have = (INV[g.code]||0) + ownedOutside(g.code), dup = dupesOf(g.code);
     const bag = INV[g.code]||0, out = ownedOutside(g.code);
     return `<div class="cell ${g.owned?'':'no'} ${have?'owned':''}">${have?`<span class="have" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${have}</span>`:''}<span class="em">${hide?'❔':ico(g)}</span><span class="rb ${g.rarity}">${RARITY[g.rarity].label}</span>
@@ -5536,12 +5575,17 @@ function renderRoad(){
   renderDeco();
   const i = stageIdx(ME.total_minutes);
   document.getElementById('road').innerHTML = STAGES.map((s,k)=> k>i
-    ? `<li class="mystery">
+    ? (peek() ? `<li class="mystery peek" title="숲지기 눈으로 미리 보는 중">
+        ${houseSVG(k, true, 0, ME.house_color, ME.house_style)}
+        <div class="step">${k+1}단계 · 누적 ${s.h}시간</div>
+        <div class="nm">${s.name}</div>
+        <div class="small">👁️ 방 크기 ${s.cols}×${s.rows} · 아직 안 열림</div>
+      </li>` : `<li class="mystery">
         <div class="q">?</div>
         <div class="step">${k+1}단계 · 누적 ?시간</div>
         <div class="nm">???</div>
         <div class="small">어떤 집일까요?</div>
-      </li>`
+      </li>`)
     : `<li class="${k===i?'now':''} ${DECO_PV && (DECO_PV.look==null ? k===i : DECO_PV.look===k) ? 'pv' : ''}" data-pv-look="${k===i?'now':k}" title="이 모습으로 미리 보기">
       ${houseSVG(k, true, 0, ME.house_color, ME.house_style)}
       ${(HOUSE_LOOK_OF[meId()] ?? null)===k ? `<div class="look-badge">👀 마을에 보이는 모습</div>` : ''}
@@ -5680,6 +5724,7 @@ async function loadAll(){
   showGifts(); showRaids(); showFlowerNotices(); showTreatNotices();
   try{ const t = sessionStorage.getItem('majam-tab'), tb = t && document.querySelector(`.tabs [data-tab="${t}"]:not([hidden])`);
     if(tb && t!=='village') tb.dispatchEvent(Object.assign(new MouseEvent('click',{bubbles:true}), {keepScroll:true})); }catch(e){}
+  logTabOnce('enter'); if(!document.getElementById('tab-village').hidden) logTabOnce('village');
   refreshEvents();
   refreshNotes();
 }
@@ -5916,10 +5961,11 @@ document.querySelector('.tabs').addEventListener('click', e=>{
   document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b));
   ['village','home','road','plaza','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
   try{ sessionStorage.setItem('majam-tab', b.dataset.tab); }catch(err){}
+  logTabOnce(b.dataset.tab);
   if(!e.keepScroll) window.scrollTo({top:0, behavior: same ? 'smooth' : 'auto'});   // 탭마다 한 화면 — 늘 맨 위에서 시작해요
   if(b.dataset.tab==='village'){ renderBanners(); renderVillage(); renderVillageTrucks(); }
   if(b.dataset.tab==='lotto'){ renderLotto(); refreshLotto().then(renderLotto); }
-  if(b.dataset.tab==='admin') renderAdmin();
+  if(b.dataset.tab==='admin'){ renderAdmin(); renderTabStats(); }
   if(b.dataset.tab==='plaza'){ refreshPlaza().then(renderPlaza); refreshTrucks().then(renderTrucks); renderBoard(); refreshBoard().then(renderBoard); }
   if(b.dataset.tab==='gacha') refreshGacha().then(renderGacha);
   if(b.dataset.tab==='lake'){ renderLake(); refreshLake().then(renderLake); }
@@ -5957,7 +6003,7 @@ document.querySelector('.shop-tabs').addEventListener('click', e=>{
 }
 // 🛒 상점 창 · ▦ 작게 보기 (10-13)
 { const d = document.getElementById('shopDlg');
-  document.getElementById('shopOpen').addEventListener('click', ()=>{ renderBag(); if(!d.open) d.showModal(); document.getElementById('shop').scrollTop = 0; });
+  document.getElementById('shopOpen').addEventListener('click', ()=>{ logTabOnce('shop'); renderBag(); if(!d.open) d.showModal(); document.getElementById('shop').scrollTop = 0; });
   document.getElementById('shopClose').onclick = ()=>d.close();
   d.addEventListener('click', e=>{ if(e.target===d) d.close(); });
   let compact = false; try{ compact = localStorage.getItem('majam-compact')==='1'; }catch(e){}
@@ -5968,6 +6014,7 @@ document.querySelector('.shop-tabs').addEventListener('click', e=>{
 
 /* ---------- 집 구경 ---------- */
 async function openVisit(id){
+  logTabOnce('visit');
   const p = VILLAGE.find(x=>x.discord_id===id); if(!p) return;
   if(isMe(p)){ document.getElementById('tab-home').scrollIntoView({behavior:'smooth'}); return; }
   const dlg = document.getElementById('visit'), st = stageIdx(p.total_minutes);
@@ -6186,6 +6233,7 @@ function renderStreak(){
 
 /* 🪙 코인 내역 (coinlog.sql 의 get_coin_log) */
 async function openCoinLog(){
+  logTabOnce('coinlog');
   const d = document.getElementById('coinDlg'), box = document.getElementById('coinLog');
   document.getElementById('coinNow').textContent = (ME ? ME.coins : 0).toLocaleString();
   box.innerHTML = '<p class="cl-empty">불러오는 중…</p>';
@@ -6252,6 +6300,7 @@ function renderMail(){
   box.innerHTML = html;
 }
 function openMail(){
+  logTabOnce('mail');
   renderMail(); const d = document.getElementById('mailDlg'); if(!d.open) d.showModal();
   mailLoad().forEach(m=>{ m.read = true; }); mailSave(); renderMailBadge();   // NEW 표시는 이번에 열었을 때만 보여요
 }
@@ -6302,6 +6351,49 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
   if(get('majam-bag-open')==='0') bag.open = false;
   bag.addEventListener('toggle', ()=>set('majam-bag-open', bag.open?'1':'0'));
 })();
+/* ---------- 👁️ 숲지기 눈 (숨은 것 다 보기) · 📊 숲 나들이 기록 (10-13) ---------- */
+let PEEK = false; try{ PEEK = localStorage.getItem('majam-peek')==='1'; }catch(e){}
+function peek(){ return !!(PEEK && ME && ME.is_admin); }
+const peekPet = s => peek() ? `${petArt(s.code,'ok','')}<b>👁️ ${esc(s.name)}</b><span class="small">${esc(s.about)}</span>` : `${petArt(s.code,'ok','shadow')}<b>???</b>`;
+function renderPeekBtn(){ const b = document.getElementById('peekBtn'); if(!b) return;
+  b.textContent = `👁️ 숨은 것 다 보기 · ${PEEK?'켜짐':'꺼짐'}`; b.classList.toggle('ask-yes', PEEK); b.setAttribute('aria-pressed', PEEK); }
+document.getElementById('peekBtn').addEventListener('click', ()=>{
+  PEEK = !PEEK; try{ localStorage.setItem('majam-peek', PEEK?'1':'0'); }catch(e){}
+  renderPeekBtn(); renderRoad(); renderGacha(); renderPets(); renderFishDex(); renderLotto(); if(inGarden) renderMyHouse();
+  toast(PEEK ? '👁️ 숲지기 눈을 떴어요. 숨은 것들이 다 보여요' : '숲지기 눈을 감았어요. 주민들이 보는 화면과 같아요');
+});
+renderPeekBtn();
+
+const TAB_STAT_NAME = {enter:'🌲 숲에 들어옴', village:'🌲 마을', home:'🏡 우리 집', road:'🎨 꾸미기', plaza:'🏘️ 광장', lotto:'🎟️ 복권', tree:'🌳 세계수',
+  lake:'🎣 호숫가', pet:'🐾 펫', gacha:'🎁 보따리', shop:'🛒 가구 상점', mail:'📬 우편함', coinlog:'🪙 코인 내역', visit:'🏠 이웃 집 구경'};
+const TAB_LOGGED = new Set();
+function logTabOnce(t){   // 한 번 들어와서(새로 고침 전까지) 같은 곳은 1번만 세요
+  if(!t || t==='admin' || TAB_LOGGED.has(t)) return; TAB_LOGGED.add(t);
+  try{ Promise.resolve(api.logTab(t)).catch(()=>{}); }catch(e){}
+}
+let STAT_DAYS = 7; try{ STAT_DAYS = +(localStorage.getItem('majam-stat-days')||7) || 7; }catch(e){}
+async function renderTabStats(){
+  const box = document.getElementById('tabStats'); if(!box || !ME || !ME.is_admin) return;
+  document.querySelectorAll('[data-srange]').forEach(b=>b.classList.toggle('ask-yes', +b.dataset.srange===STAT_DAYS));
+  box.innerHTML = '<p class="small">불러오는 중…</p>';
+  let rows;
+  try{ rows = (await api.tabStats(STAT_DAYS)) || []; }
+  catch(e){ box.innerHTML = `<p class="small">기록을 불러오지 못했어요.${/admin_tab_stats|schema cache/i.test(e.message||'') ? ' tabstats.sql 을 아직 안 돌린 것 같아요.' : ''}</p>`; return; }
+  const sum = {}; rows.forEach(r=>{ sum[r.tab_name] = (sum[r.tab_name]||0) + (+r.cnt||0); });
+  const enter = sum.enter||0, list = Object.keys(TAB_STAT_NAME).filter(k=>k!=='enter').map(k=>[k, sum[k]||0]).sort((a,b)=>b[1]-a[1]);
+  const max = Math.max(1, ...list.map(x=>x[1])), days = new Set(rows.map(r=>String(r.d))).size;
+  const when = STAT_DAYS===1 ? '오늘' : `최근 ${STAT_DAYS}일`;
+  box.innerHTML = `<div class="ts-head"><span class="ts-big">${enter.toLocaleString()}</span><span class="small">${when} 숲에 들어온 횟수${STAT_DAYS>1&&days?` · 하루 평균 ${(enter/STAT_DAYS).toFixed(1)}번`:''}</span></div>`
+    + `<div class="ts-list">` + list.map(([k,n])=>`<div class="ts-row" title="${esc(TAB_STAT_NAME[k])} · ${when} ${n}번${enter?` · 들어온 사람의 ${Math.round(n/enter*100)}%가 열어 봤어요`:''}">
+        <span class="ts-name">${TAB_STAT_NAME[k]}</span><span class="ts-track"><span class="ts-bar" style="width:${n?Math.max(2,n/max*100):0}%"></span></span><span class="ts-n">${n.toLocaleString()}</span></div>`).join('') + `</div>`
+    + (list.every(x=>!x[1]) ? `<p class="small">아직 쌓인 기록이 없어요. 주민들이 숲에 들어오면 하나씩 쌓여요.</p>` : '');
+}
+document.getElementById('statRange').addEventListener('click', e=>{
+  const b = e.target.closest('[data-srange]'); if(!b) return;
+  STAT_DAYS = +b.dataset.srange; try{ localStorage.setItem('majam-stat-days', STAT_DAYS); }catch(err){}
+  renderTabStats();
+});
+
 /* ☀️🌙 낮·밤 화면 고르기 — 자동이면 1분마다 시간을 보고 바꿔요 */
 const MODE_INFO = {auto:['🌗','자동'], day:['☀️','낮'], night:['🌙','밤']};
 function modeLabel(){ const [ico, lbl] = MODE_INFO[modePick()] || MODE_INFO.auto, btn = document.getElementById('modeBtn');
@@ -6325,6 +6417,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑪ · 낮 숲</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑫</p>
 </body>
 </html>
