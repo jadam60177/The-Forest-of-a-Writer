@@ -936,6 +936,48 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .sell-bar .small{color:var(--muted)}
 .bag-box.selling #bag .item{outline:2px dashed rgba(255,206,92,.55);outline-offset:-3px}
 .bag-box.selling #bag .item.nosell{opacity:.45;outline:none}
+
+/* ===== 🎣 미끼 · 🐾 펫 간식 (10-12) ===== */
+.bait-box{margin:.7rem auto 0;max-width:560px;background:rgba(27,32,62,.62);border:1px solid rgba(255,206,92,.35);border-radius:14px;padding:.5rem .6rem .6rem}
+.bait-head{display:flex;align-items:center;gap:.4rem;justify-content:center;font-family:"Jua",sans-serif;font-size:1.02rem}
+.bait-head img{width:34px;height:auto}
+.bait-list{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-top:.4rem}
+.bait{position:relative;border:1px solid var(--line);background:rgba(18,21,38,.55);color:var(--ink);border-radius:12px;padding:.35rem .2rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.08rem;font:inherit;cursor:pointer}
+.bait img{width:52px;height:52px;object-fit:contain}
+.bait b{font-family:"Jua",sans-serif;font-weight:400;font-size:.88rem}
+.bait .q{font-size:.74rem;opacity:.85}
+.bait.on{border-color:#FFCE5C;box-shadow:0 0 0 2px rgba(255,206,92,.65)}
+.bait.none{justify-content:center}
+.bait.none .ico{font-size:1.9rem;line-height:52px;height:52px}
+.bait .buy{margin-top:.15rem;font-size:.72rem;padding:.12rem .45rem;border-radius:999px;border:1px solid rgba(255,206,92,.6);background:transparent;color:#FFCE5C;font:inherit;font-size:.72rem;cursor:pointer}
+.bait .buy:disabled{opacity:.4;cursor:default}
+.bait-about{font-size:.76rem;opacity:.85;margin:.35rem 0 0;text-align:center;min-height:1.1em}
+.bait-net{display:flex;align-items:center;justify-content:center;gap:.25rem;font-size:.85rem;margin:.35rem 0 0;width:100%}
+.bait-net img{width:24px;height:24px;object-fit:contain}
+@media (max-width:520px){.bait-list{grid-template-columns:repeat(2,1fr)}}
+.tpets{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-top:.7rem}
+.tpet{display:flex;flex-direction:column;align-items:center;gap:.15rem;min-width:110px}
+.tpet .stage{position:relative;width:92px;height:92px;display:flex;align-items:flex-end;justify-content:center}
+.tpet .stage .pet{width:84px}
+.tpet .nm{font-family:"Jua",sans-serif;font-size:.92rem}
+.tfx{position:absolute;pointer-events:none;z-index:3;width:var(--w,34px);left:var(--x,50%);top:var(--y,10%);transform:translate(-50%,0);animation:tfxUp var(--d,1.4s) ease-out var(--dl,0s) forwards;opacity:0}
+.tfx.pop{animation-name:tfxPop}
+.tfx.drop{animation-name:tfxDrop;animation-timing-function:ease-in}
+.tfx.ground{top:auto;bottom:-6%;animation-name:tfxFade}
+@keyframes tfxUp{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}15%{opacity:1;transform:translate(-50%,0) scale(1.05)}100%{opacity:0;transform:translate(-50%,-46px) scale(.95)}}
+@keyframes tfxPop{0%{opacity:0;transform:translate(-50%,0) scale(.3)}25%{opacity:1;transform:translate(-50%,0) scale(1.15)}70%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(1)}}
+@keyframes tfxDrop{0%{opacity:0;transform:translate(-50%,-40px) scale(.8)}30%{opacity:1}80%{opacity:1;transform:translate(-50%,24px) scale(.8)}100%{opacity:0;transform:translate(-50%,30px) scale(.5)}}
+@keyframes tfxFade{0%,30%{opacity:0}45%{opacity:1}100%{opacity:0}}
+.tpet .pet.tjump{animation:tjump .55s ease-in-out var(--n,1)}
+.tpet .pet.twig{animation:twig .45s ease-in-out 2}
+@keyframes tjump{0%,100%{transform:translateY(0)}45%{transform:translateY(-30px)}}
+@keyframes twig{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.tpicks{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin:.5rem 0 .7rem}
+.tpick{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:.45rem .3rem;display:flex;flex-direction:column;align-items:center;gap:.08rem;font:inherit;cursor:pointer}
+.tpick img{width:56px;height:56px;object-fit:contain}
+.tpick b{font-family:"Jua",sans-serif;font-weight:400}
+.tpick span{font-size:.8rem;color:var(--accent)}
+.tpick:disabled{opacity:.45;cursor:default}
 </style>
 </head>
 <body>
@@ -1182,6 +1224,7 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
   <p class="small dex-line" id="visitDex"></p>
   <div class="raid" id="visitRaid"></div>
   <div class="visit-gift" id="visitGift"></div>
+  <div class="tpets" id="visitPets"></div>
 </dialog>
 
 <dialog class="visit ask" id="flowerDlg">
@@ -1192,6 +1235,15 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
   <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem">
     <button class="mini" id="flowerCancel">취소</button>
     <button class="mini ask-yes" id="flowerSend">💐 보내기</button>
+  </div>
+</dialog>
+
+<dialog class="visit ask" id="treatDlg">
+  <h3 style="margin:0 0 .2rem" id="treatTitle">🐾 간식 주기</h3>
+  <p class="small" style="margin:0">간식을 주면 펫이 반가워해요. 집주인에게는 누가 간식을 줬는지 알림이 가요.<br>(그날 처음 주는 간식엔 더 크게 기뻐해요)</p>
+  <div class="tpicks" id="treatPick"></div>
+  <div style="display:flex;gap:.5rem;justify-content:flex-end">
+    <button class="mini" id="treatCancel">닫기</button>
   </div>
 </dialog>
 
@@ -2328,24 +2380,40 @@ const demoApi = (() => {
     },
     async fishDex(){ const d = st.fdex||{}; return FISH_DEFAULT.map(f=>({...f, have:!!d[f.code], caught:d[f.code]?d[f.code].caught:0, best_cm:d[f.code]?d[f.code].best:null})); },
     async fishPending(){ return (st.fpend||[]).slice(); },
-    async castNet(){
+    bstate(){ const d = this.fday(); st.bait = st.bait || {inv:{}, day:null, legendBought:0, net:null};
+      if(st.bait.day!==d){ st.bait.day = d; st.bait.legendBought = 0; } return st.bait; },
+    async baits(){ const B = this.bstate(); return {inv:{...B.inv}, legend_today:B.legendBought, in_net: st.net ? B.net : null}; },
+    async buyBait(code){ const b = baitOf(code), B = this.bstate(); if(!b) fail('없는 미끼예요');
+      if(b.daily && B.legendBought>=b.daily) fail('전설 미끼는 하루에 1개만 살 수 있어요');
+      if(st.me.coins < b.price) fail('코인이 부족해요');
+      st.me.coins -= b.price; B.inv[code] = (B.inv[code]||0)+1; if(b.daily) B.legendBought++; persist(); return st.me.coins; },
+    async giveTreat(owner, petName, kind){ const t = TREATS.find(x=>x.kind===kind); if(!t) fail('없는 간식이에요');
+      if(st.me.coins < t.price) fail('코인이 부족해요');
+      st.me.coins -= t.price; st.treats = st.treats||{}; const k = this.fday()+'|'+owner+'|'+petName, first = !st.treats[k];
+      st.treats[k] = (st.treats[k]||0)+1; persist(); return {coins:st.me.coins, first}; },
+    async treatNotices(){ return []; },
+    async treatNoticesSeen(){},
+    async castNet(bait){
       const s = await this.fishing();
       if(!s.lake_open) fail('광장에 호숫가가 지어지면 낚시할 수 있어요');
       if(st.net) fail('어망이 이미 물에 들어가 있어요');
       if(s.used>=HAUL_PER_DAY+s.extra) fail('오늘 낚시는 끝났어요. 새벽 12시에 다시 와요');
-      st.net = Date.now();
+      const B = this.bstate();
+      if(bait){ if(!baitOf(bait)) fail('없는 미끼예요'); if(!(B.inv[bait]>0)) fail('그 미끼가 없어요'); B.inv[bait]--; }
+      B.net = bait || null; st.net = Date.now(); persist();
     },
     async haulNet(){
       const s = await this.fishing();
       if(!st.net) fail('먼저 어망을 던져 주세요');
       if(s.ready_in>0) fail('아직 물고기가 안 들었어요. 조금만 더 기다려요');
       if(s.used>=HAUL_PER_DAY+s.extra) fail('오늘 낚시는 끝났어요. 새벽 12시에 다시 와요');
+      const bait = this.bstate().net || 'none', rate = BAIT_RATE[bait] || BAIT_RATE.none; st.bait.net = null;
       st.net = null; st.fused = (st.fused||0)+1; st.fdex = st.fdex||{}; st.fpend = st.fpend||[]; st.fpid = st.fpid||1;
       const n = Math.random()<.4 ? 2 : 1, out = [];
       for(let i=0;i<n;i++){
-        const x = Math.random()*100, tier = x<4.5?'legend':x<22.5?'rare':'common';
+        const x = Math.random()*100, tier = x<rate.legend?'legend':x<rate.legend+rate.rare?'rare':'common';
         const pool = FISH_DEFAULT.filter(f=>f.tier===tier), f = pool[Math.floor(Math.random()*pool.length)];
-        const size = Math.round((f.min_cm + (f.max_cm-f.min_cm)*Math.pow(Math.random(),1.6))*10)/10;
+        const lo = bait==='chubby' ? BAIT_MIN_UP : 0, size = Math.round((f.min_cm + (f.max_cm-f.min_cm)*(lo + (1-lo)*Math.pow(Math.random(),1.6)))*10)/10;
         const d = st.fdex[f.code], kind = !d ? 'new' : size>d.best ? 'record' : 'normal', reward = FISH_REWARD[tier][kind];
         st.fdex[f.code] = {caught:(d?d.caught:0)+1, best:Math.max(d?d.best:0, size)};
         let pending_id = null;
@@ -2603,7 +2671,12 @@ const supaApi = (() => {
     async buyNet(){ return ok(await sb.rpc('buy_extra_net')); },
     async fishDex(){ return ok(await sb.rpc('get_fish_dex')); },
     async fishPending(){ return ok(await sb.rpc('fish_pending_list')); },
-    async castNet(){ ok(await sb.rpc('cast_net')); },
+    async castNet(bait){ if(bait) ok(await sb.rpc('cast_net_bait', {p_bait:bait})); else ok(await sb.rpc('cast_net')); },
+    async baits(){ const r = ok(await sb.rpc('get_baits')); return Array.isArray(r) ? r[0] : r; },
+    async buyBait(code){ return ok(await sb.rpc('buy_bait', {p_code:code})); },
+    async giveTreat(owner, petName, kind){ const r = ok(await sb.rpc('give_treat', {p_owner:owner, p_pet:petName, p_kind:kind})); return Array.isArray(r) ? r[0] : r; },
+    async treatNotices(){ return ok(await sb.rpc('my_treat_notices')); },
+    async treatNoticesSeen(){ ok(await sb.rpc('treat_notices_seen')); },
     async haulNet(){ return ok(await sb.rpc('haul_net')); },
     async resolveLegend(id, tribute){ return ok(await sb.rpc('resolve_legend', {p_id:id, p_tribute:tribute})); },
     async fishBest(id){ const r = ok(await sb.rpc('get_fish_best', {p_discord_id:id})); return Array.isArray(r) ? r[0] : r; },
@@ -3212,6 +3285,76 @@ document.addEventListener('click', async e=>{
     btn.disabled = false;
   }
 });
+/* ---------- 🐾 펫 간식 ---------- */
+let TREAT_PET = null;
+function openTreat(i){
+  const x = VISIT && VISIT.pets && VISIT.pets[i]; if(!x) return; TREAT_PET = i;
+  document.getElementById('treatTitle').textContent = `🐾 ${x.name}에게 간식 주기`;
+  document.getElementById('treatPick').innerHTML = TREATS.map(t=>`<button class="tpick" data-tkind="${t.kind}" ${ME&&ME.coins<t.price?'disabled':''}><img src="${t.img}" alt=""><b>${t.name}</b><span>🪙 ${t.price}</span></button>`).join('');
+  const d = document.getElementById('treatDlg'); if(!d.open) d.showModal();
+}
+function playTreat(i, t, big){
+  const st = document.getElementById('tpet'+i); if(!st) return;
+  st.querySelectorAll('.tfx').forEach(x=>x.remove());
+  const pet = st.querySelector('.pet'), D = .65;
+  const add = (src, cls, o) => { const im = document.createElement('img'); im.src = src; im.alt = ''; im.className = 'tfx ' + (cls||'');
+    Object.entries(o||{}).forEach(([k,v])=>im.style.setProperty('--'+k, v)); st.appendChild(im); };
+  const move = (cls, n) => { if(!pet) return; pet.classList.remove('tjump','twig'); void pet.offsetWidth; pet.style.setProperty('--n', n||1);
+    setTimeout(()=>{ pet.classList.add(cls); setTimeout(()=>pet.classList.remove(cls), 1400); }, D*1000); };
+  const heart = (x, y, w, dl) => add('goods/fx_heart.webp', '', {x, y, w, dl:(D+dl)+'s'});
+  add(t.img, 'drop', {w:'32px', y:'0%', d:'.8s'});
+  if(t.fx==='heart'){
+    heart('50%','-8%', big?'40px':'26px', 0);
+    if(big){ heart('18%','5%','22px',.25); heart('82%','5%','22px',.4); move('twig'); }
+  } else if(t.fx==='jump'){
+    add('goods/fx_jump.webp', 'ground', {x:'50%', w:big?'110px':'80px', d:big?'1.6s':'1.1s', dl:D+'s'});
+    move('tjump', big?2:1);
+    if(big) heart('50%','-14%','28px',.9);
+  } else if(t.fx==='hearts'){
+    add('goods/fx_hearts.webp', 'pop', {x:'50%', y:'-18%', w:big?'60px':'42px', d:'1.6s', dl:D+'s'});
+    if(big){ heart('14%','8%','20px',.35); heart('86%','2%','22px',.5); heart('30%','-10%','18px',.7); move('twig'); }
+  } else {
+    add('goods/fx_sparkle.webp', 'pop', {x:'50%', y:big?'-20%':'-6%', w:big?'100px':'64px', d:'1.8s', dl:D+'s'});
+    const hs = big ? [['15%','10%',.2],['85%','6%',.35],['35%','-12%',.5],['65%','-16%',.65],['50%','-4%',.85]] : [['30%','0%',.3],['70%','-4%',.5]];
+    hs.forEach(([x,y,dl])=>heart(x, y, big?'24px':'20px', dl));
+    move('tjump', big?2:1);
+  }
+  clearTimeout(st._t); st._t = setTimeout(()=>st.querySelectorAll('.tfx').forEach(x=>x.remove()), 4200);
+}
+document.addEventListener('click', e=>{
+  const tb = e.target.closest('[data-treat]'); if(tb){ openTreat(+tb.dataset.treat); return; }
+  if(e.target.closest('#treatCancel') || e.target.id==='treatDlg'){ document.getElementById('treatDlg').close(); return; }
+  const tk = e.target.closest('[data-tkind]');
+  if(tk) return act(async()=>{
+    const x = VISIT && VISIT.pets && VISIT.pets[TREAT_PET], t = treatOf(tk.dataset.tkind); if(!x) return;
+    document.querySelectorAll('[data-tkind]').forEach(b=>b.disabled = true);
+    try{
+      const r = await api.giveTreat(VISIT.p.discord_id, x.name, t.kind);
+      if(r && typeof r.coins === 'number') ME.coins = r.coins;
+      document.getElementById('treatDlg').close(); renderTop();
+      playTreat(TREAT_PET, t, !r || r.first !== false);
+      toast(`${t.emoji} ${x.name}에게 ${t.name}${jo(t.name,'을','를')} 줬어요${r && r.first===false ? '' : ' · 엄청 좋아해요!'}`);
+    }catch(err){
+      const m = err.message||''; toast(/schema cache|give_treat/.test(m) ? '간식 가게가 아직 준비 중이에요' : (m||'간식을 주지 못했어요'));
+      document.querySelectorAll('[data-tkind]').forEach(b=>b.disabled = false);
+    }
+  });
+});
+async function showTreatNotices(tries){
+  try{
+    const d = document.getElementById('party'), pe = d.querySelector('.party-emoji');
+    if(d.open){ if((tries||0)<20) d.addEventListener('close', ()=>setTimeout(()=>showTreatNotices((tries||0)+1), 400), {once:true}); return; }
+    const list = await api.treatNotices(); if(!list || !list.length) return;
+    if(d.open){ d.addEventListener('close', ()=>setTimeout(()=>showTreatNotices((tries||0)+1), 400), {once:true}); return; }
+    const lines = list.slice(0, 10).map(x=>{ const t = treatOf(x.kind);
+      return `${t.emoji} ${x.sender}님이 ${x.pet_name}에게 ${t.name}${jo(t.name,'을','를')} 주셨어요${x.n>1?` (×${x.n})`:''}`; });
+    if(list.length>10) lines.push(`… 그리고 ${list.length-10}번 더`);
+    pe.textContent = '🐾';
+    document.getElementById('partyMsg').textContent = `우리 펫이 간식을 받았어요!\n\n${lines.join('\n')}`;
+    document.getElementById('partyOk').onclick = ()=>{ d.close(); pe.textContent = '🎉'; };
+    d.showModal(); await api.treatNoticesSeen();
+  }catch(e){}
+}
 async function showFlowerNotices(){
   try{
     const list = await api.flowerNotices(); if(!list || !list.length) return;
@@ -3478,6 +3621,23 @@ function box_reset(){ const b = document.getElementById('treeBox'); if(b) b._htm
 const NET_WAIT_MIN = 60, HAUL_PER_DAY = 5;
 const NET_EXTRA_PRICE = [30, 50, 70, 200, 250];   // 하루 5번 다 걷은 뒤 어망 더 사기 (fishextra.sql 과 같아요)
 const FISH_TIER = {common:{label:'흔함'}, rare:{label:'귀함'}, legend:{label:'전설'}};
+// 🎣 미끼 (bait.sql 과 같아요) — 한 번 던질 때 1개 쓰고 사라져요
+const BAITS = [
+  {code:'shiny',  name:'반짝 미끼', price:40,  img:'goods/bait_shiny.webp',  about:'귀한 물고기가 더 잘 걸려요 (귀함 18% → 25%)'},
+  {code:'chubby', name:'통통 미끼', price:120, img:'goods/bait_chubby.webp', about:'작은 물고기가 덜 걸려요 (최소 크기만 올라가요)'},
+  {code:'legend', name:'전설 미끼', price:300, img:'goods/bait_legend.webp', about:'전설의 물고기가 더 잘 걸려요 (전설 4.5% → 6.5%) · 하루 1개만 살 수 있어요', daily:1},
+];
+const BAIT_RATE = {none:{legend:4.5, rare:18}, shiny:{legend:4.5, rare:25}, legend:{legend:6.5, rare:18}, chubby:{legend:4.5, rare:18}};
+const BAIT_MIN_UP = .3;   // 통통 미끼: 크기 범위 아래 30% 는 안 나와요
+const baitOf = c => BAITS.find(b=>b.code===c);
+// 🐾 펫 간식 (bait.sql 과 같아요) — 효과 없이 귀여운 반응만
+const TREATS = [
+  {kind:'cookie', name:'펫 쿠키',   price:5,  img:'goods/treat_cookie.webp', fx:'heart', emoji:'🍪'},
+  {kind:'fish',   name:'생선 간식', price:10, img:'goods/treat_fish.webp',   fx:'jump', emoji:'🐟'},
+  {kind:'jelly',  name:'젤리 간식', price:15, img:'goods/treat_jelly.webp',  fx:'hearts', emoji:'🐾'},
+  {kind:'deluxe', name:'고급 특식', price:40, img:'goods/treat_deluxe.webp', fx:'deluxe', emoji:'🍱'},
+];
+const treatOf = k => TREATS.find(t=>t.kind===k) || TREATS[0];
 const FISH_REWARD = {common:{normal:10, record:30, new:50}, rare:{normal:30, record:80, new:150}, legend:{normal:300, record:400, new:600}};
 const FISH_KIND = {new:'처음 낚았어요!', record:'기록 갱신!', normal:''};
 const FISH_DEFAULT = [
@@ -3614,7 +3774,7 @@ const fishSvg = (code, cls='') => FISH_IMG.has(code)
   ? `<img class="fsh ${cls}" src="fish/${code}.webp" alt="" draggable="false" loading="lazy">`
   : `<svg class="fsh ${cls}" viewBox="0 0 96 64" aria-hidden="true">${fishArtNew(code)}</svg>`;
 
-let FISHING = null, FDEX = [], FPENDING = [], LAKE_LAST = [];
+let FISHING = null, FDEX = [], FPENDING = [], LAKE_LAST = [], BAITS_ME = null, LAKE_BAIT = null;
 const fishOf = code => FDEX.find(f=>f.code===code) || FISH_DEFAULT.find(f=>f.code===code) || {code, name:'이름 모를 물고기', tier:'common'};
 const cm = n => `${(+n).toFixed(1).replace(/\.0$/,'')}cm`;
 async function refreshLake(){
@@ -3623,6 +3783,8 @@ async function refreshLake(){
     FISHING = Array.isArray(s) ? s[0] : s; if(d && d.length) FDEX = d; FPENDING = p || [];
     if(FISHING) FISHING.fetched = Date.now();
   }catch(e){ FISHING = null; }
+  try{ BAITS_ME = await api.baits(); }catch(e){ BAITS_ME = null; }   // bait.sql 전이면 미끼 상자는 안 보여요
+  if(LAKE_BAIT && !(BAITS_ME && (BAITS_ME.inv||{})[LAKE_BAIT]>0)) LAKE_BAIT = null;
 }
 const lakeOpen = () => FISHING ? !!FISHING.lake_open : !!(PLAZA.find(b=>b.code==='lake')||{}).built_at;
 function readyIn(){ if(!FISHING || FISHING.ready_in==null) return null; return Math.max(0, FISHING.ready_in - Math.floor((Date.now()-FISHING.fetched)/1000)); }
@@ -3647,9 +3809,18 @@ function renderLake(){
   else if(state==='done') action = extra < NET_EXTRA_PRICE.length
     ? `<p class="lake-msg">오늘 어망은 다 걷었어요!</p><button class="pull ten" id="buyNetBtn" ${(ME&&ME.coins<NET_EXTRA_PRICE[extra])?'disabled':''}>🎣 어망 하나 더 사기 · 🪙 ${NET_EXTRA_PRICE[extra]}</button><p class="lake-sub">오늘 ${extra+1}번째 추가 어망 · 하루 ${NET_EXTRA_PRICE.length}개까지</p>`
     : `<p class="lake-msg">오늘 낚시는 진짜 끝! 새벽 12시에 다시 와요</p>`;
-  else if(state==='empty') action = `<button class="pull ten" id="castBtn">🎣 어망 던지기</button>`;
+  else if(state==='empty') action = `<button class="pull ten" id="castBtn">🎣 어망 던지기${LAKE_BAIT?` · ${baitOf(LAKE_BAIT).name}`:''}</button>`;
   else if(state==='waiting'){ const m = Math.ceil(r/60); action = `<button class="pull" disabled>⏳ ${m>=60?'1시간':`${m}분`} 뒤에 걷을 수 있어요</button>`; }
   else action = `<button class="pull ten" id="haulBtn">🐟 어망 걷기!</button>`;
+  const inNet = (state==='waiting'||state==='ready') && BAITS_ME && baitOf(BAITS_ME.in_net);
+  if(inNet) action += `<p class="bait-net"><img src="${inNet.img}" alt="">${inNet.name}${jo(inNet.name,'을','를')} 단 어망이에요</p>`;
+  const binv = (BAITS_ME && BAITS_ME.inv) || {};
+  const baitBox = (open && BAITS_ME) ? `<div class="bait-box"><div class="bait-head"><img src="goods/bait_box.webp" alt="">미끼 상자 <span class="small">· 어망 던질 때 1개씩 써요</span></div>
+    <div class="bait-list">
+      <div class="bait none ${!LAKE_BAIT?'on':''}" data-bait="" role="button" tabindex="0"><span class="ico">🪝</span><b>미끼 없이</b><span class="q">그냥 던지기</span></div>
+      ${BAITS.map(b=>{ const q = binv[b.code]||0, sold = b.daily && (BAITS_ME.legend_today||0)>=b.daily;
+        return `<div class="bait ${LAKE_BAIT===b.code?'on':''}" data-bait="${b.code}" role="button" tabindex="0" title="${esc(b.about)}"><img src="${b.img}" alt=""><b>${b.name}</b><span class="q">${q}개 있음</span><button class="buy" data-buybait="${b.code}" ${sold||(ME&&ME.coins<b.price)?'disabled':''}>${sold?'오늘 다 샀어요':`🪙 ${b.price} 사기`}</button></div>`; }).join('')}
+    </div><p class="bait-about">${LAKE_BAIT ? esc(baitOf(LAKE_BAIT).about) : '미끼를 고르면 다음 어망에 달아요'}</p></div>` : '';
   const pend = FPENDING.map(p=>{ const f = fishOf(p.fish), tr = itemOf(TRIBUTE[p.fish]);
     return `<div class="lcard legend wide">${fishSvg(p.fish)}<b>${esc(f.name)}</b><span>${cm(p.size_cm)} · 전설의 물고기!</span>
       <span class="small">${esc(FISH_ABOUT[p.fish]||'')}</span>
@@ -3663,6 +3834,7 @@ function renderLake(){
         <p>어망을 던져 두고 1시간 뒤에 걷어 보세요. 한 번에 1~2마리가 걸려요.<br>오늘 남은 걷기 <b>${open?left:'-'} / ${HAUL_PER_DAY+extra}</b>${extra?` <span class="small">(산 어망 ${extra}개 포함)</span>`:''} · 새벽 12시에 다시 채워져요</p>
         ${action}
         <div class="results">${pend}${last}</div>
+        ${baitBox}
       </div>
     </div>`;
   const key = html.replace(/fcl\d+/g,''); if(box._html !== key){ box.innerHTML = html; box._html = key; }   // 바뀐 게 없으면 다시 안 그려요
@@ -3719,6 +3891,17 @@ function wolfHappyLines(){
   return null;
 }
 document.addEventListener('click', async e=>{
+  const bb = e.target.closest('[data-buybait]');
+  if(bb) return act(async()=>{
+    const b = baitOf(bb.dataset.buybait); if(!b) return;
+    if(!(await ask(`${b.name}${jo(b.name,'을','를')} 하나 살까요? 🪙 ${b.price}코인이 들어요.\n${b.about}`))) return;
+    const c = await api.buyBait(b.code); if(typeof c === 'number') ME.coins = c;
+    LAKE_BAIT = b.code; await Promise.all([refreshMine(), refreshLake()]); renderTop(); renderLake(); toast(`🎣 ${b.name}${jo(b.name,'을','를')} 샀어요! 미끼 상자에 넣어 뒀어요`);
+  });
+  const bs = e.target.closest('[data-bait]');
+  if(bs){ const code = bs.dataset.bait || null;
+    if(code && !((BAITS_ME && BAITS_ME.inv && BAITS_ME.inv[code])>0)){ toast('아직 그 미끼가 없어요. 🪙 사기를 눌러 주세요'); return; }
+    LAKE_BAIT = code; renderLake(); return; }
   const bn = e.target.closest('#buyNetBtn');
   if(bn) return act(async()=>{
     const k = (FISHING && FISHING.extra) || 0, price = NET_EXTRA_PRICE[k];
@@ -3728,7 +3911,8 @@ document.addEventListener('click', async e=>{
   });
   const c = e.target.closest('#castBtn');
   if(c){ c.disabled = true;
-    try{ await api.castNet(); LAKE_LAST = []; await refreshLake(); renderLake(); toast('🎣 어망을 던졌어요. 1시간 뒤에 걷어 보세요'); }
+    const bait = (LAKE_BAIT && BAITS_ME && (BAITS_ME.inv||{})[LAKE_BAIT]>0) ? LAKE_BAIT : null;
+    try{ await api.castNet(bait); LAKE_LAST = []; await refreshLake(); renderLake(); toast(bait ? `🎣 ${baitOf(bait).name}${jo(baitOf(bait).name,'을','를')} 달아서 던졌어요. 1시간 뒤에 걷어 보세요` : '🎣 어망을 던졌어요. 1시간 뒤에 걷어 보세요'); }
     catch(err){ toast(err.message||'던지지 못했어요'); c.disabled = false; } return; }
   const h = e.target.closest('#haulBtn');
   if(h){ h.disabled = true;
@@ -4762,10 +4946,11 @@ function renderVisit(){
     const leg = (info.legends||[]).map(c=>itemOf(c).emoji).join(' ');
     dex.innerHTML = `📖 보따리 도감 <b>${info.dex_have} / ${info.dex_total}</b>` + (leg ? ` · 모은 전설 ${leg}` : '');
   } else dex.textContent = '';
-  if(VISIT.pets && VISIT.pets.length) dex.innerHTML += `${dex.innerHTML?'<br>':''}<span class="visit-pets">${VISIT.pets.map(x=>`${petArt(x.pet_code, x.sad?'sad':'ok', 'tiny', petGrown(x.level||1))} ${esc(x.name)} <span class="small">Lv.${x.level}</span>`).join(' · ')}</span>`;
   if(VISIT.fishBest && VISIT.fishBest.fish) dex.innerHTML += `${dex.innerHTML?'<br>':''}🎣 최고 기록 <b>${esc(fishOf(VISIT.fishBest.fish).name)} ${cm(VISIT.fishBest.best_cm)}</b> · 물고기 도감 ${VISIT.fishBest.have}종`;
   renderRaidBtn();
   const fg = document.getElementById('visitGift'), fn = flowerCount(FLOWERS_ON[p.discord_id]);
+  const vp = document.getElementById('visitPets'), mine = isMe(p);
+  vp.innerHTML = (VISIT.pets||[]).map((x,i)=>`<div class="tpet"><div class="stage" id="tpet${i}">${petArt(x.pet_code, x.sad?'sad':'ok', '', petGrown(x.level||1))}</div><span class="nm">${esc(x.name)} <span class="small">Lv.${x.level}</span></span>${mine?'':`<button class="mini ask-yes" data-treat="${i}">🍪 간식 주기</button>`}</div>`).join('');
   fg.innerHTML = `<button class="mini ask-yes" data-giftto="${esc(p.discord_id)}" data-giftname="${esc(p.display_name)}">💐 꽃 보내기</button><span class="small">${fn?`오늘 받은 꽃 ${fn}송이 · 집 앞에 피어 있어요`:'꽃을 보내면 집 앞에 하루 동안 피어요'}</span>`;
 }
 function renderRaidBtn(){
@@ -4902,7 +5087,7 @@ async function start(){
         await refreshBanners(); renderBanners();
         await refreshTree(); renderFloatDrops(); if(!document.getElementById('tab-tree').hidden) renderTree();
         if(!document.getElementById('tab-plaza').hidden && !document.activeElement?.closest('#boardBox')){ await refreshBoard(); renderBoard(); }
-        showGifts(); showRaids(); showFlowerNotices(); refreshEvents(); refreshNotes(); refreshStreak();
+        showGifts(); showRaids(); showFlowerNotices(); showTreatNotices(); refreshEvents(); refreshNotes(); refreshStreak();
       }catch(e){}
     }, 30000);
   }
