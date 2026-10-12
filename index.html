@@ -979,6 +979,11 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .tpick b{font-family:"Jua",sans-serif;font-weight:400}
 .tpick span{font-size:.8rem;color:var(--accent)}
 .tpick:disabled{opacity:.45;cursor:default}
+/* ===== 진열장 칸 맞춤 (10-12) — 소품 그림이 커져도 진열장이 칸 밖으로 안 나가게 ===== */
+.furn.cabf{position:relative;min-width:0;min-height:0;overflow:visible}
+.furn.cabf > .cab{position:absolute;inset:2px;width:auto;height:auto}
+.cab span{position:relative;min-width:0;min-height:0}
+.cab span > .fsvg{position:absolute;left:8%;top:8%;width:84%;height:84%;object-fit:contain;margin:0}
 /* ===== 🎟️ 마감 스크래치 복권 (10-12) ===== */
 .lotto-wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:1rem;align-items:start}
 @media (max-width:760px){.lotto-wrap{grid-template-columns:1fr}}
@@ -2940,7 +2945,7 @@ function renderVillage(){
 function cabHTML(f, cabs){
   const cap = CAPACITY[f.item_code], cols = f.w===1 ? 2 : 3, inside = cabs[f.id] || [];
   let cells=''; for(let k=0;k<cap;k++){ const x = inside.find(i=>i.slot===k); cells += `<span>${x?ico(itemOf(x.item_code)):''}</span>`; }
-  return `<span class="cab ${f.w===2&&f.h===2?'big':''} c${cols}" style="grid-template-columns:repeat(${cols},1fr)">${cells}</span>`;
+  return `<span class="cab ${f.w===2&&f.h===2?'big':''} c${cols}" style="grid-template-columns:repeat(${cols},minmax(0,1fr));grid-template-rows:repeat(${Math.ceil(cap/cols)},minmax(0,1fr))">${cells}</span>`;
 }
 function roomHTML(list, cur, {editable, cabs={}}){
   let prev = null;
@@ -4432,8 +4437,8 @@ function renderLotto(){
                     : '<div class="t-cell blank">?</div>'.repeat(3);
   const week = (L.week||[]).map(lottoOf).filter(Boolean);
   const card = (it, tag) => { const have = dex.has(it.code);
-    return `<div class="lw ${have?'have':'lock'}" title="${esc(it.about)}">${tag?`<span class="wk">이번 주</span>`:''}${have?'<span class="ok">✓</span>':''}
-      <img src="furn/${it.code}.webp" alt="" draggable="false" loading="lazy"><div class="nm">${esc(it.name)}</div><div class="sz">${it.w}×${it.h}칸${it.layer==='floor'?' · 바닥':''}</div></div>`; };
+    return `<div class="lw ${have?'have':'lock'}" ${have?`title="${esc(it.about)}"`:''}>${tag?`<span class="wk">이번 주</span>`:''}${have?'<span class="ok">✓</span>':''}
+      <img src="furn/${it.code}.webp" alt="" draggable="false" loading="lazy"><div class="nm">${have?esc(it.name):'？？？'}</div><div class="sz">${it.w}×${it.h}칸${it.layer==='floor'?' · 바닥':''}</div></div>`; };
   let result = '';
   if(cur && cur.revealed){
     if(cur.res.kind==='miss') result = `<div class="wolf-note"><img src="bg/Wolf_Watcher.webp" alt=""><div><b>담당자의 쪽지</b><span>${esc(cur.nag)}</span></div></div>`;
