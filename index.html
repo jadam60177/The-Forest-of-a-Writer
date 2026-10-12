@@ -1258,7 +1258,208 @@ dialog.visit.shop-dlg{max-width:min(94vw,960px)}
 #bag .item.g-legend,#bag .item.g-lotto,#cabBag .item.g-legend{border-color:rgba(255,206,92,.85) rgba(255,206,92,.85) #7A5235;
   background:radial-gradient(ellipse at 50% 30%,rgba(255,206,92,.16),transparent 70%),linear-gradient(rgba(255,255,255,.05),rgba(255,214,150,.07))}
 body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;left:.15rem}
+
+/* =========================================================
+   ☀️ 낮 숲 테마 (10-13) — html 에 data-mode="day" 가 붙으면 켜져요
+   밤 테마 위에 덮어써요. 그림은 bg/*_day.webp 를 써요
+   ========================================================= */
+.mode-btn #modeIco{display:inline-block;transition:transform .3s}
+.mode-btn:hover #modeIco{transform:rotate(-20deg)}
+:root[data-mode="day"]:not(#_){
+  --bg:#F5F8EE; --panel:rgba(255,255,255,.84); --ink:#2B3826; --muted:#66705E;
+  --line:rgba(96,120,72,.24); --tile-locked:#CFC6B4;
+  --accent:#3F7F3A; --btn-ink:#FFFFFF; --night:#EEF5E6; --glow:0 0 16px rgba(255,190,80,.45);
+  color-scheme:light;
+}
+:root[data-mode="day"] body{background:
+  radial-gradient(ellipse 80% 50% at 15% 25%,rgba(150,210,245,.35),transparent 70%),
+  radial-gradient(ellipse 70% 45% at 85% 75%,rgba(170,215,140,.3),transparent 70%),
+  radial-gradient(ellipse 60% 40% at 50% 100%,rgba(255,220,140,.18),transparent 70%),
+  var(--night) fixed}
+:root[data-mode="day"] input,:root[data-mode="day"] select,:root[data-mode="day"] textarea{color-scheme:light}
+
+/* 위쪽 바 · 탭 */
+:root[data-mode="day"] .top{background:rgba(255,255,255,.88);color:var(--ink);border-bottom-color:var(--line);box-shadow:0 2px 12px rgba(80,110,60,.08)}
+:root[data-mode="day"] .top h1{color:#2F5A2A}
+:root[data-mode="day"] .coin{background:rgba(242,170,69,.16);color:#6A4210}
+:root[data-mode="day"] .ghost{color:var(--ink);border-color:rgba(96,120,72,.35)}
+:root[data-mode="day"] .ghost:hover{background:rgba(242,170,69,.14)}
+:root[data-mode="day"] .voice-btn{background:#FFFFFF;box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-mode="day"] .mail-dot{box-shadow:0 0 0 2px #FFFFFF}
+@media (min-width:601px){ :root[data-mode="day"] .tabs{background:rgba(255,255,255,.9);box-shadow:0 6px 18px rgba(80,110,60,.1)} }
+:root[data-mode="day"] .tabs button{background:rgba(255,255,255,.75);color:var(--ink);box-shadow:inset 0 -2px 0 rgba(96,120,72,.12)}
+:root[data-mode="day"] .tabs button:hover{background:#FFFFFF}
+:root[data-mode="day"] .tabs button[aria-selected="true"]{background:linear-gradient(#FFDC86,#F2AA45);color:#3A2600;border-color:#F2C065}
+@media (max-width:600px){
+  :root[data-mode="day"] .tabs{background:rgba(255,255,255,.96);box-shadow:0 -6px 20px rgba(80,110,60,.12)}
+  :root[data-mode="day"] .tabs button,:root[data-mode="day"] .tabs button:hover{background:transparent;box-shadow:none;color:var(--muted)}
+  :root[data-mode="day"] .tabs button[aria-selected="true"]{background:transparent;color:#C27A12}
+  :root[data-mode="day"] .tabs button[aria-selected="true"]::after{background:#F2AA45}
+  :root[data-mode="day"] .tabs .drop-badge,:root[data-mode="day"] .tabs .tab-badge{background:#2A8A9A;color:#fff}
+}
+:root[data-mode="day"] .event-banner.soon{background:#DCEBF8;color:#24405A}
+
+/* 🌲 마을: 낮 숲 그림 */
+:root[data-mode="day"] .village{background:
+  linear-gradient(#7DCAF6,#7DCAF6) top / 100% max(0px, calc(var(--bh,0px) - 98px)) no-repeat,
+  url(bg/forest_day.webp) center calc(var(--bh,0px) - 100px) / max(100%,1500px) auto no-repeat,
+  #94C460}
+@media (max-width:600px){ :root[data-mode="day"] .village{background:
+  linear-gradient(#7DCAF6,#7DCAF6) top / 100% calc(var(--bh,0px) + 2px) no-repeat,
+  url(bg/forest_day.webp) center var(--bh,0px) / 1000px auto no-repeat,
+  #94C460} }
+:root[data-mode="day"] .village::after{background:linear-gradient(rgba(238,245,230,0),rgba(238,245,230,.55) 55%,var(--night))}
+:root[data-mode="day"] .village-head{color:#1E3A4A;text-shadow:0 1px 2px rgba(255,255,255,.85),0 0 8px rgba(255,255,255,.6)}
+:root[data-mode="day"] .lit-count{color:#B5651D}
+:root[data-mode="day"] .fireflies{display:none}
+:root[data-mode="day"] .himg.off{filter:none}
+:root[data-mode="day"] .himg.on{filter:drop-shadow(0 0 3px rgba(255,206,92,.55))}
+:root[data-mode="day"] .house .st{color:#FFFFFF;text-shadow:0 1px 2px rgba(30,50,20,.9),0 0 6px rgba(30,50,20,.6)}
+:root[data-mode="day"] .village .wolf .tag{background:rgba(255,255,255,.88);color:#5A3A12;border-color:rgba(96,120,72,.3)}
+:root[data-mode="day"] .banner-meta{color:#1E3A4A;text-shadow:0 1px 2px rgba(255,255,255,.85)}
+:root[data-mode="day"] .banner-meta .b-nav{background:rgba(255,255,255,.85);color:var(--ink);border-color:var(--line)}
+
+/* 유리 패널 · 칸 · 버튼 */
+:root[data-mode="day"] .panel,:root[data-mode="day"] .shop-box{box-shadow:0 8px 24px rgba(80,110,60,.12),inset 0 1px 0 rgba(255,255,255,.8)}
+:root[data-mode="day"] .demo-note{background:rgba(255,255,255,.6)}
+:root[data-mode="day"] .rtab,:root[data-mode="day"] .shop-tab,:root[data-mode="day"] .box-tab{background:rgba(255,255,255,.8);color:var(--ink)}
+:root[data-mode="day"] .rtab.on,:root[data-mode="day"] .shop-tab.on,:root[data-mode="day"] .box-tab.on{background:linear-gradient(#FFDC86,#F2AA45);color:#3A2600;border-color:#F2C065}
+:root[data-mode="day"] .rtab.add{background:transparent;color:var(--accent);border-color:rgba(63,127,58,.5)}
+:root[data-mode="day"] .box-tab.locked{background:rgba(255,255,255,.5);color:var(--muted)}
+:root[data-mode="day"] .shop-tab.lim{background:#FFF1E2;color:#B4551E;border-color:#E9A065}
+:root[data-mode="day"] .shop-tab.lim.on{background:linear-gradient(#F5A25A,#E0802F);color:#fff}
+:root[data-mode="day"] .shop-tab.new{color:#B5651D;border-color:rgba(226,160,60,.6)}
+:root[data-mode="day"] .shop-tab.new.on{color:#3A2600}
+:root[data-mode="day"] .mini{background:rgba(255,255,255,.85);color:var(--ink)}
+:root[data-mode="day"] .mini:hover:not(:disabled){background:#FFF6DC}
+:root[data-mode="day"] .item,:root[data-mode="day"] .dex .cell,:root[data-mode="day"] .pdx,:root[data-mode="day"] .road li,
+:root[data-mode="day"] .fpick,:root[data-mode="day"] .note,:root[data-mode="day"] .deco,:root[data-mode="day"] .tpick{background:rgba(255,255,255,.72)}
+:root[data-mode="day"] .item:hover:not(:disabled){background:#FFF8E4}
+:root[data-mode="day"] .item .own,:root[data-mode="day"] .dex .cell .have,:root[data-mode="day"] .pdx .have{background:#E3F3EA;color:#2F6B4F}
+:root[data-mode="day"] .lim-note{background:#FFF1E2;color:#9A4A1E}
+:root[data-mode="day"] .dex .cell .dupb,:root[data-mode="day"] .dup-all{background:#F2EFFA;color:#5F4F8C;border-color:#B4A2DC}
+:root[data-mode="day"] .stars-have,:root[data-mode="day"] .gdx{background:rgba(255,255,255,.75)}
+:root[data-mode="day"] .item .gbadge.common{background:rgba(96,120,72,.12);color:var(--muted)}
+:root[data-mode="day"] #bag .item,:root[data-mode="day"] #shop .item,:root[data-mode="day"] #cabBag .item{background:linear-gradient(#FFFFFF,#FFF6E6);box-shadow:inset 0 -2px 0 #D9B07A,0 3px 0 #A9784B,0 6px 10px rgba(80,60,30,.15)}
+:root[data-mode="day"] #bag .item:hover:not(:disabled),:root[data-mode="day"] #shop .item:hover:not(:disabled),:root[data-mode="day"] #cabBag .item:hover:not(:disabled){background:linear-gradient(#FFFFFF,#FFEFCC)}
+:root[data-mode="day"] .shop-tools input[type=search]{background:#FFFFFF}
+:root[data-mode="day"] .shop-tools select{background:#FFFFFF;color:var(--ink)}
+:root[data-mode="day"] .shop-coins{background:rgba(242,170,69,.14)}
+:root[data-mode="day"] .shop-open{background:linear-gradient(90deg,rgba(255,220,134,.4),rgba(255,255,255,.6));border-color:rgba(226,160,60,.55)}
+:root[data-mode="day"] .shop-open .so-go{color:#B5651D}
+:root[data-mode="day"] .road li.mystery .q{background:linear-gradient(#9AD6F5,#CFEBC0);color:#4A6A80}
+:root[data-mode="day"] .road li svg,:root[data-mode="day"] .myhouse-head svg,:root[data-mode="day"] .deco-house{background:linear-gradient(#A8DCF7,#D8EFC6)}
+:root[data-mode="day"] .tile.ext-lock{background:repeating-linear-gradient(45deg,#4A3826 0 6px,transparent 6px 12px),#55402C}
+:root[data-mode="day"] .exp-btn{color:var(--accent);border-color:var(--accent)}
+
+/* 🔥 연속 출석 · 🪙 내역 · 📬 우편함 */
+:root[data-mode="day"] .streak{background:radial-gradient(ellipse at 0% 50%,rgba(255,170,80,.2),transparent 60%),rgba(255,255,255,.7);border-color:rgba(230,140,50,.35)}
+:root[data-mode="day"] .st-fire{color:#D9661E;text-shadow:none}
+:root[data-mode="day"] .st-fire b{color:#C2501A}
+:root[data-mode="day"] .st-dot{background:rgba(96,120,72,.1)}
+:root[data-mode="day"] .st-dot.next{background:#FFF1DC;color:#B5651D;border-color:rgba(230,140,50,.6)}
+:root[data-mode="day"] .st-dot.now{outline-color:#E8742E}
+:root[data-mode="day"] .st-msg b{color:#C2701A}
+:root[data-mode="day"] .cl-row:hover{background:rgba(96,120,72,.06)}
+:root[data-mode="day"] .cl-row .dl.up,:root[data-mode="day"] .ml .coin-chip{color:#2F8A4F}
+:root[data-mode="day"] .cl-row .dl.down{color:#C0503A}
+:root[data-mode="day"] .ml.new{background:#FFF7E2;border-color:rgba(226,160,60,.5)}
+:root[data-mode="day"] .ml .ic{background:rgba(96,120,72,.1)}
+:root[data-mode="day"] .earn{background:#FFF3D6;border-color:rgba(226,160,60,.4)}
+
+/* 팝업 창 */
+:root[data-mode="day"] dialog.visit{background:rgba(255,255,255,.96);box-shadow:0 20px 50px rgba(40,60,30,.25),0 0 0 1px var(--line)}
+:root[data-mode="day"] dialog.visit::backdrop{background:rgba(40,60,40,.35)}
+:root[data-mode="day"] dialog.party,:root[data-mode="day"] dialog.zoom{border-color:rgba(242,190,90,.7);
+  background:radial-gradient(ellipse 90% 60% at 50% 0%,rgba(255,220,134,.45),transparent 70%),
+    radial-gradient(circle at 12% 20%,rgba(242,170,69,.55) 0 1.2px,transparent 1.8px) 0 0/97px 83px,
+    radial-gradient(circle at 70% 60%,rgba(141,184,224,.6) 0 .9px,transparent 1.4px) 23px 41px/71px 113px,
+    #FFFDF5;
+  box-shadow:0 0 0 4px rgba(255,255,255,.7),0 0 34px rgba(255,200,90,.35),0 24px 60px rgba(40,60,30,.3)}
+:root[data-mode="day"] #partyMsg,:root[data-mode="day"] #raidMsg,:root[data-mode="day"] dialog.lotto-win p{color:var(--ink)}
+:root[data-mode="day"] .toast{background:rgba(255,255,255,.97);color:var(--ink);border-color:rgba(242,170,69,.6);box-shadow:0 0 18px rgba(255,200,90,.3),0 8px 24px rgba(40,60,30,.2)}
+
+/* 🏘️ 광장 */
+:root[data-mode="day"] .plaza-scene{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,0) 40%,rgba(255,255,255,.1)),url(bg/Square_day.webp) center bottom/cover no-repeat,#A79886;color:var(--ink)}
+:root[data-mode="day"] .plaza-head{text-shadow:none;display:inline-block;max-width:44rem;background:rgba(255,255,255,.82);border-radius:14px;padding:.55rem .9rem .3rem;margin-bottom:.8rem;box-shadow:0 2px 10px rgba(60,80,40,.15)}
+:root[data-mode="day"] .plaza-head p{margin-bottom:.4rem}
+:root[data-mode="day"] .lot.fog{background:rgba(255,255,255,.55)!important;border-color:rgba(96,120,72,.35)}
+:root[data-mode="day"] .lot.building{background:rgba(255,255,255,.7)!important;border-color:rgba(96,120,72,.55)}
+:root[data-mode="day"] .lot.built{background:rgba(255,244,210,.82)!important;border-color:rgba(226,160,60,.6)}
+:root[data-mode="day"] .lot .mbar{background:rgba(96,120,72,.2)}
+:root[data-mode="day"] .lot .mbar span{background:#F2AA45}
+:root[data-mode="day"] .give-row input{background:#FFFFFF}
+:root[data-mode="day"] .truck{background:rgba(255,255,255,.6)}
+:root[data-mode="day"] .truck.on{background:radial-gradient(120% 90% at 50% 20%,rgba(255,220,134,.4),rgba(255,255,255,.6))}
+:root[data-mode="day"] .truck .t-done{color:#B5651D}
+
+/* 🌳 세계수 */
+:root[data-mode="day"] .tree-stage{background-image:url(bg/World_Tree_day.webp)}
+:root[data-mode="day"] .tree-scene{color:var(--ink);border:1px solid var(--line)}
+:root[data-mode="day"] .tree-bar{background:rgba(96,120,72,.15)}
+:root[data-mode="day"] .tree-bar span{box-shadow:0 0 8px var(--tg1,#7FE0D0)}
+:root[data-mode="day"] .pour-row .give{background:rgba(255,255,255,.85);color:var(--ink);border-color:var(--tg1,#7FE0D0)}
+:root[data-mode="day"] .tw{fill-opacity:.8}
+
+/* 🎣 호숫가 */
+:root[data-mode="day"] .lake-scene{background:linear-gradient(#6DC7F9,#BAE2E5);color:var(--ink)}
+:root[data-mode="day"] .lake-svg{background:#6DC7F9}
+:root[data-mode="day"] .lake-inner{background:linear-gradient(rgba(255,255,255,.94),rgba(238,248,250,.97));border-top-color:rgba(80,148,149,.35);box-shadow:0 -10px 24px rgba(40,90,100,.12)}
+:root[data-mode="day"] .lake-inner .locked-note{color:var(--ink);background:rgba(255,255,255,.7);border-color:var(--line)}
+:root[data-mode="day"] .bait-box{background:rgba(255,255,255,.75);border-color:rgba(226,160,60,.45)}
+:root[data-mode="day"] .bait{background:#FFFFFF}
+:root[data-mode="day"] .bait.on{border-color:#F2AA45;box-shadow:0 0 0 2px rgba(242,170,69,.6)}
+:root[data-mode="day"] .bait .buy{color:#B5651D;border-color:rgba(226,160,60,.7)}
+:root[data-mode="day"] .rcard,:root[data-mode="day"] .lcard{background:rgba(255,255,255,.8);border-color:rgba(96,120,72,.25);color:var(--ink)}
+:root[data-mode="day"] .rcard.rare,:root[data-mode="day"] .lcard.rare{background:rgba(220,235,250,.9);border-color:#8DB8E0;box-shadow:0 0 10px rgba(141,184,224,.4)}
+:root[data-mode="day"] .rcard.legend,:root[data-mode="day"] .lcard.legend{background:rgba(255,240,200,.92);border-color:#F2AA45;box-shadow:0 0 18px rgba(255,190,80,.55)}
+:root[data-mode="day"] .lcard .kind{background:#E6F0F7;color:#24405A}
+
+/* 🐾 펫 */
+:root[data-mode="day"] .pet-yard{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,0) 40%),url(bg/Pet_background_day.webp) center bottom/cover no-repeat,#7CA25B;color:var(--ink)}
+:root[data-mode="day"] .pet-yard h3{display:inline-block;color:#24331F;text-shadow:none;background:rgba(255,255,255,.85);border-radius:999px;padding:.2rem .9rem;box-shadow:0 2px 8px rgba(60,80,40,.15)}
+:root[data-mode="day"] .pet-yard .locked-note{background:rgba(255,255,255,.8);color:var(--ink)}
+:root[data-mode="day"] .pet-card{background:rgba(255,255,255,.9);color:var(--ink)}
+:root[data-mode="day"] .pet-card.sad{background:rgba(236,236,244,.92)}
+:root[data-mode="day"] .pet-card.empty{background:rgba(255,255,255,.55);border-color:rgba(226,160,60,.6)}
+:root[data-mode="day"] .pet-walk{background:#FFF6DC;border-color:rgba(226,160,60,.4)}
+:root[data-mode="day"] .pet-choice{background:#FFFFFF}
+:root[data-mode="day"] .pet-choice:hover{background:#FFF1D0}
+:root[data-mode="day"] p.pet-main.on{color:#B5651D}
+:root[data-mode="day"] .pdx .pet.shadow img{filter:brightness(0);opacity:.18}
+:root[data-mode="day"] .fairy-dex .pdx{background:linear-gradient(180deg,#F6F1FF,#EEF6FB);border-color:#C3B3E6;box-shadow:none}
+:root[data-mode="day"] .fairy-dex .pdx b{color:#5F4F8C}
+:root[data-mode="day"] .fairy-dex .pdx .pet.shadow img,:root[data-mode="day"] .fairy-dex .pdx .pet.shadow svg{filter:brightness(0) sepia(1) hue-rotate(220deg);opacity:.2}
+:root[data-mode="day"] .fairy-dex .pdx .mini{background:#FFFFFF;border-color:#C3B3E6;color:#5F4F8C}
+:root[data-mode="day"] .fairy-dex .pdx.open{border-color:#B4A2DC;box-shadow:0 0 12px rgba(180,162,220,.35)}
+
+/* 🎁 보따리 */
+:root[data-mode="day"] .gacha-scene{background:linear-gradient(rgba(255,255,255,.3),rgba(255,255,255,.05) 45%,rgba(255,255,255,.25)),url(bg/package_day.webp) center bottom/cover no-repeat,#80A55A;color:var(--ink)}
+:root[data-mode="day"] .gacha-inner{text-shadow:none;background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.9);border-radius:18px;padding:1rem .9rem 1.1rem;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);box-shadow:0 8px 24px rgba(60,80,40,.15);align-self:start}
+:root[data-mode="day"] .gacha-scene .locked-note{background:rgba(255,255,255,.8);border-color:var(--line);color:var(--ink);text-shadow:none}
+:root[data-mode="day"] .gacha-dex{background:rgba(255,255,255,.86);box-shadow:0 8px 24px rgba(80,110,60,.15)}
+:root[data-mode="day"] .gacha-dex .dex .cell{background:#FFFFFF}
+:root[data-mode="day"] .pull{box-shadow:0 2px 8px rgba(40,60,30,.2)}
+
+/* 🎟️ 복권 · 기타 */
+:root[data-mode="day"] .prize-table li{background:rgba(255,255,255,.75)}
+:root[data-mode="day"] .prize-table li.top{background:linear-gradient(90deg,rgba(255,220,134,.5),rgba(255,255,255,.7))}
+:root[data-mode="day"] .t-win{color:#B5651D;text-shadow:none}
+:root[data-mode="day"] .lw{background:radial-gradient(ellipse at 50% 30%,rgba(255,220,134,.35),rgba(255,255,255,.75) 70%)}
+:root[data-mode="day"] .lw.lock img{filter:brightness(0) drop-shadow(0 0 6px rgba(242,170,69,.5));opacity:.35}
+:root[data-mode="day"] .raid-btn{background:#FFF1E2;color:#9A4A1E;border-color:#E9A065}
+:root[data-mode="day"] .board-form input,:root[data-mode="day"] #noteBody,:root[data-mode="day"] .gift select,:root[data-mode="day"] .gift input{background:#FFFFFF}
+:root[data-mode="day"] table.admin tr.d3 td{background:rgba(180,81,62,.1)}
 </style>
+<script>
+/* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
+var MODE_DAY_FROM = 6, MODE_DAY_TO = 18;   // 자동일 때 낮: 아침 6시 ~ 저녁 6시 전
+function modePick(){ var m = 'auto'; try{ m = localStorage.getItem('majam-mode') || 'auto'; }catch(e){} return m; }
+function modeNow(){ var m = modePick(); if(m==='day'||m==='night') return m; var h = new Date().getHours(); return (h>=MODE_DAY_FROM && h<MODE_DAY_TO) ? 'day' : 'night'; }
+function isDay(){ return document.documentElement.getAttribute('data-mode')==='day'; }
+document.documentElement.setAttribute('data-mode', modeNow());
+</script>
 </head>
 <body>
 
@@ -1296,6 +1497,7 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
       <button class="ghost" id="ffBtn" title="미리보기용: 누적 작업 시간 +5시간">⏩ +5시간</button>
     </span>
     <button class="ghost mail-btn" id="mailBtn" aria-label="우편함">📬<span class="lbl"> 우편함</span><span class="mail-dot" id="mailDot" hidden></span></button>
+    <button class="ghost mode-btn" id="modeBtn" aria-label="낮·밤 화면 고르기"><span id="modeIco">🌗</span><span class="lbl" id="modeLbl"> 자동</span></button>
     <button class="ghost" id="noteBtn" aria-label="숲지기에게 쪽지">✉️<span class="lbl"> 쪽지</span></button>
     <button class="ghost" id="logoutBtn">나가기</button>
   </div>
@@ -4056,8 +4258,8 @@ function renderTree(){
   const k = treeStageIdx(TREE.poured, TREE.goal), st = TREE_STAGES[k], pct = Math.min(100, TREE.poured/TREE.goal*100), P = treeColor(TREE.color);
   const left = TREE.goal - TREE.poured;
   const html = `
-    <div class="tree-scene" style="--tg1:${P.glow};--tg2:${P.au[1]};background:radial-gradient(ellipse at 50% 30%,${P.bg[0]} 0%,${P.bg[1]} 60%,${P.bg[2]} 100%)">
-      <div class="tree-stage" style="--tbg:${P.bg[1]}"><div class="tree-art ${TREE_IMG.has(TREE.color)?'timg':''}" style="${TREE_IMG.has(TREE.color)?`--th:${TREE_IMG_H[k]}%`:''}">${treeArt(k,'tb',TREE.color)}</div></div>
+    <div class="tree-scene" style="--tg1:${P.glow};--tg2:${P.au[1]};background:${isDay() ? `radial-gradient(ellipse at 50% 30%,#FFFFFF 0%,${P.glow}33 45%,transparent 70%),linear-gradient(#CFEBF7,#EEF6E6 60%)` : `radial-gradient(ellipse at 50% 30%,${P.bg[0]} 0%,${P.bg[1]} 60%,${P.bg[2]} 100%)`}">
+      <div class="tree-stage" style="--tbg:${isDay()?'#EEF6E6':P.bg[1]}"><div class="tree-art ${TREE_IMG.has(TREE.color)?'timg':''}" style="${TREE_IMG.has(TREE.color)?`--th:${TREE_IMG_H[k]}%`:''}">${treeArt(k,'tb',TREE.color)}</div></div>
       <h3>${TREE.tree_no}번째 · ${P.name}</h3>
       <p class="tree-about" style="margin-bottom:.1rem">지금은 <b>${st.name}</b></p>
       <p class="tree-about">${st.about}</p>
@@ -4309,13 +4511,13 @@ function readyIn(){ if(!FISHING || FISHING.ready_in==null) return null; return M
 
 function lakeScene(state){
   // state: closed / empty / waiting / ready / done · 배경은 bg/lake.webp (1000×538 칸), 찌는 낚싯줄 끝(545, 515)에 떠요
-  const buoy = state==='waiting'||state==='ready';
+  const buoy = state==='waiting'||state==='ready', day = isDay();   // 낮 그림은 낚싯줄 끝이 조금 위(545, 498)에 있어요
   return `<svg class="lake-svg" viewBox="0 0 1000 538" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <image href="bg/lake.webp" x="0" y="0" width="1000" height="538"/>
-    ${buoy?`<g class="${state==='ready'?'bob':''}"><circle cx="545" cy="512" r="6.5" fill="#E0583A" stroke="#7A2A1A" stroke-width="1"/><path d="M538.5 512 h13" stroke="#FFFFFF" stroke-width="2.2"/></g>
+    <image href="bg/lake${day?'_day':''}.webp" x="0" y="0" width="1000" height="538"/>
+    <g transform="translate(0 ${day?-14:0})">${buoy?`<g class="${state==='ready'?'bob':''}"><circle cx="545" cy="512" r="6.5" fill="#E0583A" stroke="#7A2A1A" stroke-width="1"/><path d="M538.5 512 h13" stroke="#FFFFFF" stroke-width="2.2"/></g>
       <path d="M522 520 q23 9 46 0" stroke="#B9D3F0" stroke-width="1.4" fill="none" opacity=".7"/>`:''}
-    ${state==='ready'?`<path d="M560 498 l6 -7 M567 506 l8 -3 M528 498 l-6 -7" stroke="#FFF3C4" stroke-width="2" stroke-linecap="round"/>`:''}
-    ${state==='closed'?`<rect x="0" y="0" width="1000" height="538" fill="#1F2A55" opacity=".5"/>`:''}
+    ${state==='ready'?`<path d="M560 498 l6 -7 M567 506 l8 -3 M528 498 l-6 -7" stroke="#FFF3C4" stroke-width="2" stroke-linecap="round"/>`:''}</g>
+    ${state==='closed'?`<rect x="0" y="0" width="1000" height="538" fill="${day?'#FFFFFF':'#1F2A55'}" opacity="${day?.45:.5}"/>`:''}
   </svg>`;
 }
 function renderLake(){
@@ -6097,9 +6299,29 @@ document.getElementById('coinDlg').addEventListener('click', e=>{ if(e.target.id
   if(get('majam-bag-open')==='0') bag.open = false;
   bag.addEventListener('toggle', ()=>set('majam-bag-open', bag.open?'1':'0'));
 })();
+/* ☀️🌙 낮·밤 화면 고르기 — 자동이면 1분마다 시간을 보고 바꿔요 */
+const MODE_INFO = {auto:['🌗','자동'], day:['☀️','낮'], night:['🌙','밤']};
+function modeLabel(){ const [ico, lbl] = MODE_INFO[modePick()] || MODE_INFO.auto, btn = document.getElementById('modeBtn');
+  document.getElementById('modeIco').textContent = ico; document.getElementById('modeLbl').textContent = ' ' + lbl;
+  btn.title = modePick()==='auto' ? `자동: 아침 ${MODE_DAY_FROM}시~저녁 ${MODE_DAY_TO}시는 낮, 그 밖엔 밤 · 누르면 바꿀 수 있어요` : `${lbl} 화면으로 고정 · 누르면 바꿀 수 있어요`; }
+function applyMode(){
+  const next = modeNow(), was = document.documentElement.getAttribute('data-mode');
+  modeLabel(); if(next===was) return false;
+  document.documentElement.setAttribute('data-mode', next);
+  try{ if(typeof box_reset==='function') box_reset(); if(TREE) renderTree(); if(FISHING) renderLake(); }catch(e){}
+  return true;
+}
+document.getElementById('modeBtn').addEventListener('click', ()=>{
+  const order = ['auto','day','night'], k = (order.indexOf(modePick())+1) % order.length;
+  try{ localStorage.setItem('majam-mode', order[k]); }catch(e){}
+  applyMode();
+  toast(order[k]==='auto' ? `🌗 자동: 아침 ${MODE_DAY_FROM}시~저녁 ${MODE_DAY_TO}시는 낮, 그 밖엔 밤 숲이에요 (지금은 ${isDay()?'낮':'밤'})` : order[k]==='day' ? '☀️ 늘 낮 숲으로 볼게요' : '🌙 늘 밤 숲으로 볼게요');
+});
+modeLabel();
+setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️ 숲에 아침이 왔어요' : '🌙 숲에 밤이 찾아왔어요'); }, 60e3);
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑨</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑩ · 낮 숲</p>
 </body>
 </html>
