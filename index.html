@@ -1663,6 +1663,30 @@ const FURN_IMG = new Set(["draftdesk", "windowbed", "coffeebar", "cookstation", 
 // 🎁 보따리 소품 그림 (10-12 저녁, furn 폴더) — 보따리 소품 전부 + 도장(stamp)
 const GACHA_IMG = ["unicorn", "dragon", "shootingstar", "fairy", "squirrel", "butterfly", "crystal", "turtle", "umbrella", "socks", "mapleleaf", "shell", "yarn", "honeypot", "basket", "fullmoon", "deer", "raccoon", "moonviewing", "chestnut", "sweetpotato", "fishcake", "flashlight", "backpack", "boots", "swan", "oldkey", "dove", "posthorn", "seal", "letter", "envelope", "parcel", "nametag", "clip", "memo", "stamp", "birthdaycake", "mooncake", "cake", "pie", "pudding", "croissant", "baguette", "bagel", "waffle", "pancake", "donut", "peacock", "rainbow", "clover", "blossom", "rosette", "sunflower", "tulip", "wildflower", "rose", "herb", "sprout", "medal", "legendms", "treasuremap", "quill", "magnifier", "openbook", "newspaper", "redbook", "greenbook", "bookmark", "pencil", "panda", "parfait", "bubbletea", "jar", "strawberry", "teapot", "cupcake", "dango", "milk", "juice", "lemon", "ferris", "coaster", "fireworks", "sparkler", "mask", "balloon", "windchime", "koinobori", "confetti", "popper", "ticket", "crown", "galaxy", "globe", "statue", "amulet", "compass", "urn", "ruler", "cardbox", "oillamp", "hourglass", "ribbon", "logs", "bonfire", "sleepbag", "thermos", "inkbottle", "mailbox", "bread", "muffin", "jam", "rollingpin", "chefhat", "potplant", "wateringcan", "flowerbunch", "shears", "seedpack", "bookstack", "glasses", "journal", "minishelf", "teacup", "teabag", "teacookie", "rollcake", "teatray", "cottoncandy", "candyapple", "takoyaki", "garland", "glowstick", "parchment", "startele", "libladder", "exlibris", "candlestick"];
 GACHA_IMG.forEach(c=>FURN_IMG.add(c));
+// 🧶 새 러그 20종 (10-12 밤, newrugs.sql 과 같아요) — code, emoji, 이름, 가로, 세로, 가격
+const NEW_RUGS = [
+  ["rug_sun", "☀️", "해님 러그", 2, 2, 150],
+  ["rug_stripe", "🟪", "줄무늬 러그", 2, 1, 90],
+  ["rug_daisy", "🌼", "데이지 러그", 2, 2, 150],
+  ["rug_braid", "🟢", "땋은 타원 러그", 3, 2, 220],
+  ["rug_bear", "🐻", "곰돌이 러그", 2, 2, 160],
+  ["rug_rainbow", "🌈", "무지개 러그", 2, 1, 90],
+  ["rug_star", "⭐", "별 러그", 1, 1, 40],
+  ["rug_check", "🟫", "체크 러그", 3, 2, 220],
+  ["rug_leaf", "🍃", "나뭇잎 러그", 2, 1, 90],
+  ["rug_heart", "💗", "하트 러그", 1, 1, 40],
+  ["rug_cat", "🐱", "고양이 러그", 2, 2, 160],
+  ["rug_mushroom", "🍄", "버섯 러그", 1, 1, 40],
+  ["rug_shell", "🐚", "산호 조개 러그", 1, 1, 40],
+  ["rug_kilim", "🟧", "킬림 러그", 3, 2, 220],
+  ["rug_shell2", "🐚", "무지개 조개 러그", 1, 1, 40],
+  ["rug_cloud2", "☁️", "몽실 구름 러그", 2, 1, 90],
+  ["rug_monstera", "🌿", "몬스테라 러그", 2, 2, 150],
+  ["rug_mandala", "🔵", "만다라 러그", 2, 2, 180],
+  ["rug_fox", "🦊", "여우 러그", 2, 2, 160],
+  ["rug_acorn", "🌰", "도토리 러그", 1, 1, 40]
+];
+NEW_RUGS.forEach(([code,emoji,name,w,h,price])=>{ DEFAULT_SHOP.splice(DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'), 0, {code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'floor'}); FLOOR_CODES.add(code); FURN_IMG.add(code); });
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
 const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp` : null;
 const ico = it => fimg(it) ? `<img class="fsvg fimg" src="${fimg(it)}" alt="" draggable="false" loading="lazy">` : (iconKey(it) && FURN_SVG[iconKey(it)]) ? `<svg class="fsvg" viewBox="${FURN_SVG[iconKey(it)].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[iconKey(it)].svg}</svg>` : (it ? it.emoji : '');
