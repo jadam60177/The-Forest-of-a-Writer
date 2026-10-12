@@ -928,7 +928,7 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .village-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
 .village-head .fold-btn{margin-left:auto;white-space:nowrap}
 .village.folded{min-height:0!important;height:auto!important;padding-bottom:2.2rem!important}
-.village.folded > :not(.village-head):not(#bannerBox):not(.houses):not(.vtrucks){display:none!important}
+.village.folded > :not(.village-head):not(#bannerBox):not(.houses):not(.vtrucks):not(.trail){display:none!important}
 .village.folded::after{height:40px}
 /* 현수막이 없으면 그림을 위로 100px 올리던 탓에 밤 하늘의 달이 잘렸어요 (10-13) — 현수막 높이만큼 하늘 자리를 비워 둬요 */
 @media (min-width:601px){ .village.nobanner{--bh:100px !important;padding-top:calc(1.25rem + 100px)} }
@@ -1127,6 +1127,26 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 .vtruck.coffee .vpill::after{left:22px}.vtruck.coffee .vpill::before{left:24px}
 .vtruck.dessert .vpill::after{right:22px}.vtruck.dessert .vpill::before{right:24px}
 .vtruck .vpill:hover::before{border-top-color:#FFE7A8}
+/* 🐺 담당자는 숲 그림 아래, 간식차 여우가 있는 줄에서 어슬렁거려요 (10-13) — 마을을 접어도 보이고, 조금 더 커졌어요 */
+.village > .trail{position:absolute;left:0;right:0;margin:0 auto;max-width:1200px;z-index:2;pointer-events:none;
+  height:225px;top:calc(var(--bh,0px) - 100px + max(100vw,1500px) * .2494 - 203px)}
+.village:not(.folded){padding-bottom:2.5rem}
+.trail .wolf{width:140px;bottom:-4px;left:max(4%,44px)}
+.trail .wolf-svg{width:134px}
+.trail .bubble{font-size:.86rem;max-width:220px}
+@media (prefers-reduced-motion:no-preference){
+  .trail .wolf{animation:roamTop 60s linear infinite alternate}
+  .trail .wolf-svg{animation:face 120s step-end infinite}
+  @keyframes roamTop{from{left:max(4%,44px)}to{left:calc(100% - 140px - max(4%,44px))}}
+}
+@media (max-width:600px){
+  .village > .trail{top:calc(var(--bh,0px) + 249px - 126px);height:140px}
+  .trail .wolf{width:84px;bottom:-2px}
+  .trail .wolf-svg{width:80px}
+  .trail .wolf .tag{font-size:.72rem}
+  .trail .bubble{font-size:.7rem;max-width:210px;padding:.2rem .55rem;line-height:1.35}
+  @media (prefers-reduced-motion:no-preference){ .trail .wolf{animation-name:roamTopM} @keyframes roamTopM{from{left:66px}to{left:calc(100% - 150px)}} }
+}
 @media (max-width:600px){.vtruck .vpill{top:-.6rem}.vtruck.coffee .vpill::after{left:14px}.vtruck.coffee .vpill::before{left:16px}.vtruck.dessert .vpill::after{right:14px}.vtruck.dessert .vpill::before{right:16px}}
 @media (prefers-reduced-motion:reduce){.vtruck .vfox{animation:none}}
 /* ===== 🐟 흔함·귀함 물고기 그림 (10-13) ===== */
@@ -6524,6 +6544,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑬</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑭</p>
 </body>
 </html>
