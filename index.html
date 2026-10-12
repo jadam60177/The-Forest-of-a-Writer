@@ -1556,6 +1556,7 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 .tk-nm{flex:1;display:flex;flex-direction:column;line-height:1.3;min-width:0}
 .tk-nm b{white-space:nowrap}.tk-nm .small{white-space:nowrap}
 .tk-lock{opacity:.6}
+.tk-tabs{display:flex;flex-wrap:wrap;gap:.35rem;margin:.55rem 0 .1rem}
 .tk-skin-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;margin-top:.5rem}
 .tk-skin{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.4rem;border:1px solid var(--line);border-radius:12px;text-align:center}
 .tk-skin img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px}
@@ -5161,10 +5162,15 @@ document.addEventListener('click', e=>{
    흔함 10번 · 귀함 5번 · 전설 1번 잡은 물고기를 넣을 수 있어요. 넣어도 잡은 횟수·코인은 그대로.
    물고기 그림은 머리가 왼쪽을 본다고 보고, 오른쪽으로 갈 때 뒤집어요. 반대로 그린 그림은 FISH_FACE_RIGHT 에 넣어 주세요. */
 const TANK_NEED = {common:10, rare:5, legend:1}, TANK_MAX = 12;   // tank.sql 과 같아야 해요
+const TANK_SKIN_PRICE = 150;   // 스킨은 한 번 사면 언제든 바꿔 낄 수 있어요 (tank.sql 의 tank_skin_price 와 같아야 해요)
+const TANK_TABS = [['sand','🏖️ 모래 바다'],['forest','🌿 숲지'],['more','✨ 더 보기']];
 const TANK_SKINS = [
-  {code:'sand',   name:'모래 바닷속',   price:0,   img:'tank/sand.webp'},
-  {code:'castle', name:'모래성 바닷속', price:300, img:'tank/castle.webp'},
-];
+  ['sand','sand','모래 바다 1 · 고운 모래',0], ['sand2','sand','모래 바다 2 · 해초'], ['sand3','sand','모래 바다 3 · 산호'], ['sand4','sand','모래 바다 4 · 모래성'], ['castle','sand','모래 바다 · 보물 상자'],
+  ['forest1','forest','숲지 1 · 이끼 돌'], ['forest2','forest','숲지 2 · 반딧버섯'], ['forest3','forest','숲지 3 · 우거진 풀'], ['forest4','forest','숲지 4 · 버섯 숲'],
+  ['deepsea','more','깊은 바다'], ['bluesea','more','푸른 바다'], ['cave','more','바닷속 동굴'], ['glass','more','유리 어항'],
+  ['mint','more','민트 자갈'], ['greenwater','more','연둣빛 물'], ['lilypond','more','연잎 연못'], ['swamp','more','고요한 늪'],
+].map(([code,tab,name,price])=>({code, tab, name, price: price ?? TANK_SKIN_PRICE, img:`tank/${code}.webp`}));
+let TANK_TAB = 'sand'; try{ TANK_TAB = localStorage.getItem('majam-tank-tab') || 'sand'; }catch(e){}
 const FISH_FACE_RIGHT = new Set([]);
 let TANK = null;
 async function refreshTank(){ try{ TANK = await api.tankMine(); }catch(e){ TANK = null; } }
@@ -5229,11 +5235,13 @@ function renderTank(){
            : n>=need ? `<button class="mini ask-yes" data-tank-in="${f.code}" ${full?'disabled title="어항이 꽉 찼어요"':''}>🐠 넣기</button>`
            : `<span class="tk-lock">🔒</span>`}</div>`).join('')
     : `<p class="small">호숫가에서 물고기를 잡아 오면 여기에 떠요. 흔함은 ${TANK_NEED.common}번, 귀함은 ${TANK_NEED.rare}번, 전설은 ${TANK_NEED.legend}번 잡으면 넣을 수 있어요.</p>`;
-  const skins = TANK_SKINS.map(k=>{ const own = (t.skins||['sand']).includes(k.code), use = t.skin===k.code;
+  const curTab = TANK_TABS.some(([k])=>k===TANK_TAB) ? TANK_TAB : 'sand';
+  const skinTabs = `<div class="tk-tabs">${TANK_TABS.map(([k,l])=>`<button type="button" class="rtab ${k===curTab?'on':''}" data-tank-tab="${k}">${l}</button>`).join('')}</div>`;
+  const skins = TANK_SKINS.filter(k=>k.tab===curTab).map(k=>{ const own = (t.skins||['sand']).includes(k.code), use = t.skin===k.code;
     return `<div class="tk-skin ${use?'on':''}"><img src="${k.img}" alt="" loading="lazy"><span>${esc(k.name)}</span>
       ${use ? `<span class="small tk-use">쓰는 중</span>` : own ? `<button class="mini" data-tank-skin="${k.code}">고르기</button>`
             : `<button class="mini ask-yes" data-tank-buy="${k.code}" ${coins<k.price?'disabled':''}>🪙 ${k.price.toLocaleString()}</button>`}</div>`; }).join('');
-  const key = JSON.stringify([t, rows.map(r=>[r.f.code,r.n]), coins>=300]);
+  const key = JSON.stringify([t, rows.map(r=>[r.f.code,r.n]), coins>=TANK_SKIN_PRICE, curTab]);
   if(box._key === key) return; box._key = key;
   const openPick = box.querySelector('details.tk-pick') ? box.querySelector('details.tk-pick').open : false;
   const openSkin = box.querySelector('details.tk-skins') ? box.querySelector('details.tk-skins').open : false;
@@ -5241,10 +5249,12 @@ function renderTank(){
     ${tankHTML(t, ME && ME.display_name)}
     <p class="small tank-lead">물고기를 누르면 기록을 볼 수 있어요. 마당을 구경 온 이웃도 어항을 볼 수 있어요.</p>
     <details class="tk-pick" ${openPick?'open':''}><summary>🐟 어항에 넣을 물고기 <span class="small">흔함 ${TANK_NEED.common}번 · 귀함 ${TANK_NEED.rare}번 · 전설 ${TANK_NEED.legend}번 잡으면</span></summary><div class="tk-list">${pick}</div></details>
-    <details class="tk-skins" ${openSkin?'open':''}><summary>🎨 어항 꾸미기</summary><div class="tk-skin-list">${skins}</div></details>`;
+    <details class="tk-skins" ${openSkin?'open':''}><summary>🎨 어항 꾸미기 <span class="small">한 번 사면 언제든 바꿔 낄 수 있어요 · 하나에 🪙 ${TANK_SKIN_PRICE}</span></summary>${skinTabs}<div class="tk-skin-list">${skins}</div></details>`;
   startSwim(box.querySelector('.tank'));
 }
 document.addEventListener('click', e=>{
+  const tb = e.target.closest('[data-tank-tab]');
+  if(tb){ TANK_TAB = tb.dataset.tankTab; try{ localStorage.setItem('majam-tank-tab', TANK_TAB); }catch(e){} renderTank(); return; }
   const a = e.target.closest('[data-tank-in],[data-tank-out],[data-tank-buy],[data-tank-skin]'); if(!a) return;
   act(async()=>{
     const done = async()=>{ await refreshTank(); const b = document.getElementById('tankBox'); if(b) b._key = null; renderTank(); };
@@ -6759,6 +6769,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ⑱</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ⑲</p>
 </body>
 </html>
