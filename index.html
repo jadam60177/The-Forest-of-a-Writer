@@ -1699,10 +1699,13 @@ dialog.visit#visit{width:min(94vw,640px);max-width:min(94vw,640px)}
 #visitGarden .plot img.gstage{max-width:128px}
 #visitGarden .tank{max-height:none}
 @media (max-width:600px){ #visitGarden .bed{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))} #visitGarden .plot{min-height:156px} }
-/* ===== 🐾 산책·마을 펫 외곽선 (10-13 ㉞) — 그림에 선이 없어서 크게 보면 둥둥 떠 보이던 것. 그림 모양 따라 갈색 선을 둘러요 ===== */
-.whouse .wpet img{filter:drop-shadow(2px 0 0 #3B2A22) drop-shadow(-2px 0 0 #3B2A22) drop-shadow(0 2px 0 #3B2A22) drop-shadow(0 -2px 0 #3B2A22) drop-shadow(0 4px 3px rgba(0,0,0,.3))}
-.hwrap .pet.yardpet img{filter:drop-shadow(1px 0 0 #3B2A22) drop-shadow(-1px 0 0 #3B2A22) drop-shadow(0 1px 0 #3B2A22) drop-shadow(0 -1px 0 #3B2A22) drop-shadow(0 2px 2px rgba(0,0,0,.25))}
-.whouse .wpet .pet.sad img{filter:saturate(.55) brightness(.95) drop-shadow(2px 0 0 #3B2A22) drop-shadow(-2px 0 0 #3B2A22) drop-shadow(0 2px 0 #3B2A22) drop-shadow(0 -2px 0 #3B2A22)}
+/* ===== 🐾 산책·마을 펫 외곽선 (10-13 ㉞·㉟) — 그림 모양 따라 갈색 선. 원래 선이 굵은 그림(PET_OL1, img.ol1)은 얇게/마을에선 안 둘러요 ===== */
+.whouse .wpet img{filter:drop-shadow(2px 0px 0 #3B2A22) drop-shadow(-2px 0px 0 #3B2A22) drop-shadow(0px 2px 0 #3B2A22) drop-shadow(0px -2px 0 #3B2A22) drop-shadow(0 4px 3px rgba(0,0,0,.3))}
+.whouse .wpet img.ol1{filter:drop-shadow(1px 0px 0 #3B2A22) drop-shadow(-1px 0px 0 #3B2A22) drop-shadow(0px 1px 0 #3B2A22) drop-shadow(0px -1px 0 #3B2A22) drop-shadow(0 4px 3px rgba(0,0,0,.3))}
+.hwrap .pet.yardpet img{filter:drop-shadow(1px 0px 0 #3B2A22) drop-shadow(-1px 0px 0 #3B2A22) drop-shadow(0px 1px 0 #3B2A22) drop-shadow(0px -1px 0 #3B2A22) drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.hwrap .pet.yardpet img.ol1{filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.whouse .wpet .pet.sad img{filter:saturate(.55) brightness(.95) drop-shadow(2px 0px 0 #3B2A22) drop-shadow(-2px 0px 0 #3B2A22) drop-shadow(0px 2px 0 #3B2A22) drop-shadow(0px -2px 0 #3B2A22)}
+.whouse .wpet .pet.sad img.ol1{filter:saturate(.55) brightness(.95) drop-shadow(1px 0px 0 #3B2A22) drop-shadow(-1px 0px 0 #3B2A22) drop-shadow(0px 1px 0 #3B2A22) drop-shadow(0px -1px 0 #3B2A22)}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -5149,6 +5152,8 @@ const PET_LV = [0,20,50,100,170,260,370,500,650,820];
 const PET_EVENT_HOURS = 4, PET_SAD_DAYS = 7;
 // 그림: pets 폴더의 그림(아기 = code.webp, 다 큰 모습 = code_2.webp)
 const PET_USE_IMG = true;
+// 🐾 원래 그림에 굵은 갈색 선이 있는 펫(㉟에 선 굵기 재서 고름) → 산책로에서 테두리를 1px만, 마을 집 앞에선 안 둘러요
+const PET_OL1 = new Set(['bichon','bichon_2','black','black_2','penguin','penguin_2','shiba_2','fox_2','hedgehog_2','chick_2','fairy_draft','fairy_draft_2','fairy_type','fairy_type_2','fairy_coffee','fairy_coffee_2']);
 const PET_GROW_LV = 5;   // 친밀도 이 단계부터 다 큰 모습 (pets.sql 과 같아요)
 const PETS_DEFAULT = [
   ['shiba','시바견','common','꼬리를 말고 늘 웃고 있어요'], ['black','검은 고양이','common','방울 소리로 마감을 알려 줘요'], ['bunny','토끼','common','당근보다 원고지를 좋아해요'],
@@ -5183,7 +5188,7 @@ const petMood = p => { const d = (Date.now()-new Date(p.last_cared).getTime())/8
   return d >= PET_SAD_DAYS ? 'sad' : (p.fed||p.patted||p.played) ? 'happy' : 'ok'; };
 const petGrown = lv => lv >= PET_GROW_LV;
 function petArt(code, mood='ok', cls='', grown=false){
-  const inner = PET_USE_IMG ? `<img src="pets/${code}${grown?'_2':''}.webp" alt="" draggable="false" loading="lazy">` : petSvg(code, mood);
+  const inner = PET_USE_IMG ? `<img src="pets/${code}${grown?'_2':''}.webp"${PET_OL1.has(code+(grown?'_2':''))?' class="ol1"':''} alt="" draggable="false" loading="lazy">` : petSvg(code, mood);
   return `<span class="pet ${mood} ${cls}">${inner}${mood==='sad'?`<svg class="pet-cloud" viewBox="0 0 64 64" aria-hidden="true">${PET_SAD}</svg>`:''}</span>`;
 }
 
@@ -7234,6 +7239,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㉞</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㉟</p>
 </body>
 </html>
