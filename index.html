@@ -3583,6 +3583,7 @@ const supaApi = (() => {
       if(!session) return {status:'login'};
       const md = session.user.user_metadata || {};
       myId = md.provider_id || md.sub;
+      try{ sb.realtime.setAuth(session.access_token); }catch(e){}   // 산책 실시간(비공개 채널)에 로그인 정보 실어 보내기 (㉜)
       const me = ok(await sb.from('members').select('*').eq('discord_id', myId).maybeSingle());
       if(!me || me.removed) return {status:'notmember'};
       return {status:'ok'};
@@ -3702,7 +3703,7 @@ const supaApi = (() => {
     async petsOf(id){ return ok(await sb.rpc('get_pets_of', {p_discord_id:id})); },
     async walkMine(){ return ok(await sb.rpc('get_my_walk')); },                       // 🗺️ 숲 산책 (walk.sql)
     async walkSetLook(l){ ok(await sb.rpc('set_walk_look', {p_char:l.char, p_hair:l.hair, p_top:l.top, p_bot:l.bot})); },
-    walkChannel(id){ return sb.channel('majam-walk', {config:{presence:{key:id}, broadcast:{self:false}}}); },
+    walkChannel(id, priv){ return sb.channel('majam-walk', {config:{private:!!priv, presence:{key:id}, broadcast:{self:false}}}); },
     walkChannelClose(ch){ sb.removeChannel(ch); },
     async tankMine(){ return ok(await sb.rpc('get_my_tank')); },                       // 🐠 어항 (tank.sql)
     async tankOf(id){ return ok(await sb.rpc('get_tank_of', {p_discord_id:id})); },
@@ -5607,7 +5608,10 @@ function walkMapClick(e){
   walkGo(WALK_ME, x, y); walkMoved(Math.max(3,Math.min(97,x)), Math.max(12,Math.min(96,y)));
 }
 function walkMoved(x, y){ try{ localStorage.setItem('majam-walk-pos', JSON.stringify({x, y})); }catch(e){} walkTrack(); }
-function walkNow(){ const n = WALK_OTHERS.size, el = document.getElementById('wnow'); if(el) el.textContent = n ? `지금 같이 산책 중 ${n}명` : '지금은 혼자 산책 중이에요'; }
+function walkNow(){ const n = WALK_OTHERS.size, el = document.getElementById('wnow'); if(!el) return;
+  if(WALK_RT==='fail'){ el.textContent = `⚠️ 다른 주민과 연결이 안 됐어요${ME && ME.is_admin ? ` (숲지기 확인: ${WALK_RT_ERR})` : ' · 숲지기에게 알려 주세요'}`; return; }
+  if(WALK_RT==='joining' && !n){ el.textContent = '🔗 다른 주민과 연결하는 중…'; return; }
+  el.textContent = n ? `지금 같이 산책 중 ${n}명` : '지금은 혼자 산책 중이에요'; }
 // --- 실시간: 지금 산책 탭을 보는 주민끼리 ---
 function walkPayload(){ return {id: ME.discord_id, name: ME.display_name || '', x: WALK_ME ? +WALK_ME.x.toFixed(1) : 50, y: WALK_ME ? +WALK_ME.y.toFixed(1) : 60, look: WALK ? WALK.look : null}; }
 function walkTrack(){ if(WALK_CH && WALK_CH.state==='joined') try{ WALK_CH.track(walkPayload()); }catch(e){} }
@@ -5622,17 +5626,29 @@ function walkSync(list){
   [...WALK_OTHERS.keys()].forEach(id=>{ if(!seen.has(id)){ WALK_OTHERS.get(id).remove(); WALK_OTHERS.delete(id); } });
   walkNow();
 }
-function walkJoin(){
+// 실시간 연결: 먼저 비공개 채널(walkrt.sql 의 정책 필요) → 안 되면 공개 채널로 다시 시도 (㉜)
+let WALK_RT = '', WALK_RT_ERR = '';
+function walkJoin(priv){
   if(WALK_CH || WALK_DEMO_T.length) return;
-  const ch = api.walkChannel ? api.walkChannel(ME.discord_id) : null;
-  if(!ch){ walkDemo(); return; }
-  WALK_CH = ch;
+  if(!api.walkChannel){ walkDemo(); return; }
+  if(priv===undefined) priv = true;
+  const ch = api.walkChannel(ME.discord_id, priv); WALK_CH = ch; WALK_RT = 'joining'; walkNow();
   ch.on('presence', {event:'sync'}, ()=>{ const s = ch.presenceState(); walkSync(Object.values(s).map(a=>a[a.length-1])); })
     .on('broadcast', {event:'say'}, ({payload})=>{ const c = WALK_OTHERS.get(payload.id); if(c) walkSay(c, String(payload.text||'').slice(0, WALK_SAY_MAX)); })
-    .subscribe(st=>{ if(st==='SUBSCRIBED') walkTrack(); });
+    .subscribe((st, err)=>{
+      if(WALK_CH!==ch) return;
+      if(st==='SUBSCRIBED'){ WALK_RT = 'ok'; walkTrack(); walkNow(); return; }
+      if(st==='CHANNEL_ERROR' || st==='TIMED_OUT'){
+        console.warn('산책 실시간 연결 실패', priv?'(비공개)':'(공개)', st, err);
+        try{ api.walkChannelClose(ch); }catch(e){} WALK_CH = null;
+        if(priv) walkJoin(false);
+        else { WALK_RT = 'fail'; WALK_RT_ERR = (err && err.message) || st; walkNow(); }
+      }
+    });
 }
 function walkLeave(){
-  if(WALK_CH){ try{ WALK_CH.untrack(); api.walkChannelClose(WALK_CH); }catch(e){} WALK_CH = null; }
+  if(WALK_CH){ const ch = WALK_CH; WALK_CH = null; try{ ch.untrack(); api.walkChannelClose(ch); }catch(e){} }
+  WALK_RT = '';
   WALK_DEMO_T.forEach(t=>clearTimeout(t)); WALK_DEMO_T = [];
   WALK_OTHERS.forEach(c=>c.remove()); WALK_OTHERS.clear();
 }
