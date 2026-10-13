@@ -5499,7 +5499,7 @@ const walkLookOf = l => ({char: (l && WALK_CHARS.some(c=>c.code===l.char)) ? l.c
 async function refreshWalk(){ try{ WALK = {look: walkLookOf(await api.walkMine())}; }catch(e){ WALK = WALK || {look: walkLookOf(null)}; } }
 function walkCharHTML(look){
   const L = walkLookOf(look), c = WALK_CHARS.find(x=>x.code===L.char) || WALK_CHARS[0];
-  const mv = 'v=3';   // ㊳: w3·w11 몸 그림(머리와 몸 사이 민트 배경 지움) + w3·w11·w8 칠할 자리 다시 올림
+  const mv = 'v=4';   // ㊴: 12명 몸 그림 바깥 흰 테두리(누끼 덜 따진 띠) 지움 + w3·w11 민트 배경 + w8 소매 — 몸·칠할 자리 48장 전부 다시 올림
   const body = `<img class="wc-img" src="walk/char/${c.code}.webp?${mv}" alt="" draggable="false" loading="lazy">`;   // (㉜) 칠할 자리 그림을 고쳐서 다시 올렸어요 — 예전 그림이 캐시에 남지 않게 붙이는 표시. 또 고치면 숫자만 올려요
   const tint = WALK_PARTS.map(([k,,s])=>`<i class="wc-tint" style="background:${L[k]};-webkit-mask-image:url(walk/char/${c.code}_${s}.webp?${mv});mask-image:url(walk/char/${c.code}_${s}.webp?${mv})"></i>`).join('');
   return `<span class="wc-body">${body}${tint}</span>`;
@@ -7287,6 +7287,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㊳</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㊴</p>
 </body>
 </html>
