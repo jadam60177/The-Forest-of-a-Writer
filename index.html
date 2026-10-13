@@ -1657,7 +1657,16 @@ dialog.visit.deco-dlg{max-width:min(94vw,960px);height:auto;max-height:min(90vh,
 .wmap-wrap .wmap{width:max(250%,1900px);max-width:none;border:0;border-radius:0;box-shadow:none;cursor:inherit}
 :root[data-mode="day"] .wmap-wrap{border-color:rgba(96,120,72,.35);background:#9CC46A}
 .whouse .nm{font-size:1.05rem;padding:.1rem .75rem;margin-top:-.5rem;border-width:3px;border-radius:9px;max-width:none}
-.whouse .wpet{width:44%;left:-20%;bottom:8%}
+.whouse .wpet{width:44%;left:-20%;bottom:8%;z-index:2;transition-property:left,bottom;transition-timing-function:ease-in-out}
+.whouse .wpet .pet{display:block}
+.wnm{position:absolute;z-index:1000;transform:translateX(-50%);pointer-events:none;white-space:nowrap;padding:.1rem .75rem;border-radius:9px;
+  background:linear-gradient(#A0703F,#7A5230);color:#FFF3DC;border:3px solid #4E321C;font-family:"Jua",sans-serif;font-size:1.05rem;line-height:1.3;
+  box-shadow:0 3px 6px rgba(0,0,0,.3)}
+.wnm.me{color:#FFE29A}
+@media (max-width:700px){ .wnm{font-size:.9rem;padding:.05rem .55rem;border-width:2px} }
+.whouse .wpet img{transition:transform .25s}
+.whouse .wpet.flip img{transform:scaleX(-1)}
+.whouse .wpet.walking .pet{animation:whop .22s ease-in-out infinite alternate}
 .wch{width:4.8%}
 .wc-nm{font-size:.95rem;padding:.08rem .65rem;margin-top:.1rem}
 .wc-say{font-size:1.02rem;padding:.3rem .75rem;border-radius:14px;margin-bottom:.4rem}
@@ -5460,14 +5469,15 @@ function renderWalk(){
     box.querySelector('#wsay').addEventListener('submit', e=>{ e.preventDefault(); const i = document.getElementById('wsayIn'), t = i.value.trim().slice(0, WALK_SAY_MAX); if(!t) return; i.value = ''; walkSay(WALK_ME, t); walkSend('say', {text:t}); });
   }
   const map = document.getElementById('wmap');
-  map.querySelectorAll('.whouse').forEach(x=>x.remove());
+  map.querySelectorAll('.whouse,.wnm').forEach(x=>x.remove());
   walkHouses().forEach((p,i)=>{
     const [x,y] = WALK_SLOTS[i], st = stageIdx(p.total_minutes), dc = p.decay||0, me = isMe(p), pet = PETS_ON[p.discord_id];
     map.insertAdjacentHTML('beforeend', `<button class="whouse ${p.in_voice?'lit':''} ${me?'me':''}" data-whouse="${esc(p.discord_id)}" style="left:${x}%;top:${y}%;z-index:${Math.round(y*10)}" aria-label="${esc(me?'내 집':p.display_name)} 구경 가기">
       ${houseSVG(lookStage(p.discord_id, st), p.in_voice, dc, p.house_color, lookStyle(p.discord_id, st, me ? ME.house_style : HOUSE_STYLE_OF[p.discord_id]))}
-      ${pet ? `<span class="wpet">${petArt(pet.pet_code, pet.sad?'sad':'ok', '', petGrown(pet.level||1))}</span>` : ''}
-      <span class="nm">${me?'내 집':esc(p.display_name)}</span></button>`);
+      ${pet ? `<span class="wpet" data-side="${i%2}">${petArt(pet.pet_code, pet.sad?'sad':'ok', '', petGrown(pet.level||1))}</span>` : ''}</button>
+      <span class="wnm ${me?'me':''}" style="left:${x}%;top:${(y+2.4).toFixed(1)}%">${me?'내 집':esc(p.display_name)}</span>`);   // 이름표는 따로 맨 위 층에 (옆집 펫·집에 안 묻히게)
   });
+  map.querySelectorAll('.whouse .wpet').forEach((el,i)=>walkPetWander(el, i));
   document.getElementById('wwho').innerHTML = VILLAGE.filter(p=>!p.removed && (isMe(p) || stageIdx(p.total_minutes) > 0)).map(p=>`<button class="mini ${p.in_voice?'on':''}" data-visit="${esc(p.discord_id)}">${p.in_voice?'🕯️ ':''}${isMe(p)?'내 집':esc(p.display_name)}</button>`).join('');
   if(!WALK_ME){
     let pos = null; try{ pos = JSON.parse(localStorage.getItem('majam-walk-pos')||'null'); }catch(e){}
@@ -5479,6 +5489,22 @@ function renderWalk(){
   const wrap = document.getElementById('wmapWrap');   // 처음 열 땐 내 캐릭터가 화면 가운데 오게
   if(wrap && !wrap._centered){ requestAnimationFrame(()=>{ if(!wrap.clientWidth) return; wrap._centered = true; walkCamSnap(); }); }
   WALK_FOLLOW = true; walkCamLoop();
+}
+/* 🐾 산책 지도의 펫이 자기 집 둘레를 살랑살랑 돌아다녀요 (10-13 ㉜) */
+function walkPetWander(el, i){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let x = -20;   // 집 그림 너비 기준 %, 처음엔 집 왼쪽
+  const go = () => {
+    if(!el.isConnected) return;
+    const tab = document.getElementById('tab-walk');
+    if(!tab || tab.hidden || document.hidden || Math.random() < .3){ el._t = setTimeout(go, 1500 + Math.random()*2500); return; }   // 가끔은 가만히 앉아 있어요
+    const side = el.dataset.side==='1', nx = side ? 50 + Math.random()*42 : -32 + Math.random()*58, nb = -6 + Math.random()*16, d = Math.max(.8, Math.abs(nx - x)/34);   // 집 왼쪽 옆 ~ 오른쪽 옆, 땅 위
+    el.classList.toggle('flip', nx > x); el.classList.add('walking');
+    el.style.transitionDuration = d.toFixed(1)+'s'; el.style.left = nx.toFixed(1)+'%'; el.style.bottom = nb.toFixed(1)+'%';
+    x = nx;
+    el._t = setTimeout(()=>{ el.classList.remove('walking'); el._t = setTimeout(go, 1800 + Math.random()*3500); }, d*1000);
+  };
+  el._t = setTimeout(go, 600 + i*450 + Math.random()*1500);
 }
 /* 📷 산책 카메라 (10-13 ㉜) — 지도를 크게 키우고, 화면이 내 캐릭터를 따라가요. 끌거나 스크롤하면 잠깐 멈춰요 */
 let WALK_FOLLOW = true, WALK_CAM = 0, WALK_DRAG_AT = 0;
