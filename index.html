@@ -1192,6 +1192,8 @@ dialog.lotto-win p{white-space:pre-line;margin:.2rem 0 .8rem}
 .shop-tab.new.on{color:#3A2600}
 .item .nwb{position:absolute;top:.3rem;left:.3rem;background:#E9584A;color:#fff;border-radius:999px;padding:0 .4rem;font-size:.62rem;line-height:1.6;font-family:"Jua",sans-serif;box-shadow:0 0 8px rgba(233,88,74,.5)}
 .mail-btn{position:relative}
+.admin-btn .tab-badge{position:absolute;top:-7px;right:-7px;margin:0;font-size:.62rem;line-height:1.5;padding:0 .3rem;background:#2A6E78;color:#E9FFF9;border:0;white-space:nowrap}
+.admin-btn.on{background:linear-gradient(#FFDC86,#F2AA45);color:#3A2600;border-color:#FFD98A}
 .mail-dot{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#E9584A;color:#fff;font-size:.7rem;line-height:18px;font-family:"Jua",sans-serif;text-align:center;box-shadow:0 0 0 2px rgba(18,21,38,.9)}
 .mail-btn.ring{animation:mailring .8s ease-in-out 2}
 @keyframes mailring{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
@@ -1688,13 +1690,14 @@ document.documentElement.setAttribute('data-mode', modeNow());
     <button class="ghost mode-btn" id="modeBtn" aria-label="낮·밤 화면 고르기"><span id="modeIco">🌗</span><span class="lbl" id="modeLbl"> 자동</span></button>
     <button class="ghost" id="guideBtn" aria-label="숲 안내 다시 보기" title="숲 안내 다시 보기">❓<span class="lbl"> 안내</span></button>
     <button class="ghost" id="noteBtn" aria-label="숲지기에게 쪽지">✉️<span class="lbl"> 쪽지</span></button>
+    <button class="ghost mail-btn admin-btn" id="adminTabBtn" data-tab="admin" aria-selected="false" hidden aria-label="숲지기 전용" title="숲지기 전용">🔒<span class="lbl"> 숲지기</span><span class="tab-badge" hidden></span></button>
     <button class="ghost" id="logoutBtn">나가기</button>
   </div>
 </header>
 
 <nav class="tabs" role="tablist" aria-label="숲 메뉴">
-    <button role="tab" aria-selected="true" data-tab="village" aria-label="마을"><span class="tab-ic" aria-hidden="true">🌲</span><span class="tab-tx" aria-hidden="true">마을</span><span class="tab-sh" aria-hidden="true">마을</span></button>
-    <button role="tab" aria-selected="false" data-tab="walk" aria-label="숲 산책"><span class="tab-ic" aria-hidden="true">🗺️</span><span class="tab-tx" aria-hidden="true">숲 산책</span><span class="tab-sh" aria-hidden="true">산책</span></button>
+    <button role="tab" aria-selected="true" data-tab="walk" aria-label="숲 산책"><span class="tab-ic" aria-hidden="true">🗺️</span><span class="tab-tx" aria-hidden="true">숲 산책</span><span class="tab-sh" aria-hidden="true">산책</span></button>
+    <button role="tab" aria-selected="false" data-tab="village" aria-label="마을"><span class="tab-ic" aria-hidden="false">🌲</span><span class="tab-tx" aria-hidden="false">마을</span><span class="tab-sh" aria-hidden="false">마을</span></button>
     <button role="tab" aria-selected="false" data-tab="home" aria-label="우리 집 꾸미기"><span class="tab-ic" aria-hidden="true">🏡</span><span class="tab-tx" aria-hidden="true">우리 집 꾸미기</span><span class="tab-sh" aria-hidden="true">우리 집</span></button>
     <button role="tab" aria-selected="false" data-tab="road" aria-label="집 꾸미기"><span class="tab-ic" aria-hidden="true">🎨</span><span class="tab-tx" aria-hidden="true">집 꾸미기</span><span class="tab-sh" aria-hidden="true">꾸미기</span></button>
     <button role="tab" aria-selected="false" data-tab="plaza" aria-label="마을 광장"><span class="tab-ic" aria-hidden="true">🏘️</span><span class="tab-tx" aria-hidden="true">마을 광장</span><span class="tab-sh" aria-hidden="true">광장</span></button>
@@ -1703,11 +1706,10 @@ document.documentElement.setAttribute('data-mode', modeNow());
     <button role="tab" aria-selected="false" data-tab="lake" aria-label="호숫가"><span class="tab-ic" aria-hidden="true">🎣</span><span class="tab-tx" aria-hidden="true">호숫가</span><span class="tab-sh" aria-hidden="true">호숫가</span></button>
     <button role="tab" aria-selected="false" data-tab="pet" aria-label="펫"><span class="tab-ic" aria-hidden="true">🐾</span><span class="tab-tx" aria-hidden="true">펫</span><span class="tab-sh" aria-hidden="true">펫</span></button>
     <button role="tab" aria-selected="false" data-tab="gacha" aria-label="담당자의 보따리"><span class="tab-ic" aria-hidden="true">🎁</span><span class="tab-tx" aria-hidden="true">담당자의 보따리</span><span class="tab-sh" aria-hidden="true">보따리</span></button>
-    <button role="tab" aria-selected="false" data-tab="admin" id="adminTabBtn" hidden aria-label="숲지기 전용"><span class="tab-ic" aria-hidden="true">🔒</span><span class="tab-tx" aria-hidden="true">숲지기 전용</span><span class="tab-sh" aria-hidden="true">숲지기</span><span class="tab-badge" hidden></span></button>
 </nav>
 
 <div class="event-banner" id="eventBanner" hidden></div>
-<section class="village" id="tab-village" aria-label="마감의 숲">
+<section class="village" id="tab-village" aria-label="마감의 숲" hidden>
   <svg class="stars" data-stars preserveAspectRatio="none"></svg>
   <div id="bannerBox" hidden></div>
   <div class="village-head">
@@ -1733,7 +1735,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <div class="demo-note" id="demoNote" hidden>미리보기 모드예요. 데이터베이스를 연결하기 전이라 가짜 이웃들과 함께 움직이고, 1초를 작업 1분으로 계산해요. 연결하면 이 안내와 위의 미리보기 버튼은 사라지고, 디스코드 봇이 잰 시간이 들어와요.</div>
 
 
-  <section id="tab-walk" hidden>
+  <section id="tab-walk">
     <div id="walkBox"></div>
   </section>
 
@@ -5386,7 +5388,7 @@ function walkCharHTML(look){
   return `<span class="wc-body">${body}${tint}</span>`;
 }
 function walkHouses(){
-  const list = VILLAGE.filter(p=>!p.removed), me = list.find(p=>isMe(p));
+  const list = VILLAGE.filter(p=>!p.removed && (isMe(p) || stageIdx(p.total_minutes) > 0)), me = list.find(p=>isMe(p));   // 나뭇가지 움막(0단계)은 산책 지도에 안 나와요 (10-13)
   const day = Math.floor((Date.now()+9*3600e3)/864e5);
   const rest = list.filter(p=>p!==me);
   const lit = rest.filter(p=>p.in_voice), today = rest.filter(p=>!p.in_voice && (p.today_minutes||0)>0).sort((a,b)=>(b.today_minutes||0)-(a.today_minutes||0));
@@ -5413,7 +5415,7 @@ function renderWalk(){
       ${pet ? `<span class="wpet">${petArt(pet.pet_code, pet.sad?'sad':'ok', '', petGrown(pet.level||1))}</span>` : ''}
       <span class="nm">${me?'내 집':esc(p.display_name)}</span></button>`);
   });
-  document.getElementById('wwho').innerHTML = VILLAGE.filter(p=>!p.removed).map(p=>`<button class="mini ${p.in_voice?'on':''}" data-visit="${esc(p.discord_id)}">${p.in_voice?'🕯️ ':''}${isMe(p)?'내 집':esc(p.display_name)}</button>`).join('');
+  document.getElementById('wwho').innerHTML = VILLAGE.filter(p=>!p.removed && (isMe(p) || stageIdx(p.total_minutes) > 0)).map(p=>`<button class="mini ${p.in_voice?'on':''}" data-visit="${esc(p.discord_id)}">${p.in_voice?'🕯️ ':''}${isMe(p)?'내 집':esc(p.display_name)}</button>`).join('');
   if(!WALK_ME){
     let pos = null; try{ pos = JSON.parse(localStorage.getItem('majam-walk-pos')||'null'); }catch(e){}
     if(!pos){ const k = walkHouses().findIndex(p=>isMe(p)), s = WALK_SLOTS[Math.max(0,k)]; pos = {x:s[0], y:s[1]+7}; }
@@ -6230,9 +6232,10 @@ async function loadAll(){
   document.getElementById('adminTabBtn').hidden = !ME.is_admin;
   renderAdmin();
   showGifts(); showRaids(); showFlowerNotices(); showTreatNotices();
-  try{ const t = sessionStorage.getItem('majam-tab'), tb = t && document.querySelector(`.tabs [data-tab="${t}"]:not([hidden])`);
-    if(tb && t!=='village') tb.dispatchEvent(Object.assign(new MouseEvent('click',{bubbles:true}), {keepScroll:true})); }catch(e){}
-  logTabOnce('enter'); if(!document.getElementById('tab-village').hidden) logTabOnce('village');
+  logTabOnce('enter');
+  { let t = 'walk'; try{ t = sessionStorage.getItem('majam-tab') || 'walk'; }catch(e){}   // 🗺️ 첫 화면은 숲 산책 (10-13 ㉛)
+    const tb = document.querySelector(`[data-tab="${t}"]:not([hidden])`) || document.querySelector('.tabs [data-tab="walk"]');
+    goTab(tb, {keepScroll:true}); }
   if(ME && ME.tour_done===false) setTimeout(()=>startTour(false), 900);   // 🐺 처음 온 주민 안내 (tour.sql 전이면 안 떠요)
   refreshEvents();
   refreshNotes();
@@ -6464,10 +6467,10 @@ document.addEventListener('click', e=>{
   if(v) return openVisit(v.dataset.visit);
 });
 
-document.querySelector('.tabs').addEventListener('click', e=>{
-  const b = e.target.closest('button[data-tab]'); if(!b) return;
+function goTab(b, e){
+  if(!b) return; e = e || {};
   const same = b.getAttribute('aria-selected')==='true';
-  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b));
+  document.querySelectorAll('.tabs button, #adminTabBtn').forEach(x=>{ x.setAttribute('aria-selected', x===b); x.classList.toggle('on', x===b); });
   ['village','walk','home','road','plaza','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
   if(b.dataset.tab==='walk'){ renderWalk(); refreshWalk().then(()=>{ renderWalk(); if(WALK_ME) walkSetLook(WALK_ME, WALK.look); walkJoin(); }); } else walkLeave();
   try{ sessionStorage.setItem('majam-tab', b.dataset.tab); }catch(err){}
@@ -6482,7 +6485,10 @@ document.querySelector('.tabs').addEventListener('click', e=>{
   if(b.dataset.tab==='pet'){ renderPets(); refreshPets().then(renderPets); }
   if(b.dataset.tab==='road'){ DECO_PV = null; renderRoad(); }
   if(b.dataset.tab==='tree'){ renderTree(); refreshTree().then(()=>{ renderTree(); renderFloatDrops(); }); }
-});
+}
+document.querySelector('.tabs').addEventListener('click', e=>goTab(e.target.closest('button[data-tab]'), e));
+document.getElementById('adminTabBtn').addEventListener('click', e=>{   // 🔒 숲지기 전용 — 위 줄 쪽지 옆으로 옮겼어요. 한 번 더 누르면 산책으로 돌아가요
+  const b = e.currentTarget; goTab(b.getAttribute('aria-selected')==='true' ? document.querySelector('.tabs [data-tab="walk"]') : b, e); });
 
 document.getElementById('noteBody').addEventListener('input', e=>{ document.getElementById('noteLen').textContent = e.target.value.length; });
 
@@ -6921,6 +6927,7 @@ document.getElementById('statRange').addEventListener('click', e=>{
 const TOUR_GIFT = 500;   // tour.sql 의 finish_tour 와 같아요
 const TOUR = [
   {title:'어서 오세요, 작가님!', text:'마감의 숲 담당자입니다.\n숲을 한 바퀴 안내해 드릴게요. 아래 동그라미를 누르면 보고 싶은 곳으로 바로 갈 수도 있어요.'},
+  {tab:'walk', el:'#wmap', title:'🗺️ 숲 산책', text:'숲에 들어오면 처음 보이는 곳이에요. 땅을 누르면 내 캐릭터가 걸어가고, 이웃 집을 누르면 걸어가서 구경해요.\n지금 접속한 주민들도 함께 돌아다니고, 아래 칸에 한마디를 쓰면 말풍선으로 인사할 수 있어요. 머리색·옷색은 지도 아래에서 바꿔요.'},
   {tab:'village', el:'.house.me', title:'작가님 집이에요', text:'디스코드 「작업실」 음성 채널에 들어와 있으면 집에 불이 켜지고, 1분마다 🪙 코인이 쌓여요. 오래 있을수록 집도 점점 커져요.\n이웃 집을 누르면 구경하고 꽃도 보낼 수 있어요.'},
   {el:'#coin', title:'모은 코인', text:'코인은 여기 보여요. 누르면 언제 얼마나 받았는지 내역도 볼 수 있어요.\n하루 1분이라도 들어오면 🔥 연속 출석 보너스도 붙어요.'},
   {tab:'home', el:'#room', title:'우리 집 안', text:'가구를 놓아서 방을 꾸며요. 놓은 가구를 누르면 다시 가방으로 돌아오니까 마음껏 옮겨 보세요.'},
@@ -7036,6 +7043,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㉙</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㉛</p>
 </body>
 </html>
