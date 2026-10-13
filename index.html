@@ -3737,6 +3737,8 @@ const supaApi = (() => {
     async walkSetLook(l){ ok(await sb.rpc('set_walk_look', {p_char:l.char, p_hair:l.hair, p_top:l.top, p_bot:l.bot})); },
     walkChannel(id, priv){ return sb.channel('majam-walk', {config:{private:!!priv, presence:{key:id}, broadcast:{self:false}}}); },
     walkChannelClose(ch){ sb.removeChannel(ch); },
+    async walkPing(x, y, look, say){ return ok(await sb.rpc('walk_ping', {p_x:x, p_y:y, p_look:look||null, p_say:say||null})); },   // 🗺️ 같이 걷기 튼튼판 (walkpos.sql, ㊳)
+    async walkBye(){ try{ await sb.rpc('walk_bye'); }catch(e){} },
     async tankMine(){ return ok(await sb.rpc('get_my_tank')); },                       // 🐠 어항 (tank.sql)
     async tankOf(id){ return ok(await sb.rpc('get_tank_of', {p_discord_id:id})); },
     async tankAdd(code){ ok(await sb.rpc('tank_add_fish', {p_code:code})); },
@@ -5497,8 +5499,8 @@ const walkLookOf = l => ({char: (l && WALK_CHARS.some(c=>c.code===l.char)) ? l.c
 async function refreshWalk(){ try{ WALK = {look: walkLookOf(await api.walkMine())}; }catch(e){ WALK = WALK || {look: walkLookOf(null)}; } }
 function walkCharHTML(look){
   const L = walkLookOf(look), c = WALK_CHARS.find(x=>x.code===L.char) || WALK_CHARS[0];
-  const body = `<img class="wc-img" src="walk/char/${c.code}.webp" alt="" draggable="false" loading="lazy">`;
-  const mv = 'v=2';   // (㉜) 칠할 자리 그림을 고쳐서 다시 올렸어요 — 예전 그림이 캐시에 남지 않게 붙이는 표시. 또 고치면 숫자만 올려요
+  const mv = 'v=3';   // ㊳: w3·w11 몸 그림(머리와 몸 사이 민트 배경 지움) + w3·w11·w8 칠할 자리 다시 올림
+  const body = `<img class="wc-img" src="walk/char/${c.code}.webp?${mv}" alt="" draggable="false" loading="lazy">`;   // (㉜) 칠할 자리 그림을 고쳐서 다시 올렸어요 — 예전 그림이 캐시에 남지 않게 붙이는 표시. 또 고치면 숫자만 올려요
   const tint = WALK_PARTS.map(([k,,s])=>`<i class="wc-tint" style="background:${L[k]};-webkit-mask-image:url(walk/char/${c.code}_${s}.webp?${mv});mask-image:url(walk/char/${c.code}_${s}.webp?${mv})"></i>`).join('');
   return `<span class="wc-body">${body}${tint}</span>`;
 }
@@ -5523,7 +5525,7 @@ function renderWalk(){
     walkCamInit(box.querySelector('#wmapWrap'));
     box.querySelector('#wbackBtn').addEventListener('click', ()=>goTab(document.querySelector('.tabs [data-tab="village"]'), {}));
     box.querySelector('#wmeBtn').addEventListener('click', ()=>{ WALK_FOLLOW = true; walkCamLoop(); });
-    box.querySelector('#wsay').addEventListener('submit', e=>{ e.preventDefault(); const i = document.getElementById('wsayIn'), t = i.value.trim().slice(0, WALK_SAY_MAX); if(!t) return; i.value = ''; walkSay(WALK_ME, t); walkSend('say', {text:t}); });
+    box.querySelector('#wsay').addEventListener('submit', e=>{ e.preventDefault(); const i = document.getElementById('wsayIn'), t = i.value.trim().slice(0, WALK_SAY_MAX); if(!t) return; i.value = ''; walkSay(WALK_ME, t); walkSend('say', {text:t}); WALK_SAY_Q = t; walkPollNow(); });
   }
   const map = document.getElementById('wmap');
   map.querySelectorAll('.whouse,.wnm').forEach(x=>x.remove());
@@ -5650,15 +5652,22 @@ function walkMapClick(e){
 }
 function walkMoved(x, y){ try{ localStorage.setItem('majam-walk-pos', JSON.stringify({x, y})); }catch(e){} walkTrack(); }
 function walkNow(){ const n = WALK_OTHERS.size, el = document.getElementById('wnow'); if(!el) return;
-  if(WALK_RT==='fail'){ el.textContent = `⚠️ 다른 주민과 연결이 안 됐어요${ME && ME.is_admin ? ` (숲지기 확인: ${WALK_RT_ERR})` : ' · 숲지기에게 알려 주세요'}`; return; }
+  const dbg = ME && ME.is_admin ? ` · 실시간 ${WALK_RT||'-'} / 기록 ${WALK_DB||'-'}` : '';
+  if(WALK_DB==='ok'){ el.textContent = (n ? `지금 같이 산책 중 ${n}명` : '지금은 혼자 산책 중이에요') + dbg; return; }
+  if(WALK_RT==='fail' && WALK_DB==='fail'){ el.textContent = `⚠️ 다른 주민과 연결이 안 됐어요${ME && ME.is_admin ? ` (숲지기 확인: ${WALK_RT_ERR})` : ' · 숲지기에게 알려 주세요'}`; return; }
   if(WALK_RT==='joining' && !n){ el.textContent = '🔗 다른 주민과 연결하는 중…'; return; }
-  el.textContent = n ? `지금 같이 산책 중 ${n}명` : '지금은 혼자 산책 중이에요'; }
+  el.textContent = (n ? `지금 같이 산책 중 ${n}명` : '지금은 혼자 산책 중이에요') + dbg; }
 // --- 실시간: 지금 산책 탭을 보는 주민끼리 ---
 function walkPayload(){ return {id: ME.discord_id, name: ME.display_name || '', x: WALK_ME ? +WALK_ME.x.toFixed(1) : 50, y: WALK_ME ? +WALK_ME.y.toFixed(1) : 60, look: WALK ? WALK.look : null}; }
 function walkTrack(){ if(WALK_CH && WALK_CH.state==='joined') try{ WALK_CH.track(walkPayload()); }catch(e){} }
 function walkSend(event, data){ if(WALK_CH) try{ WALK_CH.send({type:'broadcast', event, payload:{id: ME.discord_id, ...data}}); }catch(e){} }
-function walkSync(list){
+// 🗺️ 서로 보이기: 실시간 채널(WALK_RTL) + 2.5초마다 서버 기록(WALK_DBL) 둘 다 모아서 그려요 — 실시간이 안 붙어도 기록으로 보여요 (㊳)
+let WALK_RTL = [], WALK_DBL = [], WALK_DB = '', WALK_POLL = 0, WALK_SAY_Q = null;
+const WALK_SAID = new Map(), WALK_HEARD = new Map();   // 기록으로 받은 말 시각 · 실시간으로 이미 들은 말
+function walkSync(){
   const map = document.getElementById('wmap'); if(!map) return;
+  const u = new Map(); WALK_DBL.forEach(p=>{ if(p && p.id) u.set(p.id, p); }); WALK_RTL.forEach(p=>{ if(p && p.id) u.set(p.id, p); });
+  const list = [...u.values()];
   const seen = new Set();
   list.forEach(p=>{ if(!p || !p.id || p.id===ME.discord_id || seen.has(p.id)) return; seen.add(p.id);
     let c = WALK_OTHERS.get(p.id);
@@ -5672,10 +5681,11 @@ let WALK_RT = '', WALK_RT_ERR = '';
 function walkJoin(priv){
   if(WALK_CH || WALK_DEMO_T.length) return;
   if(!api.walkChannel){ walkDemo(); return; }
+  walkPollStart();
   if(priv===undefined) priv = true;
   const ch = api.walkChannel(ME.discord_id, priv); WALK_CH = ch; WALK_RT = 'joining'; walkNow();
-  ch.on('presence', {event:'sync'}, ()=>{ const s = ch.presenceState(); walkSync(Object.values(s).map(a=>a[a.length-1])); })
-    .on('broadcast', {event:'say'}, ({payload})=>{ const c = WALK_OTHERS.get(payload.id); if(c) walkSay(c, String(payload.text||'').slice(0, WALK_SAY_MAX)); })
+  ch.on('presence', {event:'sync'}, ()=>{ if(WALK_CH!==ch) return; const s = ch.presenceState(); WALK_RTL = Object.values(s).map(a=>a[a.length-1]); walkSync(); })
+    .on('broadcast', {event:'say'}, ({payload})=>{ const c = WALK_OTHERS.get(payload.id), t = String(payload.text||'').slice(0, WALK_SAY_MAX); if(c){ walkSay(c, t); WALK_HEARD.set(payload.id, {t, at:Date.now()}); } })
     .subscribe((st, err)=>{
       if(WALK_CH!==ch) return;
       if(st==='SUBSCRIBED'){ WALK_RT = 'ok'; walkTrack(); walkNow(); return; }
@@ -5687,7 +5697,27 @@ function walkJoin(priv){
       }
     });
 }
+function walkPollStart(){
+  if(WALK_POLL || !api.walkPing) return;
+  const tick = async ()=>{
+    const my = WALK_POLL; if(!my) return;
+    const say = WALK_SAY_Q; WALK_SAY_Q = null;
+    try{
+      const r = await api.walkPing(WALK_ME ? +WALK_ME.x.toFixed(1) : 50, WALK_ME ? +WALK_ME.y.toFixed(1) : 60, WALK ? WALK.look : null, say);
+      if(WALK_POLL!==my) return;
+      WALK_DB = 'ok'; WALK_DBL = Array.isArray(r) ? r : []; walkSync();
+      WALK_DBL.forEach(p=>{ if(!p.say || !p.said_at || WALK_SAID.get(p.id)===p.said_at) return; WALK_SAID.set(p.id, p.said_at);
+        const h = WALK_HEARD.get(p.id); if(h && h.t===p.say && Date.now()-h.at < 15000) return;
+        const c = WALK_OTHERS.get(p.id); if(c) walkSay(c, String(p.say).slice(0, WALK_SAY_MAX)); });
+    }catch(e){ if(WALK_POLL!==my) return; WALK_DB = 'fail'; console.warn('산책 기록 실패', e); walkNow(); }
+    if(WALK_POLL===my) WALK_POLL = setTimeout(tick, WALK_DB==='ok' ? 2500 : 6000);
+  };
+  WALK_POLL = setTimeout(tick, 50);
+}
+function walkPollNow(){ if(!WALK_POLL) return; clearTimeout(WALK_POLL); WALK_POLL = 0; walkPollStart(); }
 function walkLeave(){
+  if(WALK_POLL){ clearTimeout(WALK_POLL); WALK_POLL = 0; WALK_DBL = []; WALK_DB = ''; if(api.walkBye) api.walkBye(); }
+  WALK_RTL = [];
   if(WALK_CH){ const ch = WALK_CH; WALK_CH = null; try{ ch.untrack(); api.walkChannelClose(ch); }catch(e){} }
   WALK_RT = '';
   WALK_DEMO_T.forEach(t=>clearTimeout(t)); WALK_DEMO_T = [];
@@ -7257,6 +7287,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㊲</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㊳</p>
 </body>
 </html>
