@@ -1585,7 +1585,7 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 
 /* ===== 🗺️ 숲 산책 (10-13) ===== */
 #tab-walk{max-width:1200px;margin:0 auto}
-.wmap{position:relative;width:100%;aspect-ratio:2000/1116;border-radius:18px;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none;
+.wmap{position:relative;isolation:isolate;z-index:0;width:100%;aspect-ratio:2000/1116;border-radius:18px;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none;
   background:url(bg/walkmap.webp) center/100% 100% no-repeat,#24402E;box-shadow:0 10px 30px rgba(0,0,0,.35);border:3px solid rgba(255,215,120,.25)}
 :root[data-mode="day"] .wmap{background-image:url(bg/walkmap_day.webp);border-color:rgba(96,120,72,.35)}
 .whouse{position:absolute;width:10.5%;margin:0;padding:0;border:0;background:none;cursor:pointer;transform:translate(-50%,-78%);text-align:center;color:inherit}
@@ -1641,6 +1641,14 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 @media (max-width:700px){ .wmap-wrap{overflow-x:auto;margin:0 -.6rem;padding:0 .6rem;scrollbar-width:thin} .wmap{width:760px;max-width:none} }
 @media (max-width:600px){ .wl-grid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))} .wl-opt .wc-body{width:52px} }
 @media (prefers-reduced-motion:reduce){ .wch{transition-duration:0s!important} .wch.walk .wc-flip{animation:none} }
+/* ===== 🎨 집 겉모습 꾸미기 창 (10-13 ㉜) — 「집 꾸미기」 탭을 우리 집 탭 안 창으로 ===== */
+dialog.visit.deco-dlg{max-width:min(94vw,960px);height:auto;max-height:min(90vh,900px)}
+.deco-scroll{flex:1;min-height:0;overflow-y:auto;padding:.1rem .3rem .6rem 0;scrollbar-width:thin;scrollbar-color:rgba(255,206,92,.4) transparent}
+.deco-scroll > h3{margin:.2rem 0 .3rem}
+.shop-open.deco-open{border-color:rgba(180,162,220,.5);background:linear-gradient(90deg,rgba(180,162,220,.18),rgba(180,162,220,.04))}
+.shop-open.deco-open:hover{background:linear-gradient(90deg,rgba(180,162,220,.28),rgba(180,162,220,.08))}
+:root[data-mode="day"] .shop-open.deco-open{background:linear-gradient(90deg,rgba(196,179,234,.38),rgba(255,255,255,.6));border-color:rgba(145,128,189,.5)}
+@media (max-width:600px){ dialog.visit.deco-dlg{max-width:100vw;height:90vh} }
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -1696,10 +1704,9 @@ document.documentElement.setAttribute('data-mode', modeNow());
 </header>
 
 <nav class="tabs" role="tablist" aria-label="숲 메뉴">
-    <button role="tab" aria-selected="true" data-tab="walk" aria-label="숲 산책"><span class="tab-ic" aria-hidden="true">🗺️</span><span class="tab-tx" aria-hidden="true">숲 산책</span><span class="tab-sh" aria-hidden="true">산책</span></button>
-    <button role="tab" aria-selected="false" data-tab="village" aria-label="마을"><span class="tab-ic" aria-hidden="false">🌲</span><span class="tab-tx" aria-hidden="false">마을</span><span class="tab-sh" aria-hidden="false">마을</span></button>
+    <button role="tab" aria-selected="true" data-tab="village" aria-label="마을"><span class="tab-ic" aria-hidden="true">🌲</span><span class="tab-tx" aria-hidden="true">마을</span><span class="tab-sh" aria-hidden="true">마을</span></button>
+    <button role="tab" aria-selected="false" data-tab="walk" aria-label="숲 산책"><span class="tab-ic" aria-hidden="true">🗺️</span><span class="tab-tx" aria-hidden="true">숲 산책</span><span class="tab-sh" aria-hidden="true">산책</span></button>
     <button role="tab" aria-selected="false" data-tab="home" aria-label="우리 집 꾸미기"><span class="tab-ic" aria-hidden="true">🏡</span><span class="tab-tx" aria-hidden="true">우리 집 꾸미기</span><span class="tab-sh" aria-hidden="true">우리 집</span></button>
-    <button role="tab" aria-selected="false" data-tab="road" aria-label="집 꾸미기"><span class="tab-ic" aria-hidden="true">🎨</span><span class="tab-tx" aria-hidden="true">집 꾸미기</span><span class="tab-sh" aria-hidden="true">꾸미기</span></button>
     <button role="tab" aria-selected="false" data-tab="plaza" aria-label="마을 광장"><span class="tab-ic" aria-hidden="true">🏘️</span><span class="tab-tx" aria-hidden="true">마을 광장</span><span class="tab-sh" aria-hidden="true">광장</span></button>
     <button role="tab" aria-selected="false" data-tab="lotto" aria-label="복권"><span class="tab-ic" aria-hidden="true">🎟️</span><span class="tab-tx" aria-hidden="true">복권</span><span class="tab-sh" aria-hidden="true">복권</span></button>
     <button role="tab" aria-selected="false" data-tab="tree" aria-label="세계수"><span class="tab-ic" aria-hidden="true">🌳</span><span class="tab-tx" aria-hidden="true">세계수</span><span class="tab-sh" aria-hidden="true">세계수</span></button>
@@ -1709,7 +1716,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
 </nav>
 
 <div class="event-banner" id="eventBanner" hidden></div>
-<section class="village" id="tab-village" aria-label="마감의 숲" hidden>
+<section class="village" id="tab-village" aria-label="마감의 숲">
   <svg class="stars" data-stars preserveAspectRatio="none"></svg>
   <div id="bannerBox" hidden></div>
   <div class="village-head">
@@ -1735,7 +1742,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <div class="demo-note" id="demoNote" hidden>미리보기 모드예요. 데이터베이스를 연결하기 전이라 가짜 이웃들과 함께 움직이고, 1초를 작업 1분으로 계산해요. 연결하면 이 안내와 위의 미리보기 버튼은 사라지고, 디스코드 봇이 잰 시간이 들어와요.</div>
 
 
-  <section id="tab-walk">
+  <section id="tab-walk" hidden>
     <div id="walkBox"></div>
   </section>
 
@@ -1747,7 +1754,6 @@ document.documentElement.setAttribute('data-mode', modeNow());
           <h2 id="myStageName"></h2>
           <div class="bar"><span id="stageBar"></span></div>
           <div class="small" id="stageInfo"></div>
-          <button class="mini deco-go" data-goto-deco>🎨 집 겉모습 꾸미기</button>
           <div class="streak" id="streakBox"></div>
         </div>
       </div>
@@ -1760,6 +1766,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
     <div class="panel home-side">
       <p class="earn" id="earn">🎧 작업실에 있으면 1분마다 🪙 1개씩 쌓여요</p>
       <button class="shop-open" id="shopOpen" type="button"><span class="so-ic" aria-hidden="true">🛒</span><span class="so-tx"><b>가구 상점</b><span class="small" id="shopOpenSub"></span></span><span class="so-go" aria-hidden="true">열기 ›</span></button>
+      <button class="shop-open deco-open" type="button" data-goto-deco><span class="so-ic" aria-hidden="true">🎨</span><span class="so-tx"><b>집 겉모습 꾸미기</b><span class="small" id="decoOpenSub"></span></span><span class="so-go" aria-hidden="true">열기 ›</span></button>
       <details class="shop-box bag-box" id="bagBox" open>
         <summary><span class="jua">🎒 가방</span> <span class="small" id="bagCount"></span></summary>
         <div class="sell-bar"><button class="mini" id="sellBtn" type="button">🪙 되팔기</button><button class="mini compact-btn" type="button" data-compact>▦ 작게 보기</button><span class="small" id="sellNote"></span></div>
@@ -1773,12 +1780,6 @@ document.documentElement.setAttribute('data-mode', modeNow());
     </div>
   </section>
 
-  <section id="tab-road" class="panel" hidden>
-    <div class="deco" id="deco"></div>
-    <h3>집 성장 단계</h3>
-    <p class="small" style="margin-top:0">작업실에 오래 있을수록 집이 자동으로 커져요. 어떤 집이 언제 나올지는 도착해야 알 수 있어요! 지나온 집을 누르면 그 모습으로 미리 볼 수 있어요.</p>
-    <ol class="road" id="road"></ol>
-  </section>
 
   <section id="tab-plaza" hidden>
     <div class="panel" id="boardBox" style="margin-bottom:1rem"></div>
@@ -1979,6 +1980,16 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <div class="party-emoji">🎉</div>
   <p id="partyMsg"></p>
   <button class="mini ask-yes" id="partyOk">고마워요!</button>
+</dialog>
+
+<dialog class="visit shop-dlg deco-dlg" id="decoDlg" aria-label="집 겉모습 꾸미기">
+  <div class="shop-dlg-head"><h3>🎨 집 겉모습 꾸미기</h3><span class="shop-coins" id="decoCoins"></span><button class="mini" id="decoClose" type="button">닫기</button></div>
+  <div class="deco-scroll" id="decoScroll">
+    <div class="deco" id="deco"></div>
+    <h3>🏡 집 성장 단계</h3>
+    <p class="small" style="margin-top:0">작업실에 오래 있을수록 집이 자동으로 커져요. 어떤 집이 언제 나올지는 도착해야 알 수 있어요! 지나온 집을 누르면 그 모습으로 미리 볼 수 있어요.</p>
+    <ol class="road" id="road"></ol>
+  </div>
 </dialog>
 
 <dialog class="visit shop-dlg" id="shopDlg" aria-label="가구 상점">
@@ -3904,7 +3915,14 @@ let DECO_PV = null;   // {color, style, look}  (look: null = 지금 집)
 function decoNow(){ return {color: ME.house_color, style: ME.house_style || 'basic', look: HOUSE_LOOK_OF[meId()] ?? null}; }
 function renderPaint(){ renderDeco(); }
 function renderHouseStyle(){ renderDeco(); }
+function openDeco(){   // 🎨 우리 집 탭 안에서 창으로 열어요 (10-13 ㉜ — 예전 「집 꾸미기」 탭)
+  logTabOnce('road'); DECO_PV = null; renderRoad();
+  const d = document.getElementById('decoDlg'); if(!d.open) d.showModal(); document.getElementById('decoScroll').scrollTop = 0;
+}
 function renderDeco(){
+  { const c = document.getElementById('decoCoins'); if(c && ME) c.textContent = `🪙 ${ME.coins.toLocaleString()}`;
+    const sub = document.getElementById('decoOpenSub'); if(sub && ME){ const st = ME.house_style && ME.house_style!=='basic' && HOUSE_STYLES[ME.house_style];
+      sub.textContent = `${STAGES[stageIdx(ME.total_minutes)].name} · ${st ? st.emoji+' '+st.name+' 스타일' : '🏡 기본 스타일'} · 성장 단계 보기`; } }
   const el = document.getElementById('deco'); if(!el || !ME) return;
   const now = decoNow(); if(!DECO_PV) DECO_PV = {...now};
   const pv = DECO_PV, stg = stageIdx(ME.total_minutes), shown = pv.look==null ? stg : pv.look;
@@ -3924,7 +3942,6 @@ function renderDeco(){
       <div class="deco-tag">${colorChanged||styleChanged||lookChanged ? '👀 미리보기 중' : '지금 우리 집'}</div>
     </div>
     <div class="deco-side">
-      <h3 style="margin:0 0 .2rem">🎨 집 겉모습 꾸미기</h3>
       <p class="small" style="margin:0 0 .5rem">스타일을 눌러 보면 왼쪽 집에서 먼저 미리 볼 수 있어요. 마음에 들면 아래 버튼으로 정해요!</p>
       <div class="deco-row"><span class="paint-label">🏠 스타일</span>
         ${opts.map(([k,e,n])=>`<button class="hs-btn ${k===pv.style?'on':''} ${owned.has(k)?'':'locked'}" data-pv-style="${k}" title="${k==='basic'?'기본 모양':esc(HOUSE_STYLES[k].about)}">${e} ${n}${owned.has(k)?'':` · 🪙 ${STYLE_PRICE}`}</button>`).join('')}
@@ -4073,6 +4090,17 @@ FLOWERS_DEFAULT.push(...[
   ['camellia','동백꽃','garden','#D0404E'], ['carnation','카네이션','garden','#F0A8BC'], ['cornflower','수레국화','garden','#6A86DE'], ['babysbreath','안개꽃','garden','#FFFFFF'],
   ['orchid','계약 난초','secret','#E9E0F7'], ['starflower','별점꽃','secret','#F6D56A'],
 ].map(([code,name,tier,hint],i)=>({code,name,tier,hint,sort:15+i})));
+// 새 꽃 13종 (newflowers.sql, sort 26~38) · 비밀꽃 8종 (newsecret.sql, sort 39~46) — 10-13 판 ⑤에 넣었다가 뒤 판에서 빠졌던 것을 다시 넣어요 (㉜)
+FLOWERS_DEFAULT.push(...[
+  ['gujeolcho','구절초','wild','#FFFFFF'], ['aster','쑥부쟁이','wild','#B4A2DC'], ['bleedingheart','금낭화','wild','#F0A8BC'], ['bellflower','초롱꽃','wild','#B4A2DC'],
+  ['daylily','원추리','wild','#F0A04B'], ['columbine','매발톱','wild','#9180BD'], ['azalea','진달래','wild','#F0A8BC'],
+  ['freesia','프리지아','garden','#F6D56A'], ['ranunculus','라넌큘러스','garden','#D24B45'], ['hyacinth','히아신스','garden','#9180BD'],
+  ['sweetpea','스위트피','garden','#F0A8BC'], ['dahlia','달리아','garden','#E9584A'], ['anemone','아네모네','garden','#5E4AB0'],
+].map(([code,name,tier,hint],i)=>({code,name,tier,hint,sort:26+i})));
+FLOWERS_DEFAULT.push(...[
+  ['deadline','마감 꽃','#E9584A'], ['dailyherb','매일 연재초','#8FD1B8'], ['typo','오탈자 꽃','#F6D56A'], ['caffeine','카페인초','#A9784B'],
+  ['payday','정산 꽃','#EED77A'], ['nagging','잔소리 꽃','#8E8AA3'], ['manuscript','원고지 꽃','#F4ECD8'], ['secretside','시크릿 외전 꽃','#B4A2DC'],
+].map(([code,name,hint],i)=>({code,name,tier:'secret',hint,sort:39+i})));
 
 // 나중에 계절 꽃을 넣었는데 그림이 아직 없으면 이 꽃으로 그려요
 const gGeneric = hint => G_SOIL + gStem(40) + gL() + gR(8,(i,a)=>gPetal(48,34,16,7,a,hint||'#F0A8BC')) + `<circle cx="48" cy="34" r="5" fill="#EED77A"/>`;
@@ -4093,7 +4121,9 @@ const STAGE_NAME = {seed:'씨앗', sprout:'새싹', bud:'꽃봉오리'};
 const GARDEN_STAGE_IMG = {seed:'garden/seed.webp', sprout:'garden/sprout.webp', bud:'garden/bud.webp'};
 // 🌸 활짝 핀 꽃 그림 (10-13, garden/bloom_코드.webp) — 여기 없는 꽃은 예전 코드 그림
 const BLOOM_IMG = new Set(['starflower','orchid','endflower','nightrose','moonlily','babysbreath','cornflower','carnation','camellia','daffodil',
-  'lilyvalley','peony','lavender','hydrangea','forsythia','pasque','pinks','mossrose','morningglory','marigold','cosmos','forgetmenot','violet','daisy','dandelion']);   // 25종 전부
+  'lilyvalley','peony','lavender','hydrangea','forsythia','pasque','pinks','mossrose','morningglory','marigold','cosmos','forgetmenot','violet','daisy','dandelion',
+  'gujeolcho','aster','bleedingheart','bellflower','daylily','columbine','azalea','freesia','ranunculus','hyacinth','sweetpea','dahlia','anemone',
+  'deadline','dailyherb','typo','caffeine','payday','nagging','manuscript','secretside']);   // 46종 전부 (㉜에서 새 꽃 13 · 비밀꽃 8 다시 연결)
 const bloomSrc = code => BLOOM_IMG.has(code) ? `garden/bloom_${code}.webp` : null;
 
 function plotHTML(p, k, editable){
@@ -6233,8 +6263,8 @@ async function loadAll(){
   renderAdmin();
   showGifts(); showRaids(); showFlowerNotices(); showTreatNotices();
   logTabOnce('enter');
-  { let t = 'walk'; try{ t = sessionStorage.getItem('majam-tab') || 'walk'; }catch(e){}   // 🗺️ 첫 화면은 숲 산책 (10-13 ㉛)
-    const tb = document.querySelector(`[data-tab="${t}"]:not([hidden])`) || document.querySelector('.tabs [data-tab="walk"]');
+  { let t = 'village'; try{ t = sessionStorage.getItem('majam-tab') || 'village'; }catch(e){}   // 🌲 첫 화면은 마을, 산책은 그다음 (10-13 ㉜)
+    const tb = document.querySelector(`[data-tab="${t}"]:not([hidden])`) || document.querySelector('.tabs [data-tab="village"]');
     goTab(tb, {keepScroll:true}); }
   if(ME && ME.tour_done===false) setTimeout(()=>startTour(false), 900);   // 🐺 처음 온 주민 안내 (tour.sql 전이면 안 떠요)
   refreshEvents();
@@ -6340,10 +6370,10 @@ document.addEventListener('click', e=>{
     hover=null; setHint(); renderMyHouse(); renderBag();
   });
 
-  if(e.target.closest('[data-goto-deco]')){ document.querySelector('[data-tab="road"]').click(); window.scrollTo({top:0, behavior:'smooth'}); return; }
+  if(e.target.closest('[data-goto-deco]')){ openDeco(); return; }
   const pvc = e.target.closest('[data-pv-color]'); if(pvc){ DECO_PV.color = +pvc.dataset.pvColor; renderDeco(); return; }
   const pvs = e.target.closest('[data-pv-style]'); if(pvs){ DECO_PV.style = pvs.dataset.pvStyle; renderDeco(); return; }
-  const pvl = e.target.closest('[data-pv-look]'); if(pvl){ const v = pvl.dataset.pvLook; DECO_PV.look = v==='now' ? null : +v; renderDeco(); renderRoad(); document.getElementById('deco').scrollIntoView({behavior:'smooth', block:'nearest'}); return; }
+  const pvl = e.target.closest('[data-pv-look]'); if(pvl){ const v = pvl.dataset.pvLook; DECO_PV.look = v==='now' ? null : +v; renderDeco(); renderRoad(); document.getElementById('decoScroll').scrollTo({top:0, behavior:'smooth'}); return; }
   if(e.target.closest('[data-pv-reset]')){ DECO_PV = decoNow(); renderDeco(); renderRoad(); return; }
   const ap = e.target.closest('[data-apply]');
   if(ap) return act(async()=>{
@@ -6471,7 +6501,7 @@ function goTab(b, e){
   if(!b) return; e = e || {};
   const same = b.getAttribute('aria-selected')==='true';
   document.querySelectorAll('.tabs button, #adminTabBtn').forEach(x=>{ x.setAttribute('aria-selected', x===b); x.classList.toggle('on', x===b); });
-  ['village','walk','home','road','plaza','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
+  ['village','walk','home','plaza','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
   if(b.dataset.tab==='walk'){ renderWalk(); refreshWalk().then(()=>{ renderWalk(); if(WALK_ME) walkSetLook(WALK_ME, WALK.look); walkJoin(); }); } else walkLeave();
   try{ sessionStorage.setItem('majam-tab', b.dataset.tab); }catch(err){}
   if(!e.tour) logTabOnce(b.dataset.tab);
@@ -6483,12 +6513,11 @@ function goTab(b, e){
   if(b.dataset.tab==='gacha') refreshGacha().then(renderGacha);
   if(b.dataset.tab==='lake'){ renderLake(); refreshLake().then(renderLake); }
   if(b.dataset.tab==='pet'){ renderPets(); refreshPets().then(renderPets); }
-  if(b.dataset.tab==='road'){ DECO_PV = null; renderRoad(); }
   if(b.dataset.tab==='tree'){ renderTree(); refreshTree().then(()=>{ renderTree(); renderFloatDrops(); }); }
 }
 document.querySelector('.tabs').addEventListener('click', e=>goTab(e.target.closest('button[data-tab]'), e));
-document.getElementById('adminTabBtn').addEventListener('click', e=>{   // 🔒 숲지기 전용 — 위 줄 쪽지 옆으로 옮겼어요. 한 번 더 누르면 산책으로 돌아가요
-  const b = e.currentTarget; goTab(b.getAttribute('aria-selected')==='true' ? document.querySelector('.tabs [data-tab="walk"]') : b, e); });
+document.getElementById('adminTabBtn').addEventListener('click', e=>{   // 🔒 숲지기 전용 — 위 줄 쪽지 옆으로 옮겼어요. 한 번 더 누르면 마을로 돌아가요
+  const b = e.currentTarget; goTab(b.getAttribute('aria-selected')==='true' ? document.querySelector('.tabs [data-tab="village"]') : b, e); });
 
 document.getElementById('noteBody').addEventListener('input', e=>{ document.getElementById('noteLen').textContent = e.target.value.length; });
 
@@ -6521,6 +6550,9 @@ document.querySelector('.shop-tabs').addEventListener('click', e=>{
 { const d = document.getElementById('shopDlg');
   document.getElementById('shopOpen').addEventListener('click', ()=>{ logTabOnce('shop'); renderBag(); if(!d.open) d.showModal(); document.getElementById('shop').scrollTop = 0; });
   document.getElementById('shopClose').onclick = ()=>d.close();
+  const dd = document.getElementById('decoDlg');
+  document.getElementById('decoClose').onclick = ()=>dd.close();
+  dd.addEventListener('click', e=>{ if(e.target===dd) dd.close(); });
   d.addEventListener('click', e=>{ if(e.target===d) d.close(); });
   let compact = false; try{ compact = localStorage.getItem('majam-compact')==='1'; }catch(e){}
   const applyCompact = ()=>{ document.body.classList.toggle('compact-items', compact);
@@ -6927,13 +6959,13 @@ document.getElementById('statRange').addEventListener('click', e=>{
 const TOUR_GIFT = 500;   // tour.sql 의 finish_tour 와 같아요
 const TOUR = [
   {title:'어서 오세요, 작가님!', text:'마감의 숲 담당자입니다.\n숲을 한 바퀴 안내해 드릴게요. 아래 동그라미를 누르면 보고 싶은 곳으로 바로 갈 수도 있어요.'},
-  {tab:'walk', el:'#wmap', title:'🗺️ 숲 산책', text:'숲에 들어오면 처음 보이는 곳이에요. 땅을 누르면 내 캐릭터가 걸어가고, 이웃 집을 누르면 걸어가서 구경해요.\n지금 접속한 주민들도 함께 돌아다니고, 아래 칸에 한마디를 쓰면 말풍선으로 인사할 수 있어요. 머리색·옷색은 지도 아래에서 바꿔요.'},
   {tab:'village', el:'.house.me', title:'작가님 집이에요', text:'디스코드 「작업실」 음성 채널에 들어와 있으면 집에 불이 켜지고, 1분마다 🪙 코인이 쌓여요. 오래 있을수록 집도 점점 커져요.\n이웃 집을 누르면 구경하고 꽃도 보낼 수 있어요.'},
+  {tab:'walk', el:'#wmap', title:'🗺️ 숲 산책', text:'숲을 걸어 다니는 곳이에요. 땅을 누르면 내 캐릭터가 걸어가고, 이웃 집을 누르면 걸어가서 구경해요.\n지금 접속한 주민들도 함께 돌아다니고, 아래 칸에 한마디를 쓰면 말풍선으로 인사할 수 있어요. 머리색·옷색은 지도 아래에서 바꿔요.'},
   {el:'#coin', title:'모은 코인', text:'코인은 여기 보여요. 누르면 언제 얼마나 받았는지 내역도 볼 수 있어요.\n하루 1분이라도 들어오면 🔥 연속 출석 보너스도 붙어요.'},
   {tab:'home', el:'#room', title:'우리 집 안', text:'가구를 놓아서 방을 꾸며요. 놓은 가구를 누르면 다시 가방으로 돌아오니까 마음껏 옮겨 보세요.'},
   {tab:'home', el:'#shopOpen', title:'가구 상점', text:'가구는 여기서 사요. 산 가구는 가방에 들어가고, 가방에서 고른 뒤 방 칸을 누르면 놓여요. 안 쓰는 가구는 되팔 수도 있어요.'},
   {tab:'home', el:'#roomTabs .garden-tab', title:'🌷 마당 · 화단과 어항', text:'방 이름 옆 「마당」을 누르면 화단과 어항이 나와요.\n씨앗을 심으면 작업실에 있는 동안 자라서 꽃이 피고, 호숫가에서 많이 잡은 물고기는 어항에 넣어 헤엄치게 할 수 있어요.'},
-  {tab:'road', el:'#tab-road', title:'🎨 집 겉모습', text:'집이 커지는 단계를 미리 보고, 집 스타일을 골라 꾸밀 수 있어요. 지나온 집 모습으로 되돌려 둘 수도 있어요.'},
+  {tab:'home', el:'.deco-open', title:'🎨 집 겉모습 꾸미기', text:'여기를 누르면 집이 커지는 단계를 미리 보고, 집 스타일을 골라 꾸밀 수 있어요. 지나온 집 모습으로 되돌려 둘 수도 있어요.'},
   {tab:'plaza', el:'.plaza-scene', title:'🏘️ 마을 광장', text:'주민들이 코인을 모아 건물을 하나씩 지어요.\n동물 보호소가 지어지면 펫을, 꽃집이 지어지면 씨앗을 살 수 있어요. 간식차가 오면 커피도 얻어 마실 수 있어요.'},
   {tab:'lotto', el:'#lottoBox', title:'🎟️ 마감 복권', text:'한 장 🪙30, 하루 5장까지 긁을 수 있어요.\n같은 그림 3개가 나오면 당첨! 이번 주 전설 가구도 나와요.'},
   {tab:'tree', el:'#treeBox', title:'🌳 세계수', text:'작업실에 있으면 주머니에 물방울이 모이고, 세계수 둘레에 떠오르는 물방울도 주울 수 있어요.\n다 같이 물을 줘서 나무가 다 자라면, 물을 준 주민 모두 코인을 받아요.'},
@@ -7043,6 +7075,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㉛</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㉜</p>
 </body>
 </html>
