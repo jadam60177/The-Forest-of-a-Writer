@@ -1723,6 +1723,12 @@ dialog.visit#visit{width:min(94vw,640px);max-width:min(94vw,640px)}
 /* ===== 🐋 어항 속 전설 물고기 테두리 (10-13 ㊲) — 물속에서 잘 안 보이던 것. 갈색 선 1px (라밀: 2px는 너무 굵음) ===== */
 .tank .tf img.lg{filter:drop-shadow(1px 0px 0 #3B2A22) drop-shadow(-1px 0px 0 #3B2A22) drop-shadow(0px 1px 0 #3B2A22) drop-shadow(0px -1px 0 #3B2A22) drop-shadow(0 3px 3px rgba(0,30,50,.3))}
 
+/* ===== 🖐️ 놓인 가구 끌어서 옮기기 (10-14 ㊵) ===== */
+#room .furn[data-pid]{cursor:grab;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#room .furn.fdrag-src{opacity:.3}
+.fghost{z-index:9999;pointer-events:none;opacity:.9;cursor:grabbing;filter:drop-shadow(0 8px 10px rgba(0,0,0,.35));transform:scale(1.04)}
+body.fdragging,body.fdragging *{cursor:grabbing!important}
+
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -3959,6 +3965,7 @@ function roomHTML(list, cur, {editable, cabs={}}){
 }
 
 function renderMyHouse(){
+  if(typeof FDRAG!=='undefined' && FDRAG && FDRAG.on){ FDRAG.dirty = true; return; }   // 가구를 끄는 중엔 방을 다시 그리지 않아요 (손가락이 잡은 가구가 사라지면 끌기가 끊겨요)
   const i = stageIdx(ME.total_minutes), cur = roomOf(ME.total_minutes, ME.room_blocks), next = STAGES[i+1];
   const here = PLACED.filter(p=>(p.room||0)===curRoom);
   document.getElementById('myHouseIcon').innerHTML = houseSVG(lookStage(meId(), i), ME.in_voice, 0, ME.house_color, lookStyle(meId(), i, ME.house_style));
@@ -6220,7 +6227,7 @@ document.getElementById('plazaWork').addEventListener('click', async e=>{
 
 function setHint(){
   const el = document.getElementById('hint');
-  if(!selected){ el.textContent = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구를 누르면 가방으로 돌아가요.'; return; }
+  if(!selected){ el.textContent = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구는 끌어서 옮기고(폰은 꾹 눌렀다가 끌기), 그냥 누르면 가방으로 돌아가요.'; return; }
   const it = itemOf(selected), fp = footprint(selected);
   const canRot = true;   // 진열장도 돌릴 수 있어요 (칸 배치만 세로로 바뀌어요)
   el.innerHTML = `<span class="hint-ico r${rotated}">${ico(it)}</span> ${esc(it.name)}(${fp.w}×${fp.h}칸)${rotated?` · ${ROT_NAME[rotated]}`:''} · 놓을 자리의 왼쪽 위 칸을 눌러 주세요.` +
@@ -6248,7 +6255,9 @@ const GRADE_LABEL = {common:'일반', rare:'희귀', legend:'전설', lotto:'�
 const gradeBadge = code => { const g = gradeOf(code); return g ? `<span class="gbadge ${g}">${GRADE_LABEL[g]}</span>` : ''; };
 const gradeCls = code => { const g = gradeOf(code); return g ? 'g-'+g : ''; };
 function renderBag(){
-  const entries = Object.entries(INV).filter(([,n])=>n>0);
+  const GR = {lotto:0, legend:1, rare:2, common:3};   // 🎒 가방은 등급순: 👑 전설 가구 → 전설 → 희귀 → 일반 → 상점 가구 (주민 건의 10-14)
+  const entries = Object.entries(INV).filter(([,n])=>n>0).map((e,k)=>[e,k])
+    .sort((a,b)=>((GR[gradeOf(a[0][0])] ?? 9) - (GR[gradeOf(b[0][0])] ?? 9)) || a[1]-b[1]).map(x=>x[0]);
   document.getElementById('bagCount').textContent = `${entries.reduce((a,[,n])=>a+n,0)}개`;
   document.getElementById('bagBox').classList.toggle('selling', sellMode);
   document.getElementById('sellBtn').textContent = sellMode ? '✔ 되팔기 끝' : '🪙 되팔기';
@@ -6567,6 +6576,7 @@ document.addEventListener('click', e=>{
   });
 
   const fu = e.target.closest('.furn[data-pid]');
+  if(fu && Date.now() - FDRAG_AT < 450) return;   // 끌어서 옮긴 직후의 클릭은 치우기로 안 쳐요
   if(fu) return act(async()=>{
     await api.remove(+fu.dataset.pid); await refreshMine(); renderMyHouse(); renderBag();
   });
@@ -6738,6 +6748,72 @@ roomEl.addEventListener('mouseover', e=>{
   if(JSON.stringify(h)!==JSON.stringify(hover)){ hover=h; if(selected) renderMyHouse(); }
 });
 roomEl.addEventListener('mouseleave', ()=>{ hover=null; if(selected) renderMyHouse(); });
+// 🖐️ 놓인 가구 끌어서 옮기기 (주민 건의 10-14) — 마우스는 바로 끌기, 폰은 꾹 눌렀다가(0.3초) 끌기. 그냥 누르면 예전처럼 가방으로
+var FDRAG = null, FDRAG_AT = 0;   // var: renderMyHouse 가 먼저 불려도 괜찮게
+function fdragClear(){ document.querySelectorAll('#room .tile.pv-ok,#room .tile.pv-no').forEach(t=>t.classList.remove('pv-ok','pv-no')); }
+function fdragTarget(x, y){
+  const t = document.elementsFromPoint(x, y).find(el=>el.matches && el.matches('#room .tile[data-r]'));
+  return t ? {r: +t.dataset.r - FDRAG.dr, c: +t.dataset.c - FDRAG.dc} : null;
+}
+function fdragStart(){
+  const D = FDRAG; D.on = true;
+  const r = D.el.getBoundingClientRect(), g = D.el.cloneNode(true);
+  g.className += ' fghost'; g.removeAttribute('data-pid');
+  Object.assign(g.style, {position:'fixed', left:r.left+'px', top:r.top+'px', width:r.width+'px', height:r.height+'px', gridRow:'', gridColumn:'', margin:0});
+  document.body.appendChild(g); D.ghost = g; D.ox = D.x0 - r.left; D.oy = D.y0 - r.top;
+  D.el.classList.add('fdrag-src'); document.body.classList.add('fdragging');
+  try{ navigator.vibrate && navigator.vibrate(15); }catch(e){}
+}
+function fdragMove(x, y){
+  const D = FDRAG; D.ghost.style.left = (x - D.ox)+'px'; D.ghost.style.top = (y - D.oy)+'px';
+  const t = fdragTarget(x, y); fdragClear(); D.to = null; if(!t) return;
+  const cur = roomOf(ME.total_minutes, ME.room_blocks), others = PLACED.filter(p=>(p.room||0)===curRoom && p.id!==D.f.id);
+  const ok = canPlaceIn(others, t.r, t.c, D.f.w, D.f.h, cur, D.f.item_code);
+  for(let y2=0;y2<D.f.h;y2++) for(let x2=0;x2<D.f.w;x2++){ const el = document.querySelector(`#room .tile[data-r="${t.r+y2}"][data-c="${t.c+x2}"]`); if(el) el.classList.add(ok?'pv-ok':'pv-no'); }
+  D.to = ok ? t : null;
+}
+function fdragEnd(cancel){
+  const D = FDRAG; FDRAG = null; if(!D) return;
+  clearTimeout(D.timer);
+  if(!D.on) return;
+  FDRAG_AT = Date.now(); fdragClear(); D.ghost.remove(); D.el.classList.remove('fdrag-src'); document.body.classList.remove('fdragging');
+  const to = !cancel && D.to, f = D.f;
+  if(!to || (to.r===f.r && to.c===f.c)){ if(D.dirty) renderMyHouse(); return; }
+  const it = itemOf(f.item_code); let rot = +f.rot || 0;
+  if(!rot && it.w!==it.h && f.w===it.h && f.h===it.w) rot = 1;
+  act(async()=>{
+    await api.remove(f.id);
+    try{ await api.place(f.item_code, to.r, to.c, rot, curRoom); }
+    catch(err){ try{ await api.place(f.item_code, f.r, f.c, rot, curRoom); }catch(e2){} await refreshMine(); renderMyHouse(); renderBag(); throw err; }
+    await refreshMine(); renderMyHouse(); renderBag();
+  });
+}
+roomEl.addEventListener('pointerdown', e=>{
+  if(selected || busy || e.button>0) return;
+  const el = e.target.closest('.furn[data-pid]'); if(!el) return;
+  const f = PLACED.find(p=>p.id===+el.dataset.pid); if(!f) return;
+  const r = el.getBoundingClientRect();
+  FDRAG = {el, f, x0:e.clientX, y0:e.clientY, on:false, mouse:e.pointerType==='mouse', id:e.pointerId,
+    dr: Math.min(f.h-1, Math.max(0, Math.floor((e.clientY-r.top)/r.height*f.h))), dc: Math.min(f.w-1, Math.max(0, Math.floor((e.clientX-r.left)/r.width*f.w)))};
+  if(!FDRAG.mouse) FDRAG.timer = setTimeout(()=>{ if(FDRAG && !FDRAG.on){ fdragStart(); fdragMove(FDRAG.x0, FDRAG.y0); } }, 300);
+});
+addEventListener('pointermove', e=>{
+  const D = FDRAG; if(!D || e.pointerId!==D.id) return;
+  if(!D.on){
+    const moved = Math.hypot(e.clientX-D.x0, e.clientY-D.y0);
+    if(D.mouse){ if(moved > 6) fdragStart(); else return; }
+    else { if(moved > 10){ clearTimeout(D.timer); FDRAG = null; } return; }   // 폰: 꾹 누르기 전에 움직이면 그냥 화면 넘기기
+  }
+  e.preventDefault(); fdragMove(e.clientX, e.clientY);
+});
+addEventListener('pointerup', e=>{ if(FDRAG && e.pointerId===FDRAG.id){ if(FDRAG.on) fdragMove(e.clientX, e.clientY); fdragEnd(false); } });
+addEventListener('pointercancel', e=>{ if(FDRAG && e.pointerId===FDRAG.id && !(FDRAG.on && !FDRAG.mouse)) fdragEnd(true); });   // 폰은 끄는 도중 cancel 이 와도 손가락(touch)으로 계속 따라가요
+roomEl.addEventListener('touchmove', e=>{ if(FDRAG && FDRAG.on){ e.preventDefault(); const t = e.touches[0]; if(t) fdragMove(t.clientX, t.clientY); } }, {passive:false});
+addEventListener('touchend', ()=>{ if(FDRAG && FDRAG.on && !FDRAG.mouse) fdragEnd(false); });
+addEventListener('touchcancel', ()=>{ if(FDRAG && FDRAG.on && !FDRAG.mouse) fdragEnd(true); });
+roomEl.addEventListener('contextmenu', e=>{ if(e.target.closest('.furn[data-pid]')) e.preventDefault(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && FDRAG && FDRAG.on) fdragEnd(true); });
+
 document.addEventListener('keydown', e=>{
   if((e.key==='r'||e.key==='R') && selected && !e.target.closest('input,textarea') && !CAPACITY[selected]){ nextRot(); setHint(); renderMyHouse(); }
   if(e.key==='Escape' && selected){ selected=null; rotated=0; setHint(); renderMyHouse(); renderBag(); }
@@ -7287,6 +7363,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㊴</p>
+<p class="site-ver">마감의 숲 · 10-14 판 ①</p>
 </body>
 </html>
