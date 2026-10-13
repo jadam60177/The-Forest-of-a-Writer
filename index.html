@@ -1580,6 +1580,65 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 #tourCard .tc-dot{border:0;background:none;padding:0 1px;font:inherit;font-size:.7rem;line-height:1;color:inherit;opacity:.55;cursor:pointer}
 #tourCard .tc-dot:hover{opacity:1}
 #tourCard .tc-dots b{font-size:.7rem}
+
+/* ===== 🗺️ 숲 산책 (10-13) ===== */
+#tab-walk{max-width:1200px;margin:0 auto}
+.wmap{position:relative;width:100%;aspect-ratio:2000/1116;border-radius:18px;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none;
+  background:url(bg/walkmap.webp) center/100% 100% no-repeat,#24402E;box-shadow:0 10px 30px rgba(0,0,0,.35);border:3px solid rgba(255,215,120,.25)}
+:root[data-mode="day"] .wmap{background-image:url(bg/walkmap_day.webp);border-color:rgba(96,120,72,.35)}
+.whouse{position:absolute;width:10.5%;margin:0;padding:0;border:0;background:none;cursor:pointer;transform:translate(-50%,-78%);text-align:center;color:inherit}
+.whouse svg{width:100%;height:auto;display:block;filter:drop-shadow(0 5px 3px rgba(0,0,0,.3))}
+.whouse .wpet{position:absolute;left:-14%;bottom:12%;width:38%}
+.whouse .wpet img,.whouse .wpet svg{width:100%;height:auto;filter:none}
+.whouse .nm{display:inline-block;max-width:150%;margin-top:-.2rem;padding:.02rem .45rem;border-radius:6px;background:linear-gradient(#A0703F,#7A5230);color:#FFF3DC;border:2px solid #4E321C;
+  font-family:"Jua",sans-serif;font-size:clamp(.55rem,1.05vw,.82rem);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.whouse.me .nm{color:#FFE29A}
+.whouse.lit svg{filter:drop-shadow(0 0 8px rgba(255,200,90,.75)) drop-shadow(0 5px 3px rgba(0,0,0,.3))}
+.whouse:hover svg{transform:translateY(-2px)}
+.wch{position:absolute;width:6.4%;transform:translate(-50%,-92%);transition-property:left,top;transition-timing-function:linear;pointer-events:none;text-align:center}
+.wch .wc-flip{display:block;position:relative}
+.wch .wc-flip.left .wc-body{transform:scaleX(-1)}
+.wc-body{display:block;position:relative;transition:transform .2s}
+.wc-img{display:block;width:100%;height:auto}
+.wc-body > svg{display:block;width:100%;height:auto}
+.wch .wc-body > svg,.wch .wc-img{width:100%;height:auto;display:block;filter:drop-shadow(0 4px 2px rgba(0,0,0,.3))}
+.wch.walk .wc-flip{animation:whop .28s ease-in-out infinite alternate}
+@keyframes whop{to{transform:translateY(-8%)}}
+.wc-tint{position:absolute;inset:0;mix-blend-mode:multiply;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;pointer-events:none}
+.wc-body{isolation:isolate}
+.wc-nm{display:inline-block;margin-top:-.1rem;padding:0 .4rem;border-radius:99px;background:rgba(0,0,0,.5);color:#fff;font-size:clamp(.5rem,.9vw,.72rem);white-space:nowrap}
+.wch.me .wc-nm{background:#F2AA45;color:#3A2600;font-weight:700}
+.wc-say{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:.2rem;background:#FFF6E2;color:#4A3420;border:2px solid #8A6142;border-radius:12px;
+  padding:.1rem .5rem;font-size:clamp(.55rem,1vw,.78rem);white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.3);animation:popin .25s}
+.wbar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between;margin:.6rem 0}
+.wsay{display:flex;gap:.35rem;flex:1;min-width:220px;max-width:420px}
+.wsay input{flex:1;min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:.4rem .8rem;font:inherit;font-size:.88rem}
+.wside{display:grid;gap:.8rem}
+.wwho{border:1px solid var(--line);border-radius:14px;padding:.45rem .7rem;background:var(--panel)}
+.wwho summary{cursor:pointer;font-family:"Jua",sans-serif}
+.wwho-list{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.wwho-list .mini.on{border-color:var(--accent)}
+.wl-tabs{display:flex;gap:.35rem;margin-bottom:.5rem}
+.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:.45rem}
+.wl-opt{display:flex;flex-direction:column;align-items:center;gap:.1rem;padding:.4rem .25rem .4rem;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.05);color:var(--ink);font:inherit;cursor:pointer}
+.wl-opt .wc-body{width:62px}
+.wl-opt .wc-body > svg{width:100%;height:auto}
+.wl-opt b{font-weight:400;font-size:.78rem;line-height:1.25}
+.wl-opt.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.wl-colors{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+.wl-colors b{font-weight:400;font-family:"Jua",sans-serif;margin-right:.2rem}
+.wl-pick{display:flex;gap:.8rem;align-items:flex-start}
+.wl-me{flex:none;width:96px}
+.wl-me .wc-body{width:96px}
+.wl-now{margin:.1rem 0 .4rem}
+.wl-colors .sw{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25);cursor:pointer;padding:0}
+.wl-colors .sw.on{box-shadow:0 0 0 3px var(--accent)}
+.wl-colors input[type=color]{width:34px;height:30px;border:0;background:none;padding:0;cursor:pointer}
+:root[data-mode="day"] .wl-opt{background:rgba(255,255,255,.7)}
+.wmap-wrap{border-radius:18px}
+@media (max-width:700px){ .wmap-wrap{overflow-x:auto;margin:0 -.6rem;padding:0 .6rem;scrollbar-width:thin} .wmap{width:760px;max-width:none} }
+@media (max-width:600px){ .wl-grid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))} .wl-opt .wc-body{width:52px} }
+@media (prefers-reduced-motion:reduce){ .wch{transition-duration:0s!important} .wch.walk .wc-flip{animation:none} }
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -1635,6 +1694,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
 
 <nav class="tabs" role="tablist" aria-label="숲 메뉴">
     <button role="tab" aria-selected="true" data-tab="village" aria-label="마을"><span class="tab-ic" aria-hidden="true">🌲</span><span class="tab-tx" aria-hidden="true">마을</span><span class="tab-sh" aria-hidden="true">마을</span></button>
+    <button role="tab" aria-selected="false" data-tab="walk" aria-label="숲 산책"><span class="tab-ic" aria-hidden="true">🗺️</span><span class="tab-tx" aria-hidden="true">숲 산책</span><span class="tab-sh" aria-hidden="true">산책</span></button>
     <button role="tab" aria-selected="false" data-tab="home" aria-label="우리 집 꾸미기"><span class="tab-ic" aria-hidden="true">🏡</span><span class="tab-tx" aria-hidden="true">우리 집 꾸미기</span><span class="tab-sh" aria-hidden="true">우리 집</span></button>
     <button role="tab" aria-selected="false" data-tab="road" aria-label="집 꾸미기"><span class="tab-ic" aria-hidden="true">🎨</span><span class="tab-tx" aria-hidden="true">집 꾸미기</span><span class="tab-sh" aria-hidden="true">꾸미기</span></button>
     <button role="tab" aria-selected="false" data-tab="plaza" aria-label="마을 광장"><span class="tab-ic" aria-hidden="true">🏘️</span><span class="tab-tx" aria-hidden="true">마을 광장</span><span class="tab-sh" aria-hidden="true">광장</span></button>
@@ -1672,6 +1732,10 @@ document.documentElement.setAttribute('data-mode', modeNow());
 <main>
   <div class="demo-note" id="demoNote" hidden>미리보기 모드예요. 데이터베이스를 연결하기 전이라 가짜 이웃들과 함께 움직이고, 1초를 작업 1분으로 계산해요. 연결하면 이 안내와 위의 미리보기 버튼은 사라지고, 디스코드 봇이 잰 시간이 들어와요.</div>
 
+
+  <section id="tab-walk" hidden>
+    <div id="walkBox"></div>
+  </section>
 
   <section id="tab-home" class="grid2" hidden>
     <div class="panel">
@@ -3322,6 +3386,10 @@ const demoApi = (() => {
     async mainPet(){ const P = this.pstate(), yp = P.pets.filter(x=>!x.lodge), mp = yp.find(x=>x.id===P.main) || yp[0]; return mp ? mp.id : null; },
     async setMainPet(id){ const P = this.pstate(); if(!P.pets.some(x=>x.id===id && !x.lodge)) fail('마당에 있는 친구만 대표로 정할 수 있어요'); P.main = id; persist(); },
     async petsOf(id){ this.pstate(); const o = st.others.find(x=>x.discord_id===id); return o && o.pet ? [{...o.pet}] : []; },
+    // 🗺️ 숲 산책 (10-13) — 미리보기는 이 브라우저에만 저장
+    wstate(){ let w; try{ w = JSON.parse(localStorage.getItem('majam-demo-walk2')||'null'); }catch(e){} return w || {char:'w1', hair:'#4A3226', top:'#9EE0CC', bot:'#5A78A8'}; },
+    async walkMine(){ return this.wstate(); },
+    async walkSetLook(l){ try{ localStorage.setItem('majam-demo-walk2', JSON.stringify({char:l.char, hair:l.hair, top:l.top, bot:l.bot})); }catch(e){} },
     // 🐠 어항 (10-13) — 미리보기는 이 브라우저에만 저장
     tstate(){ let t; try{ t = JSON.parse(localStorage.getItem('majam-demo-tank')||'null'); }catch(e){} return t || {skin:'sand', skins:['sand'], fish:[]}; },
     tsave(t){ try{ localStorage.setItem('majam-demo-tank', JSON.stringify(t)); }catch(e){} },
@@ -3576,6 +3644,10 @@ const supaApi = (() => {
     async setMainPet(id){ ok(await sb.rpc('set_main_pet', {p_id:id})); },
     async lodgePet(id, inLodge){ ok(await sb.rpc('lodge_pet', {p_id:id, p_in:!!inLodge})); },   // 🏡 펫 숙소 (lodge.sql)
     async petsOf(id){ return ok(await sb.rpc('get_pets_of', {p_discord_id:id})); },
+    async walkMine(){ return ok(await sb.rpc('get_my_walk')); },                       // 🗺️ 숲 산책 (walk.sql)
+    async walkSetLook(l){ ok(await sb.rpc('set_walk_look', {p_char:l.char, p_hair:l.hair, p_top:l.top, p_bot:l.bot})); },
+    walkChannel(id){ return sb.channel('majam-walk', {config:{presence:{key:id}, broadcast:{self:false}}}); },
+    walkChannelClose(ch){ sb.removeChannel(ch); },
     async tankMine(){ return ok(await sb.rpc('get_my_tank')); },                       // 🐠 어항 (tank.sql)
     async tankOf(id){ return ok(await sb.rpc('get_tank_of', {p_discord_id:id})); },
     async tankAdd(code){ ok(await sb.rpc('tank_add_fish', {p_code:code})); },
@@ -5283,6 +5355,170 @@ document.addEventListener('click', e=>{
   });
 });
 
+/* ---------- 🗺️ 숲 산책 (10-13) — walk.sql ----------
+   위에서 내려다본 숲 지도(bg/walkmap.webp · walkmap_day.webp) 위에 집 16채, 내 작가 캐릭터가 콩콩 걸어 다녀요.
+   지금 산책 탭을 보고 있는 주민끼리는 Supabase 실시간 채널로 서로 보여요 (서버 표 없이).
+   캐릭터는 흰 머리·흰 옷 그림에 주민이 고른 색을 칠해요 (walk/char). */
+const WALK_CHARS = Array.from({length:12}, (_,i)=>({code:'w'+(i+1)}));   // walk/char/코드.webp (흰 머리·흰 옷) + 칠할 자리 코드_h(머리)·_t(윗옷)·_b(아래옷).webp · 373×560, 발끝 맞춤
+// 칠할 수 있는 색 (지정색만) — walk.sql 의 set_walk_look 은 #rrggbb 모양만 봐요
+const WALK_HAIR = [['검정','#2B2422'],['먹색','#4A4246'],['짙은 갈색','#4A3226'],['갈색','#7A4E32'],['밤색','#8C4A3A'],['구릿빛','#B5693A'],['카라멜','#C98E55'],['금발','#E8C77A'],['버터','#F2DE9A'],['크림','#F5EBD3'],
+  ['은발','#C9CCD6'],['잿빛','#9A9AA6'],['벚꽃','#F5B5C6'],['분홍','#E98AA8'],['딸기','#E06A7E'],['빨강','#C8453E'],['와인','#8E3048'],['주황','#E98A48'],['살구','#F2A984'],['민트','#8ED6C0'],
+  ['청록','#3E9C98'],['하늘','#9CCBEB'],['파랑','#4B7FC4'],['남색','#2E3A6B'],['라벤더','#B9A6E3'],['보라','#7A5AAE'],['자두','#5E3A6E'],['연두','#A8D47A']];
+const WALK_CLOTH = [['흰색','#FFFFFF'],['아이보리','#F7F0DD'],['크림','#F2E3C0'],['베이지','#D9C2A0'],['카멜','#B9895A'],['갈색','#7A5236'],['초코','#4A3226'],['연회색','#CFCFD4'],['회색','#8E8E98'],['먹색','#4A4A54'],
+  ['검정','#2A2A30'],['연분홍','#F7C6D2'],['분홍','#EE8FAE'],['산호','#F08A78'],['빨강','#D24B45'],['와인','#8E2E44'],['살구','#F7B98E'],['주황','#EE8A3E'],['겨자','#E0B23C'],['연노랑','#F7E79A'],
+  ['레몬','#F2D64E'],['연두','#B7DA86'],['초록','#5FA35A'],['올리브','#7E8A4A'],['숲','#2F6B48'],['민트','#9EE0CC'],['청록','#3A9E9A'],['하늘','#A9D4F0'],['파랑','#4A82C8'],['청바지','#5A78A8'],
+  ['남색','#2C3A66'],['라벤더','#C4B3EA'],['보라','#7E5CB4'],['자두','#5E3670']];
+const WALK_PARTS = [['hair','💇 머리색','h',WALK_HAIR],['top','👕 윗옷','t',WALK_CLOTH],['bot','👖 아래옷·신발','b',WALK_CLOTH]];
+const WALK_HEX = /^#[0-9a-fA-F]{6}$/;
+// 집 16자리 = 공터 8곳 × 2채 (지도 %, 낮·밤 같은 구도) · 앞쪽 자리부터 채워요
+const WALK_PLOTS = [[42.5,52],[54,25],[66,56],[24,31],[80,32],[56,76],[37,77],[21,69]];
+const WALK_SLOTS = WALK_PLOTS.flatMap(([x,y])=>[[x-4.2,y-1],[x+4.2,y+1.5]]);
+const WALK_SAY_MAX = 30;
+let WALK = null;   // {look, owned}
+let WALK_CH = null, WALK_ME = null, WALK_OTHERS = new Map(), WALK_DEMO_T = [];
+const walkLookOf = l => ({char: (l && WALK_CHARS.some(c=>c.code===l.char)) ? l.char : 'w1',
+  hair: (l && WALK_HEX.test(l.hair||'')) ? l.hair : '#4A3226', top: (l && WALK_HEX.test(l.top||'')) ? l.top : '#9EE0CC', bot: (l && WALK_HEX.test(l.bot||'')) ? l.bot : '#5A78A8'});
+async function refreshWalk(){ try{ WALK = {look: walkLookOf(await api.walkMine())}; }catch(e){ WALK = WALK || {look: walkLookOf(null)}; } }
+function walkCharHTML(look){
+  const L = walkLookOf(look), c = WALK_CHARS.find(x=>x.code===L.char) || WALK_CHARS[0];
+  const body = `<img class="wc-img" src="walk/char/${c.code}.webp" alt="" draggable="false" loading="lazy">`;
+  const tint = WALK_PARTS.map(([k,,s])=>`<i class="wc-tint" style="background:${L[k]};-webkit-mask-image:url(walk/char/${c.code}_${s}.webp);mask-image:url(walk/char/${c.code}_${s}.webp)"></i>`).join('');
+  return `<span class="wc-body">${body}${tint}</span>`;
+}
+function walkHouses(){
+  const list = VILLAGE.filter(p=>!p.removed), me = list.find(p=>isMe(p));
+  const day = Math.floor((Date.now()+9*3600e3)/864e5);
+  const rest = list.filter(p=>p!==me);
+  const lit = rest.filter(p=>p.in_voice), today = rest.filter(p=>!p.in_voice && (p.today_minutes||0)>0).sort((a,b)=>(b.today_minutes||0)-(a.today_minutes||0));
+  const others = rest.filter(p=>!lit.includes(p) && !today.includes(p)).sort((a,b)=>mixN(a.discord_id+':'+day)-mixN(b.discord_id+':'+day));
+  return [me, ...lit, ...today, ...others].filter(Boolean).slice(0, WALK_SLOTS.length);
+}
+function renderWalk(){
+  const box = document.getElementById('walkBox'); if(!box || !ME) return;
+  if(!box.querySelector('.wmap')){
+    box.innerHTML = `<div class="wmap-wrap" id="wmapWrap"><div class="wmap" id="wmap" aria-label="숲 산책 지도"></div></div>
+      <div class="wbar"><form class="wsay" id="wsay"><input id="wsayIn" maxlength="${WALK_SAY_MAX}" placeholder="한마디 건네기 (${WALK_SAY_MAX}자)" autocomplete="off"><button class="mini ask-yes" type="submit">💬</button></form>
+        <span class="small wnow" id="wnow"></span></div>
+      <div class="wside"><details class="wwho"><summary>🏡 주민 집 목록 <span class="small">지도에 없는 집도 여기서 구경 가요</span></summary><div class="wwho-list" id="wwho"></div></details>
+        <div class="panel wlook" id="wlook"></div></div>`;
+    box.querySelector('#wmap').addEventListener('click', walkMapClick);
+    box.querySelector('#wsay').addEventListener('submit', e=>{ e.preventDefault(); const i = document.getElementById('wsayIn'), t = i.value.trim().slice(0, WALK_SAY_MAX); if(!t) return; i.value = ''; walkSay(WALK_ME, t); walkSend('say', {text:t}); });
+  }
+  const map = document.getElementById('wmap');
+  map.querySelectorAll('.whouse').forEach(x=>x.remove());
+  walkHouses().forEach((p,i)=>{
+    const [x,y] = WALK_SLOTS[i], st = stageIdx(p.total_minutes), dc = p.decay||0, me = isMe(p), pet = PETS_ON[p.discord_id];
+    map.insertAdjacentHTML('beforeend', `<button class="whouse ${p.in_voice?'lit':''} ${me?'me':''}" data-whouse="${esc(p.discord_id)}" style="left:${x}%;top:${y}%;z-index:${Math.round(y*10)}" aria-label="${esc(me?'내 집':p.display_name)} 구경 가기">
+      ${houseSVG(lookStage(p.discord_id, st), p.in_voice, dc, p.house_color, lookStyle(p.discord_id, st, me ? ME.house_style : HOUSE_STYLE_OF[p.discord_id]))}
+      ${pet ? `<span class="wpet">${petArt(pet.pet_code, pet.sad?'sad':'ok', '', petGrown(pet.level||1))}</span>` : ''}
+      <span class="nm">${me?'내 집':esc(p.display_name)}</span></button>`);
+  });
+  document.getElementById('wwho').innerHTML = VILLAGE.filter(p=>!p.removed).map(p=>`<button class="mini ${p.in_voice?'on':''}" data-visit="${esc(p.discord_id)}">${p.in_voice?'🕯️ ':''}${isMe(p)?'내 집':esc(p.display_name)}</button>`).join('');
+  if(!WALK_ME){
+    let pos = null; try{ pos = JSON.parse(localStorage.getItem('majam-walk-pos')||'null'); }catch(e){}
+    if(!pos){ const k = walkHouses().findIndex(p=>isMe(p)), s = WALK_SLOTS[Math.max(0,k)]; pos = {x:s[0], y:s[1]+7}; }
+    WALK_ME = walkChar(map, 'me', ME.display_name || '나', WALK ? WALK.look : null, pos.x, pos.y, true);
+  } else if(!WALK_ME.isConnected) map.appendChild(WALK_ME);
+  WALK_OTHERS.forEach(c=>{ if(!c.isConnected) map.appendChild(c); });
+  renderWalkLook(); walkNow();
+  const wrap = document.getElementById('wmapWrap');   // 폰: 지도를 옆으로 밀어 보게 — 내 캐릭터가 가운데 오도록
+  if(wrap && wrap.scrollWidth > wrap.clientWidth && !wrap._centered){ wrap._centered = true; wrap.scrollLeft = WALK_ME.x/100*wrap.scrollWidth - wrap.clientWidth/2; }
+}
+function walkChar(map, id, name, look, x, y, me){
+  const c = document.createElement('div'); c.className = 'wch' + (me?' me':''); c.dataset.id = id;
+  c.innerHTML = `<span class="wc-flip">${walkCharHTML(look)}</span><span class="wc-nm">${esc(name)}</span>`;
+  c.x = x; c.y = y; c.style.left = x+'%'; c.style.top = y+'%'; c.style.zIndex = Math.round(y*10)+5; c._look = JSON.stringify(walkLookOf(look));
+  map.appendChild(c); return c;
+}
+function walkSetLook(c, look){ const k = JSON.stringify(walkLookOf(look)); if(c._look===k) return; c._look = k; c.querySelector('.wc-flip').innerHTML = walkCharHTML(look); }
+function walkGo(c, x, y, done){
+  if(!c) return; const map = document.getElementById('wmap'); if(!map) return;
+  x = Math.max(3, Math.min(97, x)); y = Math.max(12, Math.min(96, y));
+  const W = map.clientWidth, H = map.clientHeight, d = Math.hypot((x-c.x)*W/100, (y-c.y)*H/100), t = Math.max(.35, d/ (W*0.13));
+  if(Math.abs(x-c.x) > .3) c.querySelector('.wc-flip').classList.toggle('left', x < c.x);
+  c.style.transitionDuration = t.toFixed(2)+'s'; c.classList.add('walk');
+  c.style.left = x+'%'; c.style.top = y+'%'; c.style.zIndex = Math.round(y*10)+5; c.x = x; c.y = y;
+  clearTimeout(c._t); c._t = setTimeout(()=>{ c.classList.remove('walk'); done && done(); }, t*1000);
+}
+function walkSay(c, text){
+  if(!c) return; c.querySelector('.wc-say')?.remove();
+  const s = document.createElement('span'); s.className = 'wc-say'; s.textContent = text; c.appendChild(s);
+  clearTimeout(c._s); c._s = setTimeout(()=>s.remove(), 6000);
+}
+function walkMapClick(e){
+  const map = document.getElementById('wmap'), r = map.getBoundingClientRect();
+  const h = e.target.closest('[data-whouse]');
+  if(h){ const id = h.dataset.whouse, x = parseFloat(h.style.left), y = parseFloat(h.style.top) + 7;
+    walkGo(WALK_ME, x, y, ()=>{ if(id===ME.discord_id || isMe({discord_id:id})) document.querySelector('.tabs [data-tab="home"]').click(); else openVisit(id); });
+    walkMoved(x, y); return; }
+  const x = (e.clientX - r.left)/r.width*100, y = (e.clientY - r.top)/r.height*100;
+  walkGo(WALK_ME, x, y); walkMoved(Math.max(3,Math.min(97,x)), Math.max(12,Math.min(96,y)));
+}
+function walkMoved(x, y){ try{ localStorage.setItem('majam-walk-pos', JSON.stringify({x, y})); }catch(e){} walkTrack(); }
+function walkNow(){ const n = WALK_OTHERS.size, el = document.getElementById('wnow'); if(el) el.textContent = n ? `지금 같이 산책 중 ${n}명` : '지금은 혼자 산책 중이에요'; }
+// --- 실시간: 지금 산책 탭을 보는 주민끼리 ---
+function walkPayload(){ return {id: ME.discord_id, name: ME.display_name || '', x: WALK_ME ? +WALK_ME.x.toFixed(1) : 50, y: WALK_ME ? +WALK_ME.y.toFixed(1) : 60, look: WALK ? WALK.look : null}; }
+function walkTrack(){ if(WALK_CH && WALK_CH.state==='joined') try{ WALK_CH.track(walkPayload()); }catch(e){} }
+function walkSend(event, data){ if(WALK_CH) try{ WALK_CH.send({type:'broadcast', event, payload:{id: ME.discord_id, ...data}}); }catch(e){} }
+function walkSync(list){
+  const map = document.getElementById('wmap'); if(!map) return;
+  const seen = new Set();
+  list.forEach(p=>{ if(!p || !p.id || p.id===ME.discord_id || seen.has(p.id)) return; seen.add(p.id);
+    let c = WALK_OTHERS.get(p.id);
+    if(!c){ c = walkChar(map, p.id, p.name||'이웃', p.look, p.x, p.y, false); WALK_OTHERS.set(p.id, c); }
+    else { walkSetLook(c, p.look); if(Math.abs(c.x-p.x)>.2 || Math.abs(c.y-p.y)>.2) walkGo(c, p.x, p.y); } });
+  [...WALK_OTHERS.keys()].forEach(id=>{ if(!seen.has(id)){ WALK_OTHERS.get(id).remove(); WALK_OTHERS.delete(id); } });
+  walkNow();
+}
+function walkJoin(){
+  if(WALK_CH || WALK_DEMO_T.length) return;
+  const ch = api.walkChannel ? api.walkChannel(ME.discord_id) : null;
+  if(!ch){ walkDemo(); return; }
+  WALK_CH = ch;
+  ch.on('presence', {event:'sync'}, ()=>{ const s = ch.presenceState(); walkSync(Object.values(s).map(a=>a[a.length-1])); })
+    .on('broadcast', {event:'say'}, ({payload})=>{ const c = WALK_OTHERS.get(payload.id); if(c) walkSay(c, String(payload.text||'').slice(0, WALK_SAY_MAX)); })
+    .subscribe(st=>{ if(st==='SUBSCRIBED') walkTrack(); });
+}
+function walkLeave(){
+  if(WALK_CH){ try{ WALK_CH.untrack(); api.walkChannelClose(WALK_CH); }catch(e){} WALK_CH = null; }
+  WALK_DEMO_T.forEach(t=>clearTimeout(t)); WALK_DEMO_T = [];
+  WALK_OTHERS.forEach(c=>c.remove()); WALK_OTHERS.clear();
+}
+function walkDemo(){   // 미리보기: 가짜 이웃 셋이 돌아다녀요
+  const map = document.getElementById('wmap'); if(!map) return;
+  const ppl = VILLAGE.filter(p=>!p.removed && !isMe(p)).slice(0,3), path = [[12,48],[30,48],[48,45],[66,46],[88,47],[66,22],[49,62],[48,90],[36,40]];
+  ppl.forEach((p,i)=>{ const s = path[i*3 % path.length], look = {char:WALK_CHARS[(i+1)%WALK_CHARS.length].code, hair:WALK_HAIR[(i*7+3)%WALK_HAIR.length][1], top:WALK_CLOTH[(i*11+14)%WALK_CLOTH.length][1], bot:WALK_CLOTH[(i*5+30)%WALK_CLOTH.length][1]};
+    const c = walkChar(map, p.discord_id, p.display_name, look, s[0], s[1], false); WALK_OTHERS.set(p.discord_id, c);
+    const wander = () => { const q = path[Math.floor(Math.random()*path.length)]; walkGo(c, q[0]+Math.random()*4-2, q[1]+Math.random()*3, ()=>WALK_DEMO_T.push(setTimeout(wander, 900+Math.random()*2200))); };
+    WALK_DEMO_T.push(setTimeout(wander, 600+i*900));
+    if(i===1) WALK_DEMO_T.push(setTimeout(()=>walkSay(c, '오늘 3천 자 썼어요!'), 2500)); });
+  walkNow();
+}
+// --- 꾸미기 ---
+let WALK_LOOK_TAB = 'char';
+function renderWalkLook(){
+  const el = document.getElementById('wlook'); if(!el || !WALK) return;
+  const L = WALK.look;
+  const tabs = `<div class="wl-tabs">${[['char','🧑 캐릭터'], ...WALK_PARTS.map(([k,l])=>[k,l])].map(([k,l])=>`<button type="button" class="rtab ${k===WALK_LOOK_TAB?'on':''}" data-wltab="${k}">${l}</button>`).join('')}</div>`;
+  let body = '';
+  if(WALK_LOOK_TAB==='char') body = `<div class="wl-grid">${WALK_CHARS.map(c=>`<button type="button" class="wl-opt ${L.char===c.code?'on':''}" data-wchar="${c.code}">${walkCharHTML({...L, char:c.code})}</button>`).join('')}</div>`;
+  else { const part = WALK_PARTS.find(x=>x[0]===WALK_LOOK_TAB), cur = (L[part[0]]||'').toLowerCase(), nm = (part[3].find(c=>c[1].toLowerCase()===cur)||['',''])[0];
+    body = `<div class="wl-pick"><span class="wl-me">${walkCharHTML(L)}</span><div><p class="small wl-now">지금 <b>${esc(nm||'')}</b></p>
+      <div class="wl-colors">${part[3].map(([n,c])=>`<button type="button" class="sw ${c.toLowerCase()===cur?'on':''}" style="background:${c}" data-wcol="${part[0]}" data-c="${c}" title="${n}" aria-label="${n}"></button>`).join('')}</div></div></div>`; }
+  el.innerHTML = `<h3 style="margin:0 0 .3rem">✨ 내 작가 꾸미기</h3><p class="small" style="margin:0 0 .5rem">캐릭터를 고르고 머리색, 윗옷, 아래옷 색을 골라요. 언제든 무료로 바꿀 수 있어요.</p>${tabs}${body}`;
+}
+let WALK_SAVE_T = null;
+function walkSaveLook(){
+  if(WALK_ME) walkSetLook(WALK_ME, WALK.look); walkTrack(); renderWalkLook();
+  clearTimeout(WALK_SAVE_T); WALK_SAVE_T = setTimeout(()=>{ api.walkSetLook(WALK.look).catch(e=>toast(e.message||'저장하지 못했어요')); }, 600);
+}
+document.addEventListener('click', e=>{
+  const t = e.target.closest('[data-wltab]'); if(t){ WALK_LOOK_TAB = t.dataset.wltab; renderWalkLook(); return; }
+  const c = e.target.closest('[data-wchar]'); if(c && WALK){ WALK.look.char = c.dataset.wchar; walkSaveLook(); return; }
+  const k = e.target.closest('[data-wcol]'); if(k && WALK){ WALK.look[k.dataset.wcol] = k.dataset.c; walkSaveLook(); return; }
+});
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) walkLeave(); else if(!document.getElementById('tab-walk').hidden){ renderWalk(); walkJoin(); } });
+
 /* ---------- 🎟️ 마감 스크래치 복권 (lotto.sql) ---------- */
 const LOTTO_PRICE = 30, LOTTO_PER_DAY = 5, LOTTO_DUP_COIN = 120, LOTTO_WEEK_N = 5;   // lotto.sql 의 play_lotto 와 같아야 해요
 // 전설 가구 — furn/코드.webp · 새 가구를 넣을 땐 여기 + lotto.sql 의 lotto_items 둘 다
@@ -6232,7 +6468,8 @@ document.querySelector('.tabs').addEventListener('click', e=>{
   const b = e.target.closest('button[data-tab]'); if(!b) return;
   const same = b.getAttribute('aria-selected')==='true';
   document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b));
-  ['village','home','road','plaza','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
+  ['village','walk','home','road','plaza','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
+  if(b.dataset.tab==='walk'){ renderWalk(); refreshWalk().then(()=>{ renderWalk(); if(WALK_ME) walkSetLook(WALK_ME, WALK.look); walkJoin(); }); } else walkLeave();
   try{ sessionStorage.setItem('majam-tab', b.dataset.tab); }catch(err){}
   if(!e.tour) logTabOnce(b.dataset.tab);
   if(!e.keepScroll) window.scrollTo({top:0, behavior: same ? 'smooth' : 'auto'});   // 탭마다 한 화면 — 늘 맨 위에서 시작해요
@@ -6799,6 +7036,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㉔</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㉙</p>
 </body>
 </html>
