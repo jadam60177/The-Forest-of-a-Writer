@@ -1691,6 +1691,18 @@ dialog.visit.deco-dlg{max-width:min(94vw,960px);height:auto;max-height:min(90vh,
   .vsign{top:calc(var(--bh,0px) + 249px - 126px);height:140px;width:92px;right:2px}
   .vtruck.dessert{right:88px}
 }
+/* ===== 🏠 이웃 집 구경 창 너비 고정 (10-13 ㉞) — 어항·마당도 방만큼 넓게 ===== */
+dialog.visit#visit{width:min(94vw,640px);max-width:min(94vw,640px)}
+#visit .room-wrap{display:flex;justify-content:center}
+#visitGarden .bed{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}
+#visitGarden .plot{min-height:180px}
+#visitGarden .plot img.gstage{max-width:128px}
+#visitGarden .tank{max-height:none}
+@media (max-width:600px){ #visitGarden .bed{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))} #visitGarden .plot{min-height:156px} }
+/* ===== 🐾 산책·마을 펫 외곽선 (10-13 ㉞) — 그림에 선이 없어서 크게 보면 둥둥 떠 보이던 것. 그림 모양 따라 갈색 선을 둘러요 ===== */
+.whouse .wpet img{filter:drop-shadow(2px 0 0 #3B2A22) drop-shadow(-2px 0 0 #3B2A22) drop-shadow(0 2px 0 #3B2A22) drop-shadow(0 -2px 0 #3B2A22) drop-shadow(0 4px 3px rgba(0,0,0,.3))}
+.hwrap .pet.yardpet img{filter:drop-shadow(1px 0 0 #3B2A22) drop-shadow(-1px 0 0 #3B2A22) drop-shadow(0 1px 0 #3B2A22) drop-shadow(0 -1px 0 #3B2A22) drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.whouse .wpet .pet.sad img{filter:saturate(.55) brightness(.95) drop-shadow(2px 0 0 #3B2A22) drop-shadow(-2px 0 0 #3B2A22) drop-shadow(0 2px 0 #3B2A22) drop-shadow(0 -2px 0 #3B2A22)}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -7222,6 +7234,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-13 판 ㉝</p>
+<p class="site-ver">마감의 숲 · 10-13 판 ㉞</p>
 </body>
 </html>
