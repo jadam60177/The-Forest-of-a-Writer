@@ -5458,7 +5458,8 @@ async function refreshWalk(){ try{ WALK = {look: walkLookOf(await api.walkMine()
 function walkCharHTML(look){
   const L = walkLookOf(look), c = WALK_CHARS.find(x=>x.code===L.char) || WALK_CHARS[0];
   const body = `<img class="wc-img" src="walk/char/${c.code}.webp" alt="" draggable="false" loading="lazy">`;
-  const tint = WALK_PARTS.map(([k,,s])=>`<i class="wc-tint" style="background:${L[k]};-webkit-mask-image:url(walk/char/${c.code}_${s}.webp);mask-image:url(walk/char/${c.code}_${s}.webp)"></i>`).join('');
+  const mv = 'v=2';   // (㉜) 칠할 자리 그림을 고쳐서 다시 올렸어요 — 예전 그림이 캐시에 남지 않게 붙이는 표시. 또 고치면 숫자만 올려요
+  const tint = WALK_PARTS.map(([k,,s])=>`<i class="wc-tint" style="background:${L[k]};-webkit-mask-image:url(walk/char/${c.code}_${s}.webp?${mv});mask-image:url(walk/char/${c.code}_${s}.webp?${mv})"></i>`).join('');
   return `<span class="wc-body">${body}${tint}</span>`;
 }
 function walkHouses(){
