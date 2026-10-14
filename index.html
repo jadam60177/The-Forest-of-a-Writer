@@ -1741,6 +1741,15 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 .buy-dlg .bq-quick{display:flex;gap:.35rem;justify-content:center;margin:.6rem 0 .2rem;flex-wrap:wrap}
 .buy-dlg .bq-total{text-align:center;margin:.6rem 0 .9rem;line-height:1.5}
 
+/* ===== 🐺 담당자가 풀밭을 이리저리 어슬렁 (10-14 ③) — 한 줄로 왔다 갔다 하며 첫 줄 집 지붕을 밟던 것(주민 제보) → JS(wolfWander)가 집 위쪽 풀밭 안에서만 아무 데나 골라 걸어가요 ===== */
+.trail .wolf.wander{animation:none!important;transition-property:left,bottom;transition-timing-function:ease-in-out}
+.trail .wolf.wander .wolf-svg{animation:none!important;transition:transform .35s}
+.trail .wolf.wander.left .wolf-svg{transform:scaleX(-1)}
+.trail .wolf.wander.walking .wolf-svg{animation:wolfHop .32s ease-in-out infinite alternate!important}
+.trail .wolf.wander.walking.left .wolf-svg{animation-name:wolfHopL!important}
+@keyframes wolfHop{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes wolfHopL{from{transform:scaleX(-1) translateY(0)}to{transform:scaleX(-1) translateY(-3px)}}
+
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -6906,6 +6915,43 @@ document.querySelector('.shop-tabs').addEventListener('click', e=>{
   document.addEventListener('click', e=>{ if(!e.target.closest('[data-compact]')) return; compact = !compact; try{ localStorage.setItem('majam-compact', compact?'1':'0'); }catch(e){} applyCompact(); });
   applyCompact(); }
 
+// 🐺 담당자 어슬렁 (10-14 ③): 물고기처럼 다음 자리를 아무 데나 골라 천천히 걸어가고, 가끔 서서 쉬어요.
+//    발끝은 늘 첫 줄 집보다 위(풀밭)에 있게 — 집 지붕을 밟지 않아요.
+(function wolfWander(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let t = 0;
+  const step = ()=>{
+    const w = document.querySelector('.village > .trail .wolf'), tr = w && w.parentElement, hs = document.getElementById('houses');
+    if(!w || !tr){ t = setTimeout(step, 3000); return; }
+    if(!w.classList.contains('wander')){ w.classList.add('wander'); w.style.transitionDuration = '0s'; }
+    const vis = !document.hidden && tr.offsetParent !== null;
+    if(!vis){ t = setTimeout(step, 4000); return; }
+    const TR = tr.getBoundingClientRect(), H = hs && hs.offsetHeight ? hs.getBoundingClientRect() : null, ww = w.offsetWidth || 140;
+    const phone = innerWidth <= 600;
+    // 집 첫 줄 지붕보다 위: 트레일 바닥이 집 칸 위쪽으로 얼마나 내려와 있는지 보고 그만큼 올려요
+    const lift = H ? Math.max(0, TR.bottom - H.top) + (phone ? 6 : 2) : 0;   // 이름표 아래끝이 집 칸 위에 오게 (발끝은 그보다 28px쯤 위 = 지붕보다 위)
+    const band = phone ? 22 : 38;   // 숲 앞 풀밭 띠 안에서만 (너무 올라가면 나무 속을 걷는 것 같아서)
+    const minB = Math.max(phone ? -2 : -4, lift), maxB = minB + band;
+    const pad = phone ? 8 : Math.max(24, TR.width*.03), maxL = Math.max(pad, TR.width - ww - pad);
+    const curL = parseFloat(w.style.left) || w.offsetLeft, curB = parseFloat(w.style.bottom); 
+    if(Math.random() < .2 && w.style.left){ w.classList.remove('walking'); t = setTimeout(step, 2000 + Math.random()*3000); return; }   // 가만히 서서 지켜보기
+    // 다음 자리: 너무 가깝지 않게 (지도 너비의 15%~60% 떨어진 곳)
+    let nl = curL;
+    for(let k=0;k<6;k++){ nl = pad + Math.random()*(maxL-pad); if(Math.abs(nl-curL) > TR.width*.15) break; }
+    const nb = minB + Math.random()*(maxB-minB);
+    const d = Math.hypot(nl-curL, (isNaN(curB)?minB:curB)-nb), sec = Math.max(1.2, d / (phone ? 34 : 48));   // 1초에 약 48px
+    w.classList.toggle('left', nl < curL);
+    if(!w.style.left){ w.style.left = curL+'px'; w.style.bottom = minB+'px'; }
+    requestAnimationFrame(()=>{
+      w.style.transitionDuration = sec.toFixed(2)+'s'; w.classList.add('walking');
+      w.style.left = nl.toFixed(0)+'px'; w.style.bottom = nb.toFixed(0)+'px';
+    });
+    t = setTimeout(()=>{ w.classList.remove('walking'); t = setTimeout(step, 1200 + Math.random()*3500); }, sec*1000);
+  };
+  addEventListener('resize', ()=>{ clearTimeout(t); t = setTimeout(step, 400); });
+  t = setTimeout(step, 1500);
+})();
+
 /* ---------- 집 구경 ---------- */
 async function openVisit(id){
   logTabOnce('visit');
@@ -7423,6 +7469,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-14 판 ②</p>
+<p class="site-ver">마감의 숲 · 10-14 판 ③</p>
 </body>
 </html>
