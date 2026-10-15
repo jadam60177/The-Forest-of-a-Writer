@@ -4031,7 +4031,7 @@ function roomHTML(list, cur, {editable, cabs={}}){
 }
 
 function renderMyHouse(){
-  if(typeof FDRAG!=='undefined' && FDRAG && FDRAG.on){ FDRAG.dirty = true; return; }   // 가구를 끄는 중엔 방을 다시 그리지 않아요 (손가락이 잡은 가구가 사라지면 끌기가 끊겨요)
+  if(typeof FDRAG!=='undefined' && FDRAG && FDRAG.on){ if(FDRAG.ghost && FDRAG.ghost.isConnected && Date.now()-(FDRAG.t0||(FDRAG.t0=Date.now()))<60000){ FDRAG.dirty = true; return; } try{ fdragEnd(true); }catch(e){ FDRAG = null; } }   // 가구를 끄는 중엔 방을 다시 그리지 않아요 (손가락이 잡은 가구가 사라지면 끌기가 끊겨요)
   const i = stageIdx(ME.total_minutes), cur = roomOf(ME.total_minutes, ME.room_blocks), next = STAGES[i+1];
   const here = PLACED.filter(p=>(p.room||0)===curRoom);
   document.getElementById('myHouseIcon').innerHTML = houseSVG(lookStage(meId(), i), ME.in_voice, 0, ME.house_color, lookStyle(meId(), i, ME.house_style));
@@ -7164,12 +7164,12 @@ async function start(){
       try{
         const before = stageIdx(ME.total_minutes);
         await Promise.all([refreshVillage(), api.me().then(m=>ME=m), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPetsOn()]);
+        await liveGarden();   // 🌷 (10-14 ⑤) 꽃 자란 시간은 뒤쪽 단계가 실패해도 먼저 갱신
         if(!document.getElementById('tab-pet').hidden){ await refreshPets(); renderPets(); }
         const after = stageIdx(ME.total_minutes);
         if(after>before){ toast(`🎉 집이 ${STAGES[after].name}(으)로 커졌어요!`); renderMyHouse(); renderRoad(); }
         if(!document.getElementById('tab-plaza').hidden || Math.random()<.34){ await refreshPlaza(); renderPlaza(); celebratePlaza(); api.shop().then(s=>{ if(s && s.length){ SHOP=s; renderBag(); } }); }
         renderTop(); renderVillage(); renderBag();
-        if(inGarden && !document.getElementById('tab-home').hidden){ await refreshGarden(); renderMyHouse(); }
         if(!document.getElementById('tab-lake').hidden){ await refreshLake(); renderLake(); }
         await refreshBanners(); renderBanners();
         await refreshTree(); renderFloatDrops(); if(!document.getElementById('tab-tree').hidden) renderTree();
@@ -7179,6 +7179,26 @@ async function start(){
     }, 30000);
   }
 }
+
+
+/* 🌷 꽃밭 실시간 갱신 (10-14 ⑤) — 새로고침 없이도 자란 시간이 반영되게
+   다른 갱신이 실패·지연돼도 따로 돌고, 방은 안 건드려서(끌기 중에도) 꽃밭 칸만 다시 그려요 */
+let LIVE_GARDEN_BUSY = false;
+async function liveGarden(){
+  if(DEMO || LIVE_GARDEN_BUSY || typeof ME==='undefined' || !ME) return;
+  const home = document.getElementById('tab-home');
+  if(!inGarden || !home || home.hidden || document.hidden) return;
+  LIVE_GARDEN_BUSY = true;
+  try{
+    const m = await api.me(); if(m) ME = m;
+    await refreshGarden();
+    if(inGarden && !home.hidden){ const box = document.getElementById('gardenBox'); if(box && !box.hidden) renderGarden(); else renderMyHouse(); }
+  }catch(e){ console.warn('꽃밭 갱신 실패', e); }
+  finally{ LIVE_GARDEN_BUSY = false; }
+}
+setInterval(liveGarden, 20000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) liveGarden(); });
+addEventListener('focus', ()=>liveGarden());
 
 /* 🔥 연속 출석 (streak.sql 의 get_streak · 보상은 streak_reward 와 같아요) */
 const streakReward = n => 2*((Math.max(n,1)-1)%14);
@@ -7486,6 +7506,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-14 판 ④</p>
+<p class="site-ver">마감의 숲 · 10-14 판 ⑤</p>
 </body>
 </html>
