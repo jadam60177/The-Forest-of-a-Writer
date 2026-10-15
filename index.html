@@ -1753,6 +1753,32 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 @keyframes wolfHopL{from{transform:scaleX(-1) translateY(0)}to{transform:scaleX(-1) translateY(-3px)}}
 @media (max-width:600px){ #houses > .wolf.roam{width:76px} #houses > .wolf.roam .wolf-svg{width:72px} #houses > .wolf.roam .tag{font-size:.68rem} #houses > .wolf.roam .bubble{font-size:.68rem;max-width:180px} }
 
+
+/* 🌸 꽃 전시 (10-14 ⑤) — 마당 맨 위 전시대, 그 아래가 내 텃밭 */
+.fshow-box{margin:0 0 1.1rem}
+.fshow-title,.farm-title{margin:.2rem 0 .5rem;font-family:"Jua",sans-serif;font-weight:400}
+.fshow{position:relative;display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px 4px;background:url(bg/Flower_pot_soil.webp) center/cover,#5A3E28;border-radius:14px;padding:12px 10px 8px;box-shadow:inset 0 0 0 3px #4A3220,inset 0 0 26px rgba(0,0,0,.35);min-height:150px}
+.fshow .fs-pot{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:2px 2px 4px;border-radius:10px;-webkit-tap-highlight-color:transparent}
+.fshow .fs-pot:hover,.fshow .fs-pot:focus-visible{background:rgba(255,232,200,.14)}
+.fshow .fs-pot img{display:block;width:100%;max-width:112px;height:auto;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));transition:transform .25s}
+.fshow .fs-pot:hover img{transform:translateY(-3px) scale(1.04)}
+.fshow .fs-pot.secret img{filter:drop-shadow(0 0 10px rgba(200,180,255,.6)) drop-shadow(0 3px 4px rgba(0,0,0,.4))}
+.fshow .fs-pot svg{width:100%;max-width:96px;height:auto}
+.fshow .fs-nm{font-size:.74rem;color:#FFF3DF;font-family:"Jua",sans-serif;line-height:1.2;margin-top:2px;text-align:center}
+.fshow .fs-empty{grid-column:1/-1;align-self:center;text-align:center;color:#FFF3DF;font-size:.9rem;padding:1rem .5rem}
+.fshow .fs-tip{position:absolute;z-index:5;width:150px;padding:.35rem .5rem;border-radius:12px;background:#FFF6E2;color:#4A3420;border:2px solid #8A6142;font-size:.78rem;line-height:1.4;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none}
+.fs-pick{margin-top:.5rem;border:1px solid var(--line);border-radius:14px;padding:.45rem .7rem}
+.fs-pick summary{cursor:pointer;font-family:"Jua",sans-serif}
+.fs-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:.45rem;margin-top:.5rem;max-height:340px;overflow-y:auto}
+.fs-row{display:flex;align-items:center;gap:.45rem;padding:.3rem .45rem;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04)}
+.fs-row img,.fs-row svg{width:46px;height:46px;object-fit:contain;flex:none}
+.fs-row:not(.ok) img,.fs-row:not(.ok) svg{filter:grayscale(.75);opacity:.6}
+.fs-row.on{border-color:#E9A9BD;box-shadow:0 0 0 1px #E9A9BD}
+.fs-row .fs-info{display:flex;flex-direction:column;flex:1;min-width:0;line-height:1.3}
+.fs-row .fs-lock{opacity:.7}
+.farm-title{margin-top:1.1rem}
+#visitGarden .fshow{grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}
+@media (max-width:600px){ .fshow{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))} #visitGarden .fshow{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))} }
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -3523,6 +3549,18 @@ const demoApi = (() => {
     wstate(){ let w; try{ w = JSON.parse(localStorage.getItem('majam-demo-walk2')||'null'); }catch(e){} return w || {char:'w1', hair:'#4A3226', top:'#9EE0CC', bot:'#5A78A8'}; },
     async walkMine(){ return this.wstate(); },
     async walkSetLook(l){ try{ localStorage.setItem('majam-demo-walk2', JSON.stringify({char:l.char, hair:l.hair, top:l.top, bot:l.bot})); }catch(e){} },
+    // 🌸 꽃 전시 (10-14 ⑤) — 미리보기는 이 브라우저에만 저장
+    fsget(){ try{ return JSON.parse(localStorage.getItem('majam-demo-fshow')||'[]'); }catch(e){ return []; } },
+    fsset(a){ try{ localStorage.setItem('majam-demo-fshow', JSON.stringify(a)); }catch(e){} },
+    async flowerShowMine(){ return this.fsget().map(c=>({code:c, harvested:st.gdex[c]||0})); },
+    async flowerShowOf(id){ const o = st.others.find(x=>x.discord_id===id); if(!o) return [];
+      const k = [...String(id)].reduce((a,c)=>a+c.charCodeAt(0),0), pool = FLOWERS_DEFAULT.filter((f,i)=>(i+k)%5===0).slice(0, 3+k%6);
+      return pool.map(f=>({code:f.code, harvested:FSHOW_NEED[f.tier]+k%9})); },
+    async flowerShowAdd(code){ const a = this.fsget(), f = FLOWERS_DEFAULT.find(x=>x.code===code), n = st.gdex[code]||0;
+      if(!f) fail('없는 꽃이에요'); if(a.includes(code)) fail('이미 전시 중이에요'); if(a.length>=FSHOW_MAX) fail(`전시대에는 ${FSHOW_MAX}송이까지 놓을 수 있어요`);
+      if(n < FSHOW_NEED[f.tier]) fail(`${f.name}${jo(f.name,'은','는')} ${FSHOW_NEED[f.tier]}번 수확하면 전시할 수 있어요`);
+      a.push(code); this.fsset(a); },
+    async flowerShowRemove(code){ this.fsset(this.fsget().filter(c=>c!==code)); },
     // 🐠 어항 (10-13) — 미리보기는 이 브라우저에만 저장
     tstate(){ let t; try{ t = JSON.parse(localStorage.getItem('majam-demo-tank')||'null'); }catch(e){} return t || {skin:'sand', skins:['sand'], fish:[]}; },
     tsave(t){ try{ localStorage.setItem('majam-demo-tank', JSON.stringify(t)); }catch(e){} },
@@ -3784,6 +3822,10 @@ const supaApi = (() => {
     walkChannelClose(ch){ sb.removeChannel(ch); },
     async walkPing(x, y, look, say){ return ok(await sb.rpc('walk_ping', {p_x:x, p_y:y, p_look:look||null, p_say:say||null})); },   // 🗺️ 같이 걷기 튼튼판 (walkpos.sql, ㊳)
     async walkBye(){ try{ await sb.rpc('walk_bye'); }catch(e){} },
+    async flowerShowMine(){ return ok(await sb.rpc('get_my_flower_show')); },                         // 🌸 꽃 전시 (flowershow.sql)
+    async flowerShowOf(id){ return ok(await sb.rpc('get_flower_show_of', {p_discord_id:id})); },
+    async flowerShowAdd(code){ ok(await sb.rpc('flower_show_add', {p_code:code})); },
+    async flowerShowRemove(code){ ok(await sb.rpc('flower_show_remove', {p_code:code})); },
     async tankMine(){ return ok(await sb.rpc('get_my_tank')); },                       // 🐠 어항 (tank.sql)
     async tankOf(id){ return ok(await sb.rpc('get_tank_of', {p_discord_id:id})); },
     async tankAdd(code){ ok(await sb.rpc('tank_add_fish', {p_code:code})); },
@@ -4262,9 +4304,12 @@ const gSvg = (inner, vb='0 0 96 96') => `<svg viewBox="${vb}" aria-hidden="true"
 let GARDEN = [], GDEX = [], inGarden = false, inTank = false;   // (㉜) 우리 집 칸: 방 / 🌷 마당 / 🐠 어항
 try{ const g = localStorage.getItem('majam-garden'); inGarden = g === '1'; inTank = g === 't'; }catch(e){}
 const saveGardenTab = () => { try{ localStorage.setItem('majam-garden', inTank?'t':inGarden?'1':'0'); }catch(e){} };
+let FSHOW = null;   // 🌸 전시 중인 꽃 [{code, harvested}] — 서버 함수가 아직 없으면 null
+const FSHOW_NEED = {wild:25, garden:15, secret:3}, FSHOW_MAX = 12;   // flowershow.sql 과 같아야 해요
 async function refreshGarden(){
   try{ const [g, d] = await Promise.all([api.garden('me'), api.gardenDex()]); GARDEN = g||[]; GDEX = (d && d.length) ? d : GDEX; }
   catch(e){ GARDEN = []; }
+  try{ FSHOW = (await api.flowerShowMine()) || []; }catch(e){ FSHOW = null; }
 }
 const floristOpen = () => !!(PLAZA.find(b=>b.code==='florist')||{}).built_at;
 const flowerOf = code => GDEX.find(f=>f.code===code) || FLOWERS_DEFAULT.find(f=>f.code===code) || {code, name:'이름 모를 꽃', tier:'wild', hint:'#F0A8BC'};
@@ -4315,8 +4360,50 @@ function gardenDexHTML(){
       : peek() ? `<span class="gdx ${f.tier} peek" title="👁️ ${esc(f.name)} · ${(GTIER[f.tier]||GTIER.wild).name} · 아직 못 피웠어요">${bloomSrc(f.code) ? `<img class="gdximg" src="${bloomSrc(f.code)}" data-code="${f.code}" onerror="bloomFail(this)" alt="" draggable="false" loading="lazy">` : gSvg(flowerArt(f),'14 4 68 68')}</span>`
       : `<span class="gdx unknown" title="아직 못 본 꽃이에요${f.season?` (${esc(f.season)})`:''}">?</span>`).join('') + `</div>`;
 }
+// 🌸 꽃 전시대 (내 마당·이웃 구경 둘 다) — list: [{code, harvested}]
+function fshowHTML(list, owner){
+  const pots = (list||[]).map(x=>{ const f = flowerOf(x.code), t = GTIER[f.tier] || GTIER.wild;
+    const art = bloomSrc(f.code) ? `<img src="${bloomSrc(f.code)}" data-code="${f.code}" onerror="bloomFail(this)" alt="" draggable="false" loading="lazy">` : gSvg(flowerArt(f), PLOT_VB);
+    return `<button class="fs-pot ${f.tier}" type="button" data-fshow="${esc(f.code)}" data-n="${+x.harvested||0}" title="${esc(f.name)}">${art}<span class="fs-nm">${esc(f.name)}</span></button>`; }).join('');
+  return `<div class="fshow" data-owner="${esc(owner||'')}">${pots || `<p class="fs-empty">아직 전시한 꽃이 없어요</p>`}</div>`;
+}
+document.addEventListener('click', e=>{   // 꽃을 누르면 기록 말풍선
+  const b = e.target.closest('.fs-pot'); if(!b) return;
+  const box = b.closest('.fshow'), f = flowerOf(b.dataset.fshow), t = GTIER[f.tier] || GTIER.wild; if(!box) return;
+  box.querySelectorAll('.fs-tip').forEach(x=>x.remove());
+  const tip = document.createElement('div'); tip.className = 'fs-tip';
+  tip.innerHTML = `<b>${esc(f.name)}</b> <span class="rb ${f.tier==='secret'?'legend':f.tier==='garden'?'rare':'common'}">${t.name}</span><br>${b.dataset.n}번 수확했어요`;
+  const r = b.getBoundingClientRect(), br = box.getBoundingClientRect();
+  tip.style.left = Math.max(4, Math.min(br.width-154, r.left - br.left + r.width/2 - 75)) + 'px'; tip.style.top = Math.max(4, r.top - br.top - 50) + 'px';
+  box.appendChild(tip); setTimeout(()=>tip.remove(), 3200);
+});
+function fshowSectionHTML(prevOpen){
+  const shown = FSHOW || [], on = new Set(shown.map(x=>x.code)), full = on.size >= FSHOW_MAX;
+  const dexList = GDEX.length ? GDEX : FLOWERS_DEFAULT;
+  const rows = dexList.map(f=>({f, n: +f.harvested || (f.have ? 1 : 0)})).filter(r=>r.n>0)
+    .map(r=>({...r, need:FSHOW_NEED[r.f.tier]||FSHOW_NEED.wild, on:on.has(r.f.code)}))
+    .sort((a,b)=>(b.on-a.on) || ((b.n>=b.need)-(a.n>=a.need)) || (b.n/b.need - a.n/a.need));
+  const art = f => bloomSrc(f.code) ? `<img src="${bloomSrc(f.code)}" data-code="${f.code}" onerror="bloomFail(this)" alt="" loading="lazy">` : gSvg(flowerArt(f), '14 4 68 68');
+  const pick = rows.length ? rows.map(({f,n,need,on:isOn})=>`<div class="fs-row ${isOn?'on':''} ${n>=need?'ok':''}">${art(f)}<span class="fs-info"><b>${esc(f.name)}</b><span class="small">${n>=need?`${n}번 수확`:`${n} / ${need}번 · ${need-n}번 더`}</span></span>`
+      + (isOn ? `<button class="mini" data-fshow-out="${f.code}">내리기</button>`
+         : n>=need ? `<button class="mini ask-yes" data-fshow-in="${f.code}" ${full?'disabled title="전시대가 꽉 찼어요"':''}>🌸 전시</button>`
+         : `<span class="fs-lock">🔒</span>`) + `</div>`).join('')
+    : `<p class="small">꽃을 수확하면 여기에 나와요. 들꽃은 ${FSHOW_NEED.wild}번, 정원 꽃은 ${FSHOW_NEED.garden}번, 비밀꽃은 ${FSHOW_NEED.secret}번 수확하면 전시할 수 있어요.</p>`;
+  return `<div class="fshow-box"><h3 class="fshow-title">🌸 우리 집 꽃 전시 <span class="small">${on.size} / ${FSHOW_MAX}송이</span></h3>${fshowHTML(shown, ME && ME.display_name)}
+    <p class="small tank-lead">꽃을 누르면 기록을 볼 수 있어요. 마당을 구경 온 이웃도 전시한 꽃을 볼 수 있어요.</p>
+    <details class="fs-pick" ${prevOpen?'open':''}><summary>🌼 전시할 꽃 고르기 <span class="small">들꽃 ${FSHOW_NEED.wild}번 · 정원 꽃 ${FSHOW_NEED.garden}번 · 비밀꽃 ${FSHOW_NEED.secret}번 수확하면</span></summary><div class="fs-list">${pick}</div></details></div>`;
+}
+document.addEventListener('click', e=>{
+  const a = e.target.closest('[data-fshow-in],[data-fshow-out]'); if(!a) return;
+  act(async()=>{
+    const done = async()=>{ await refreshGarden(); renderGarden(); };
+    if(a.dataset.fshowIn){ const f = flowerOf(a.dataset.fshowIn); await api.flowerShowAdd(f.code); await done(); toast(`🌸 ${f.name}${jo(f.name,'을','를')} 전시대에 놓았어요!`); }
+    else { const f = flowerOf(a.dataset.fshowOut); if(!(await ask(`${f.name}${jo(f.name,'을','를')} 전시대에서 내릴까요?\n수확 기록은 그대로라 언제든 다시 놓을 수 있어요.`))) return; await api.flowerShowRemove(f.code); await done(); }
+  });
+});
 function renderGarden(){
   const box = document.getElementById('gardenBox'); if(!box || !ME) return;
+  const prevOpen = box.querySelector('details.fs-pick') ? box.querySelector('details.fs-pick').open : false;
   const n = gardenSlots(ME.total_minutes), seeds = ME.seeds||0, open = floristOpen();
   const seedRow = `<div class="seed-row"><span>🌰 이름 모를 씨앗 <b>${seeds}</b>개</span>`
     + (open
@@ -4325,7 +4412,7 @@ function renderGarden(){
   const head = n
     ? `<p class="small garden-lead">${STAGES[stageIdx(ME.total_minutes)].name} 화단 ${n}칸 · 작업실에 있는 동안 자라고, 안 와도 시들지 않아요. 뭐가 필지는 피어 봐야 알아요!</p>`
     : `<p class="small garden-lead">${STAGES[1].name}${jo(STAGES[1].name,'이','가')} 되면 마당에 화단이 생겨요. 조금만 더 작업실에 있어 볼까요?</p>`;
-  box.innerHTML = head + seedRow + (n ? gardenBedHTML(GARDEN, ME.total_minutes, true) : '') + gardenDexHTML();
+  box.innerHTML = fshowSectionHTML(prevOpen) + `<h3 class="farm-title">🌱 내 텃밭</h3>` + head + seedRow + (n ? gardenBedHTML(GARDEN, ME.total_minutes, true) : '') + gardenDexHTML();
 }
 
 /* ---------- 💐 꽃다발 선물하기 ---------- */
@@ -6985,9 +7072,9 @@ async function openVisit(id){
   room.innerHTML = '<span class="small">불러오는 중…</span>';
   dlg.showModal();
   try{
-    const [list, info, garden, fishBest, vpets, vtank] = await Promise.all([api.placements(id), api.house(id).catch(()=>null), api.garden(id).catch(()=>[]), api.fishBest(id).catch(()=>null), api.petsOf(id).catch(()=>[]), api.tankOf(id).catch(()=>null)]);
+    const [list, info, garden, fishBest, vpets, vtank, vflora] = await Promise.all([api.placements(id), api.house(id).catch(()=>null), api.garden(id).catch(()=>[]), api.fishBest(id).catch(()=>null), api.petsOf(id).catch(()=>[]), api.tankOf(id).catch(()=>null), api.flowerShowOf(id).catch(()=>[])]);
     const h = info || {room_blocks:0, room_names:['거실']};
-    VISIT = {p, list, info:h, garden:garden||[], fishBest, pets:vpets||[], tank:vtank, cabs: await cabsFor(id, list), room:0, raid: await api.raidStatus().catch(()=>null)};
+    VISIT = {p, list, info:h, garden:garden||[], fishBest, pets:vpets||[], tank:vtank, flora:vflora||[], cabs: await cabsFor(id, list), room:0, raid: await api.raidStatus().catch(()=>null)};
     renderVisit();
   }catch(e){
     console.error('집 구경 오류', e);
@@ -7000,7 +7087,7 @@ function renderVisit(){
   if(!VISIT) return;
   const {p, list, info, cabs} = VISIT, names = (info.room_names && info.room_names.length) ? info.room_names : ['거실'];
   const cur = roomOf(p.total_minutes, info.room_blocks||0);
-  const hasGarden = gardenSlots(p.total_minutes) > 0, hasTank = !!(VISIT.tank && VISIT.tank.fish && VISIT.tank.fish.length);
+  const hasGarden = gardenSlots(p.total_minutes) > 0 || (VISIT.flora||[]).length > 0, hasTank = !!(VISIT.tank && VISIT.tank.fish && VISIT.tank.fish.length);
   document.getElementById('visitTabs').innerHTML = (names.length>1 || hasGarden || hasTank)
     ? names.map((n,k)=>`<button class="rtab ${k===VISIT.room?'on':''}" data-vroom="${k}">${esc(n)}</button>`).join('')
       + (hasTank ? `<button class="rtab garden-tab ${VISIT.room==='k'?'on':''}" data-vroom="k">🐠 어항</button>` : '')
@@ -7010,7 +7097,9 @@ function renderVisit(){
   room.parentElement.hidden = outside; vg.hidden = !outside;
   if(VISIT.room==='g'){
     const blooms = VISIT.garden.filter(x=>x.stage==='bloom').length;
-    vg.innerHTML = gardenBedHTML(VISIT.garden, p.total_minutes, false)
+    const fl = VISIT.flora || [];
+    vg.innerHTML = (fl.length ? `<h4 class="tank-title">🌸 ${esc(p.display_name)}님의 꽃 전시 <span class="small">${fl.length}송이</span></h4>${fshowHTML(fl, p.display_name)}<h4 class="tank-title farm-title">🌱 텃밭</h4>` : '')
+      + (gardenSlots(p.total_minutes) > 0 ? gardenBedHTML(VISIT.garden, p.total_minutes, false) : '')
       + `<p class="small" style="text-align:center;margin:.5rem 0 0">${VISIT.garden.length ? `화단에서 ${VISIT.garden.length}송이가 자라는 중이에요${blooms?` · 활짝 핀 꽃 ${blooms}송이`:''}` : '아직 아무것도 안 심었어요'}</p>`;
   } else if(VISIT.room==='k'){
     vg.innerHTML = `<h4 class="tank-title">🐠 ${esc(p.display_name)}님의 어항 <span class="small">${VISIT.tank.fish.length}마리</span></h4>${tankHTML(VISIT.tank, p.display_name)}`;
@@ -7506,6 +7595,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-14 판 ⑤</p>
+<p class="site-ver">마감의 숲 · 10-14 판 ⑥</p>
 </body>
 </html>
