@@ -4306,8 +4306,9 @@ try{ const g = localStorage.getItem('majam-garden'); inGarden = g === '1'; inTan
 const saveGardenTab = () => { try{ localStorage.setItem('majam-garden', inTank?'t':inGarden?'1':'0'); }catch(e){} };
 let FSHOW = null;   // 🌸 전시 중인 꽃 [{code, harvested}] — 서버 함수가 아직 없으면 null
 const FSHOW_NEED = {wild:25, garden:15, secret:3}, FSHOW_MAX = 12;   // flowershow.sql 과 같아야 해요
+let GARDEN_AT = null;
 async function refreshGarden(){
-  try{ const [g, d] = await Promise.all([api.garden('me'), api.gardenDex()]); GARDEN = g||[]; GDEX = (d && d.length) ? d : GDEX; }
+  try{ const [g, d] = await Promise.all([api.garden('me'), api.gardenDex()]); GARDEN = g||[]; GDEX = (d && d.length) ? d : GDEX; GARDEN_AT = new Date(); }
   catch(e){ GARDEN = []; }
   try{ FSHOW = (await api.flowerShowMine()) || []; }catch(e){ FSHOW = null; }
 }
@@ -4410,7 +4411,7 @@ function renderGarden(){
       ? `<button class="mini" data-seeds="1" ${ME.coins<SEED_PRICE?'disabled':''}>1봉투 · 🪙 ${SEED_PRICE}</button><button class="mini" data-seeds="5" ${ME.coins<SEED_PRICE*5?'disabled':''}>5봉투 · 🪙 ${SEED_PRICE*5}</button>`
       : `<span class="small">🏘️ 광장에 꽃집이 지어지면 씨앗을 살 수 있어요</span>`) + `</div>`;
   const head = n
-    ? `<p class="small garden-lead">${STAGES[stageIdx(ME.total_minutes)].name} 화단 ${n}칸 · 작업실에 있는 동안 자라고, 안 와도 시들지 않아요. 뭐가 필지는 피어 봐야 알아요!</p>`
+    ? `<p class="small garden-lead">${STAGES[stageIdx(ME.total_minutes)].name} 화단 ${n}칸 · 작업실에 있는 동안 자라고, 안 와도 시들지 않아요. 뭐가 필지는 피어 봐야 알아요!${GARDEN_AT ? ` <span class="small" title="마당을 보고 있으면 15초마다 새로 받아요">· 🔄 ${GARDEN_AT.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})} 기준</span>` : ''}</p>`
     : `<p class="small garden-lead">${STAGES[1].name}${jo(STAGES[1].name,'이','가')} 되면 마당에 화단이 생겨요. 조금만 더 작업실에 있어 볼까요?</p>`;
   box.innerHTML = fshowSectionHTML(prevOpen) + `<h3 class="farm-title">🌱 내 텃밭</h3>` + head + seedRow + (n ? gardenBedHTML(GARDEN, ME.total_minutes, true) : '') + gardenDexHTML();
 }
@@ -6876,6 +6877,7 @@ document.addEventListener('click', e=>{
 });
 
 function goTab(b, e){
+  setTimeout(liveGarden, 150);   // (⑦) 우리 집으로 돌아오면 꽃밭 시간 바로 갱신
   if(!b) return; e = e || {};
   const same = b.getAttribute('aria-selected')==='true';
   document.querySelectorAll('.tabs button, #adminTabBtn').forEach(x=>{ x.setAttribute('aria-selected', x===b); x.classList.toggle('on', x===b); });
@@ -7272,20 +7274,22 @@ async function start(){
 
 /* 🌷 꽃밭 실시간 갱신 (10-14 ⑤) — 새로고침 없이도 자란 시간이 반영되게
    다른 갱신이 실패·지연돼도 따로 돌고, 방은 안 건드려서(끌기 중에도) 꽃밭 칸만 다시 그려요 */
-let LIVE_GARDEN_BUSY = false;
+let LIVE_GARDEN_BUSY = false, LIVE_GARDEN_AT = 0;
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej)=>setTimeout(()=>rej(new Error('시간 초과')), ms))]);
 async function liveGarden(){
-  if(DEMO || LIVE_GARDEN_BUSY || typeof ME==='undefined' || !ME) return;
+  if(DEMO || typeof ME==='undefined' || !ME) return;
+  if(LIVE_GARDEN_BUSY && Date.now() - LIVE_GARDEN_AT < 30000) return;   // 요청이 걸려 잠금이 안 풀려도 30초 뒤엔 다시 해요
   const home = document.getElementById('tab-home');
   if(!inGarden || !home || home.hidden || document.hidden) return;
-  LIVE_GARDEN_BUSY = true;
+  LIVE_GARDEN_BUSY = true; LIVE_GARDEN_AT = Date.now();
   try{
-    const m = await api.me(); if(m) ME = m;
-    await refreshGarden();
+    const m = await withTimeout(api.me(), 15000); if(m) ME = m;
+    await withTimeout(refreshGarden(), 15000);
     if(inGarden && !home.hidden){ const box = document.getElementById('gardenBox'); if(box && !box.hidden) renderGarden(); else renderMyHouse(); }
   }catch(e){ console.warn('꽃밭 갱신 실패', e); }
   finally{ LIVE_GARDEN_BUSY = false; }
 }
-setInterval(liveGarden, 20000);
+setInterval(liveGarden, 15000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) liveGarden(); });
 addEventListener('focus', ()=>liveGarden());
 
@@ -7595,6 +7599,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-14 판 ⑥</p>
+<p class="site-ver">마감의 숲 · 10-14 판 ⑦</p>
 </body>
 </html>
