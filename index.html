@@ -5353,14 +5353,14 @@ const PETS_DEFAULT = [
   ['fairy_draft','원고지의 요정','fairy','연필 하나로 원고지를 가득 채워요. 지우개는 의자로 써요'],
 ].map(([code,name,tier,about],i)=>({code,name,tier,about,sort:i+1}));
 const PET_WALK = [
-  '{n} 수풀 쪽을 보고 꼬리를 흔들어요.', '{n} 코를 킁킁거리며 어딘가 가고 싶어 해요.', '{n} 신발을 물고 와서 산책 가자고 졸라요.',
+  '{n} 수풀 쪽을 보고 꼬리를 흔들어요.', '{n} 코를 킁킁거리며 어딘가 가고 싶어 해요.', '{n} 신발을 가져와서 산책 가자고 졸라요.',
   '{n} 창밖을 보며 귀를 쫑긋 세웠어요.', '{n} 뭔가 반짝이는 걸 발견한 것 같아요!', '{n} 문 앞에서 빙글빙글 돌고 있어요.',
 ];
 const PET_WALK_FAIRY = [
   '{n} 창가에 앉아 반짝이는 가루를 흩날리고 있어요.', '{n} 어딘가에서 이야기 냄새가 난대요!', '{n} 날개를 파닥이며 바깥을 가리켜요.',
   '{n} 콧노래를 흥얼거리며 빙글빙글 날아다녀요.', '{n} 작은 목소리로 "같이 나가요" 하고 속삭여요.',
 ];
-const PET_CHOICE = [['🌿 수풀로','씨앗을 자주 물어 와요'], ['💧 물가로','별조각을 자주 물어 와요'], ['🏘️ 마을로','코인이나 소품을 물어 와요']];
+const PET_CHOICE = [['🌿 수풀로','씨앗을 자주 가져와요'], ['💧 물가로','별조각을 자주 가져와요'], ['🏘️ 마을로','코인이나 소품을 가져와요']];
 const PET_PLACE = ['수풀', '물가', '마을'];
 const petOf = code => PETS_DEFAULT.find(p=>p.code===code) || {code, name:'꼬마 동물', tier:'common', about:''};
 const petLevel = a => PET_LV.filter(t=>t<=a).length;
@@ -5417,7 +5417,7 @@ function renderPets(){
   }
   const tiers = ['common','rare','legend','fairy'], traces = +(P.traces||0);
   const dexHTML = tiers.map(t=>`<h4 class="pet-tier"><span class="rb ${t}">${t==='fairy'?'✨ ':''}${PET_TIER[t].label}</span> <span class="small">${t==='fairy'
-      ? `도감 열기 ✨요정의 흔적 1개 · 입양 🪙 ${PET_TIER[t].adopt.toLocaleString()}</span></h4><p class="small fairy-note">요정의 흔적은 펫이 <b>친밀도 Lv.10</b>이 되면 하나 생기고, 산책하다 아주 가끔 물어 오기도 해요. 지금 가진 흔적 <b>✨ ${traces}개</b>`
+      ? `도감 열기 ✨요정의 흔적 1개 · 입양 🪙 ${PET_TIER[t].adopt.toLocaleString()}</span></h4><p class="small fairy-note">요정의 흔적은 펫이 <b>친밀도 Lv.10</b>이 되면 하나 생기고, 산책하다 아주 가끔 가져오기도 해요. 지금 가진 흔적 <b>✨ ${traces}개</b>`
       : `도감 열기 🪙 ${PET_TIER[t].open.toLocaleString()} · 입양 🪙 ${PET_TIER[t].adopt.toLocaleString()}`}</${t==='fairy'?'p':'span></h4'}><div class="pet-dex ${t==='fairy'?'fairy-dex':''}">`
     + PETS_DEFAULT.filter(s=>s.tier===t).map(s=>{
       const has = dex.has(s.code), mine = ALL.filter(p=>p.code===s.code).length, grownMine = ALL.some(p=>p.code===s.code && petGrown(petLevel(p.affection))), full = (P.pets||[]).length >= P.slots;
@@ -5471,7 +5471,7 @@ document.addEventListener('click', e=>{
     const r = await api.petEvent(p.id, k);
     await Promise.all([refreshPets(), refreshMine()]); renderTop(); renderPets(); renderBag(); renderMyHouse();
     const grewNow = !petGrown(petLevel(p.affection)) && petGrown(petLevel(p.affection+2));
-    petParty(r.trace?'✨':grewNow?'🌱':'🐾', `${grewNow?`${p.name}${jo(p.name,'이','가')} 산책하다 훌쩍 자랐어요!\n`:''}${p.name}${jo(p.name,'이','가')} ${PET_PLACE[k]}에서 돌아왔어요!\n입에 ${petRewardText(r)}${jo(petRewardText(r).slice(-1),'을','를')} 물고 왔어요.${r.trace?`\n\n✨ 그런데 털에 반짝이는 가루가… 「요정의 흔적」${r.trace>1?` ${r.trace}개`:''}도 묻혀 왔어요!`:''}\n\n다음 산책은 ${PET_EVENT_HOURS}시간 뒤예요.`);
+    petParty(r.trace?'✨':grewNow?'🌱':'🐾', `${grewNow?`${p.name}${jo(p.name,'이','가')} 산책하다 훌쩍 자랐어요!\n`:''}${p.name}${jo(p.name,'이','가')} ${PET_PLACE[k]}에서 돌아왔어요!\n${petRewardText(r)}${jo(petRewardText(r).slice(-1),'을','를')} 가져왔어요.${r.trace?`\n\n✨ 그런데 털에 반짝이는 가루가… 「요정의 흔적」${r.trace>1?` ${r.trace}개`:''}도 묻혀 왔어요!`:''}\n\n다음 산책은 ${PET_EVENT_HOURS}시간 뒤예요.`);
   });
   const pd = e.target.closest('[data-petdex]');
   if(pd) return act(async()=>{
@@ -7062,10 +7062,9 @@ document.querySelector('.shop-tabs').addEventListener('click', e=>{
 async function openVisit(id){
   logTabOnce('visit');
   const p = VILLAGE.find(x=>x.discord_id===id); if(!p) return;
-  if(isMe(p)){ document.getElementById('tab-home').scrollIntoView({behavior:'smooth'}); return; }
   const dlg = document.getElementById('visit'), st = stageIdx(p.total_minutes);
-  document.getElementById('visitTitle').textContent = `${p.display_name}님의 ${STAGES[st].name}`;
-  document.getElementById('visitSub').textContent = p.in_voice ? '지금 작업 중이에요. 조용히 구경하고 나와요 🤫' : (p.decay ? decayLabel(p.decay, st) : '집주인은 지금 자리를 비웠어요.');
+  document.getElementById('visitTitle').textContent = isMe(p) ? `내 ${STAGES[st].name} · 이웃 시점` : `${p.display_name}님의 ${STAGES[st].name}`;
+  document.getElementById('visitSub').textContent = isMe(p) ? '이웃이 내 집을 구경하면 이렇게 보여요 👀' : p.in_voice ? '지금 작업 중이에요. 조용히 구경하고 나와요 🤫' : (p.decay ? decayLabel(p.decay, st) : '집주인은 지금 자리를 비웠어요.');
   const room = document.getElementById('visitRoom');
   document.getElementById('visitTabs').innerHTML = ''; document.getElementById('visitDex').textContent = '';
   document.getElementById('visitGarden').hidden = true; room.parentElement.hidden = false;
@@ -7123,10 +7122,10 @@ function renderVisit(){
   const fg = document.getElementById('visitGift'), fn = flowerCount(FLOWERS_ON[p.discord_id]);
   const vp = document.getElementById('visitPets'), mine = isMe(p);
   vp.innerHTML = (VISIT.pets||[]).map((x,i)=>`<div class="tpet"><div class="stage" id="tpet${i}">${petArt(x.pet_code, x.sad?'sad':'ok', '', petGrown(x.level||1))}</div><span class="nm">${esc(x.name)} <span class="small">Lv.${x.level}</span></span>${mine?'':`<button class="mini ask-yes" data-treat="${i}">🍪 간식 주기</button>`}</div>`).join('');
-  fg.innerHTML = `<button class="mini ask-yes" data-giftto="${esc(p.discord_id)}" data-giftname="${esc(p.display_name)}">💐 꽃 보내기</button><span class="small">${fn?`오늘 받은 꽃 ${fn}송이 · 집 앞에 피어 있어요`:'꽃을 보내면 집 앞에 하루 동안 피어요'}</span>`;
+  fg.innerHTML = mine ? `<button class="mini ask-yes" data-gohome="1">🏡 우리 집 꾸미러 가기</button>` : `<button class="mini ask-yes" data-giftto="${esc(p.discord_id)}" data-giftname="${esc(p.display_name)}">💐 꽃 보내기</button><span class="small">${fn?`오늘 받은 꽃 ${fn}송이 · 집 앞에 피어 있어요`:'꽃을 보내면 집 앞에 하루 동안 피어요'}</span>`;
 }
 function renderRaidBtn(){
-  const el = document.getElementById('visitRaid'); if(!VISIT || !VISIT.raid){ el.innerHTML=''; return; }
+  const el = document.getElementById('visitRaid'); if(!VISIT || !VISIT.raid || isMe(VISIT.p)){ el.innerHTML=''; return; }
   const {used, owners} = VISIT.raid, left = Math.max(0, RAID_PER_DAY - used), done = (owners||[]).includes(VISIT.p.discord_id);
   el.innerHTML = `<button class="raid-btn" id="raidBtn" ${(!left||done)?'disabled':''}>🍑 몰래 서리하기</button>
     <span class="small">${done ? '오늘은 이 집 마당을 이미 다녀왔어요' : left ? `오늘 남은 서리 ${left}번 · 성공하면 과일 1~5코인어치` : '오늘 서리는 다 했어요. 내일 또 와요'}</span>`;
@@ -7160,6 +7159,7 @@ document.getElementById('visitTabs').addEventListener('click', e=>{
   const b = e.target.closest('[data-vroom]'); if(!b || !VISIT) return;
   const v = b.dataset.vroom; VISIT.room = (v==='g' || v==='k') ? v : +v; renderVisit();
 });
+document.getElementById('visitGift').addEventListener('click', e=>{ if(!e.target.closest('[data-gohome]')) return; document.getElementById('visit').close(); const b = document.querySelector('.tabs [data-tab="home"]') || [...document.querySelectorAll('.tabs button')].find(x=>x.textContent.includes('우리 집')); if(b) b.click(); });
 document.getElementById('visitClose').onclick = ()=>document.getElementById('visit').close();
 document.getElementById('visit').addEventListener('click', e=>{ if(e.target.id==='visit') e.target.close(); });
 
@@ -7494,7 +7494,7 @@ const TOUR = [
   {tab:'lotto', el:'#lottoBox', title:'🎟️ 마감 복권', text:'한 장 🪙30, 하루 5장까지 긁을 수 있어요.\n같은 그림 3개가 나오면 당첨! 이번 주 전설 가구도 나와요.'},
   {tab:'tree', el:'#treeBox', title:'🌳 세계수', text:'작업실에 있으면 주머니에 물방울이 모이고, 세계수 둘레에 떠오르는 물방울도 주울 수 있어요.\n다 같이 물을 줘서 나무가 다 자라면, 물을 준 주민 모두 코인을 받아요.'},
   {tab:'lake', el:'#lakeBox', title:'🎣 호숫가', text:'어망을 던져 두고 1시간 뒤에 걷으면 물고기가 1~2마리 걸려요.\n처음 잡거나 내 기록보다 크면 코인을 더 받아요. 미끼를 달면 귀한 물고기가 더 잘 나와요.'},
-  {tab:'pet', el:'#petBox .pet-yard', title:'🐾 펫', text:'광장에 보호소가 생기면 도감 칸을 열고 펫을 입양할 수 있어요.\n밥 주고, 쓰다듬고, 놀아 주면 친밀도가 올라 코인을 받고, 다 크면 모습도 바뀌어요. 산책을 보내면 선물을 물어 와요.\n마당 칸이 꽉 차면 🏡 펫 숙소에서 쉬게 할 수 있어요.'},
+  {tab:'pet', el:'#petBox .pet-yard', title:'🐾 펫', text:'광장에 보호소가 생기면 도감 칸을 열고 펫을 입양할 수 있어요.\n밥 주고, 쓰다듬고, 놀아 주면 친밀도가 올라 코인을 받고, 다 크면 모습도 바뀌어요. 산책을 보내면 선물을 가져와요.\n마당 칸이 꽉 차면 🏡 펫 숙소에서 쉬게 할 수 있어요.'},
   {tab:'gacha', el:'.gacha-inner', title:'🎁 담당자의 보따리', text:'코인으로 보따리를 열면 상점에 없는 소품이 나와요. 열 때마다 ✨ 별조각이 모이고, 별조각으로 갖고 싶은 소품을 바꿀 수도 있어요.'},
   {el:'#mailBtn', title:'우편함', text:'이웃이 보낸 꽃이나 선물 소식은 여기 모여요.'},
   {el:'#modeBtn', title:'낮·밤 화면', text:'누를 때마다 자동 → 낮 → 밤으로 바뀌어요. 자동이면 시간에 맞춰 숲에 아침과 밤이 와요.'},
@@ -7599,6 +7599,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-14 판 ⑦</p>
+<p class="site-ver">마감의 숲 · 10-14 판 ⑧</p>
 </body>
 </html>
