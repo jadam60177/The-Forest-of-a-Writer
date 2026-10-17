@@ -1779,6 +1779,10 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 .farm-title{margin-top:1.1rem}
 #visitGarden .fshow{grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}
 @media (max-width:600px){ .fshow{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))} #visitGarden .fshow{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))} }
+
+/* 🍰 탁상 소품 (10-17) — 테이블 위에 작게 올라가요 */
+.furn.ontable{background:none!important;box-shadow:none!important;transform:translateY(-16%) scale(.56);transform-origin:50% 70%}
+.furn.ontable .fimg,.furn.ontable .emo,.furn.ontable svg{filter:drop-shadow(0 2px 1px rgba(60,35,15,.5))}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -3862,12 +3866,21 @@ const sizeText = it => it.w===1&&it.h===1 ? '1칸' : `${it.w}×${it.h}칸`;
 const isMe = p => DEMO ? p.discord_id==='me' : p.discord_id===supaApi.myId();
 
 // 카페트는 바닥 층이라 가구 밑에 깔려요. 같은 층끼리만 안 겹치면 돼요
+/* 🍰 탁상 소품 (10-17): 음식·음료 1칸 소품은 식탁류 위에 올릴 수 있어요 (placeitem 규칙은 tabletop.sql 과 같아요) */
+const TABLE_SURFACE = new Set(['table','roundtable','lowtable','teatable']);   // 식탁 · 원탁 · 좌식 탁자 · 차 마시는 좌탁
+const TABLE_FOOD = new Set(['coffee','tea','cookie','chestnut','sweetpotato','fishcake','croissant','baguette','bagel','waffle','pancake','donut','cake','pie','pudding','birthdaycake','mooncake',
+  'honeypot','teapot','cupcake','dango','milk','juice','lemon','bubbletea','strawberry','parfait','bread','muffin','jam','teacup','teabag','teacookie','rollcake','teatray',
+  'cottoncandy','candyapple','takoyaki','thermos']);
+const tableUnder = (f, list) => TABLE_FOOD.has(f.item_code) ? list.find(g => g.id!==f.id && TABLE_SURFACE.has(g.item_code) && (g.room||0)===(f.room||0) && f.r>=g.r && f.r<g.r+g.h && f.c>=g.c && f.c<g.c+g.w) : null;
+const topsOn = (t, list) => TABLE_SURFACE.has(t.item_code) ? list.filter(g => g.id!==t.id && TABLE_FOOD.has(g.item_code) && (g.room||0)===(t.room||0) && g.r>=t.r && g.r<t.r+t.h && g.c>=t.c && g.c<t.c+t.w) : [];
 const layerOf = code => { const it = itemOf(code); return it.layer || (FLOOR_CODES.has(code) ? 'floor' : 'furniture'); };
 function canPlaceIn(list,r,c,w,h,cur,code){
   if(r<0||c<0||c+w>cur.cols||r+h>cur.rows+EXTRA_ROWS) return false;
   if(r+h>cur.rows && c+w>(cur.extraW||0)) return false;   // 증축 칸은 연 만큼만
   const L = code ? layerOf(code) : 'furniture';
-  return !list.some(f => layerOf(f.item_code)===L && r < f.r+f.h && f.r < r+h && c < f.c+f.w && f.c < c+w);
+  const hits = list.filter(f => layerOf(f.item_code)===L && r < f.r+f.h && f.r < r+h && c < f.c+f.w && f.c < c+w);
+  if(!hits.length) return true;
+  return !!code && TABLE_FOOD.has(code) && w===1 && h===1 && hits.length===1 && TABLE_SURFACE.has(hits[0].item_code);   // 식탁 위엔 한 칸에 하나씩
 }
 function footprint(code){ const it=itemOf(code); return rotated%2 ? {w:it.h,h:it.w} : {w:it.w,h:it.h}; }
 
@@ -4039,10 +4052,12 @@ function roomHTML(list, cur, {editable, cabs={}}){
       ? `<button class="tile ${cls} ${pv}" style="${pos}" data-r="${r}" data-c="${c}" aria-label="빈 칸 ${r+1}행 ${c+1}열"></button>`
       : `<span class="tile ${cls}" style="${pos}"></span>`;
   }
-  [...list].sort((a,b)=>(layerOf(a.item_code)==='floor'?0:1)-(layerOf(b.item_code)==='floor'?0:1)).forEach(f=>{
+  const rankOf = g => layerOf(g.item_code)==='floor' ? 0 : tableUnder(g, list) ? 2 : 1;
+  [...list].sort((a,b)=>rankOf(a)-rankOf(b)).forEach(f=>{
     const it = itemOf(f.item_code), big = Math.min(f.w,f.h)>=2, floor = layerOf(f.item_code)==='floor';
     const onRug = !floor && list.some(g => layerOf(g.item_code)==='floor' && f.r < g.r+g.h && g.r < f.r+f.h && f.c < g.c+g.w && g.c < f.c+f.w);
-    const style = `grid-row:${f.r+1}/span ${f.h};grid-column:${f.c+1}/span ${f.w}` + (fimg(it) ? (floor ? ';z-index:0' : `;z-index:${2+f.r+f.h}`) : '');
+    const onTable = tableUnder(f, list);
+    const style = `grid-row:${f.r+1}/span ${f.h};grid-column:${f.c+1}/span ${f.w}` + (fimg(it) ? (floor ? ';z-index:0' : `;z-index:${2+f.r+f.h}`) : '') + (onTable ? `;z-index:${2+onTable.r+onTable.h+1}` : '');
     if(CAPACITY[f.item_code]){
       const n = (cabs[f.id]||[]).length;
       html += editable
@@ -4062,7 +4077,7 @@ function roomHTML(list, cur, {editable, cabs={}}){
     const rs = rot%2 ? `;--rw:calc(${f.w}*var(--tile) + ${f.w-1}*3px - 4px);--rh:calc(${f.h}*var(--tile) + ${f.h-1}*3px - 4px)` : '';
     // 세로로 긴 그림 가구(1×2 등)는 키를 칸에 꽉 맞추고, 그림이 통통하면 옆으로 조금 삐져나와요 (10-13 옷장 제보)
     const tallfit = !!fimg(it) && f.h>f.w && !stretch && !turn && !wallH && !tile && !floor && !TURN_IMG.has(f.item_code);
-    const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${rot?'rot r'+rot:''}`;
+    const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${rot?'rot r'+rot:''}`;
     const art = wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
     html += editable
@@ -6384,7 +6399,7 @@ function setHint(){
   if(!selected){ el.textContent = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구는 끌어서 옮기고(폰은 꾹 눌렀다가 끌기), 그냥 누르면 가방으로 돌아가요.'; return; }
   const it = itemOf(selected), fp = footprint(selected);
   const canRot = true;   // 진열장도 돌릴 수 있어요 (칸 배치만 세로로 바뀌어요)
-  el.innerHTML = `<span class="hint-ico r${rotated}">${ico(it)}</span> ${esc(it.name)}(${fp.w}×${fp.h}칸)${rotated?` · ${ROT_NAME[rotated]}`:''} · 놓을 자리의 왼쪽 위 칸을 눌러 주세요.` +
+  el.innerHTML = `<span class="hint-ico r${rotated}">${ico(it)}</span> ${esc(it.name)}(${fp.w}×${fp.h}칸)${rotated?` · ${ROT_NAME[rotated]}`:''} · 놓을 자리의 왼쪽 위 칸을 눌러 주세요.` + (TABLE_FOOD.has(selected) ? ' 🍰 식탁·원탁·좌탁 위에도 올릴 수 있어요!' : '') +
     (canRot ? ` <button class="mini" id="rotBtn">↻ 돌리기</button>` : '');
 }
 
@@ -6738,7 +6753,10 @@ document.addEventListener('click', e=>{
   const fu = e.target.closest('.furn[data-pid]');
   if(fu && Date.now() - FDRAG_AT < 450) return;   // 끌어서 옮긴 직후의 클릭은 치우기로 안 쳐요
   if(fu) return act(async()=>{
-    await api.remove(+fu.dataset.pid); await refreshMine(); renderMyHouse(); renderBag();
+    const pid = +fu.dataset.pid, f = PLACED.find(p=>p.id===pid), tops = f ? topsOn(f, PLACED) : [];
+    for(const t of tops) await api.remove(t.id);   // 🍰 테이블을 치우면 위에 올린 소품은 먼저 가방으로
+    await api.remove(pid); await refreshMine(); renderMyHouse(); renderBag();
+    if(tops.length) toast(`🍰 위에 놓인 소품 ${tops.length}개도 가방으로 돌아갔어요`);
   });
 
   const tile = e.target.closest('#room .tile[data-r]');
@@ -6953,6 +6971,7 @@ roomEl.addEventListener('pointerdown', e=>{
   if(selected || busy || e.button>0) return;
   const el = e.target.closest('.furn[data-pid]'); if(!el) return;
   const f = PLACED.find(p=>p.id===+el.dataset.pid); if(!f) return;
+  if(topsOn(f, PLACED).length) return;   // 🍰 위에 소품이 놓인 테이블은 끌지 않고, 누르면 소품째 가방으로
   const r = el.getBoundingClientRect();
   FDRAG = {el, f, x0:e.clientX, y0:e.clientY, on:false, mouse:e.pointerType==='mouse', id:e.pointerId,
     dr: Math.min(f.h-1, Math.max(0, Math.floor((e.clientY-r.top)/r.height*f.h))), dc: Math.min(f.w-1, Math.max(0, Math.floor((e.clientX-r.left)/r.width*f.w)))};
@@ -7599,6 +7618,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-14 판 ⑧</p>
+<p class="site-ver">마감의 숲 · 10-17 판 ①</p>
 </body>
 </html>
