@@ -3434,8 +3434,8 @@ const demoApi = (() => {
       const t = st.tree = st.tree || {no:1, color:['water','blossom','moon','gold','maple'][Math.floor(Math.random()*5)], goal:1800, reward:700, poured:1210, givers:new Set(['moon','dl','green','dawn','pencil']), mine:0};
       const m = st.me; if(m.dropMark==null){ m.dropMark = m.total_minutes; m.drops = m.drops||0; m.floatMark = Date.now(); m.floatWait = 4; m.floatToday = 0; }
       const w = Math.floor((m.total_minutes - m.dropMark)/TREE_WORK_MIN); if(w>0){ m.drops += w; m.dropMark += w*TREE_WORK_MIN; }
-      const h = Math.floor((Date.now()-m.floatMark)/3600e3); if(h>0){ let a=0; for(let i=0;i<Math.min(h,5);i++) a += 2+Math.floor(Math.random()*4); m.floatWait = Math.min(TREE_FLOAT_MAX, m.floatWait+a); m.floatMark += h*3600e3; }
-      if(m.floatDay!==this.fday()){ m.floatDay = this.fday(); m.floatToday = 0; }
+      const h = Math.floor((Date.now()-m.floatMark)/(15*60e3)); if(h>0){ m.floatWait = Math.min(TREE_FLOAT_MAX, TREE_FLOAT_DAY - m.floatToday, m.floatWait + h); m.floatMark += h*15*60e3; }   // (10-20) 미리보기는 15분마다 1개
+      if(m.floatDay!==this.fday()){ m.floatDay = this.fday(); m.floatToday = 0; m.floatWait = 1 + Math.floor(Math.random()*2); }
       return t;
     },
     async tree(){ const t = this.tick2(), m = st.me;
@@ -4905,7 +4905,7 @@ function renderTree(){
     <div class="panel tree-help">
       <h3 style="margin:0 0 .3rem">💧 물방울 모으는 법</h3>
       <p class="small" style="margin:0 0 .3rem">🎧 작업실에 ${TREE_WORK_MIN}분 있을 때마다 주머니에 1방울씩 저절로 모여요.</p>
-      <p class="small" style="margin:0 0 .3rem">✨ 세계수 둘레에 1시간마다 물방울이 2~5개 떠올라요. 누르면 물방울 1개와 🪙 ${TREE_DROP_COIN}코인! 안 주우면 ${TREE_FLOAT_MAX}개까지 기다려 줘요. (하루 ${TREE_FLOAT_DAY}개까지 · 오늘 ${TREE.float_today}개 주웠어요)</p>
+      <p class="small" style="margin:0 0 .3rem">✨ 세계수 둘레에 새벽 12시에 1~2개, 그 뒤로 10~20분마다 1개씩 물방울이 떠올라요. 누르면 물방울 1개와 🪙 ${TREE_DROP_COIN}코인! 안 주우면 ${TREE_FLOAT_MAX}개까지 기다려 줘요. (하루 ${TREE_FLOAT_DAY}개까지 · 오늘 ${TREE.float_today}개 주웠어요)</p>
       <p class="small" style="margin:0">🌳 다 같이 물을 부어 세계수가 다 자라면, 그 나무에 한 방울이라도 준 주민 모두에게 🪙 ${TREE.reward}코인이 도착해요. 그리고 새 씨앗이 심겨요.</p>
     </div>`;
   if(box._html !== html){ box.innerHTML = html; box._html = html; }
@@ -7814,6 +7814,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-20 판 ④</p>
+<p class="site-ver">마감의 숲 · 10-20 판 ⑤</p>
 </body>
 </html>
