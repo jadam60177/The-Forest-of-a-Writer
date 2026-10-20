@@ -1783,6 +1783,43 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 /* 🍰 탁상 소품 (10-17) — 테이블 위에 작게 올라가요 */
 .furn.ontable{background:none!important;box-shadow:none!important;transform:translate(var(--tx,0%),var(--ty,-16%)) scale(var(--ts,.56));transform-origin:50% 70%}
 .furn.ontable .fimg,.furn.ontable .emo,.furn.ontable svg{filter:drop-shadow(0 2px 1px rgba(60,35,15,.5))}
+
+/* ❄️ 26 겨울 행사판 (10-20) */
+.winter-panel{background:linear-gradient(160deg,rgba(214,234,252,.16),rgba(120,160,215,.12)) ,var(--panel);border-color:rgba(190,222,255,.55)!important}
+.wb-head{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}.wb-head h3{margin:0}
+.wb-badge{font-size:.75rem;padding:.1rem .55rem;border-radius:999px;background:#CFE8FF;color:#21466E;font-family:"Jua",sans-serif}
+.winter-panel .bar.wb-bar{position:relative;height:16px;width:100%;max-width:none}.wb-bar>span{background:linear-gradient(90deg,#BFE3FF,#E9F6FF,#A9D2F7)!important}
+.wb-bar i{position:absolute;top:-3px;bottom:-3px;width:2px;background:rgba(255,255,255,.7);border-radius:2px}
+.wb-slots{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.5rem;margin:.9rem 0}
+.wb-slot{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.15rem;padding:.5rem .3rem;border-radius:14px;border:1px dashed rgba(190,222,255,.5);background:rgba(255,255,255,.05);font-size:.78rem;line-height:1.3}
+.wb-slot img{width:100%;max-width:120px;aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))}
+.wb-slot b{font-family:"Jua",sans-serif;font-size:.9rem;font-weight:400}
+.wb-slot span{opacity:.8}
+.wb-slot.open{border-style:solid;border-color:rgba(190,222,255,.8);background:rgba(200,230,255,.12)}
+.wb-slot.beyond{border-color:rgba(255,226,154,.6)}
+.wb-slot.beyond.open{background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.25),rgba(160,200,255,.1))}
+.wq{width:min(96px,90%);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-family:"Jua",sans-serif;font-size:2.4rem;
+  color:#DCEFFF;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.3),rgba(120,165,220,.25));border:2px dashed rgba(220,240,255,.7);box-shadow:inset 0 0 18px rgba(180,220,255,.3)}
+.wb-slot.beyond .wq{color:#FFE29A;border-color:rgba(255,226,154,.7)}
+@media (prefers-reduced-motion:no-preference){ .wb-slot.beyond:not(.open) .wq{animation:wqGlow 2.6s ease-in-out infinite} @keyframes wqGlow{50%{box-shadow:inset 0 0 18px rgba(255,226,154,.4),0 0 16px rgba(255,226,154,.45)}} }
+.wb-mine{border-top:1px solid var(--line);padding-top:.6rem;margin-top:.2rem}
+.wb-mine h4{margin:0 0 .4rem;font-family:"Jua",sans-serif;font-weight:400}
+.wb-mine-row{display:grid;grid-template-columns:1.6rem 1fr auto;align-items:center;gap:.1rem .5rem;padding:.35rem 0}
+.wb-mine-row .wm-ic{font-size:1.2rem;text-align:center}.wb-mine-row .wm-tx{display:flex;flex-direction:column;line-height:1.3}
+.wb-mine-row .wm-st{font-size:.82rem;white-space:nowrap}.wb-mine-row .mbar{grid-column:2/4;height:6px}
+.wb-mine-row.ok .wm-st{color:#9FE0B0}.wb-mine-row.secret{opacity:.75}
+.winter-tease{color:#CFE8FF}
+@media (max-width:700px){ .wb-slots{grid-template-columns:repeat(3,minmax(0,1fr))} }
+/* 🏷️ 눈꽃 이름표 */
+.house .nm.plate-snow,.wnm.plate-snow,.plate-chip.plate-snow{background:linear-gradient(#F6FCFF,#C3E0F5);color:#24476D;border-color:#6E95BD;text-shadow:none;
+  box-shadow:inset 0 3px 0 #fff,0 3px 0 #5A82AA,0 4px 8px rgba(0,0,0,.3)}
+.house .nm.plate-snow::before,.house .nm.plate-snow::after{background:#8DB8E0;box-shadow:none}
+.house.me .nm.plate-snow,.wnm.me.plate-snow{color:#1B5E9C}
+.plate-chip{display:inline-block;padding:.05rem .55rem;border-radius:7px;border:2px solid #4E321C;background:linear-gradient(#A0703F,#7A5230);color:#FFF3DC;font-family:"Jua",sans-serif;font-size:.85rem}
+.hs-btn.plate-btn{padding:.2rem .3rem}
+/* ❄️ 시즌 한정 펫 */
+.rb.season{background:linear-gradient(90deg,#E6F4FF,#BFDDF7,#E6F4FF);color:#24476D}
+.season-dex .wq-pet{width:72px;font-size:2rem;margin:0 auto}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -1919,6 +1956,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <section id="tab-plaza" hidden>
     <div class="panel" id="boardBox" style="margin-bottom:1rem"></div>
     <div class="panel truck-panel" id="truckBox" style="margin-bottom:1rem"></div>
+    <div class="panel winter-panel" id="winterBox" style="margin-bottom:1rem" hidden></div>
     <div class="panel plaza-panel" id="plazaWork" style="margin-bottom:1rem"></div>
     <div class="plaza-scene">
       <svg class="stars" data-stars preserveAspectRatio="none"></svg>
@@ -2202,6 +2240,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>/* (10-20 ③) jsdelivr 가 막히면 unpkg 에서 한 번 더 */ if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>');</script>
 <script>
 /* =========================================================
    마감의 숲
@@ -2897,6 +2936,14 @@ const HOUSE_STYLES = {
 const HOUSE_STYLE_FROM = 3;   // 통나무집(3)부터 스타일이 갈려요
 const styleSize = stage => stage>=9 ? 3 : stage>=7 ? 2 : stage>=5 ? 1 : 0;   // 통나무·흙벽돌 / 기와·벽돌 / 이층·저택 / 성
 
+/* ❄️ 26 겨울 행사 (10-20) — winter.sql 과 같아요 */
+let WINTER = null;   // get_winter() 결과 {code, goal, state, total, tiers(0~4), revealed, my_total, my_after, got, need}
+HOUSE_STYLES.winter26 = {name:'26 겨울', emoji:'⛄', about:'26 겨울 행사 한정 이글루 집', limited:true, sizes: HOUSE_STYLES.korean.sizes};
+const WINTER_TIER_OF_SIZE = [1,2,3,4];   // 통나무·흙벽돌 25% · 기와·벽돌 50% · 이층·저택 75% · 성 100%
+const WINTER_PCT = [0,25,50,75,100];
+// 한정 스타일은 마을이 그 크기의 집을 공개해야 입혀져요 (그 전엔 기본 모습)
+const styleUnlocked = (style, stage) => { const h = HOUSE_STYLES[style]; if(!h || !h.limited) return true;
+  return !!(WINTER && WINTER.code===style && (WINTER.tiers||0) >= WINTER_TIER_OF_SIZE[styleSize(stage)]); };
 const STYLE_PRICE = 800;   // housestyle.sql 의 buy_house_style 과 같아요
 let HOUSE_STYLE_OF = {};   // 이웃 집 스타일
 let HOUSE_LOOK_OF = {};    // 겉모습으로 고른 예전 단계 (houselook.sql)
@@ -3093,6 +3140,8 @@ const HOUSE_IMG_SCALE = 1.2;
 const STYLE_IMG = {"korean":[[640,497],[640,509],[640,487],[640,593]],"modern":[[640,486],[640,520],[640,601],[489,640]],"fantasy":[[640,601],[524,640],[450,640],[640,616]],"ancient":[[640,535],[640,574],[640,588],[617,640]]};   // house/스타일0~3.webp 크기 (통나무·흙벽돌 / 기와·벽돌 / 이층·저택 / 성)   // 그림 집은 풀밭 받침까지 있어서 조금 크게   // 단계별 집 크기 (움막 → 성으로 갈수록 커져요)
 // 업그레이드 그림 (흙벽돌·벽돌·저택 단계 = 4·6·8단계): house/스타일0b~2b.webp — 그림이 있는 스타일만 써요
 const STYLE_IMG_B = {"korean":[[640,484],[640,418],[640,464]],"modern":[[640,554],[640,541],[636,640]],"fantasy":[[572,640],[625,640],[479,640]],"ancient":[[640,516],[640,595],[640,570]]};
+STYLE_IMG.winter26 = [[640,588],[640,480],[637,640],[590,640]];   // house/winter260~263.webp
+STYLE_IMG_B.winter26 = [null, null, [553,640]];                       // house/winter262b.webp (저택만 따로)
 const styleSrc = (style, st) => { const z = styleSize(st), b = (st===4||st===6||st===8) && STYLE_IMG_B[style] && STYLE_IMG_B[style][z];
   return b ? {src:`${style}${z}b`, wh:b} : {src:`${style}${z}`, wh:STYLE_IMG[style][z]}; };
 const FIT_CACHE = {}; let FIT_SVG = null;
@@ -3117,7 +3166,7 @@ function houseSVG(stage, lit, decay=0, color=null, style=null){
   const W = lit ? '#FFCE5C' : 'var(--win-off)';
   const win = (x,y,w,h) => `<rect class="glowwin" x="${x}" y="${y}" width="${w}" height="${h}" rx="1.5" fill="${W}"/>`;
   let g = '';
-  const styled = !!(style && style!=='basic' && HOUSE_STYLES[style] && stage>=HOUSE_STYLE_FROM);
+  const styled = !!(style && style!=='basic' && HOUSE_STYLES[style] && stage>=HOUSE_STYLE_FROM && styleUnlocked(style, stage));
   // 집 그림: house 폴더 (기본 h0~h9, 스타일 korean0~3 …) · 불 꺼진 집은 살짝 어둡게
   const st = Math.min(Math.max(stage,0), HOUSE_IMG.length-1);
   const sty = styled ? styleSrc(style, st) : null;
@@ -3345,7 +3394,7 @@ const demoApi = (() => {
       const [p]=st.placed.splice(i,1); st.inv[p.item_code]=(st.inv[p.item_code]||0)+1;
       (st.cabs[p.id]||[]).forEach(x=>{ st.inv[x.item_code]=(st.inv[x.item_code]||0)+1; }); delete st.cabs[p.id]; persist();
     },
-    async houseStyles(){ if(!st.hsOthers){ const ks = Object.keys(HOUSE_STYLES); st.hsOthers = {}; st.others.forEach((o,i)=>{ if(i%2===0) st.hsOthers[o.discord_id] = ks[(i/2)%ks.length]; }); }
+    async houseStyles(){ if(!st.hsOthers){ const ks = Object.keys(HOUSE_STYLES).filter(k=>!HOUSE_STYLES[k].limited); st.hsOthers = {}; st.others.forEach((o,i)=>{ if(i%2===0) st.hsOthers[o.discord_id] = ks[(i/2)%ks.length]; }); }
       return Object.entries(st.hsOthers).map(([discord_id, house_style])=>({discord_id, house_style})); },
     async buyHouseStyle(k){ st.me.house_styles = st.me.house_styles || ['basic']; if(st.me.house_styles.includes(k)) fail('이미 갖고 있는 스타일이에요');
       if(st.me.coins < STYLE_PRICE) fail('코인이 부족해요'); st.me.coins -= STYLE_PRICE; st.me.house_styles = [...st.me.house_styles, k]; st.me.house_style = k; persist(); return st.me.coins; },
@@ -3556,6 +3605,27 @@ const demoApi = (() => {
     wstate(){ let w; try{ w = JSON.parse(localStorage.getItem('majam-demo-walk2')||'null'); }catch(e){} return w || {char:'w1', hair:'#4A3226', top:'#9EE0CC', bot:'#5A78A8'}; },
     async walkMine(){ return this.wstate(); },
     async walkSetLook(l){ try{ localStorage.setItem('majam-demo-walk2', JSON.stringify({char:l.char, hair:l.hair, top:l.top, bot:l.bot})); }catch(e){} },
+    // ❄️ 겨울 행사 (10-20) — 미리보기는 이 브라우저에만 저장
+    wstate(){ if(!st.winter) st.winter = {total:0, mine:0, after:0, got:[], force:false}; return st.winter; },
+    async winter(){ const W = this.wstate(), lib = st.plaza.find(b=>b.code==='library'), goal = 30000;
+      let start = null;
+      if(W.force) start = Date.now() - 1000;
+      else if(lib && lib.built_at){ const k = new Date(new Date(lib.built_at).getTime() + 9*3600e3); k.setUTCHours(0,0,0,0); start = k.getTime() + 864e5 - 9*3600e3; }
+      const state = start==null ? 'wait' : Date.now() < start ? 'soon' : 'open';
+      return {code:'winter26', goal, state, starts_at: start && new Date(start).toISOString(), ends_at:'2027-01-01T00:00:00+09:00',
+        total:W.total, givers: W.total ? 1 + Math.floor(W.total/2500) : 0, tiers:[.25,.5,.75,1].filter(f=>W.total >= Math.ceil(goal*f)).length,
+        revealed: W.total >= goal, my_total:W.mine, my_after:W.after, need:{plate:100, style:1000, after:500}, got:[...W.got]}; },
+    async giveWinter(n){ const W = this.wstate(), w = await this.winter(); if(w.state!=='open') fail('지금은 겨울 행사 기간이 아니에요');
+      if(!(n>=1)) fail('1코인 이상 보내 주세요'); if(st.me.coins < n) fail('코인이 부족해요');
+      st.me.coins -= n; const before = W.total; W.total += n; W.mine += n; W.after += Math.max(0, Math.min(n, before + n - 30000));
+      const fresh = [];
+      if(W.mine >= 100 && !W.got.includes('plate')){ W.got.push('plate'); st.me.nameplates = [...new Set([...(st.me.nameplates||['wood']), 'snow'])]; fresh.push('plate'); }
+      if(W.mine >= 1000 && !W.got.includes('style')){ W.got.push('style'); st.me.house_styles = [...new Set([...(st.me.house_styles||['basic']), 'winter26'])]; fresh.push('style'); }
+      if(W.after >= 500 && !W.got.includes('pet')){ W.got.push('pet'); const P = this.pstate(); if(!P.dex.includes('icefairy26')) P.dex.push('icefairy26');
+        P.pets.push({id:P.nid++, code:'icefairy26', name:'얼음 요정', affection:0, last_cared:new Date().toISOString(), fed:0, patted:0, played:0, day:this.fday(), event_at:new Date().toISOString(), lodge: P.pets.filter(x=>!x.lodge).length >= P.slots}); fresh.push('pet'); }
+      persist(); return {coins:st.me.coins, total:W.total, my_total:W.mine, my_after:W.after, new:fresh}; },
+    async setNameplate(k){ if(k!=='wood' && !(st.me.nameplates||[]).includes(k)) fail('아직 없는 이름표예요'); st.me.nameplate = k; persist(); },
+    async nameplates(){ return (st.winter && st.winter.total >= 100) ? st.others.filter((o,i)=>i%3===1).map(o=>({discord_id:o.discord_id, nameplate:'snow'})) : []; },
     // 🌸 꽃 전시 (10-14 ⑤) — 미리보기는 이 브라우저에만 저장
     fsget(){ try{ return JSON.parse(localStorage.getItem('majam-demo-fshow')||'[]'); }catch(e){ return []; } },
     fsset(a){ try{ localStorage.setItem('majam-demo-fshow', JSON.stringify(a)); }catch(e){} },
@@ -3829,6 +3899,10 @@ const supaApi = (() => {
     walkChannelClose(ch){ sb.removeChannel(ch); },
     async walkPing(x, y, look, say){ return ok(await sb.rpc('walk_ping', {p_x:x, p_y:y, p_look:look||null, p_say:say||null})); },   // 🗺️ 같이 걷기 튼튼판 (walkpos.sql, ㊳)
     async walkBye(){ try{ await sb.rpc('walk_bye'); }catch(e){} },
+    async winter(){ return ok(await sb.rpc('get_winter')); },                                          // ❄️ 겨울 행사 (winter.sql)
+    async giveWinter(n){ return ok(await sb.rpc('give_to_winter', {p_amount:n})); },
+    async setNameplate(k){ ok(await sb.rpc('set_nameplate', {p_plate:k})); },
+    async nameplates(){ return ok(await sb.rpc('get_nameplates')); },
     async flowerShowMine(){ return ok(await sb.rpc('get_my_flower_show')); },                         // 🌸 꽃 전시 (flowershow.sql)
     async flowerShowOf(id){ return ok(await sb.rpc('get_flower_show_of', {p_discord_id:id})); },
     async flowerShowAdd(code){ ok(await sb.rpc('flower_show_add', {p_code:code})); },
@@ -4028,7 +4102,7 @@ function renderVillage(){
     const status = p.in_voice ? `작업 중${today}` : dc ? decayLabel(dc, st) : `불 꺼짐${today}`;
     return `<button class="house ${p.in_voice?'lit':''} ${me?'me':''}" data-visit="${esc(p.discord_id)}" aria-label="${esc(me?'내 집':p.display_name)} 구경하기">
       <span class="hwrap">${houseSVG(lookStage(p.discord_id, st), p.in_voice, dc, p.house_color, lookStyle(p.discord_id, st, me ? ME.house_style : HOUSE_STYLE_OF[p.discord_id]))}${flowerYard(FLOWERS_ON[p.discord_id])}${PETS_ON[p.discord_id]?petArt(PETS_ON[p.discord_id].pet_code, PETS_ON[p.discord_id].sad?'sad':'ok', 'yardpet', petGrown(PETS_ON[p.discord_id].level||1)):''}</span>
-      <span class="nm">${me?'내 집':esc(p.display_name)}</span>
+      <span class="nm ${plateCls(p)}">${me?'내 집':esc(p.display_name)}</span>
       <span class="st">${status}</span>
     </button>`;
   }).join('');
@@ -4146,7 +4220,7 @@ function renderDeco(){
   const now = decoNow(); if(!DECO_PV) DECO_PV = {...now};
   const pv = DECO_PV, stg = stageIdx(ME.total_minutes), shown = pv.look==null ? stg : pv.look;
   const owned = new Set(['basic', ...(ME.house_styles||[])]);
-  const opts = [['basic','🏡','기본'], ...Object.entries(HOUSE_STYLES).map(([k,v])=>[k, v.emoji, v.name])];
+  const opts = [['basic','🏡','기본'], ...Object.entries(HOUSE_STYLES).filter(([k,v])=>!v.limited || owned.has(k)).map(([k,v])=>[k, v.emoji, v.name])];
   const colorChanged = false, styleChanged = pv.style !== now.style, lookChanged = pv.look !== now.look;
   const pc = PALETTE[pv.color];
   const btns = [
@@ -4164,7 +4238,11 @@ function renderDeco(){
       <p class="small" style="margin:0 0 .5rem">스타일을 눌러 보면 왼쪽 집에서 먼저 미리 볼 수 있어요. 마음에 들면 아래 버튼으로 정해요!</p>
       <div class="deco-row"><span class="paint-label">🏠 스타일</span>
         ${opts.map(([k,e,n])=>`<button class="hs-btn ${k===pv.style?'on':''} ${owned.has(k)?'':'locked'}" data-pv-style="${k}" title="${k==='basic'?'기본 모양':esc(HOUSE_STYLES[k].about)}">${e} ${n}${owned.has(k)?'':` · 🪙 ${STYLE_PRICE}`}</button>`).join('')}
-              ${shown < HOUSE_STYLE_FROM ? `<span class="small" style="display:block;width:100%">스타일은 ${STAGES[HOUSE_STYLE_FROM].name}부터 모양이 달라져요.</span>` : ''}</div>
+              ${shown < HOUSE_STYLE_FROM ? `<span class="small" style="display:block;width:100%">스타일은 ${STAGES[HOUSE_STYLE_FROM].name}부터 모양이 달라져요.</span>` : ''}
+              ${HOUSE_STYLES[pv.style] && HOUSE_STYLES[pv.style].limited && shown >= HOUSE_STYLE_FROM && !styleUnlocked(pv.style, shown) ? `<span class="small" style="display:block;width:100%">🔒 마을 겨울 행사가 ${WINTER_PCT[WINTER_TIER_OF_SIZE[styleSize(shown)]]}%가 되면 지금 집 크기의 겨울 집이 공개돼요. 그 전엔 기본 모습으로 보여요.</span>` : ''}</div>
+      <div class="deco-row"><span class="paint-label">🏷️ 이름표</span>
+        ${['wood', ...(ME.nameplates||[]).filter(k=>k!=='wood')].filter(k=>NAMEPLATE_DEF[k]).map(k=>`<button class="hs-btn plate-btn ${(ME.nameplate||'wood')===k?'on':''}" data-plate="${k}"><span class="plate-chip plate-${k}">${NAMEPLATE_DEF[k].emoji} ${NAMEPLATE_DEF[k].name}</span></button>`).join('')}
+        <span class="small" style="display:block;width:100%">마을 집과 산책로에 보이는 내 이름표예요. 가진 것끼리 무료로 바꿔 끼워요.</span></div>
       <div class="deco-row"><span class="paint-label">🏚️ 모습</span>
         <span class="small">${pv.look==null ? `지금 집 (${STAGES[stg].name})` : `${STAGES[pv.look].name} 모습 · 방 크기와 화단은 지금 집 그대로`}</span>
         ${pv.look!=null ? `<button class="mini" data-pv-look="now">지금 집으로</button>` : ''}
@@ -5349,7 +5427,7 @@ const petSvg = (code, mood='ok', cls='') => `<svg class="pet-svg ${cls} ${mood==
 
 /* ---------- 🐾 펫 ---------- */
 // 아래 숫자들은 pets.sql 과 같아야 해요
-const PET_TIER = {common:{label:'일반', open:300, adopt:200}, rare:{label:'희귀', open:500, adopt:500}, legend:{label:'전설', open:1000, adopt:1000}, fairy:{label:'요정', open:0, adopt:1000}};
+const PET_TIER = {common:{label:'일반', open:300, adopt:200}, rare:{label:'희귀', open:500, adopt:500}, legend:{label:'전설', open:1000, adopt:1000}, fairy:{label:'요정', open:0, adopt:1000}, season:{label:'시즌 한정', open:0, adopt:0}};
 const PET_MAX = 5, PET_SLOT_PRICE = new Proxy({}, {get:()=>1500});   // (10-13) 칸 늘리기는 늘 1,500 · 최대 5마리 — petslot5.sql 과 같아야 해요
 const PET_CARE = {feed:{label:'🍖 밥 주기', max:3, gain:3, key:'fed'}, pat:{label:'🤲 쓰다듬기', max:5, gain:1, key:'patted'}, play:{label:'🧶 놀아 주기', max:2, gain:5, key:'played'}};
 const PET_LV = [0,20,50,100,170,260,370,500,650,820];
@@ -5375,6 +5453,8 @@ const PETS_DEFAULT = [
   ['fairy_cloud','구름의 요정','fairy','기분이 흐리면 비가 와요. 다 크면 무지개를 띄워 줘요'],
   ['fairy_type','타자기의 요정','fairy','엔터 키를 소중히 안고 다녀요. 다음 화는 엔터 한 번이면 시작돼요'],
   ['fairy_draft','원고지의 요정','fairy','연필 하나로 원고지를 가득 채워요. 지우개는 의자로 써요'],
+  // ❄️ 시즌 한정 (winter.sql) — 도감 열기·입양 없이 겨울 행사 선물로만
+  ['icefairy26','얼음 요정','season','첫눈 오는 밤에만 나타나요. 다 크면 얼음 날개로 등불을 밝혀 줘요'],
 ].map(([code,name,tier,about],i)=>({code,name,tier,about,sort:i+1}));
 const PET_WALK = [
   '{n} 수풀 쪽을 보고 꼬리를 흔들어요.', '{n} 코를 킁킁거리며 어딘가 가고 싶어 해요.', '{n} 신발을 가져와서 산책 가자고 졸라요.',
@@ -5461,9 +5541,20 @@ function renderPets(){
       : `<p class="small lodge-empty">아직 숙소에서 지내는 친구가 없어요.</p>`}</div>`;
   const html = `<div class="pet-yard"><h3>🐾 우리 집 펫 <span class="small">${open?`마당 ${(P.pets||[]).length} / ${P.slots}마리${LG.length?` · 숙소 ${LG.length}마리`:''}`:''}</span></h3><div class="pet-cards">${yard}</div></div>${lodgeHTML}
     <div class="panel"><h3 style="margin:0 0 .2rem">📖 펫 도감 <span class="small">${dex.size} / ${PETS_DEFAULT.length}</span></h3>
-    <p class="small" style="margin:0 0 .6rem">도감 칸을 열어야 그 친구를 입양할 수 있어요. 돌봐 주면 친밀도가 오르고, 단계가 오를 때마다 코인을 받아요. 7일 넘게 못 보면 시무룩해지니 가끔 들러 주세요!</p><div class="dex-scroll">${dexHTML}</div></div>`;
+    <p class="small" style="margin:0 0 .6rem">도감 칸을 열어야 그 친구를 입양할 수 있어요. 돌봐 주면 친밀도가 오르고, 단계가 오를 때마다 코인을 받아요. 7일 넘게 못 보면 시무룩해지니 가끔 들러 주세요!</p><div class="dex-scroll">${dexHTML}${seasonDexHTML(ALL)}</div></div>`;
   const key = html.replace(/\d+분/g,'');
   if(box._html !== key || box._min !== Math.floor(Date.now()/60e3)){ box.innerHTML = html; box._html = key; box._min = Math.floor(Date.now()/60e3); }
+}
+function seasonDexHTML(ALL){   // ❄️ 시즌 한정 칸 — 공개 전엔 정체를 숨겨요
+  const list = PETS_DEFAULT.filter(s=>s.tier==='season'); if(!list.length) return '';
+  return `<h4 class="pet-tier"><span class="rb season">❄️ 시즌 한정</span> <span class="small">계절 행사에서만 만날 수 있어요 · 도감 열기·입양은 없어요</span></h4><div class="pet-dex season-dex">`
+    + list.map(s=>{
+      const mine = (ALL||[]).some(p=>p.code===s.code), grownMine = (ALL||[]).some(p=>p.code===s.code && petGrown(petLevel(p.affection)));
+      const rev = peek() || !!(WINTER && (WINTER.revealed || WINTER.state==='closed'));
+      if(mine) return `<div class="pdx open"><span class="pdx-pics">${petArt(s.code,'ok')}${grownMine?petArt(s.code,'ok','',true):petArt(s.code,'ok','shadow',true)}</span><b>${esc(s.name)}</b><span class="small">${esc(s.about)}</span><span class="have">❄️ 26 겨울 한정</span></div>`;
+      if(rev) return `<div class="pdx">${petArt(s.code,'ok','shadow')}<b>${esc(s.name)}</b><span class="small">${WINTER && WINTER.state==='closed' ? '이번 겨울 행사가 끝났어요' : '겨울 행사에서 마을이 목표를 넘긴 뒤 500코인을 더 보태면 와요'}</span></div>`;
+      return `<div class="pdx"><span class="wq wq-pet">？</span><b>？？？</b><span class="small">겨울 행사의 비밀 친구</span></div>`;
+    }).join('') + `</div>`;
 }
 function petRewardText(r){
   if(r.kind==='seeds') return `🌰 이름 모를 씨앗 ${r.amount}봉투`;
@@ -5719,7 +5810,7 @@ function renderWalk(){
     map.insertAdjacentHTML('beforeend', `<button class="whouse ${p.in_voice?'lit':''} ${me?'me':''}" data-whouse="${esc(p.discord_id)}" style="left:${x}%;top:${y}%;z-index:${Math.round(y*10)}" aria-label="${esc(me?'내 집':p.display_name)} 구경 가기">
       ${houseSVG(lookStage(p.discord_id, st), p.in_voice, dc, p.house_color, lookStyle(p.discord_id, st, me ? ME.house_style : HOUSE_STYLE_OF[p.discord_id]))}
       ${pet ? `<span class="wpet" data-side="${i%2}">${petArt(pet.pet_code, pet.sad?'sad':'ok', '', petGrown(pet.level||1))}</span>` : ''}</button>
-      <span class="wnm ${me?'me':''}" style="left:${x}%;top:${(y+2.4).toFixed(1)}%">${me?'내 집':esc(p.display_name)}</span>`);   // 이름표는 따로 맨 위 층에 (옆집 펫·집에 안 묻히게)
+      <span class="wnm ${me?'me':''} ${plateCls(p)}" style="left:${x}%;top:${(y+2.4).toFixed(1)}%">${me?'내 집':esc(p.display_name)}</span>`);   // 이름표는 따로 맨 위 층에 (옆집 펫·집에 안 묻히게)
   });
   map.querySelectorAll('.whouse .wpet').forEach((el,i)=>walkPetWander(el, i));
   document.getElementById('wwho').innerHTML = VILLAGE.filter(p=>!p.removed && (isMe(p) || stageIdx(p.total_minutes) > 0)).map(p=>`<button class="mini ${p.in_voice?'on':''}" data-visit="${esc(p.discord_id)}">${p.in_voice?'🕯️ ':''}${isMe(p)?'내 집':esc(p.display_name)}</button>`).join('');
@@ -6360,7 +6451,9 @@ function renderPlaza(){
   }).join('');
   const w = document.getElementById('plazaWork');
   if(!list.length){ w.innerHTML = `<p class="small">광장을 불러오지 못했어요.</p>`; return; }
-  if(!cur){ w.innerHTML = `<h3>🎉 광장이 모두 지어졌어요!</h3><p class="small">주민 여러분 덕분이에요. 다음 건물은 숲지기가 곧 준비할 거예요.</p>`; return; }
+  w.hidden = false;
+  if(!cur){ if(WINTER && WINTER.state!=='wait'){ w.innerHTML = ''; w.hidden = true; return; }
+    w.innerHTML = `<h3>🎉 광장이 모두 지어졌어요!</h3><p class="small">주민 여러분 덕분이에요. 다음 건물은 숲지기가 곧 준비할 거예요.</p>`; return; }
   const left = cur.goal - cur.raised, bx = plazaBox(cur.code);
   w.innerHTML = `
     <h3>${cur.emoji} 지금 짓는 중: ${esc(cur.name)}</h3>
@@ -6374,9 +6467,89 @@ function renderPlaza(){
     </div>
     ${cur.code==='shelter'?`<p class="small" style="margin:.5rem 0 .1rem">완공되면 🐾 펫 탭에서 꼬마 동물 15종을 입양할 수 있어요!</p>`:''}
     ${cur.code==='lake'?`<p class="small" style="margin:.5rem 0 .1rem">완공되면 🎣 호숫가 탭에서 낚시가 열려요. 하루 5번, 물고기 31종!</p>`:''}
+    ${cur.code==='library' && WINTER ? `<p class="small winter-tease" style="margin:.5rem 0 .1rem">❄️ 숲 도서관이 다 지어지면 다음 날 0시에 <b>겨울 행사</b>가 열려요. 무엇이 기다리고 있을까요?</p>`:''}
     <p class="small" style="margin:0">내가 이 건물에 보탠 코인: 🪙 ${(cur.my_amount||0).toLocaleString()} · 보탠 코인은 돌려받을 수 없어요. 완공에 필요한 만큼만 빠져나가요.</p>
     ${bx?`<p class="small" style="margin:.7rem 0 .1rem">완공되면 담당자의 보따리 탭에 새 보따리가 열려요</p><div class="unlock-list"><span>${bx.emoji} ${esc(bx.name)} · 소품 ${GACHA_DEFAULT.filter(g=>g.gacha_box===bx.code).length}종</span></div>`:''}`;
 }
+/* ---------- ❄️ 겨울 행사판 (10-20) ---------- */
+const WINTER_SLOTS = [
+  {t:1, src:'winter260',  name:'작은 이글루',     for:'통나무집 · 흙벽돌집'},
+  {t:2, src:'winter261',  name:'쌍둥이 이글루',   for:'기와집 · 벽돌집'},
+  {t:3, src:'winter262',  name:'나무 지붕 이글루', for:'이층집'},
+  {t:3, src:'winter262b', name:'이글루 저택',     for:'정원 딸린 저택'},
+  {t:4, src:'winter263',  name:'눈의 성',         for:'작가의 성'},
+];
+const NAMEPLATE_DEF = {wood:{emoji:'🪵', name:'나무'}, snow:{emoji:'❄️', name:'눈꽃'}};
+let NAMEPLATE_OF = {};
+const plateCls = p => { const k = isMe(p) ? ((ME && ME.nameplate) || 'wood') : (NAMEPLATE_OF[p.discord_id] || 'wood'); return k==='wood' ? '' : 'plate-'+k; };
+async function refreshNameplates(){ try{ const r = (await api.nameplates()) || []; NAMEPLATE_OF = {}; r.forEach(x=>{ NAMEPLATE_OF[x.discord_id] = x.nameplate; }); }catch(e){ NAMEPLATE_OF = {}; } }
+async function refreshWinter(){ try{ WINTER = (await api.winter()) || null; }catch(e){ WINTER = null; } }   // winter.sql 전이면 그냥 없음
+function winterBoardHTML(){
+  const W = WINTER, goal = W.goal, total = W.total||0, pct = Math.min(100, total/goal*100), got = new Set(W.got||[]), need = W.need || {plate:100, style:1000, after:500};
+  const open = W.state==='open', reveal = W.revealed || peek();
+  const slot = s => (W.tiers||0) >= s.t || peek()
+    ? `<div class="wb-slot open"><img src="house/${s.src}.webp" alt="" loading="lazy"><b>${s.name}</b><span>${s.for}</span></div>`
+    : `<div class="wb-slot"><div class="wq">？</div><b>？？？</b><span>🔒 ${WINTER_PCT[s.t]}%에서 공개</span></div>`;
+  const beyond = reveal
+    ? `<div class="wb-slot beyond open"><img src="pets/icefairy26.webp" alt="" loading="lazy"><b>❄️ 얼음 요정</b><span>시즌 한정 펫</span></div>`
+    : `<div class="wb-slot beyond"><div class="wq">✦</div><b>100% 너머에</b><span>무언가 더 있어요!</span></div>`;
+  const row = (icon, name, sub, have, max, ok) => `<div class="wb-mine-row ${ok?'ok':''}"><span class="wm-ic">${icon}</span><span class="wm-tx"><b>${name}</b><span class="small">${sub}</span></span>
+      <span class="wm-st">${ok ? '✓ 받았어요' : `${Math.min(have,max).toLocaleString()} / ${max.toLocaleString()}`}</span><span class="mbar"><span style="width:${Math.min(100, have/max*100)}%"></span></span></div>`;
+  const marks = [25,50,75].map(m=>`<i style="left:${m}%"></i>`).join('');
+  const head = W.state==='soon' ? `<p class="small" style="margin:.2rem 0 .6rem">🏛️ 숲 도서관이 다 지어졌어요! <b>내일 0시</b>에 겨울 행사가 열려요. 무엇이 기다리고 있을까요?</p>`
+    : W.state==='closed' ? `<p class="small" style="margin:.2rem 0 .6rem">겨울 행사가 끝났어요. 함께 눈송이를 모아 줘서 고마워요! 받은 겨울 집·이름표·펫은 계속 내 거예요.</p>`
+    : `<p class="small" style="margin:.2rem 0 .6rem">다 같이 코인을 보태면 마을 목표에 따라 <b>한정 겨울 집</b>이 하나씩 공개돼요. 12월 31일 밤 12시까지 · 못 연 집은 영원히 잠겨요!</p>`;
+  return `<div class="wb-head"><h3>❄️ 26 겨울 행사 · 눈꽃 마을</h3><span class="wb-badge">${W.state==='open'?'진행 중':W.state==='soon'?'곧 시작':'끝'}</span></div>${head}
+    <div class="wb-gauge"><div class="bar wb-bar"><span style="width:${pct}%"></span>${marks}</div>
+      <p class="small" style="margin:.25rem 0 0">🪙 ${total.toLocaleString()} / ${goal.toLocaleString()}${total>goal?` · 🎉 목표를 넘겼어요! +${(total-goal).toLocaleString()}`:` · 목표까지 ${(goal-total).toLocaleString()}`} · ${(W.givers||0)}명이 눈송이를 보탰어요</p></div>
+    <div class="wb-slots">${WINTER_SLOTS.map(slot).join('')}${beyond}</div>
+    <div class="wb-mine"><h4>🎁 내가 받을 것 <span class="small">내가 보탠 코인 🪙 ${(W.my_total||0).toLocaleString()}</span></h4>
+      ${row('❄️','눈꽃 이름표', `내가 ${need.plate.toLocaleString()}코인 보태면 · 마을·산책로 이름표가 눈꽃으로`, W.my_total||0, need.plate, got.has('plate'))}
+      ${row('⛄','26 겨울 집', `내가 ${need.style.toLocaleString()}코인 보태면 · 마을이 연 크기의 겨울 집만 입혀져요`, W.my_total||0, need.style, got.has('style'))}
+      ${reveal ? row('❄️','얼음 요정 (시즌 한정 펫)', `마을이 목표를 넘긴 뒤에 내가 ${need.after.toLocaleString()}코인 더 보태면`, W.my_after||0, need.after, got.has('pet'))
+               : `<div class="wb-mine-row secret"><span class="wm-ic">✦</span><span class="wm-tx"><b>？？？</b><span class="small">마을이 100%를 넘기면 정체가 밝혀져요</span></span></div>`}</div>
+    ${open ? `<div class="give-row">
+      ${[10,50,100,500].map(n=>`<button class="give" data-wgive="${n}" ${ME.coins<1?'disabled':''}>❄️ ${n}</button>`).join('')}
+      <input type="number" min="1" inputmode="numeric" id="wgiveCustom" placeholder="직접 입력">
+      <button class="give" data-wgive="custom" ${ME.coins<1?'disabled':''}>보내기</button></div>
+      <p class="small" style="margin:.4rem 0 0">보탠 코인은 돌려받을 수 없어요. 상점에선 절대 안 파는 한정 보상이에요.</p>` : ''}`;
+}
+function renderWinter(){
+  const box = document.getElementById('winterBox'); if(!box) return;
+  if(!WINTER || WINTER.state==='wait' || !ME){ box.hidden = true; box.innerHTML = ''; return; }
+  if(document.activeElement && document.activeElement.id==='wgiveCustom') return;   // 숫자 적는 중엔 다시 그리지 않아요
+  box.hidden = false; box.innerHTML = winterBoardHTML();
+}
+function winterMailCheck(){   // 📬 행사 시작·집 공개·100% 너머 소식은 우편함으로
+  if(!WINTER) return;
+  const k = 'majam-winter-seen-' + WINTER.code, now = {state:WINTER.state, tiers:WINTER.tiers||0, rev:!!WINTER.revealed};
+  let seen = null; try{ seen = JSON.parse(localStorage.getItem(k)||'null'); }catch(e){}
+  try{ localStorage.setItem(k, JSON.stringify(now)); }catch(e){}
+  const items = [];
+  if((!seen || seen.state!=='open') && now.state==='open') items.push({icon:'❄️', title:'겨울 행사가 열렸어요!', body:'마을 광장에서 다 같이 코인을 보태면 한정 겨울 집이 하나씩 공개돼요.\n100코인만 보태도 ❄️ 눈꽃 이름표를 받아요.'});
+  const from = seen ? seen.tiers : 0;
+  for(let t = from+1; t <= now.tiers; t++){ const ns = WINTER_SLOTS.filter(s=>s.t===t).map(s=>s.name).join('·');
+    items.push({icon:'⛄', title:`겨울 집 「${ns}」${jo(ns,'이','가')} 공개됐어요!`, body:`마을이 ${WINTER_PCT[t]}%를 넘겼어요. 겨울 집을 받은 주민은 ${WINTER_SLOTS.filter(s=>s.t===t).map(s=>s.for).join(' · ')} 크기에서 입을 수 있어요.`}); }
+  if(seen && !seen.rev && now.rev) items.push({icon:'✨', title:'100% 너머의 비밀이 풀렸어요!', body:'시즌 한정 펫 ❄️ 얼음 요정 — 마을이 목표를 넘긴 지금부터 500코인을 더 보태면 우리 집에 와요.'});
+  if(seen || now.state==='open') mailAdd(items);
+}
+document.getElementById('winterBox').addEventListener('click', e=>{
+  const g = e.target.closest('[data-wgive]'); if(!g) return;
+  let n = g.dataset.wgive==='custom' ? parseInt(document.getElementById('wgiveCustom').value,10) : +g.dataset.wgive;
+  if(!(n>=1)) return toast('1코인 이상 적어 주세요');
+  if(n>ME.coins) return toast('코인이 부족해요');
+  act(async()=>{
+    const r = await api.giveWinter(n); if(r && r.coins!=null) ME.coins = r.coins;
+    await refreshWinter(); const fresh = (r && r.new) || [];
+    if(fresh.includes('pet')) await Promise.all([refreshPets(), refreshPetsOn()]);
+    if(fresh.length) await refreshMine();
+    renderTop(); renderWinter(); renderPets(); winterMailCheck();
+    if(fresh.length){
+      const L = {plate:'❄️ 눈꽃 이름표를 받았어요! 집 겉모습 꾸미기에서 바꿔 끼울 수 있어요.', style:'⛄ 26 겨울 집을 받았어요! 집 겉모습 꾸미기에서 입을 수 있어요.\n(마을이 연 크기의 집부터 입혀져요)', pet:'❄️ 얼음 요정이 우리 집에 왔어요! 시즌 한정 친구예요.'};
+      petParty(fresh.includes('pet')?'❄️':'⛄', fresh.map(k=>L[k]).join('\n\n'));
+    } else toast(`❄️ 눈송이 ${n.toLocaleString()}개를 보탰어요!`);
+  });
+});
 function celebratePlaza(){   // 📬 새로 지어진 건물 소식은 우편함으로 (새로 생긴 개수를 돌려줘요)
   const seenKey = 'majam-plaza-seen';
   const built = PLAZA.filter(b=>b.built_at).map(b=>b.code);
@@ -6647,10 +6820,10 @@ async function cabsFor(owner, list){
 }
 async function refreshVillage(){ VILLAGE = await api.village(); }
 async function loadAll(){
-  await Promise.all([refreshMine(), refreshVillage(), refreshPlaza(), refreshGacha(), refreshGarden(), refreshLake(), refreshTank(), refreshTree(), refreshBanners(), refreshBoard(), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPets(), refreshPetsOn(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
+  await Promise.all([refreshMine(), refreshVillage(), refreshPlaza(), refreshGacha(), refreshGarden(), refreshLake(), refreshTank(), refreshTree(), refreshBanners(), refreshBoard(), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPets(), refreshPetsOn(), refreshWinter(), refreshNameplates(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
   refreshStreak();
   MAIL_BOOT_UNTIL = Date.now() + 10000; renderMailBadge();   // 들어오자마자 온 소식은 우편함을 한 번만 열어 보여 줘요
-  renderPlaza(); celebratePlaza(); renderGacha(); renderBanners(); renderFloatDrops(); renderBoard();
+  renderPlaza(); renderWinter(); winterMailCheck(); celebratePlaza(); renderGacha(); renderBanners(); renderFloatDrops(); renderBoard();
   refreshTrucks().then(renderTrucks); showTruckReport();
   setInterval(()=>refreshTrucks().then(renderTrucks), 5*60e3);
   renderTop(); renderVillage(); renderMyHouse(); renderBag(); renderRoad(); setHint();
@@ -7188,6 +7361,13 @@ document.getElementById('visitTabs').addEventListener('click', e=>{
   const v = b.dataset.vroom; VISIT.room = (v==='g' || v==='k') ? v : +v; renderVisit();
 });
 document.getElementById('visitGift').addEventListener('click', e=>{ if(!e.target.closest('[data-gohome]')) return; document.getElementById('visit').close(); const b = document.querySelector('.tabs [data-tab="home"]') || [...document.querySelectorAll('.tabs button')].find(x=>x.textContent.includes('우리 집')); if(b) b.click(); });
+document.addEventListener('click', e=>{   // 🏷️ 이름표 바꿔 끼우기
+  const b = e.target.closest('[data-plate]'); if(!b) return;
+  const k = b.dataset.plate; if((ME.nameplate||'wood')===k) return;
+  act(async()=>{ await api.setNameplate(k); ME.nameplate = k; NAMEPLATE_OF[meId()] = k; renderDeco(); renderVillage();
+    if(typeof renderWalk==='function' && !document.getElementById('tab-walk').hidden) renderWalk();
+    toast(`🏷️ ${NAMEPLATE_DEF[k].emoji} ${NAMEPLATE_DEF[k].name} 이름표로 바꿨어요!`); });
+});
 document.getElementById('visitClose').onclick = ()=>document.getElementById('visit').close();
 document.getElementById('visit').addEventListener('click', e=>{ if(e.target.id==='visit') e.target.close(); });
 
@@ -7236,7 +7416,13 @@ async function start(){
 
   let res;
   try{ res = await api.init(); }
-  catch(e){ show('screenLogin'); toast('연결이 안 돼요. 설정을 확인해 주세요'); return; }
+  catch(e){
+    // (10-20 ③) 왜 안 되는지 보이게: 라이브러리를 못 불러온 건지, 서버가 대답을 안 하는 건지
+    const why = !window.supabase ? '로그인 도구(supabase-js)를 불러오지 못했어요 — 인터넷 연결이나 광고 차단 프로그램을 확인해 주세요'
+      : /fetch|network|Load failed/i.test(String(e && e.message)) ? '숲 서버(Supabase)가 대답하지 않아요 — 잠시 뒤 다시 들어와 주세요'
+      : '서버 오류: ' + ((e && e.message) || e);
+    console.error('마감의 숲 연결 실패', e);
+    show('screenLogin'); toast('연결이 안 돼요. ' + why); return; }
   if(res.status==='login') return show('screenLogin');
   if(res.status==='notmember') return show('screenNotMember');
 
@@ -7282,7 +7468,8 @@ async function start(){
     setInterval(async ()=>{
       try{
         const before = stageIdx(ME.total_minutes);
-        await Promise.all([refreshVillage(), api.me().then(m=>ME=m), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPetsOn()]);
+        await Promise.all([refreshVillage(), api.me().then(m=>ME=m), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPetsOn(), refreshWinter(), refreshNameplates()]);
+        renderWinter(); winterMailCheck();
         await liveGarden();   // 🌷 (10-14 ⑤) 꽃 자란 시간은 뒤쪽 단계가 실패해도 먼저 갱신
         if(!document.getElementById('tab-pet').hidden){ await refreshPets(); renderPets(); }
         const after = stageIdx(ME.total_minutes);
@@ -7627,6 +7814,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-20 판 ②</p>
+<p class="site-ver">마감의 숲 · 10-20 판 ④</p>
 </body>
 </html>
