@@ -1781,7 +1781,7 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 @media (max-width:600px){ .fshow{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))} #visitGarden .fshow{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))} }
 
 /* 🍰 탁상 소품 (10-17) — 테이블 위에 작게 올라가요 */
-.furn.ontable{background:none!important;box-shadow:none!important;transform:translateY(-16%) scale(.56);transform-origin:50% 70%}
+.furn.ontable{background:none!important;box-shadow:none!important;transform:translate(var(--tx,0%),var(--ty,-16%)) scale(var(--ts,.56));transform-origin:50% 70%}
 .furn.ontable .fimg,.furn.ontable .emo,.furn.ontable svg{filter:drop-shadow(0 2px 1px rgba(60,35,15,.5))}
 </style>
 <script>
@@ -2557,7 +2557,10 @@ const NEW_FURN66 = [
 ];
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'); DEFAULT_SHOP.splice(at<0?DEFAULT_SHOP.length:at, 0, ...NEW_FURN66.map(([code,emoji,name,price,w,h,category])=>({code,emoji,name,price,w,h,active:true,category,icon:code,layer:'furniture'}))); NEW_FURN66.forEach(r=>FURN_IMG.add(r[0])); }
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
-const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp` : null;
+// 🧽 누끼를 다시 딴 그림 (같은 이름으로 덮어쓰니까 ?v= 를 붙여 옛 그림 캐시를 피해요) — 또 고치면 숫자만 올리기
+const FURN_VER = {lantern:2, tr_medal:2, tr_scarf:2, oldkey:2, gears:2, globe:2, wall_trellis:2, eggchair:2, hammock:2, hammock2:2, diningtable:2, rocking:2, rocking2:2, clip:2, glasses:2};
+const furnV = k => FURN_VER[k] ? `?v=${FURN_VER[k]}` : '';
+const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp${furnV(fimgKey(it))}` : null;
 const icoSrc = it => it && WALL_H.has(it.code) && fimg(it) ? `furn/${it.code}_h.webp` : fimg(it);   // 예전 벽 4종은 상점·가방에서 앞모습으로
 const ico = it => fimg(it) ? `<img class="fsvg fimg" src="${icoSrc(it)}" alt="" draggable="false" loading="lazy">` : (iconKey(it) && FURN_SVG[iconKey(it)]) ? `<svg class="fsvg" viewBox="${FURN_SVG[iconKey(it)].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[iconKey(it)].svg}</svg>` : (it ? it.emoji : '');
 const GACHA_BOXES = [
@@ -3871,6 +3874,12 @@ const TABLE_SURFACE = new Set(['table','roundtable','lowtable','teatable']);   /
 const TABLE_FOOD = new Set(['coffee','tea','cookie','chestnut','sweetpotato','fishcake','croissant','baguette','bagel','waffle','pancake','donut','cake','pie','pudding','birthdaycake','mooncake',
   'honeypot','teapot','cupcake','dango','milk','juice','lemon','bubbletea','strawberry','parfait','bread','muffin','jam','teacup','teabag','teacookie','rollcake','teatray',
   'cottoncandy','candyapple','takoyaki','thermos']);
+const TABLE_SPOT = {table:{dx:30, dy:-44, s:.56}, teatable:{dx:14, dy:-40, s:.42}, lowtable:{dx:30, dy:-36, s:.56}, roundtable:{dx:0, dy:-36, s:.56}};   // 상판 자리·크기 (10-20 진짜 그림으로 맞춤)
+const spotOf = (f, t) => { const sp = TABLE_SPOT[t.item_code] || {dx:0, dy:-30, s:.56}, ci = f.c - t.c, ri = f.r - t.r;
+  let dx = 0, dy = sp.dy;
+  if(t.w>1) dx = ci===0 ? sp.dx : ci===t.w-1 ? -sp.dx : 0;          // 가로로 긴 식탁: 양쪽 칸 소품을 가운데로
+  else if(t.h>1) dy = sp.dy*0.5 + (ri===0 ? 22 : ri===t.h-1 ? -22 : 0);   // 돌려서 세로로 놓은 식탁: 위아래 칸을 가운데로
+  return `;--tx:${dx}%;--ty:${dy}%;--ts:${sp.s}`; };
 const tableUnder = (f, list) => TABLE_FOOD.has(f.item_code) ? list.find(g => g.id!==f.id && TABLE_SURFACE.has(g.item_code) && (g.room||0)===(f.room||0) && f.r>=g.r && f.r<g.r+g.h && f.c>=g.c && f.c<g.c+g.w) : null;
 const topsOn = (t, list) => TABLE_SURFACE.has(t.item_code) ? list.filter(g => g.id!==t.id && TABLE_FOOD.has(g.item_code) && (g.room||0)===(t.room||0) && g.r>=t.r && g.r<t.r+t.h && g.c>=t.c && g.c<t.c+t.w) : [];
 const layerOf = code => { const it = itemOf(code); return it.layer || (FLOOR_CODES.has(code) ? 'floor' : 'furniture'); };
@@ -4057,7 +4066,7 @@ function roomHTML(list, cur, {editable, cabs={}}){
     const it = itemOf(f.item_code), big = Math.min(f.w,f.h)>=2, floor = layerOf(f.item_code)==='floor';
     const onRug = !floor && list.some(g => layerOf(g.item_code)==='floor' && f.r < g.r+g.h && g.r < f.r+f.h && f.c < g.c+g.w && g.c < f.c+f.w);
     const onTable = tableUnder(f, list);
-    const style = `grid-row:${f.r+1}/span ${f.h};grid-column:${f.c+1}/span ${f.w}` + (fimg(it) ? (floor ? ';z-index:0' : `;z-index:${2+f.r+f.h}`) : '') + (onTable ? `;z-index:${2+onTable.r+onTable.h+1}` : '');
+    const style = `grid-row:${f.r+1}/span ${f.h};grid-column:${f.c+1}/span ${f.w}` + (fimg(it) ? (floor ? ';z-index:0' : `;z-index:${2+f.r+f.h}`) : '') + (onTable ? `;z-index:${2+onTable.r+onTable.h+1}${spotOf(f, onTable)}` : '');
     if(CAPACITY[f.item_code]){
       const n = (cabs[f.id]||[]).length;
       html += editable
@@ -7618,6 +7627,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-17 판 ①</p>
+<p class="site-ver">마감의 숲 · 10-20 판 ②</p>
 </body>
 </html>
