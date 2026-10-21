@@ -5709,7 +5709,9 @@ const weaponDmg = (w, m) => w.dmg * (m.weak===w.code ? BOSS_WEAK : 1);
 const BOSS_DROP = .04;   // (10-22 새벽 10% → 4%, boss.sql 의 boss_hit 과 같아야 해요)
 const BOSS_ITEMS = {
   slump: [['slump_cushion','회색 털뭉치 쿠션'],['slump_eyemask','반쯤 감긴 눈안대'],['slump_coldcoffee','다 식어버린 커피 머그잔'],['slump_clock','태엽이 멈춘 시계'],
-          ['slump_sandbag','무거운 모래주머니'],['slump_postit',"'내일부터 해야지' 포스트잇"],['slump_penholder','먼지 쌓인 펜 거치대']],
+          ['slump_sandbag','무거운 모래주머니'],['slump_postit',"'내일부터 해야지' 포스트잇"],['slump_penholder','먼지 쌓인 펜 거치대'],
+          ['slump_cat','늘어진 고양이 인형'],['slump_candle','반쯤 녹은 초'],['slump_phone','무한 스크롤 핸드폰'],['slump_hotpack','미지근한 핫팩'],['slump_chips','눅눅해진 과자 봉지'],['slump_todo','끝없이 긴 할 일 목록'],['slump_lamp','꺼진 스탠드'],
+          ['slump_cave','이불 속 동굴'],['slump_cursor','멈춰 버린 커서 깃발'],['slump_balloon','바람 빠진 풍선'],['slump_jelly','흐물흐물한 젤리'],['slump_kbcover','먼지 쌓인 키보드 덮개'],['slump_alarm',"'5분만 더' 알람시계"],['slump_cloud','회색 구름 쿠션']],
   typo: [['typo_magnifier','동그란 돋보기'],['typo_backspace','닳아버린 Backspace 키캡'],['typo_zigzag','빨간 지그재그 밑줄 스티커'],['typo_eraser','가루 가득한 지우개'],
          ['typo_keys','뒤죽박죽 자판 조각'],['typo_tape','반만 지워진 수정 테이프'],['typo_dict','찢어진 맞춤법 사전']],
   proof: [['proof_redpen','빨간 펜'],['proof_scissors','뾰족한 편집용 가위'],['proof_ink','빨간 잉크 리필액'],['proof_draft','무자비하게 구겨진 초고'],
@@ -8632,6 +8634,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑭</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑮</p>
 </body>
 </html>
