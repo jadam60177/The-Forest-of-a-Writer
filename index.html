@@ -1666,6 +1666,24 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 .wl-colors input[type=color]{width:34px;height:30px;border:0;background:none;padding:0;cursor:pointer}
 :root[data-mode="day"] .wl-opt{background:rgba(255,255,255,.7)}
 .wmap-wrap{border-radius:18px}
+.wloot{position:absolute;width:3.8%;padding:0;margin:0;border:0;background:none;cursor:pointer;transform:translate(-50%,-70%);filter:drop-shadow(0 0 6px rgba(255,236,150,.85)) drop-shadow(0 3px 2px rgba(40,30,10,.35))}
+.wloot img{display:block;width:100%;height:auto;pointer-events:none}
+.wloot::after{content:'✦';position:absolute;right:-12%;top:-18%;font-size:clamp(10px,1.1vw,18px);color:#FFE9A0;text-shadow:0 0 6px #FFD24A;animation:wlootTw 1.6s ease-in-out infinite;animation-delay:var(--d,0s)}
+.wloot:hover{filter:drop-shadow(0 0 10px rgba(255,236,150,1)) drop-shadow(0 3px 2px rgba(40,30,10,.35))}
+.wloot.got{animation:wlootGot .6s ease-out forwards;pointer-events:none}
+.wloot.gone{animation:wlootGone .5s ease-out forwards;pointer-events:none}
+@media (prefers-reduced-motion:no-preference){ .wloot{animation:wlootBob 2.6s ease-in-out infinite;animation-delay:var(--d,0s)} }
+@keyframes wlootBob{0%,100%{transform:translate(-50%,-70%)}50%{transform:translate(-50%,-80%)}}
+@keyframes wlootTw{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
+@keyframes wlootGot{to{transform:translate(-50%,-190%) scale(1.25);opacity:0}}
+@keyframes wlootGone{to{transform:translate(-50%,-70%) scale(.3);opacity:0}}
+.wloot-pop{position:absolute;transform:translate(-50%,-140%);pointer-events:none;font-family:"Jua",sans-serif;font-size:clamp(14px,1.6vw,26px);color:#FFF4C8;text-shadow:0 2px 0 #7A4A12,0 0 8px rgba(0,0,0,.5);white-space:nowrap;animation:wlootPop 1.6s ease-out forwards}
+.wloot-pop.big{font-size:clamp(18px,2.2vw,34px);color:#FFE070}
+@keyframes wlootPop{0%{opacity:0;margin-top:10px}15%{opacity:1;margin-top:0}100%{opacity:0;margin-top:-50px}}
+.wloot-cnt{white-space:nowrap}
+.toast{white-space:pre-line;width:max-content;max-width:min(92vw,560px);box-sizing:border-box;word-break:keep-all;line-height:1.45}
+.lotto-free-note{margin:.4rem 0 0;color:#E9B949}
+:root[data-mode="day"] .lotto-free-note{color:#B06E0E}
 @media (max-width:700px){ .wmap-wrap{overflow-x:auto;margin:0 -.6rem;padding:0 .6rem;scrollbar-width:thin} .wmap{width:760px;max-width:none} }
 @media (max-width:600px){ .wl-grid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))} .wl-opt .wc-body{width:52px} }
 @media (prefers-reduced-motion:reduce){ .wch{transition-duration:0s!important} .wch.walk .wc-flip{animation:none} }
@@ -3967,7 +3985,31 @@ const demoApi = (() => {
     lweek(){ const wk = Math.floor((Date.now() - Date.parse('2026-10-09T00:00:00+09:00'))/604800e3), cyc = Math.max(1, Math.ceil(LOTTO_FURN.length/LOTTO_WEEK_N)), c = Math.floor(wk/cyc), k = wk%cyc;
       const h = t => { let x = 2166136261; for(const ch of t){ x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619); } return x>>>0; };
       return LOTTO_FURN.map(x=>x.code).sort((a,b)=>h(a+':'+c)-h(b+':'+c)).slice(k*LOTTO_WEEK_N, (k+1)*LOTTO_WEEK_N); },
-    async lotto(){ const L = this.lstate(); return {plays_today:L.n, week:this.lweek(), dex:[...L.dex]}; },
+    async lotto(){ const L = this.lstate(); return {plays_today:L.n, week:this.lweek(), dex:[...L.dex], free:st.lfree||0}; },
+    async playLottoFree(){ const L = this.lstate(); if(!(st.lfree>0)) fail('공짜 복권이 없어요. 산책로에서 주워 보세요!');
+      st.lfree--; const n0 = L.n; if(L.n>=LOTTO_PER_DAY) L.n = LOTTO_PER_DAY-1; st.me.coins += LOTTO_PRICE;
+      const r = await this.playLotto(); L.n = n0; persist(); return {...r, plays_today:n0, free:st.lfree, is_free:true}; },
+    // 🗺️ 산책로 분실물 (미리보기: 2분마다 1개)
+    wlstate(){ const now = Date.now();
+      st.wloot = st.wloot || {items:[], last: now - 3*120e3, n:1, day:'', today:0};
+      const W = st.wloot; if(W.day!==this.fday()){ W.day = this.fday(); W.today = 0; }
+      const k = Math.floor((now - W.last)/120e3);
+      if(k>0){ for(let i=0;i<Math.min(k, WLOOT_MAX - W.items.length);i++){ const [x,y] = wlootSpot(); W.items.push({id:W.n++, x, y, look:WLOOT_LOOKS[Math.floor(Math.random()*WLOOT_LOOKS.length)]}); } W.last += k*120e3; }
+      return W; },
+    async walkLoot(){ const W = this.wlstate(); return {items:W.items.map(x=>({...x})), today:W.today, max:WLOOT_DAY, next_at:new Date(W.last+120e3).toISOString()}; },
+    async walkLootPick(id, x, y){ const W = this.wlstate();
+      if(W.today>=WLOOT_DAY) fail(`오늘은 분실물을 다 주웠어요 (하루 ${WLOOT_DAY}개). 새벽 12시에 다시 주울 수 있어요`);
+      const l = W.items.find(i=>i.id===id); if(!l) fail('앗, 다른 작가님이 먼저 주워 갔어요!');
+      if(Math.abs(x-l.x)>7 || Math.abs(y-l.y)>10) fail('조금 더 가까이 가서 주워 주세요');
+      const r = Math.random(); let kind, amount;
+      if(r<.47){ kind='coin'; amount=10+Math.floor(Math.random()*31); } else if(r<.67){ kind='drop'; amount=wlootMany(); } else if(r<.82){ kind='ticket'; amount=wlootMany(); } else if(r<.95){ kind='lotto'; amount=1; } else if(r<.98){ kind='bait'; amount=1; } else { kind='jackpot'; amount=100; }
+      if(kind==='bait'){ st.bait = st.bait || {inv:{}, day:null, legendBought:0, net:null}; st.bait.inv = st.bait.inv || {}; st.bait.inv.legend = (st.bait.inv.legend||0)+1; }
+      if(kind==='drop') st.me.drops = (st.me.drops||0)+amount;
+      if(kind==='lotto') st.lfree = (st.lfree||0)+1;
+      if(kind==='ticket'){ const B = this.bossState(); if(B.dmg<B.max_hp) B.tickets += amount; else { kind='ticketcoin'; amount=20; } }
+      if(['coin','jackpot','ticketcoin'].includes(kind)) st.me.coins += amount;
+      W.items = W.items.filter(i=>i.id!==id); W.today++; persist();
+      return {kind, amount, look:l.look, coins:st.me.coins, today:W.today}; },
     async playLotto(){ const L = this.lstate();
       if(L.n>=LOTTO_PER_DAY) fail('오늘 복권은 다 긁었어요. 새벽 12시에 다시 채워져요');
       if(st.me.coins<LOTTO_PRICE) fail('코인이 부족해요');
@@ -4216,6 +4258,9 @@ const supaApi = (() => {
     async boss(){ const r = ok(await sb.rpc('get_boss')); return Array.isArray(r) ? r[0] : r; },              // ⚔️ 이번 주 괴물 (boss.sql)
     async bossHit(w, n){ const r = ok(await sb.rpc('boss_hit', {p_weapon:w, p_count:n})); return Array.isArray(r) ? r[0] : r; },
     async playLotto(){ return ok(await sb.rpc('play_lotto')); },
+    async playLottoFree(){ return ok(await sb.rpc('play_lotto_free')); },                       // 🎟️ 산책로에서 주운 공짜 복권 (walkloot.sql)
+    async walkLoot(){ const r = ok(await sb.rpc('get_walk_loot')); return Array.isArray(r) ? r[0] : r; },   // 🗺️ 산책로 분실물 (walkloot.sql)
+    async walkLootPick(id, x, y){ const r = ok(await sb.rpc('walk_loot_pick', {p_id:id, p_x:+(+x).toFixed(1), p_y:+(+y).toFixed(1)})); return Array.isArray(r) ? r[0] : r; },
     async trucks(){ return ok(await sb.rpc('get_trucks')) || []; },
     async callTruck(kind){ const r = ok(await sb.rpc('call_truck', {p_kind:kind})); return Array.isArray(r) ? r[0] : r; },
     async claimTruck(id){ const r = ok(await sb.rpc('claim_truck', {p_id:id})); return Array.isArray(r) ? r[0] : r; },
@@ -6332,8 +6377,8 @@ function renderWalk(){
     box.innerHTML = `<details class="wlook-top" id="wlookTop"><summary><span class="wlk-mini" id="wlkMini" aria-hidden="true"></span><span class="wlk-tx"><b>✨ 내 작가 꾸미기</b><span class="small">캐릭터 · 머리색 · 옷 색을 무료로 바꿔요</span></span><span class="wlk-go" aria-hidden="true">열기 ›</span></summary><div class="wlook" id="wlook"></div></details>
       <div class="wmap-wrap" id="wmapWrap"><div class="wmap" id="wmap" aria-label="숲 산책 지도"></div></div>
       <div class="wbar"><form class="wsay" id="wsay"><input id="wsayIn" maxlength="${WALK_SAY_MAX}" placeholder="한마디 건네기 (${WALK_SAY_MAX}자)" autocomplete="off"><button class="mini ask-yes" type="submit">💬</button></form>
-        <button class="mini" type="button" id="wbackBtn">🌲 마을로 돌아가기</button><button class="mini" type="button" id="wmeBtn">📍 내 캐릭터 보기</button><span class="small wnow" id="wnow"></span></div>
-      <p class="small whelp">땅을 누르거나 방향키(WASD)로 걸어요 · 끌거나 스크롤해서 둘러보면 화면이 멈추고, 다시 걸으면 따라와요</p>
+        <button class="mini" type="button" id="wbackBtn">🌲 마을로 돌아가기</button><button class="mini" type="button" id="wmeBtn">📍 내 캐릭터 보기</button><span class="small wloot-cnt" id="wlootCnt" hidden></span><span class="small wnow" id="wnow"></span></div>
+      <p class="small whelp">땅을 누르거나 방향키(WASD)로 걸어요 · 끌거나 스크롤해서 둘러보면 화면이 멈추고, 다시 걸으면 따라와요 · ✨ 반짝이는 분실물을 누르면 걸어가서 주워요</p>
       <div class="wside"><details class="wwho"><summary>🏡 주민 집 목록 <span class="small">지도에 없는 집도 여기서 구경 가요</span></summary><div class="wwho-list" id="wwho"></div></details></div>`;
     box.querySelector('#wmap').addEventListener('click', walkMapClick);
     walkCamInit(box.querySelector('#wmapWrap'));
@@ -6358,6 +6403,7 @@ function renderWalk(){
     WALK_ME = walkChar(map, 'me', ME.display_name || '나', WALK ? WALK.look : null, pos.x, pos.y, true);
   } else if(!WALK_ME.isConnected) map.appendChild(WALK_ME);
   WALK_OTHERS.forEach(c=>{ if(!c.isConnected) map.appendChild(c); });
+  renderWalkLoot(); if(!WLOOT_AT || Date.now()-WLOOT_AT > 15000) refreshWalkLoot();
   renderWalkLook(); walkNow();
   const wrap = document.getElementById('wmapWrap');   // 처음 열 땐 내 캐릭터가 화면 가운데 오게
   if(wrap && !wrap._centered){ requestAnimationFrame(()=>{ if(!wrap.clientWidth) return; wrap._centered = true; walkCamSnap(); }); }
@@ -6420,7 +6466,7 @@ document.addEventListener('keydown', e=>{
   const step = now => {
     const dt = Math.min(.05, (now - WALK_KLAST)/1000); WALK_KLAST = now;
     let vx = 0, vy = 0; WALK_HELD.forEach(k=>{ vx += WALK_KEYS[k][0]; vy += WALK_KEYS[k][1]; });
-    if(!WALK_HELD.size || !WALK_ME.isConnected){ WALK_KRAF = 0; WALK_ME.classList.remove('walk'); walkMoved(WALK_ME.x, WALK_ME.y); return; }
+    if(!WALK_HELD.size || !WALK_ME.isConnected){ WALK_KRAF = 0; WALK_ME.classList.remove('walk'); walkMoved(WALK_ME.x, WALK_ME.y); walkLootNear(); return; }
     const n = Math.hypot(vx, vy) || 1, sp = 8;   // 1초에 지도 너비의 8%
     const x = Math.max(3, Math.min(97, WALK_ME.x + vx/n*sp*dt)), y = Math.max(12, Math.min(96, WALK_ME.y + vy/n*sp*dt*2000/1116));
     if(vx) WALK_ME.querySelector('.wc-flip').classList.toggle('left', vx < 0);
@@ -6457,12 +6503,16 @@ function walkMapClick(e){
   if(Date.now() - WALK_DRAG_AT < 300) return;   // 끌어서 둘러본 거면 걷지 않아요
   WALK_FOLLOW = true; walkCamLoop();
   const map = document.getElementById('wmap'), r = map.getBoundingClientRect();
+  const lt = e.target.closest('[data-wloot]');   // ✨ 분실물: 걸어가서 주워요
+  if(lt){ const id = +lt.dataset.wloot, l = (WLOOT.items||[]).find(i=>i.id===id); if(!l) return;
+    const tx = l.x, ty = Math.min(96, l.y + 1.2);
+    walkGo(WALK_ME, tx, ty, ()=>walkLootPick(id)); walkMoved(tx, ty); return; }
   const h = e.target.closest('[data-whouse]');
   if(h){ const id = h.dataset.whouse, x = parseFloat(h.style.left), y = parseFloat(h.style.top) + 7;
     walkGo(WALK_ME, x, y, ()=>{ if(id===ME.discord_id || isMe({discord_id:id})) document.querySelector('.tabs [data-tab="home"]').click(); else openVisit(id); });
     walkMoved(x, y); return; }
   const x = (e.clientX - r.left)/r.width*100, y = (e.clientY - r.top)/r.height*100;
-  walkGo(WALK_ME, x, y); walkMoved(Math.max(3,Math.min(97,x)), Math.max(12,Math.min(96,y)));
+  walkGo(WALK_ME, x, y, walkLootNear); walkMoved(Math.max(3,Math.min(97,x)), Math.max(12,Math.min(96,y)));
 }
 function walkMoved(x, y){ try{ localStorage.setItem('majam-walk-pos', JSON.stringify({x, y})); }catch(e){} walkTrack(); }
 function walkNow(){ const n = WALK_OTHERS.size, el = document.getElementById('wnow'); if(!el) return;
@@ -6499,6 +6549,7 @@ function walkJoin(priv){
   if(priv===undefined) priv = true;
   const ch = api.walkChannel(ME.discord_id, priv); WALK_CH = ch; WALK_RT = 'joining'; walkNow();
   ch.on('presence', {event:'sync'}, ()=>{ if(WALK_CH!==ch) return; const s = ch.presenceState(); WALK_RTL = Object.values(s).map(a=>a[a.length-1]); walkSync(); })
+    .on('broadcast', {event:'loot'}, ({payload})=>{ walkLootGone(+payload.lid); const c = WALK_OTHERS.get(payload.id); if(c) walkSay(c, '✨ 분실물 주웠다!'); })
     .on('broadcast', {event:'say'}, ({payload})=>{ const c = WALK_OTHERS.get(payload.id), t = String(payload.text||'').slice(0, WALK_SAY_MAX); if(c){ walkSay(c, t); WALK_HEARD.set(payload.id, {t, at:Date.now()}); } })
     .subscribe((st, err)=>{
       if(WALK_CH!==ch) return;
@@ -6547,6 +6598,106 @@ function walkDemo(){   // 미리보기: 가짜 이웃 셋이 돌아다녀요
     if(i===1) WALK_DEMO_T.push(setTimeout(()=>walkSay(c, '오늘 3천 자 썼어요!'), 2500)); });
   walkNow();
 }
+// --- ✨ 산책로 분실물 (10-22, walkloot.sql 과 같은 값) — 모두 같은 자리에 보이고, 먼저 주운 사람이 임자 ---
+const WLOOT_MAX = 6, WLOOT_DAY = 5;
+const wlootMany = () => 1 + Math.floor(Math.random()**2 * 20);   // 물방울·공격권 1~20 (적은 게 자주) — walkloot.sql 과 같아요
+const WLOOT_LOOKS = ['paper','keyboard','mouse','cup'];   // walk/loot/코드.webp
+const WLOOT_NAME = {paper:'구겨진 원고 더미', keyboard:'부서진 키보드', mouse:'고장 난 마우스', cup:'다 마신 커피컵'};
+// 🐺 주울 때 담당자 한마디 (10-22 라밀이 뽑아 온 20줄) — 주운 물건에 맞는 줄 + 어디에나 맞는 줄(any) 중에서 하나
+const WLOOT_WOLF = {
+  paper: ['이만큼 치열하게 고민하셨다는 증거네요. 작가님의 한 줄 한 줄이 정말 귀합니다.',
+    '구겨진 종이 하나에도 작가님의 정성이 가득 담겨 있는 게 보여요. 버릴 게 하나도 없는 원고입니다.',
+    '찢긴 파편만 봐도 문장력이 빛나네요. 작가님의 치열한 고민이 고스란히 느껴져서 감동입니다.',
+    '스스로에게 엄격해서 버리셨겠지만, 제 눈에는 이미 보석 같은 문장들뿐입니다.',
+    '고치고 또 고치며 더 나은 문장을 빚어내신 거잖아요. 늘 작가님의 끈기에 감탄합니다.',
+    '이 많은 원고지를 털어내며 여기까지 달려오셨군요. 스스로를 자랑스러워하셔도 돼요.',
+    '흩어진 원고의 흔적들이 전부 작가님이 걸어오신 단단한 발자국입니다. 오늘도 정말 잘 해내셨어요.'],
+  keyboard: ['얼마나 뜨겁게 달리셨으면 장비가 먼저 지쳤을까요. 오늘 작업량 진짜 대단하십니다.',
+    '이렇게 부서질 정도로 두드리셨으니, 이번 회차는 무조건 재미있을 수밖에 없습니다.',
+    '키캡이 튕겨 나갈 때까지 몰아치신 그 집중력, 솔직히 정말 존경스럽습니다.',
+    '키보드가 부러져도 작가님의 글을 향한 열정은 전혀 꺾이지 않았네요. 최고예요.',
+    '장비가 먼저 닳아 떨어질 정도로 쓰셨네요. 역시 우리 마감방의 든든한 주력다우십니다.'],
+  mouse: ['얼마나 뜨겁게 달리셨으면 장비가 먼저 지쳤을까요. 오늘 작업량 진짜 대단하십니다.',
+    '마우스가 버티지 못할 만큼 수없이 지우고 고쳐 쓰신 흔적이네요. 이 집념이 대단합니다.',
+    '고치고 또 고치며 더 나은 문장을 빚어내신 거잖아요. 늘 작가님의 끈기에 감탄합니다.',
+    '클릭 하나까지 신중하게 고민하셨던 흔적이 그대로 남아있네요. 고생 많으셨습니다.',
+    '장비가 먼저 닳아 떨어질 정도로 쓰셨네요. 역시 우리 마감방의 든든한 주력다우십니다.'],
+  cup: ['텀블러가 완전히 바닥났네요. 오늘 하루도 누구보다 깊게 몰입하셨다는 뜻이겠죠.',
+    '텅 빈 텀블러는 오늘 치열하게 글을 밀어붙인 멋진 훈장입니다.',
+    '커피 한 방울 남기지 않고 전력투구하신 작가님, 오늘 작업도 완벽 그 자체예요.'],
+  any: ['손끝이 아릴 정도로 원고에 쏟아부으신 그 몰입은 절대 배신하지 않을 겁니다.',
+    '쉽지 않은 마감이었을 텐데, 온 힘을 다해 분량을 뽑아내 주셔서 진심으로 든든합니다.',
+    '지치지 않고 묵묵히 글을 쌓아 올리시는 작가님의 뒷모습은 언제 봐도 멋집니다.'],
+};
+const wlootLine = look => { const L = [...(WLOOT_WOLF[look]||[]), ...WLOOT_WOLF.any]; return L[Math.floor(Math.random()*L.length)]; };
+const WLOOT_PTS = [[12,48],[30,48],[48,45],[66,46],[88,47],[66,22],[49,62],[48,90],[36,40]];   // 미리보기용 자리 (서버 walk_loot_spot 과 같은 길목)
+function wlootSpot(){ for(let t=0;t<80;t++){ const p = WLOOT_PTS[Math.floor(Math.random()*WLOOT_PTS.length)];
+    const x = Math.max(6, Math.min(94, +(p[0] + Math.random()*16 - 8).toFixed(1))), y = Math.max(18, Math.min(92, +(p[1] + Math.random()*12 - 6).toFixed(1)));
+    if(!WALK_PLOTS.some(([px,py])=>Math.abs(x-px)<10.5 && y>py-17 && y<py+7)) return [x,y]; } return [12,48]; }
+let WLOOT = {items:[], today:0, max:WLOOT_DAY}, WLOOT_AT = 0, WLOOT_BUSY = false;
+async function refreshWalkLoot(){
+  if(!api.walkLoot) return;
+  try{ const r = await api.walkLoot(); if(r && Array.isArray(r.items)){ WLOOT = {items:r.items.map(i=>({...i, id:+i.id, x:+i.x, y:+i.y})), today:r.today||0, max:r.max||WLOOT_DAY}; WLOOT_AT = Date.now(); renderWalkLoot(); } }
+  catch(e){ WLOOT_AT = Date.now(); }   // walkloot.sql 전이면 조용히 안 보여요
+}
+function renderWalkLoot(){
+  const map = document.getElementById('wmap'); if(!map) return;
+  const ids = new Set(WLOOT.items.map(i=>String(i.id)));
+  map.querySelectorAll('.wloot').forEach(el=>{ if(!ids.has(el.dataset.wloot) && !el.classList.contains('got')) el.remove(); });
+  WLOOT.items.forEach(l=>{ if(map.querySelector(`.wloot[data-wloot="${l.id}"]`)) return;
+    map.insertAdjacentHTML('beforeend', `<button type="button" class="wloot" data-wloot="${l.id}" style="left:${l.x}%;top:${l.y}%;z-index:${Math.round(l.y*10)+3};--d:${(l.id%7)*.37}s" aria-label="${esc(WLOOT_NAME[l.look]||'분실물')} 줍기" title="${esc(WLOOT_NAME[l.look]||'분실물')}"><img src="walk/loot/${WLOOT_LOOKS.includes(l.look)?l.look:'paper'}.webp" alt="" draggable="false"></button>`); });
+  const c = document.getElementById('wlootCnt');
+  if(c){ const any = api.walkLoot && WLOOT_AT; c.hidden = !any; if(any) c.textContent = `🎒 오늘 주운 분실물 ${WLOOT.today}/${WLOOT.max}`; }
+}
+function walkLootGone(id, cls){
+  WLOOT.items = WLOOT.items.filter(i=>i.id!==id);
+  const el = document.querySelector(`#wmap .wloot[data-wloot="${id}"]`); if(!el) return;
+  if(cls){ el.classList.add(cls); setTimeout(()=>el.remove(), 700); } else el.remove();
+}
+function walkLootNear(){   // 분실물 바로 위에 멈추면 저절로 주워요
+  if(!WALK_ME || WLOOT_BUSY) return;
+  const l = WLOOT.items.find(i=>Math.abs(i.x-WALK_ME.x) < 2.4 && Math.abs(i.y-WALK_ME.y) < 4.5); if(l) walkLootPick(l.id);
+}
+function wlootGift(r){
+  if(r.kind==='coin') return `🪙 ${r.amount}코인`;
+  if(r.kind==='jackpot') return `💰 대박! 🪙 ${r.amount}코인`;
+  if(r.kind==='drop') return `💧 세계수 물방울 ${r.amount}개${r.amount>=15?' (대박!)':''}`;
+  if(r.kind==='ticket') return `🎫 이세계 공격권 ${r.amount}장${r.amount>=15?' (대박!)':''}`;
+  if(r.kind==='ticketcoin') return '🎫 공격권 대신 🪙 20코인 (이번 주 괴물은 쉬는 중이에요)';
+  if(r.kind==='lotto') return '🎟️ 공짜 복권 1장 (복권 탭에서 긁어요)';
+  if(r.kind==='bait') return '🎣 전설 미끼 1개 (호숫가 미끼 상자에 넣어 뒀어요)';
+  return '';
+}
+async function walkLootPick(id){
+  if(WLOOT_BUSY || !api.walkLootPick || !WALK_ME) return;
+  if(WLOOT.today >= WLOOT.max) return toast(`🎒 오늘은 분실물을 다 주웠어요 (하루 ${WLOOT.max}개). 새벽 12시에 다시 주울 수 있어요`, 4000);
+  const l = WLOOT.items.find(i=>i.id===id); if(!l) return;
+  WLOOT_BUSY = true;
+  try{
+    const r = await api.walkLootPick(id, WALK_ME.x, WALK_ME.y);
+    walkLootGone(id, 'got'); WLOOT.today = r.today ?? WLOOT.today+1;
+    walkSend('loot', {lid:id});
+    const map = document.getElementById('wmap');
+    if(map){ const f = document.createElement('span'); f.className = 'wloot-pop' + (r.kind==='jackpot'?' big':''); f.style.left = l.x+'%'; f.style.top = l.y+'%'; f.style.zIndex = 2000;
+      if((r.kind==='drop'||r.kind==='ticket') && r.amount>=15) f.classList.add('big');
+      f.textContent = {coin:`🪙 +${r.amount}`, jackpot:`💰 +${r.amount}`, drop:`💧 +${r.amount}`, ticket:`🎫 +${r.amount}`, ticketcoin:'🪙 +20', lotto:'🎟️ +1', bait:'🎣 전설 미끼!'}[r.kind] || '✨'; map.appendChild(f); setTimeout(()=>f.remove(), 1600); }
+    toast(`🐺 담당자: "${wlootLine(r.look)}"\n✨ ${WLOOT_NAME[r.look]||'분실물'} 속에서 ${wlootGift(r)}!`, 7000);
+    if(r.coins!=null && ME){ ME.coins = r.coins; renderTop(); }
+    if(r.kind==='jackpot') petParty('💰', `산책로 대박!\n🪙 ${r.amount}코인을 주웠어요!`);
+    if(r.kind==='drop' && typeof refreshTree==='function') refreshTree().then(()=>{ try{ renderTree(); }catch(e){} });
+    if(r.kind==='ticket' && typeof refreshBoss==='function') refreshBoss().then(()=>{ try{ renderBoss(true); }catch(e){} });
+    if(r.kind==='bait'){ try{ api.baits().then(b=>{ BAITS_ME = b; }).catch(()=>{}); }catch(e){} }
+    if(r.kind==='lotto' && typeof refreshLotto==='function') refreshLotto().then(()=>{ try{ renderLotto(); }catch(e){} });
+    renderWalkLoot();
+  }catch(err){
+    const m = err.message || '줍지 못했어요';
+    if(/먼저 주워/.test(m)) walkLootGone(id, 'gone');
+    if(/다 주웠/.test(m)) WLOOT.today = WLOOT.max;
+    toast('🐺 ' + m, 3500); refreshWalkLoot();
+  }finally{ WLOOT_BUSY = false; }
+}
+setInterval(()=>{ const t = document.getElementById('tab-walk'); if(t && !t.hidden && !document.hidden && ME) refreshWalkLoot(); }, 30000);
+
 // --- 꾸미기 ---
 let WALK_LOOK_TAB = 'char';
 function renderWalkLook(){
@@ -6689,8 +6840,10 @@ function renderLotto(){
           <div class="t-btns">
             ${scratching
               ? `<button class="pull" id="lottoAll" type="button">✨ 한 번에 다 긁기</button>`
-              : `<button class="pull" id="lottoBuy" type="button" ${left<1||ME.coins<LOTTO_PRICE?'disabled':''}>${left<1?'오늘은 다 긁었어요':`🪙 ${LOTTO_PRICE} · 한 장 사기`}</button>`}
+              : `<button class="pull" id="lottoBuy" type="button" ${left<1||ME.coins<LOTTO_PRICE?'disabled':''}>${left<1?'오늘은 다 긁었어요':`🪙 ${LOTTO_PRICE} · 한 장 사기`}</button>`
+                + ((L.free||0)>0 ? `<button class="pull ten" id="lottoFree" type="button">🎁 공짜 복권 긁기 · ${L.free}장</button>` : '')}
           </div>
+          ${(L.free||0)>0 && !scratching ? `<p class="small lotto-free-note">🗺️ 산책로에서 주운 공짜 복권이에요. 하루 ${LOTTO_PER_DAY}장과 따로 긁을 수 있어요!</p>` : ''}
           <div class="t-result">${result}</div>
         </div>
         <div>
@@ -6762,6 +6915,13 @@ document.addEventListener('click', e=>{
     LOTTO_CUR = {res, cells: lottoCells(res), revealed:false, nag: WOLF_NAG[Math.floor(Math.random()*WOLF_NAG.length)]};
     if(LOTTO) LOTTO.plays_today = res.plays_today;
     if(res.coins_paid!=null){ ME.coins = res.coins_paid; renderTop(); }   // 결과는 긁은 뒤에 보여 줘요
+    renderLotto();
+  });
+  if(e.target.closest('#lottoFree')) return act(async()=>{   // 🎟️ 산책로에서 주운 공짜 복권
+    const r = await api.playLottoFree(), res = Array.isArray(r) ? r[0] : r;
+    LOTTO_CUR = {res, cells: lottoCells(res), revealed:false, nag: WOLF_NAG[Math.floor(Math.random()*WOLF_NAG.length)]};
+    if(LOTTO){ LOTTO.plays_today = res.plays_today; LOTTO.free = res.free; }
+    if(res.coins_paid!=null){ ME.coins = res.coins_paid; renderTop(); }
     renderLotto();
   });
   if(e.target.closest('#lottoAll')) return revealLotto();
@@ -8439,6 +8599,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑧</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑪</p>
 </body>
 </html>
