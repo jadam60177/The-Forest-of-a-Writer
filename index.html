@@ -4073,7 +4073,10 @@ const supaApi = (() => {
       const t = await sb.from('placements').select('id,item_code,r,c,w,h,room,rot,tint').eq('discord_id', who);   // 🎨 rugtint.sql 뒤
       if(!t.error) return t.data;
       const r = await sb.from('placements').select('id,item_code,r,c,w,h,room,rot').eq('discord_id', who);
-      if(!r.error) return r.data;
+      if(!r.error){   // 🎨 러그 색 칸을 표에서 못 읽으면 get_rug_tints 로 색만 따로 받아서 붙여요
+        try{ const g = await sb.rpc('get_rug_tints', {p_who:who});
+          if(!g.error){ const m = new Map((g.data||[]).map(x=>[String(x.id), x.tint])); r.data.forEach(p=>{ p.tint = m.get(String(p.id)) || null; }); } }catch(e){}
+        return r.data; }
       return ok(await sb.from('placements').select('id,item_code,r,c,w,h,room').eq('discord_id', who));   // rotate.sql 넣기 전 예비
     },
     async buy(code){ return ok(await sb.rpc('buy_item_ex', {p_code:code})); },
@@ -8424,6 +8427,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑤</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑥</p>
 </body>
 </html>
