@@ -2385,6 +2385,8 @@ const DRAWN_FURN = [
   ['windowbed','🛋️','창가 소파 베드',520,2,2],
   ['coffeebar','☕','심야 홈 카페 바',480,2,2],
   ['cookstation','🍳','요리용 주방 조리대',400,2,2],
+  // 10-21 소품 올리는 빈 테이블 (tables.sql 과 같아요)
+  ['tbl_side','🪵','작은 사이드 테이블',80,1,1], ['tbl_two','🪵','나무 테이블',150,2,1], ['tbl_long','🪵','긴 나무 테이블',220,3,1], ['tbl_wide','🪵','넓은 나무 테이블',260,2,2],
 ].map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:code!=='kitchen',category:'furniture',icon:code}));
 DEFAULT_SHOP.splice(DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'), 0, ...DRAWN_FURN);
 DEFAULT_SHOP.find(x=>x.code==='table').icon = 'diningtable';   // 식탁은 그림으로
@@ -2484,7 +2486,7 @@ const HALLOWEEN_UNTIL = '2026-11-01T00:00:00+09:00';
 ["chair", "clock", "bed", "sofa", "desk", "bathtub", "piano", "tree", "fireplace", "telescope", "camptent", "fountain", "carousel", "xmastree"].forEach(c=>{ const it = DEFAULT_SHOP.find(x=>x.code===c); if(it) it.icon = c; });
 const iconKey = it => it && (it.icon || (CAPACITY[it.code] ? it.code : null));   // 진열장은 DB 설정 없이도 그림으로
 // 제미나이 가구 그림 (furn 폴더) — 있으면 코드 그림 대신 이걸 써요
-const FURN_IMG = new Set(["draftdesk", "windowbed", "coffeebar", "cookstation", "wall_white", "aquarium", "armchair", "bat", "bathtub", "bed", "bigshelf", "books", "bookshelf", "bouquet", "cabinet", "cactus", "campfire", "camptent", "candle", "canopy", "carousel", "cat", "cattower", "cauldron", "chair", "clock", "coatrack", "coffee", "contract", "cookie", "desk", "deskchair", "diningtable", "dog", "drawer", "fireplace", "firewood", "fishbowl", "floorlamp", "fountain", "fox", "frame", "fridge", "ghost", "gramophone", "grandpiano", "guitar", "hammock", "headphone", "hedgehog", "ironstove", "keyboard", "kitchen", "lantern", "laptop", "lowtable", "mirror", "monstera", "moonlamp", "mushroom", "notebook", "pen", "piano", "plant", "plotboard", "postbox", "pumpkin", "rabbit", "radio", "rocking", "roundtable", "rug_blue", "rug_cloud", "rug_green", "rug_living", "rug_navy", "rug_orange", "rug_persian", "rug_purple", "rug_red", "rug_round", "rug_runner", "rug_straw", "rug_yellow", "screen", "shelf", "sofa", "sofa3", "tallmirror", "tea", "teddy", "telescope", "tr_bookmark", "tr_cushion", "tr_dict", "tr_letter", "tr_medal", "tr_pass", "tr_receipt", "tr_redpen", "tr_scarf", "tr_tea", "tree", "trophy", "tvstand", "twdesk", "vanity", "violin", "vitrine", "wall_arch", "wall_bamboo", "wall_brick", "wall_curtain", "wall_wood", "wardrobe", "washer", "window", "witchhat", "wolfdoll", "xmastree"]);
+const FURN_IMG = new Set(["tbl_side", "tbl_two", "tbl_long", "tbl_wide", "draftdesk", "windowbed", "coffeebar", "cookstation", "wall_white", "aquarium", "armchair", "bat", "bathtub", "bed", "bigshelf", "books", "bookshelf", "bouquet", "cabinet", "cactus", "campfire", "camptent", "candle", "canopy", "carousel", "cat", "cattower", "cauldron", "chair", "clock", "coatrack", "coffee", "contract", "cookie", "desk", "deskchair", "diningtable", "dog", "drawer", "fireplace", "firewood", "fishbowl", "floorlamp", "fountain", "fox", "frame", "fridge", "ghost", "gramophone", "grandpiano", "guitar", "hammock", "headphone", "hedgehog", "ironstove", "keyboard", "kitchen", "lantern", "laptop", "lowtable", "mirror", "monstera", "moonlamp", "mushroom", "notebook", "pen", "piano", "plant", "plotboard", "postbox", "pumpkin", "rabbit", "radio", "rocking", "roundtable", "rug_blue", "rug_cloud", "rug_green", "rug_living", "rug_navy", "rug_orange", "rug_persian", "rug_purple", "rug_red", "rug_round", "rug_runner", "rug_straw", "rug_yellow", "screen", "shelf", "sofa", "sofa3", "tallmirror", "tea", "teddy", "telescope", "tr_bookmark", "tr_cushion", "tr_dict", "tr_letter", "tr_medal", "tr_pass", "tr_receipt", "tr_redpen", "tr_scarf", "tr_tea", "tree", "trophy", "tvstand", "twdesk", "vanity", "violin", "vitrine", "wall_arch", "wall_bamboo", "wall_brick", "wall_curtain", "wall_wood", "wardrobe", "washer", "window", "witchhat", "wolfdoll", "xmastree"]);
 // 🎁 보따리 소품 그림 (10-12 저녁, furn 폴더) — 보따리 소품 전부 + 도장(stamp)
 const GACHA_IMG = ["unicorn", "dragon", "shootingstar", "fairy", "squirrel", "butterfly", "crystal", "turtle", "umbrella", "socks", "mapleleaf", "shell", "yarn", "honeypot", "basket", "fullmoon", "deer", "raccoon", "moonviewing", "chestnut", "sweetpotato", "fishcake", "flashlight", "backpack", "boots", "swan", "oldkey", "dove", "posthorn", "seal", "letter", "envelope", "parcel", "nametag", "clip", "memo", "stamp", "birthdaycake", "mooncake", "cake", "pie", "pudding", "croissant", "baguette", "bagel", "waffle", "pancake", "donut", "peacock", "rainbow", "clover", "blossom", "rosette", "sunflower", "tulip", "wildflower", "rose", "herb", "sprout", "medal", "legendms", "treasuremap", "quill", "magnifier", "openbook", "newspaper", "redbook", "greenbook", "bookmark", "pencil", "panda", "parfait", "bubbletea", "jar", "strawberry", "teapot", "cupcake", "dango", "milk", "juice", "lemon", "ferris", "coaster", "fireworks", "sparkler", "mask", "balloon", "windchime", "koinobori", "confetti", "popper", "ticket", "crown", "galaxy", "globe", "statue", "amulet", "compass", "urn", "ruler", "cardbox", "oillamp", "hourglass", "ribbon", "logs", "bonfire", "sleepbag", "thermos", "inkbottle", "mailbox", "bread", "muffin", "jam", "rollingpin", "chefhat", "potplant", "wateringcan", "flowerbunch", "shears", "seedpack", "bookstack", "glasses", "journal", "minishelf", "teacup", "teabag", "teacookie", "rollcake", "teatray", "cottoncandy", "candyapple", "takoyaki", "garland", "glowstick", "parchment", "startele", "libladder", "exlibris", "candlestick"];
 GACHA_IMG.forEach(c=>FURN_IMG.add(c));
@@ -3952,16 +3954,21 @@ const isMe = p => DEMO ? p.discord_id==='me' : p.discord_id===supaApi.myId();
 
 // 카페트는 바닥 층이라 가구 밑에 깔려요. 같은 층끼리만 안 겹치면 돼요
 /* 🍰 탁상 소품 (10-17): 음식·음료 1칸 소품은 식탁류 위에 올릴 수 있어요 (placeitem 규칙은 tabletop.sql 과 같아요) */
-const TABLE_SURFACE = new Set(['table','roundtable','lowtable','teatable']);   // 식탁 · 원탁 · 좌식 탁자 · 차 마시는 좌탁
-const TABLE_FOOD = new Set(['coffee','tea','cookie','chestnut','sweetpotato','fishcake','croissant','baguette','bagel','waffle','pancake','donut','cake','pie','pudding','birthdaycake','mooncake',
-  'honeypot','teapot','cupcake','dango','milk','juice','lemon','bubbletea','strawberry','parfait','bread','muffin','jam','teacup','teabag','teacookie','rollcake','teatray',
-  'cottoncandy','candyapple','takoyaki','thermos']);
-const TABLE_SPOT = {table:{dx:30, dy:-44, s:.56}, teatable:{dx:14, dy:-40, s:.42}, lowtable:{dx:30, dy:-36, s:.56}, roundtable:{dx:0, dy:-36, s:.56}};   // 상판 자리·크기 (10-20 진짜 그림으로 맞춤)
+const TABLE_SURFACE = new Set(['table','roundtable','lowtable','teatable','tbl_side','tbl_two','tbl_long','tbl_wide']);   // (10-21) 빈 테이블 4종 추가   // 식탁 · 원탁 · 좌식 탁자 · 차 마시는 좌탁
+// (10-21) 1칸짜리 소품이면 전부 식탁 위에 올라가요 — 새 소품도 저절로 (서버 tabletop2.sql 은 1칸짜리면 받아 줘요)
+const TABLE_FOOD = {has: code => { const it = itemOf(code); return !!it && catOf(it)==='accessory' && it.w===1 && it.h===1 && it.layer!=='floor' && !TABLE_SURFACE.has(code) && !CAPACITY[code]; }};
+const TABLE_SPOT = {table:{dx:30, dy:-44, s:.56}, teatable:{dx:14, dy:-40, s:.42}, lowtable:{dx:30, dy:-36, s:.56}, roundtable:{dx:0, dy:-36, s:.56},
+  tbl_side:{dx:0, dy:-26, s:.5}, tbl_two:{dx:26, dy:-16, s:.5, v:{pull:20, dy:-10}}, tbl_long:{dx:52, dy:-26, s:.5, v:{pull:58, dy:-6}}, tbl_wide:{dx:22, dyTop:22, dyBot:-34, s:.52}};   // 상판 자리·크기 (10-20 진짜 그림으로 맞춤)
 const spotOf = (f, t) => { const sp = TABLE_SPOT[t.item_code] || {dx:0, dy:-30, s:.56}, ci = f.c - t.c, ri = f.r - t.r;
   let dx = 0, dy = sp.dy;
   if(t.w>1) dx = ci===0 ? sp.dx : ci===t.w-1 ? -sp.dx : 0;          // 가로로 긴 식탁: 양쪽 칸 소품을 가운데로
-  else if(t.h>1) dy = sp.dy*0.5 + (ri===0 ? 22 : ri===t.h-1 ? -22 : 0);   // 돌려서 세로로 놓은 식탁: 위아래 칸을 가운데로
+  if(t.w>1 && t.h>1) dy = ri===0 ? (sp.dyTop ?? sp.dy) : (sp.dyBot ?? sp.dy);   // 넓은 테이블: 위 줄은 아래로, 아래 줄은 위로
+  else if(t.h>1){   // (10-21) 돌려서 세로로 놓은 테이블: 누운 상판 가운데 줄에 맞춰요 (세로 그림 _v 가 있으면 그 그림 기준)
+    const v = TABLE_V_IMG.has(t.item_code), sv = sp.v || {};
+    dx = v ? (sv.dx ?? 0) : (sv.dx ?? 6); const pull = v ? (sv.pull ?? 14) : (sv.pull ?? 16);
+    dy = (v ? (sv.dy ?? -24) : (sv.dy ?? -8)) + (ri===0 ? pull : ri===t.h-1 ? -pull : 0); }
   return `;--tx:${dx}%;--ty:${dy}%;--ts:${sp.s}`; };
+const TABLE_V_IMG = new Set([]);   // 세로 그림(furn/코드_v.webp)이 있는 테이블 — 그림이 오면 코드를 넣어요
 const tableUnder = (f, list) => TABLE_FOOD.has(f.item_code) ? list.find(g => g.id!==f.id && TABLE_SURFACE.has(g.item_code) && (g.room||0)===(f.room||0) && f.r>=g.r && f.r<g.r+g.h && f.c>=g.c && f.c<g.c+g.w) : null;
 const topsOn = (t, list) => TABLE_SURFACE.has(t.item_code) ? list.filter(g => g.id!==t.id && TABLE_FOOD.has(g.item_code) && (g.room||0)===(t.room||0) && g.r>=t.r && g.r<t.r+t.h && g.c>=t.c && g.c<t.c+t.w) : [];
 const layerOf = code => { const it = itemOf(code); return it.layer || (FLOOR_CODES.has(code) ? 'floor' : 'furniture'); };
@@ -4163,13 +4170,15 @@ function roomHTML(list, cur, {editable, cabs={}}){
     const hKey = rot%2 && !fimg(it) && iconKey(it) && FURN_SVG[iconKey(it)+'_h'] ? iconKey(it)+'_h' : null;
     const stretch = !!fimg(it) && STRETCH_IMG.has(f.item_code);   // 커튼처럼 칸에 맞춰 늘려 그리는 그림 (돌려도 그림은 안 눕혀요)
     const wallH = WALL_H.has(f.item_code) && !!fimg(it), tile = TILE_WALL.has(f.item_code) && !!fimg(it);
-    const turn = !stretch && !wallH && rot%2 && !!fimg(it);   // 그림 칸막이는 그림째 눕혀요
-    if(hKey) rot = 0;
+    if(rot%2 && TABLE_SURFACE.has(f.item_code) && it.w===it.h) rot = 0;   // (10-21) 정사각 테이블은 돌려도 똑같이 (그림이 옆으로 눕지 않게)
+    const tableV = rot%2 && TABLE_V_IMG.has(f.item_code);                  // 세로로 놓은 긴 테이블: 세로 그림
+    const turn = !stretch && !wallH && !tableV && rot%2 && !!fimg(it);   // 그림 칸막이는 그림째 눕혀요
+    if(hKey || tableV) rot = 0;
     const rs = rot%2 ? `;--rw:calc(${f.w}*var(--tile) + ${f.w-1}*3px - 4px);--rh:calc(${f.h}*var(--tile) + ${f.h-1}*3px - 4px)` : '';
     // 세로로 긴 그림 가구(1×2 등)는 키를 칸에 꽉 맞추고, 그림이 통통하면 옆으로 조금 삐져나와요 (10-13 옷장 제보)
     const tallfit = !!fimg(it) && f.h>f.w && !stretch && !turn && !wallH && !tile && !floor && !TURN_IMG.has(f.item_code);
     const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${rot?'rot r'+rot:''}`;
-    const art = wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
+    const art = tableV ? `<img class="fsvg fimg" src="furn/${f.item_code}_v.webp" alt="" draggable="false" loading="lazy">` : wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
     html += editable
       ? `<button class="${cls}" data-pid="${f.id}" style="${style}${rs}" aria-label="${esc(it.name)} 치우기">${art}</button>`
@@ -6616,7 +6625,7 @@ function setHint(){
   if(!selected){ el.textContent = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구는 끌어서 옮기고(폰은 꾹 눌렀다가 끌기), 그냥 누르면 가방으로 돌아가요.'; return; }
   const it = itemOf(selected), fp = footprint(selected);
   const canRot = true;   // 진열장도 돌릴 수 있어요 (칸 배치만 세로로 바뀌어요)
-  el.innerHTML = `<span class="hint-ico r${rotated}">${ico(it)}</span> ${esc(it.name)}(${fp.w}×${fp.h}칸)${rotated?` · ${ROT_NAME[rotated]}`:''} · 놓을 자리의 왼쪽 위 칸을 눌러 주세요.` + (TABLE_FOOD.has(selected) ? ' 🍰 식탁·원탁·좌탁 위에도 올릴 수 있어요!' : '') +
+  el.innerHTML = `<span class="hint-ico r${rotated}">${ico(it)}</span> ${esc(it.name)}(${fp.w}×${fp.h}칸)${rotated?` · ${ROT_NAME[rotated]}`:''} · 놓을 자리의 왼쪽 위 칸을 눌러 주세요.` + (TABLE_FOOD.has(selected) ? ' 🍰 식탁·테이블 위에도 올릴 수 있어요!' : '') +
     (canRot ? ` <button class="mini" id="rotBtn">↻ 돌리기</button>` : '');
 }
 
@@ -7850,6 +7859,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-21 판 ②</p>
+<p class="site-ver">마감의 숲 · 10-21 판 ⑤</p>
 </body>
 </html>
