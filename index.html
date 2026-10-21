@@ -1681,6 +1681,9 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 .wloot-pop.big{font-size:clamp(18px,2.2vw,34px);color:#FFE070}
 @keyframes wlootPop{0%{opacity:0;margin-top:10px}15%{opacity:1;margin-top:0}100%{opacity:0;margin-top:-50px}}
 .wloot-cnt{white-space:nowrap}
+.bi-trade{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin:.2rem 0 .8rem}.bi-trade:empty{display:none}.bi-trade p{flex-basis:100%;text-align:center}
+.bi-trade-all{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin:.1rem 0 .55rem;padding:.45rem .6rem;border:1px dashed rgba(255,206,92,.45);border-radius:12px;background:rgba(255,206,92,.07)}
+.bi-trade-all .small{flex:1 1 14rem}
 .wloot-emo{display:block;font-size:clamp(22px,2.6vw,44px);line-height:1;text-align:center}
 .wloot.bonus{filter:drop-shadow(0 0 7px rgba(255,214,90,1)) drop-shadow(0 0 14px rgba(255,190,60,.8)) drop-shadow(0 3px 2px rgba(40,30,10,.35))}
 .wloot.bonus::after{content:'✦✦';color:#FFD24A}
@@ -2458,6 +2461,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <h3 id="zoomName" style="margin:0"></h3>
   <div id="zoomBadge"></div>
   <p class="small" id="zoomMeta"></p>
+  <div class="bi-trade" id="zoomTrade"></div>
   <button class="mini ask-yes" id="zoomOk">닫기</button>
 </dialog>
 
@@ -4059,6 +4063,12 @@ const demoApi = (() => {
         st.bossS = {week:wk, monster:MONSTERS[wk%MONSTERS.length].code, max_hp:15000, dmg:3050, att:new Set(['moon','dl','green','dawn','owl']), my:0, coins:0, dex:p?p.dex:[], tickets:p?0:3, fuel:p?0:20}; }   // 공격권은 다음 주로 안 넘어가요
       return st.bossS;
     },
+    async bossTrade(item, kind){ const B = this.bossState(); st.bitems = st.bitems || {}; let n = 0;
+      if(kind==='ticket' && B.dmg>=B.max_hp) fail('이번 주 괴물이 쉬는 중이라 공격권으로는 못 바꿔요. 코인으로 바꿔 주세요');
+      Object.keys(st.bitems).forEach(c=>{ if((!item || c===item) && st.bitems[c]>1){ n += st.bitems[c]-1; st.bitems[c] = 1; } });
+      if(!n) fail('바꿀 수 있는 겹친 수집품이 없어요');
+      if(kind==='coin') st.me.coins += BOSS_TRADE_COIN*n; else B.tickets += n;
+      persist(); return {kind, n, coins:st.me.coins, tickets:B.tickets}; },
     async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, my_coins:B.coins||0, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
     async bossHit(code, n){
       const B = this.bossState(), w = weaponOf(code), m = monsterOf(B.monster);
@@ -4265,6 +4275,7 @@ const supaApi = (() => {
     async lotto(){ return ok(await sb.rpc('get_lotto')); },
     async boss(){ const r = ok(await sb.rpc('get_boss')); return Array.isArray(r) ? r[0] : r; },              // ⚔️ 이번 주 괴물 (boss.sql)
     async bossHit(w, n){ const r = ok(await sb.rpc('boss_hit', {p_weapon:w, p_count:n})); return Array.isArray(r) ? r[0] : r; },
+    async bossTrade(item, kind){ const r = ok(await sb.rpc('boss_trade_dup', {p_item:item||'', p_kind:kind})); return Array.isArray(r) ? r[0] : r; },   // 🔁 겹친 수집품 바꾸기
     async playLotto(){ return ok(await sb.rpc('play_lotto')); },
     async playLottoFree(){ return ok(await sb.rpc('play_lotto_free')); },                       // 🎟️ 산책로에서 주운 공짜 복권 (walkloot.sql)
     async walkLoot(){ const r = ok(await sb.rpc('get_walk_loot')); return Array.isArray(r) ? r[0] : r; },   // 🗺️ 산책로 분실물 (walkloot.sql)
@@ -5706,6 +5717,7 @@ const weaponDmg = (w, m) => w.dmg * (m.weak===w.code ? BOSS_WEAK : 1);
 // 🏆 잡은 괴물은 꽃·물고기처럼 📖 괴물 도감에만 모여요 (가방에 들어가는 전리품은 없어요)
 // ✨ 괴물 수집품 (10-21 ⑯) — 괴물마다 7개, 주민마다 랜덤으로 모아요. 그림 monster/코드.webp · boss.sql 의 boss_items 와 같아야 해요
 //    때릴 때마다 BOSS_DROP 확률로 1개 · 쓰러뜨리면 때린 주민 모두 1개 더(아직 없는 것부터). 새 괴물 수집품은 매주 목요일에 여기 + boss.sql 에 한 줄씩
+const BOSS_TRADE_COIN = 50;   // 🔁 겹친 수집품 1개 = 🪙 50 또는 🎫 1장 (boss.sql boss_trade_dup 과 같아요)
 const BOSS_DROP = .04;   // (10-22 새벽 10% → 4%, boss.sql 의 boss_hit 과 같아야 해요)
 const BOSS_ITEMS = {
   slump: [['slump_cushion','회색 털뭉치 쿠션'],['slump_eyemask','반쯤 감긴 눈안대'],['slump_coldcoffee','다 식어버린 커피 머그잔'],['slump_clock','태엽이 멈춘 시계'],
@@ -5821,7 +5833,11 @@ function bossItemsHTML(m){
   const cell = ([c,n]) => mine[c]>0 || peek()
     ? `<button type="button" class="bi ${mine[c]>0?'':'peek'}" data-bitem="${c}" title="${esc(n)}">${bossItemImg(c)}<b>${esc(n)}</b>${mine[c]>1?`<span class="bq">×${mine[c]}</span>`:''}</button>`
     : `<span class="bi no">${bossItemImg(c,'shadow')}<b>???</b></span>`;
-  return `<div class="boss-items"><h4>✨ ${esc(m.name)} 수집품 <span class="small">${have} / ${list.length} · 때릴 때마다 가끔 떨어뜨리고, 쓰러뜨리면 하나 더! 주민마다 랜덤이에요</span></h4>
+  const dupN = Object.values(mine).reduce((a,q)=>a + Math.max(0, q-1), 0), alive = BOSS && BOSS.hp > 0;
+  const tradeAll = dupN > 0 && api.bossTrade ? `<div class="bi-trade-all"><span class="small">🔁 겹친 수집품 <b>${dupN}</b>개 (모든 괴물) · 1개에 🪙 ${BOSS_TRADE_COIN} 또는 🎫 1장</span>
+      <button class="mini" type="button" data-btrade-all="coin">🪙 ${(BOSS_TRADE_COIN*dupN).toLocaleString()}코인으로</button>
+      <button class="mini" type="button" data-btrade-all="ticket" ${alive?'':'disabled title="이번 주 괴물이 쉬는 중이에요"'}>🎫 공격권 ${dupN}장으로</button></div>` : '';
+  return `<div class="boss-items"><h4>✨ ${esc(m.name)} 수집품 <span class="small">${have} / ${list.length} · 때릴 때마다 가끔 떨어뜨리고, 쓰러뜨리면 하나 더! 주민마다 랜덤이에요</span></h4>${tradeAll}
     <div class="bi-grid">${list.map(cell).join('')}</div>
     ${others.length ? `<details class="boss-dex"><summary>🎒 다른 괴물 수집품</summary>${others.map(([k,l])=>`<p class="small" style="margin:.5rem 0 .2rem">${esc(monsterOf(k).name)} · ${l.filter(([c])=>mine[c]>0).length} / ${l.length}</p><div class="bi-grid">${l.map(cell).join('')}</div>`).join('')}</details>` : ''}</div>`;
 }
@@ -5831,8 +5847,29 @@ function bossItemShow(code, isNew, qty, why){
   document.getElementById('zoomName').textContent = it.name;
   document.getElementById('zoomBadge').innerHTML = isNew ? '<span class="rb legend">✨ 새 수집품!</span>' : `<span class="rb rare">×${qty}</span>`;
   document.getElementById('zoomMeta').innerHTML = `<span class="zoom-about">${esc(why)}</span>`;
+  const tr = document.getElementById('zoomTrade'), dup = (qty||0) - 1, alive = BOSS && BOSS.hp > 0;
+  tr.innerHTML = dup > 0 && api.bossTrade ? `<p class="small" style="margin:.1rem 0 .4rem">🔁 겹친 ${dup}개를 바꿀 수 있어요 (도감용 1개는 남아요)</p>
+    <button class="mini" type="button" data-btrade="${esc(code)}" data-kind="coin">🪙 ${(BOSS_TRADE_COIN*dup).toLocaleString()}코인으로</button>
+    <button class="mini" type="button" data-btrade="${esc(code)}" data-kind="ticket" ${alive?'':'disabled title="이번 주 괴물이 쉬는 중이에요"'}>🎫 공격권 ${dup}장으로</button>` : '';
   if(!d.open) d.showModal();
 }
+document.getElementById('zoomDlg').addEventListener('close', ()=>{ const t = document.getElementById('zoomTrade'); if(t) t.innerHTML = ''; });
+async function bossTradeDo(item, kind){
+  const items = (BOSS && BOSS.items) || {};
+  const n = item ? Math.max(0, (items[item]||0) - 1) : Object.values(items).reduce((a,q)=>a + Math.max(0, q-1), 0);
+  if(!n) return toast('바꿀 수 있는 겹친 수집품이 없어요');
+  const what = kind==='coin' ? `🪙 ${(BOSS_TRADE_COIN*n).toLocaleString()}코인` : `🎫 공격권 ${n}장`;
+  if(!await ask(`${item ? `「${bossItem(item).name}」 겹친 ${n}개` : `겹친 수집품 ${n}개`}를 ${what}으로 바꿀까요?\n도감용 1개씩은 그대로 남아요.`)) return;
+  const r = await api.bossTrade(item||null, kind);
+  await refreshBoss(); renderBoss(true);
+  if(r && r.coins!=null && ME){ ME.coins = r.coins; renderTop(); }
+  const d = document.getElementById('zoomDlg'); if(d.open) d.close();
+  toast(`🔁 겹친 수집품 ${r.n}개 → ${kind==='coin' ? `🪙 ${(BOSS_TRADE_COIN*r.n).toLocaleString()}코인` : `🎫 공격권 ${r.n}장`}!`);
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-btrade]'); if(b) return act(()=>bossTradeDo(b.dataset.btrade, b.dataset.kind));
+  const a = e.target.closest('[data-btrade-all]'); if(a) return act(()=>bossTradeDo(null, a.dataset.btradeAll));
+});
 document.addEventListener('click', e=>{ const b = e.target.closest('[data-bitem]'); if(!b) return; const q = (BOSS && BOSS.items && BOSS.items[b.dataset.bitem]) || 0;
   bossItemShow(b.dataset.bitem, false, q, q ? `${monsterOf(bossItem(b.dataset.bitem).monster).name}에게서 얻은 수집품이에요` : '👁️ 아직 못 모았어요'); });
 function bossPop(stage, text, cls, k){
@@ -8634,6 +8671,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑮</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑯</p>
 </body>
 </html>
