@@ -1681,6 +1681,9 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 .wloot-pop.big{font-size:clamp(18px,2.2vw,34px);color:#FFE070}
 @keyframes wlootPop{0%{opacity:0;margin-top:10px}15%{opacity:1;margin-top:0}100%{opacity:0;margin-top:-50px}}
 .wloot-cnt{white-space:nowrap}
+.wloot.bonus{filter:drop-shadow(0 0 7px rgba(255,214,90,1)) drop-shadow(0 0 14px rgba(255,190,60,.8)) drop-shadow(0 3px 2px rgba(40,30,10,.35))}
+.wloot.bonus::after{content:'✦✦';color:#FFD24A}
+.wloot-admin{display:inline-flex;gap:.35rem;flex-wrap:wrap}
 .toast{white-space:pre-line;width:max-content;max-width:min(92vw,560px);box-sizing:border-box;word-break:keep-all;line-height:1.45}
 .lotto-free-note{margin:.4rem 0 0;color:#E9B949}
 :root[data-mode="day"] .lotto-free-note{color:#B06E0E}
@@ -3994,12 +3997,16 @@ const demoApi = (() => {
       st.wloot = st.wloot || {items:[], last: now - 3*120e3, n:1, day:'', today:0};
       const W = st.wloot; if(W.day!==this.fday()){ W.day = this.fday(); W.today = 0; }
       const k = Math.floor((now - W.last)/120e3);
-      if(k>0){ for(let i=0;i<Math.min(k, WLOOT_MAX - W.items.length);i++){ const [x,y] = wlootSpot(); W.items.push({id:W.n++, x, y, look:WLOOT_LOOKS[Math.floor(Math.random()*WLOOT_LOOKS.length)]}); } W.last += k*120e3; }
+      if(k>0){ for(let i=0;i<Math.min(k, WLOOT_MAX - W.items.filter(x=>!x.bonus).length);i++){ const [x,y] = wlootSpot(); W.items.push({id:W.n++, x, y, look:WLOOT_LOOKS[Math.floor(Math.random()*WLOOT_LOOKS.length)]}); } W.last += k*120e3; }
       return W; },
+    async adminLootDrop(n, x, y){ const W = this.wlstate(); n = Math.max(1, Math.min(30, n|0));
+      for(let i=0;i<n;i++){ let p; if(x==null) p = wlootSpot(); else { for(let t=0;t<40;t++){ p = [Math.max(4,Math.min(96,+(x+Math.random()*20-10).toFixed(1))), Math.max(16,Math.min(94,+(y+Math.random()*16-8).toFixed(1)))]; if(!WALK_PLOTS.some(([px,py])=>Math.abs(p[0]-px)<10.5 && p[1]>py-17 && p[1]<py+7)) break; } }
+        W.items.push({id:W.n++, x:p[0], y:p[1], look:WLOOT_LOOKS[Math.floor(Math.random()*WLOOT_LOOKS.length)], bonus:true}); }
+      persist(); return n; },
     async walkLoot(){ const W = this.wlstate(); return {items:W.items.map(x=>({...x})), today:W.today, max:WLOOT_DAY, next_at:new Date(W.last+120e3).toISOString()}; },
     async walkLootPick(id, x, y){ const W = this.wlstate();
-      if(W.today>=WLOOT_DAY) fail(`오늘은 분실물을 다 주웠어요 (하루 ${WLOOT_DAY}개). 새벽 12시에 다시 주울 수 있어요`);
       const l = W.items.find(i=>i.id===id); if(!l) fail('앗, 다른 작가님이 먼저 주워 갔어요!');
+      if(!l.bonus && W.today>=WLOOT_DAY) fail(`오늘은 분실물을 다 주웠어요 (하루 ${WLOOT_DAY}개). 새벽 12시에 다시 주울 수 있어요`);
       if(Math.abs(x-l.x)>7 || Math.abs(y-l.y)>10) fail('조금 더 가까이 가서 주워 주세요');
       const r = Math.random(); let kind, amount;
       if(r<.47){ kind='coin'; amount=10+Math.floor(Math.random()*31); } else if(r<.67){ kind='drop'; amount=wlootMany(); } else if(r<.82){ kind='ticket'; amount=wlootMany(); } else if(r<.95){ kind='lotto'; amount=1; } else if(r<.98){ kind='bait'; amount=1; } else { kind='jackpot'; amount=100; }
@@ -4008,7 +4015,7 @@ const demoApi = (() => {
       if(kind==='lotto') st.lfree = (st.lfree||0)+1;
       if(kind==='ticket'){ const B = this.bossState(); if(B.dmg<B.max_hp) B.tickets += amount; else { kind='ticketcoin'; amount=20; } }
       if(['coin','jackpot','ticketcoin'].includes(kind)) st.me.coins += amount;
-      W.items = W.items.filter(i=>i.id!==id); W.today++; persist();
+      W.items = W.items.filter(i=>i.id!==id); if(!l.bonus) W.today++; persist();
       return {kind, amount, look:l.look, coins:st.me.coins, today:W.today}; },
     async playLotto(){ const L = this.lstate();
       if(L.n>=LOTTO_PER_DAY) fail('오늘 복권은 다 긁었어요. 새벽 12시에 다시 채워져요');
@@ -4260,6 +4267,7 @@ const supaApi = (() => {
     async playLotto(){ return ok(await sb.rpc('play_lotto')); },
     async playLottoFree(){ return ok(await sb.rpc('play_lotto_free')); },                       // 🎟️ 산책로에서 주운 공짜 복권 (walkloot.sql)
     async walkLoot(){ const r = ok(await sb.rpc('get_walk_loot')); return Array.isArray(r) ? r[0] : r; },   // 🗺️ 산책로 분실물 (walkloot.sql)
+    async adminLootDrop(n, x, y){ return ok(await sb.rpc('admin_walk_loot_drop', {p_n:n, p_x:x==null?null:+(+x).toFixed(1), p_y:y==null?null:+(+y).toFixed(1)})); },   // 🎁 숲지기 뿌리기
     async walkLootPick(id, x, y){ const r = ok(await sb.rpc('walk_loot_pick', {p_id:id, p_x:+(+x).toFixed(1), p_y:+(+y).toFixed(1)})); return Array.isArray(r) ? r[0] : r; },
     async trucks(){ return ok(await sb.rpc('get_trucks')) || []; },
     async callTruck(kind){ const r = ok(await sb.rpc('call_truck', {p_kind:kind})); return Array.isArray(r) ? r[0] : r; },
@@ -6549,6 +6557,7 @@ function walkJoin(priv){
   if(priv===undefined) priv = true;
   const ch = api.walkChannel(ME.discord_id, priv); WALK_CH = ch; WALK_RT = 'joining'; walkNow();
   ch.on('presence', {event:'sync'}, ()=>{ if(WALK_CH!==ch) return; const s = ch.presenceState(); WALK_RTL = Object.values(s).map(a=>a[a.length-1]); walkSync(); })
+    .on('broadcast', {event:'lootdrop'}, ()=>{ refreshWalkLoot(); })
     .on('broadcast', {event:'loot'}, ({payload})=>{ walkLootGone(+payload.lid); const c = WALK_OTHERS.get(payload.id); if(c) walkSay(c, '✨ 분실물 주웠다!'); })
     .on('broadcast', {event:'say'}, ({payload})=>{ const c = WALK_OTHERS.get(payload.id), t = String(payload.text||'').slice(0, WALK_SAY_MAX); if(c){ walkSay(c, t); WALK_HEARD.set(payload.id, {t, at:Date.now()}); } })
     .subscribe((st, err)=>{
@@ -6637,7 +6646,7 @@ function wlootSpot(){ for(let t=0;t<80;t++){ const p = WLOOT_PTS[Math.floor(Math
 let WLOOT = {items:[], today:0, max:WLOOT_DAY}, WLOOT_AT = 0, WLOOT_BUSY = false;
 async function refreshWalkLoot(){
   if(!api.walkLoot) return;
-  try{ const r = await api.walkLoot(); if(r && Array.isArray(r.items)){ WLOOT = {items:r.items.map(i=>({...i, id:+i.id, x:+i.x, y:+i.y})), today:r.today||0, max:r.max||WLOOT_DAY}; WLOOT_AT = Date.now(); renderWalkLoot(); } }
+  try{ const r = await api.walkLoot(); if(r && Array.isArray(r.items)){ WLOOT = {items:r.items.map(i=>({...i, id:+i.id, x:+i.x, y:+i.y, bonus:!!i.bonus})), today:r.today||0, max:r.max||WLOOT_DAY}; WLOOT_AT = Date.now(); renderWalkLoot(); } }
   catch(e){ WLOOT_AT = Date.now(); }   // walkloot.sql 전이면 조용히 안 보여요
 }
 function renderWalkLoot(){
@@ -6645,9 +6654,12 @@ function renderWalkLoot(){
   const ids = new Set(WLOOT.items.map(i=>String(i.id)));
   map.querySelectorAll('.wloot').forEach(el=>{ if(!ids.has(el.dataset.wloot) && !el.classList.contains('got')) el.remove(); });
   WLOOT.items.forEach(l=>{ if(map.querySelector(`.wloot[data-wloot="${l.id}"]`)) return;
-    map.insertAdjacentHTML('beforeend', `<button type="button" class="wloot" data-wloot="${l.id}" style="left:${l.x}%;top:${l.y}%;z-index:${Math.round(l.y*10)+3};--d:${(l.id%7)*.37}s" aria-label="${esc(WLOOT_NAME[l.look]||'분실물')} 줍기" title="${esc(WLOOT_NAME[l.look]||'분실물')}"><img src="walk/loot/${WLOOT_LOOKS.includes(l.look)?l.look:'paper'}.webp" alt="" draggable="false"></button>`); });
+    map.insertAdjacentHTML('beforeend', `<button type="button" class="wloot${l.bonus?' bonus':''}" data-wloot="${l.id}" style="left:${l.x}%;top:${l.y}%;z-index:${Math.round(l.y*10)+3};--d:${(l.id%7)*.37}s" aria-label="${esc(WLOOT_NAME[l.look]||'분실물')} 줍기" title="${esc(WLOOT_NAME[l.look]||'분실물')}"><img src="walk/loot/${WLOOT_LOOKS.includes(l.look)?l.look:'paper'}.webp" alt="" draggable="false"></button>`); });
   const c = document.getElementById('wlootCnt');
   if(c){ const any = api.walkLoot && WLOOT_AT; c.hidden = !any; if(any) c.textContent = `🎒 오늘 주운 분실물 ${WLOOT.today}/${WLOOT.max}`; }
+  const bar = document.querySelector('#walkBox .wbar');   // 🎁 숲지기만: 분실물 뿌리기
+  if(bar && ME && ME.is_admin && api.adminLootDrop && !bar.querySelector('.wloot-admin'))
+    bar.insertAdjacentHTML('beforeend', `<span class="wloot-admin"><button class="mini" type="button" data-wlootdrop="me">🎁 내 둘레에 뿌리기</button><button class="mini" type="button" data-wlootdrop="all">🌲 숲 곳곳에 뿌리기</button></span>`);
 }
 function walkLootGone(id, cls){
   WLOOT.items = WLOOT.items.filter(i=>i.id!==id);
@@ -6670,12 +6682,12 @@ function wlootGift(r){
 }
 async function walkLootPick(id){
   if(WLOOT_BUSY || !api.walkLootPick || !WALK_ME) return;
-  if(WLOOT.today >= WLOOT.max) return toast(`🎒 오늘은 분실물을 다 주웠어요 (하루 ${WLOOT.max}개). 새벽 12시에 다시 주울 수 있어요`, 4000);
   const l = WLOOT.items.find(i=>i.id===id); if(!l) return;
+  if(!l.bonus && WLOOT.today >= WLOOT.max) return toast(`🎒 오늘은 분실물을 다 주웠어요 (하루 ${WLOOT.max}개). 새벽 12시에 다시 주울 수 있어요\n🎁 숲지기가 뿌린 금빛 분실물은 더 주울 수 있어요!`, 4500);
   WLOOT_BUSY = true;
   try{
     const r = await api.walkLootPick(id, WALK_ME.x, WALK_ME.y);
-    walkLootGone(id, 'got'); WLOOT.today = r.today ?? WLOOT.today+1;
+    walkLootGone(id, 'got'); WLOOT.today = r.today ?? (l.bonus ? WLOOT.today : WLOOT.today+1);
     walkSend('loot', {lid:id});
     const map = document.getElementById('wmap');
     if(map){ const f = document.createElement('span'); f.className = 'wloot-pop' + (r.kind==='jackpot'?' big':''); f.style.left = l.x+'%'; f.style.top = l.y+'%'; f.style.zIndex = 2000;
@@ -6692,11 +6704,23 @@ async function walkLootPick(id){
   }catch(err){
     const m = err.message || '줍지 못했어요';
     if(/먼저 주워/.test(m)) walkLootGone(id, 'gone');
-    if(/다 주웠/.test(m)) WLOOT.today = WLOOT.max;
+    if(/다 주웠/.test(m) && !l.bonus) WLOOT.today = WLOOT.max;
     toast('🐺 ' + m, 3500); refreshWalkLoot();
   }finally{ WLOOT_BUSY = false; }
 }
 setInterval(()=>{ const t = document.getElementById('tab-walk'); if(t && !t.hidden && !document.hidden && ME) refreshWalkLoot(); }, 30000);
+document.addEventListener('click', e=>{   // 🎁 숲지기 분실물 뿌리기
+  const b = e.target.closest('[data-wlootdrop]'); if(!b || !ME || !ME.is_admin) return;
+  const near = b.dataset.wlootdrop==='me';
+  act(async()=>{
+    const t = await askText(near ? '🎁 내 캐릭터 둘레에 분실물을 몇 개 뿌릴까요? (1~30)\n뿌린 건 주민들 하루 5개 제한에 안 들어가요.' : '🌲 숲 곳곳에 분실물을 몇 개 뿌릴까요? (1~30)\n뿌린 건 주민들 하루 5개 제한에 안 들어가요.', '5');
+    if(t==null) return; const n = parseInt(t, 10); if(!(n>=1)) return toast('1 이상으로 적어 주세요');
+    const k = await api.adminLootDrop(Math.min(30, n), near && WALK_ME ? WALK_ME.x : null, near && WALK_ME ? WALK_ME.y : null);
+    walkSend('lootdrop', {n:k}); await refreshWalkLoot();
+    if(near && WALK_ME) walkSay(WALK_ME, '🎁 분실물 뿌렸어요~ 주워 가세요!');
+    toast(`🎁 분실물 ${k}개를 ${near?'내 둘레에':'숲 곳곳에'} 뿌렸어요!`);
+  });
+});
 
 // --- 꾸미기 ---
 let WALK_LOOK_TAB = 'char';
@@ -8599,6 +8623,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑪</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑫</p>
 </body>
 </html>
