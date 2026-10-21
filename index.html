@@ -151,6 +151,28 @@ dialog.zoom{max-width:min(92vw,420px);text-align:center}
 .furn.drawn{padding:2px;background:rgba(255,255,255,.18)}
 .furn.carpet{background:transparent;box-shadow:none;padding:0;z-index:0}
 .furn.carpet:hover{box-shadow:inset 0 0 0 2px #B4513E}
+/* 🎨 러그 색 (10-22) */
+.furn.tinted > *, .furn.tinted > img.fimg, .tart > *, .tart > img.fimg{filter:var(--tf)}
+.room.tint-mode .furn:not(.carpet){opacity:.28;pointer-events:none}
+.room.tint-mode .furn.carpet{cursor:pointer;outline:2px dashed rgba(255,206,92,.85);outline-offset:-2px}
+.room.tint-mode .furn.carpet:hover{outline-style:solid}
+.tint-pv{width:min(100%, calc(150px * var(--ar,1)));aspect-ratio:var(--ar,1);max-height:170px;margin:.8rem auto .2rem;display:grid;place-items:center}
+.tint-pv .tart{width:100%;height:100%;display:grid;place-items:center}
+.tint-pv .tart > *{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain}
+.tint-now{text-align:center;margin:.2rem 0 .6rem}
+.tint-sw{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.35rem}
+.tsw{display:flex;flex-direction:column;align-items:center;gap:.1rem;padding:.3rem .15rem;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.05);color:var(--ink);font:inherit;cursor:pointer}
+.tsw .tart{width:40px;height:40px;display:grid;place-items:center}.tsw .tart > *{max-width:40px;max-height:40px;width:100%;height:100%;object-fit:contain}
+.tsw b{font-weight:400;font-size:.74rem}
+.tsw.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.tint-hue{display:block;margin-top:.7rem}
+.tint-hue-tip{color:var(--muted);font-size:.72rem}
+.tint-hue input{width:100%;margin-top:.3rem;appearance:none;-webkit-appearance:none;height:14px;border-radius:999px;background:linear-gradient(90deg,#f66,#fb5,#ee5,#6d6,#5cd,#69f,#b7f,#f6c,#f66);opacity:.55}
+.tint-hue input.on{opacity:1;box-shadow:0 0 0 2px var(--accent)}
+.tint-hue input::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #555;cursor:pointer}
+.tint-hue input::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid #555;cursor:pointer}
+@media (max-width:480px){.tint-sw{grid-template-columns:repeat(4,minmax(0,1fr))}}
+:root[data-mode="day"] .tsw{background:rgba(255,255,255,.75)}
 .furn.onrug{background:transparent;box-shadow:none}
 .deco{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:1rem;align-items:start;padding:.9rem;margin:0 0 1.1rem;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
 @media (max-width:640px){.deco{grid-template-columns:1fr}}
@@ -2281,6 +2303,19 @@ document.documentElement.setAttribute('data-mode', modeNow());
   </div>
 </dialog>
 
+<dialog class="visit ask tint-dlg" id="tintDlg">
+  <h3 style="margin:0 0 .2rem" id="tintTitle">🎨 러그 색 바꾸기</h3>
+  <p class="small" style="margin:0">무늬는 그대로, 색만 바뀌어요. 깔아 둔 러그마다 따로 기억하고, 놀러 온 주민에게도 이 색으로 보여요.</p>
+  <div class="tint-pv" id="tintPv"></div>
+  <p class="small tint-now" id="tintNow"></p>
+  <div class="tint-sw" id="tintSw" role="group" aria-label="색 견본"></div>
+  <label class="tint-hue"><span class="small">🌈 직접 돌리기 <span class="tint-hue-tip">막대를 밀면 무늬 속 색들이 같이 빙글 돌아가요</span></span><input type="range" id="tintHue" min="0" max="359" step="1" value="0"></label>
+  <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem">
+    <button class="mini" id="tintCancel" type="button">취소</button>
+    <button class="mini ask-yes" id="tintSave" type="button">🎨 이 색으로</button>
+  </div>
+</dialog>
+
 <dialog class="visit ask" id="treatDlg">
   <h3 style="margin:0 0 .2rem" id="treatTitle">🐾 간식 주기</h3>
   <p class="small" style="margin:0">간식을 주면 펫이 반가워해요. 집주인에게는 누가 간식을 줬는지 알림이 가요.<br>(그날 처음 주는 간식엔 더 크게 기뻐해요)</p>
@@ -2711,6 +2746,21 @@ RAINBOW_RUGS.forEach(([code,emoji,name])=>{
   DEFAULT_SHOP.splice(at, 0, ...RUG_SIZES.map(([suf,w,h,price])=>({code:code+suf,emoji,name,price,w,h,active:true,category:'furniture',icon:code+suf,layer:'floor'})));
   RUG_SIZES.forEach(([suf])=>{ FLOOR_CODES.add(code+suf); FURN_IMG.add(code+suf); TILE_WALL.add(code+suf); });
 });
+// 🎨 러그 색 바꾸기 (10-22, rugtint.sql 과 같아요) — 깔아 둔 러그마다 색을 따로 기억해요 · 무료
+//    tint: 비어 있으면 원래 색 · c1~c11 색 견본(무늬는 그대로 한 색으로 물들이기) · h0~h359 무지개 막대(색을 빙글 돌리기)
+const RUG_TINTS = [['c1','빨강','#E06A5E'],['c2','주황','#EE9A4A'],['c3','노랑','#E9C44A'],['c4','초록','#6FAE5E'],['c5','민트','#5FC0AC'],['c6','하늘','#6FB2E0'],
+  ['c7','남색','#4E5E9E'],['c8','보라','#9E84D6'],['c9','분홍','#EE8FB4'],['c10','갈색','#A8794E'],['c11','회색','#9A958E']];
+const isRug = code => !!code && (code.startsWith('rug_') || code==='hellrug');
+const tintCSS = t => !t ? '' : t[0]==='h' ? `hue-rotate(${(+t.slice(1))||0}deg) saturate(1.15)` : RUG_TINTS.some(x=>x[0]===t) ? `url(#rugT_${t})` : '';
+const tintName = t => !t ? '원래 색' : t[0]==='h' ? `🌈 직접 고른 색` : ((RUG_TINTS.find(x=>x[0]===t)||[])[1] || '원래 색');
+(() => {
+  const hex = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
+  const defs = RUG_TINTS.map(([k,,h])=>{ const c = hex(h), tab = i => `${(c[i]*.32).toFixed(3)} ${c[i].toFixed(3)} ${(c[i]+(1-c[i])*.8).toFixed(3)}`;
+    return `<filter id="rugT_${k}" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="table" tableValues="${tab(0)}"/><feFuncG type="table" tableValues="${tab(1)}"/><feFuncB type="table" tableValues="${tab(2)}"/></feComponentTransfer></filter>`; }).join('');
+  const put = () => { const sv = document.createElementNS('http://www.w3.org/2000/svg','svg'); sv.setAttribute('width','0'); sv.setAttribute('height','0'); sv.setAttribute('aria-hidden','true');
+    sv.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden'; sv.innerHTML = defs; document.body.prepend(sv); };
+  document.body ? put() : document.addEventListener('DOMContentLoaded', put);
+})();
 // 🪟 새 창문 20종 (10-12 밤, newwins.sql 과 같아요) — 전부 1×1. 유리는 옅은 하늘색으로 칠했어요
 const NEW_WINS = [["win_lace", "🪟", "레이스 커튼 창문", 120, 1, 1], ["win_pinkarch", "🪟", "분홍 아치 창문", 120, 1, 1], ["win_roundval", "🪟", "동그란 커튼 창문", 120, 1, 1], ["win_gingham", "🪟", "체크 커튼 창문", 120, 1, 1], ["win_green", "🪟", "초록 커튼 창문", 120, 1, 1], ["win_lattice", "🪟", "동그란 격자 창문", 100, 1, 1], ["win_pots", "🪟", "화분 창문", 120, 1, 1], ["win_twin", "🪟", "쌍둥이 아치 창문", 120, 1, 1], ["win_catnap", "🪟", "낮잠 고양이 창문", 150, 1, 1], ["win_octa", "🪟", "팔각 창문", 100, 1, 1], ["win_ivyshut", "🪟", "담쟁이 덧창 창문", 130, 1, 1], ["win_stained", "🪟", "스테인드글라스 창문", 150, 1, 1], ["win_ivyarch", "🪟", "담쟁이 아치 창문", 130, 1, 1], ["win_gable", "🪟", "지붕 모양 창문", 120, 1, 1], ["win_nook", "🪟", "책 읽는 창가", 150, 1, 1], ["win_blueshut", "🪟", "파란 덧창 꽃 창문", 130, 1, 1], ["win_roundcat", "🪟", "동그란 고양이 창문", 150, 1, 1], ["win_awning", "🪟", "차양 창문", 130, 1, 1], ["win_hanging", "🪟", "행잉 화분 창문", 130, 1, 1], ["win_potion", "🪟", "물약 창문", 150, 1, 1]];
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='window_3')+1 || DEFAULT_SHOP.length; DEFAULT_SHOP.splice(at, 0, ...NEW_WINS.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); NEW_WINS.forEach(r=>FURN_IMG.add(r[0])); }
@@ -3582,6 +3632,10 @@ const demoApi = (() => {
       if(!canPlaceIn(st.placed.filter(p=>(p.room||0)===room),r,c,w,h,cur,code)) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
       st.inv[code]--; st.placed.push({id:st.nextId++,item_code:code,r,c,w,h,room,rot:rot||0}); persist();
     },
+    async setTint(id, t){
+      const p = st.placed.find(x=>x.id===id); if(!p) fail('내 방에 깔린 러그가 아니에요');
+      if(!isRug(p.item_code)) fail('러그만 색을 바꿀 수 있어요'); p.tint = t || null; persist();
+    },
     async remove(id){
       const i=st.placed.findIndex(p=>p.id===id); if(i<0) fail('내 가구가 아니에요');
       const [p]=st.placed.splice(i,1); st.inv[p.item_code]=(st.inv[p.item_code]||0)+1;
@@ -4016,6 +4070,8 @@ const supaApi = (() => {
     },
     async placements(id){
       const who = id==='me'?myId:id;
+      const t = await sb.from('placements').select('id,item_code,r,c,w,h,room,rot,tint').eq('discord_id', who);   // 🎨 rugtint.sql 뒤
+      if(!t.error) return t.data;
       const r = await sb.from('placements').select('id,item_code,r,c,w,h,room,rot').eq('discord_id', who);
       if(!r.error) return r.data;
       return ok(await sb.from('placements').select('id,item_code,r,c,w,h,room').eq('discord_id', who));   // rotate.sql 넣기 전 예비
@@ -4035,6 +4091,8 @@ const supaApi = (() => {
     async renameRoom(k, name){ ok(await sb.rpc('rename_room', {p_idx:k, p_name:name})); },
     async house(id){ const r = ok(await sb.rpc('get_house', {p_discord_id:id})); return Array.isArray(r) ? r[0] : r; },
     async remove(id){ ok(await sb.rpc('remove_item_ex', {p_id:id})); },
+    async setTint(id, t){ const { error } = await sb.rpc('set_rug_tint', {p_id:id, p_tint:t||''});
+      if(error) throw new Error(/set_rug_tint|function/i.test(error.message) ? '러그 색 바꾸기는 곧 열려요! 조금만 기다려 주세요' : error.message); },
     async adminList(){ return ok(await sb.rpc('admin_list')); },
     async finishTour(){ return ok(await sb.rpc('finish_tour')); },
     async logTab(t){ await sb.rpc('log_tab', {p_tab:t}); },   // 실패해도 조용히 넘어가요 (tabstats.sql 전이어도 괜찮아요)
@@ -4398,9 +4456,10 @@ function roomHTML(list, cur, {editable, cabs={}}){
     const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${small?'acc-small':''} ${WIN2.has(f.item_code)?'winfit':''} ${rot?'rot r'+rot:''}`;
     const art = tableV ? `<img class="fsvg fimg" src="furn/${f.item_code}_v.webp${furnV(f.item_code)}" alt="" draggable="false" loading="lazy">` : wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
+    const tf = isRug(f.item_code) ? tintCSS(f.tint) : '', tcls = tf ? ' tinted' : '', ts = tf ? `;--tf:${tf}` : '';   // 🎨 러그 색
     html += editable
-      ? `<button class="${cls}" data-pid="${f.id}" style="${style}${rs}" aria-label="${esc(it.name)} 치우기">${art}</button>`
-      : `<span class="${cls}" style="${style}${rs}" title="${esc(it.name)}">${art}</span>`;
+      ? `<button class="${cls}${tcls}" data-pid="${f.id}" style="${style}${rs}${ts}" aria-label="${esc(it.name)} 치우기">${art}</button>`
+      : `<span class="${cls}${tcls}" style="${style}${rs}${ts}" title="${esc(it.name)}">${art}</span>`;
   });
   return html;
 }
@@ -5581,6 +5640,18 @@ const BOSS_DROP = .10;
 const BOSS_ITEMS = {
   slump: [['slump_cushion','회색 털뭉치 쿠션'],['slump_eyemask','반쯤 감긴 눈안대'],['slump_coldcoffee','다 식어버린 커피 머그잔'],['slump_clock','태엽이 멈춘 시계'],
           ['slump_sandbag','무거운 모래주머니'],['slump_postit',"'내일부터 해야지' 포스트잇"],['slump_penholder','먼지 쌓인 펜 거치대']],
+  typo: [['typo_magnifier','동그란 돋보기'],['typo_backspace','닳아버린 Backspace 키캡'],['typo_zigzag','빨간 지그재그 밑줄 스티커'],['typo_eraser','가루 가득한 지우개'],
+         ['typo_keys','뒤죽박죽 자판 조각'],['typo_tape','반만 지워진 수정 테이프'],['typo_dict','찢어진 맞춤법 사전']],
+  proof: [['proof_redpen','빨간 펜'],['proof_scissors','뾰족한 편집용 가위'],['proof_ink','빨간 잉크 리필액'],['proof_draft','무자비하게 구겨진 초고'],
+          ['proof_feedback','빨간 체크가 가득한 피드백지'],['proof_stapler','닳아버린 스테이플러'],['proof_shard','날카로운 종이 조각']],
+  blank: [['blank_sheet','첫 줄만 쓰인 원고지 한 장'],['blank_lead','부러진 연필심'],['blank_inkjar','말라버린 잉크병'],['blank_crumple','구겨진 생각의 흔적'],
+          ['blank_notebook','아무것도 안 적힌 새 수첩'],['blank_soul','영혼의 천 조각'],['blank_untitled',"'제목 없음' 파일 아이콘"]],
+  plot: [['plot_pincushion','실 감긴 바늘 꽂이'],['plot_puzzle','빠진 퍼즐 조각'],['plot_yarn','엉켜버린 실타래'],['plot_chain','끊어진 쇠사슬 조각'],
+         ['plot_memo','구멍 난 메모지'],['plot_patch','덕지덕지 기운 천 조각'],['plot_map',"'?'가 그려진 낡은 지도"]],
+  short: [['short_pile','두툼하게 쌓인 원고 더미'],['short_pencil','아껴 쓴 몽당연필'],['short_ellipsis',"'…' 말줄임표 스티커"],['short_spacebar','스페이스바 키캡'],
+          ['short_postit','한 줄 겨우 적힌 포스트잇'],['short_counter',"'글자 수 0' 카운터"],['short_vocab','미사여구 단어장']],
+  revise: [['revise_stamp','빨간 완료 도장'],['revise_bandage','동그란 반창고'],['revise_chip',"'진짜최종' 메모리칩"],['revise_note',"'한 번만 더' 간청 쪽지"],
+           ['revise_ointment','피로 회복 연고'],['revise_hourglass','무한 반복 모래시계'],['revise_postit','피드백 가득한 포스트잇']],
 };
 const bossItem = code => { for(const [m,l] of Object.entries(BOSS_ITEMS)){ const x = l.find(r=>r[0]===code); if(x) return {code, name:x[1], monster:m}; } return {code, name:'이세계 수집품', monster:''}; };
 const bossItemImg = (code, cls='') => `<img class="bi-img ${cls}" src="monster/${code}.webp" alt="" draggable="false" loading="lazy">`;
@@ -7041,9 +7112,41 @@ document.getElementById('plazaWork').addEventListener('click', async e=>{
   }catch(err){ toast(err.message||'보내지 못했어요'); g.disabled=false; }
 });
 
+let TINT_MODE = false, TINT_CUR = null;   // 🎨 러그 색 바꾸기 중
+function tintArt(it, t){ return `<span class="tart" style="${t?`--tf:${tintCSS(t)}`:''}">${ico(it)}</span>`; }
+function openTint(f){
+  TINT_CUR = {f, t: f.tint || ''};
+  const it = itemOf(f.item_code), d = document.getElementById('tintDlg');
+  document.getElementById('tintTitle').textContent = `🎨 ${it.name} 색 바꾸기`;
+  const ar = Math.max(.5, Math.min(2.2, (it.w||1)/(it.h||1)));
+  document.getElementById('tintPv').style.setProperty('--ar', ar);
+  document.getElementById('tintSw').innerHTML = [['','원래 색'], ...RUG_TINTS.map(([k,n])=>[k,n])].map(([k,n])=>
+    `<button type="button" class="tsw" data-tint="${k}" title="${n}">${tintArt(it, k)}<b>${n}</b></button>`).join('');
+  drawTint(); if(!d.open) d.showModal();
+}
+function drawTint(){
+  if(!TINT_CUR) return; const {f, t} = TINT_CUR, it = itemOf(f.item_code);
+  document.getElementById('tintPv').innerHTML = tintArt(it, t);
+  document.getElementById('tintNow').textContent = `지금 고른 색 · ${tintName(t)}`;
+  document.querySelectorAll('#tintSw .tsw').forEach(b=>b.classList.toggle('on', b.dataset.tint===t));
+  const hue = document.getElementById('tintHue'); hue.classList.toggle('on', t[0]==='h'); if(t[0]==='h') hue.value = +t.slice(1);
+}
+document.getElementById('tintSw').addEventListener('click', e=>{ const b = e.target.closest('[data-tint]'); if(!b || !TINT_CUR) return; TINT_CUR.t = b.dataset.tint; drawTint(); });
+document.getElementById('tintHue').addEventListener('input', e=>{ if(!TINT_CUR) return; TINT_CUR.t = 'h' + (+e.target.value); drawTint(); });
+document.getElementById('tintCancel').addEventListener('click', ()=>{ TINT_CUR = null; document.getElementById('tintDlg').close(); });
+document.getElementById('tintSave').addEventListener('click', ()=>act(async()=>{
+  if(!TINT_CUR) return; const {f, t} = TINT_CUR;
+  if((f.tint||'') !== t){ await api.setTint(f.id, t); await refreshMine(); renderMyHouse(); toast(`🎨 ${itemOf(f.item_code).name} · ${tintName(t)}${t?'으로 바꿨어요!':'으로 돌려놨어요'}`); }
+  TINT_CUR = null; document.getElementById('tintDlg').close();
+}));
 function setHint(){
   const el = document.getElementById('hint');
-  if(!selected){ el.textContent = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구는 끌어서 옮기고(폰은 꾹 눌렀다가 끌기), 그냥 누르면 가방으로 돌아가요.'; return; }
+  if(selected || inGarden || inTank) TINT_MODE = false;
+  { const rm = document.getElementById('room'); if(rm) rm.classList.toggle('tint-mode', TINT_MODE); }
+  if(TINT_MODE){ el.innerHTML = `🎨 색을 바꿀 러그를 눌러 주세요 <button class="mini" id="tintDone">다 했어요</button>`; return; }
+  const rugHere = PLACED.some(p=>(p.room||0)===curRoom && isRug(p.item_code));
+  if(!selected){ el.innerHTML = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구는 끌어서 옮기고(폰은 꾹 눌렀다가 끌기), 그냥 누르면 가방으로 돌아가요.'
+    + (rugHere && !inGarden && !inTank ? ` <button class="mini" id="tintBtn">🎨 러그 색 바꾸기</button>` : ''); return; }
   const it = itemOf(selected), fp = footprint(selected);
   const canRot = true;   // 진열장도 돌릴 수 있어요 (칸 배치만 세로로 바뀌어요)
   el.innerHTML = `<span class="hint-ico r${rotated}">${ico(it)}</span> ${esc(it.name)}(${fp.w}×${fp.h}칸)${rotated?` · ${ROT_NAME[rotated]}`:''} · 놓을 자리의 왼쪽 위 칸을 눌러 주세요.` + (TABLE_FOOD.has(selected) ? ' 🍰 식탁·테이블 위에도 올릴 수 있어요!' : '') +
@@ -7333,6 +7436,8 @@ async function act(fn){
 
 document.addEventListener('click', e=>{
   if(e.target.closest('#rotBtn')){ nextRot(); setHint(); renderMyHouse(); return; }
+  if(e.target.closest('#tintBtn')){ TINT_MODE = true; selected = null; sellMode = false; setHint(); renderMyHouse(); renderBag(); return; }
+  if(e.target.closest('#tintDone')){ TINT_MODE = false; setHint(); renderMyHouse(); return; }
 
   const bg = e.target.closest('[data-bag]');
   if(bg){ if(inGarden || inTank){ inGarden=false; inTank=false; saveGardenTab(); } selected = selected===bg.dataset.bag ? null : bg.dataset.bag; rotated=0; setHint(); renderMyHouse(); renderBag();
@@ -7417,11 +7522,12 @@ document.addEventListener('click', e=>{
   });
 
   const fu = e.target.closest('.furn[data-pid]');
+  if(fu && TINT_MODE){ const f = PLACED.find(p=>p.id===+fu.dataset.pid); if(f && isRug(f.item_code)) openTint(f); else toast('러그만 색을 바꿀 수 있어요'); return; }
   if(fu && Date.now() - FDRAG_AT < 450) return;   // 끌어서 옮긴 직후의 클릭은 치우기로 안 쳐요
   if(fu) return act(async()=>{
     const pid = +fu.dataset.pid, f = PLACED.find(p=>p.id===pid), tops = f ? topsOn(f, PLACED) : [];
     for(const t of tops) await api.remove(t.id);   // 🍰 테이블을 치우면 위에 올린 소품은 먼저 가방으로
-    await api.remove(pid); await refreshMine(); renderMyHouse(); renderBag();
+    await api.remove(pid); await refreshMine(); renderMyHouse(); renderBag(); setHint();
     if(tops.length) toast(`🍰 위에 놓인 소품 ${tops.length}개도 가방으로 돌아갔어요`);
   });
 
@@ -7629,14 +7735,20 @@ function fdragEnd(cancel){
   const it = itemOf(f.item_code); let rot = +f.rot || 0;
   if(!rot && it.w!==it.h && f.w===it.h && f.h===it.w) rot = 1;
   act(async()=>{
+    const keepTint = async (r, c) => {   // 🎨 옮겨도 러그 색은 그대로
+      if(!f.tint) return; await refreshMine();
+      const n = PLACED.find(p=>p.item_code===f.item_code && p.r===r && p.c===c && (p.room||0)===curRoom);
+      if(n && n.tint!==f.tint) try{ await api.setTint(n.id, f.tint); }catch(e){}
+    };
     await api.remove(f.id);
     try{ await api.place(f.item_code, to.r, to.c, rot, curRoom); }
-    catch(err){ try{ await api.place(f.item_code, f.r, f.c, rot, curRoom); }catch(e2){} await refreshMine(); renderMyHouse(); renderBag(); throw err; }
+    catch(err){ try{ await api.place(f.item_code, f.r, f.c, rot, curRoom); await keepTint(f.r, f.c); }catch(e2){} await refreshMine(); renderMyHouse(); renderBag(); throw err; }
+    await keepTint(to.r, to.c);
     await refreshMine(); renderMyHouse(); renderBag();
   });
 }
 roomEl.addEventListener('pointerdown', e=>{
-  if(selected || busy || e.button>0) return;
+  if(selected || busy || e.button>0 || TINT_MODE) return;
   const el = e.target.closest('.furn[data-pid]'); if(!el) return;
   const f = PLACED.find(p=>p.id===+el.dataset.pid); if(!f) return;
   if(topsOn(f, PLACED).length) return;   // 🍰 위에 소품이 놓인 테이블은 끌지 않고, 누르면 소품째 가방으로
@@ -8308,6 +8420,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ①</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ④</p>
 </body>
 </html>
