@@ -550,6 +550,11 @@ img.fsh{display:block;aspect-ratio:3/2;height:auto;object-fit:contain;filter:dro
 .lim-note span{font-family:"Gowun Dodum",sans-serif;font-size:.8rem;opacity:.85}
 .cab span .fsvg,.slot .fsvg{width:88%;height:88%}
 .shop-tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+/* 🎒 가방 칸 나누기 (10-21) — 상점이랑 같은 칸 */
+.bag-tabs{flex-wrap:wrap;gap:.3rem;margin:.2rem 0 .45rem}
+.bag-tabs .shop-tab{flex:0 0 auto;padding:.25rem .6rem;font-size:.85rem}
+.bag-tabs .shop-tab span{font-size:.75rem;opacity:.8}
+.bag-tabs .shop-tab.zero{opacity:.45}
 .shop-tab span{font-family:"Gowun Dodum",sans-serif;font-size:.8rem;opacity:.85}
 
 /* ---- 숲 배경 고침: 주민이 많아도 집들이 땅 위에 서 있게 ---- */
@@ -1951,6 +1956,14 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <details class="shop-box bag-box" id="bagBox" open>
         <summary><span class="jua">🎒 가방</span> <span class="small" id="bagCount"></span></summary>
         <div class="sell-bar"><button class="mini" id="sellBtn" type="button">🪙 되팔기</button><button class="mini compact-btn" type="button" data-compact>▦ 작게 보기</button><span class="small" id="sellNote"></span></div>
+        <div class="shop-tabs bag-tabs" id="bagTabs" role="tablist">
+          <button class="shop-tab" data-bagtab="all" role="tab">전체 <span id="bcAll"></span></button>
+          <button class="shop-tab" data-bagtab="furniture" role="tab">🪑 가구 <span id="bcF"></span></button>
+          <button class="shop-tab" data-bagtab="accessory" role="tab">✨ 소품 <span id="bcA"></span></button>
+          <button class="shop-tab" data-bagtab="wall" role="tab">🧱 벽 <span id="bcW"></span></button>
+          <button class="shop-tab" data-bagtab="window" role="tab">🪟 창문 <span id="bcN"></span></button>
+          <button class="shop-tab" data-bagtab="rug" role="tab">🧶 러그 <span id="bcR"></span></button>
+        </div>
         <div class="items bag-scroll" id="bag"></div>
       </details>
       <div class="rules">
@@ -6659,19 +6672,37 @@ function gradeOf(code){
 const GRADE_LABEL = {common:'일반', rare:'희귀', legend:'전설', lotto:'👑 전설 가구'};
 const gradeBadge = code => { const g = gradeOf(code); return g ? `<span class="gbadge ${g}">${GRADE_LABEL[g]}</span>` : ''; };
 const gradeCls = code => { const g = gradeOf(code); return g ? 'g-'+g : ''; };
+// 🎒 가방 칸 나누기 (10-21) — 상점 칸과 같은 기준: 가구 / 소품(진열장·보따리 소품 포함) / 벽 / 창문·커튼 / 러그
+let bagTab = 'all'; try{ bagTab = localStorage.getItem('majam-bag-tab') || 'all'; }catch(e){}
+function bagKind(code){
+  const it = itemOf(code);
+  if(CAPACITY[code] || catOf(it)==='accessory' || SHOP_ETC.has(code) || SHOP_ETC.has(it.icon||'')) return 'accessory';
+  if(layerOf(code)==='floor') return 'rug';
+  if(/^win(dow)?(_|$)/.test(code) || SHOP_WIN.has(code)) return 'window';
+  if(/^wall_/.test(code) || SHOP_WALL.has(code)) return 'wall';
+  return 'furniture';
+}
 function renderBag(){
   const GR = {lotto:0, legend:1, rare:2, common:3};   // 🎒 가방은 등급순: 👑 전설 가구 → 전설 → 희귀 → 일반 → 상점 가구 (주민 건의 10-14)
   const entries = Object.entries(INV).filter(([,n])=>n>0).map((e,k)=>[e,k])
     .sort((a,b)=>((GR[gradeOf(a[0][0])] ?? 9) - (GR[gradeOf(b[0][0])] ?? 9)) || a[1]-b[1]).map(x=>x[0]);
   document.getElementById('bagCount').textContent = `${entries.reduce((a,[,n])=>a+n,0)}개`;
+  { const cnt = {all:0, furniture:0, accessory:0, wall:0, window:0, rug:0};
+    entries.forEach(([code,n])=>{ cnt.all += n; cnt[bagKind(code)] += n; });
+    if(!(bagTab in cnt)) bagTab = 'all';
+    const ids = {all:'bcAll', furniture:'bcF', accessory:'bcA', wall:'bcW', window:'bcN', rug:'bcR'};
+    document.querySelectorAll('[data-bagtab]').forEach(b=>{ const k=b.dataset.bagtab, on=k===bagTab;
+      b.classList.toggle('on',on); b.classList.toggle('zero',!cnt[k] && !on); b.setAttribute('aria-selected',on);
+      document.getElementById(ids[k]).textContent = cnt[k]; }); }
+  const shown = bagTab==='all' ? entries : entries.filter(([code])=>bagKind(code)===bagTab);
   document.getElementById('bagBox').classList.toggle('selling', sellMode);
   document.getElementById('sellBtn').textContent = sellMode ? '✔ 되팔기 끝' : '🪙 되팔기';
   document.getElementById('sellNote').textContent = sellMode ? '팔 가구를 누르세요 · 산 값 그대로 돌려받아요 (방에 놓은 건 먼저 치워 주세요)' : '';
-  document.getElementById('bag').innerHTML = entries.length ? entries.map(([code,n])=>{
+  document.getElementById('bag').innerHTML = shown.length ? shown.map(([code,n])=>{
     const it = itemOf(code), sp = sellPrice(code);
     if(sellMode) return `<button class="item ${gradeCls(code)} ${sp?'':'nosell'}" data-sell="${esc(code)}" ${sp?'':'disabled'}>${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span><span class="p">${sp?`🪙 ${sp}에 팔기`:'팔 수 없어요'} · ×${n}</span></button>`;
     return `<button class="item ${gradeCls(code)} ${selected===code?'sel':''}" data-bag="${esc(code)}" ${gradeOf(code)?`title="${GRADE_LABEL[gradeOf(code)].replace('👑 ','')}"`:''}>${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)} · ${sizeText(it)}</span><span class="p">×${n}</span></button>`;
-  }).join('') : `<p class="empty" style="grid-column:1/-1">가방이 비어 있어요. 상점에서 가구를 사 보세요.</p>`;
+  }).join('') : `<p class="empty" style="grid-column:1/-1">${entries.length ? '이 칸에는 아직 아무것도 없어요.' : '가방이 비어 있어요. 상점에서 가구를 사 보세요.'}</p>`;
   const regular = SHOP.filter(x=>!x.limited_until), lim = SHOP.filter(x=>x.limited_until && isLive(x));
   document.getElementById('shopCount').textContent = `${regular.length+lim.length}개`;
   { const nNew = [...lim, ...regular].filter(isNewItem).length;
@@ -6698,7 +6729,7 @@ function renderBag(){
   nt.hidden = !news.length; if(news.length) nt.innerHTML = `✨ 새 가구 <span>${news.length}</span>`;
   if(shopTab==='new' && !news.length) shopTab = 'furniture';
   const q = shopQ.trim().replace(/\s+/g,'');
-  document.querySelector('.shop-tabs').classList.toggle('searching', !!q);
+  document.querySelector('.shop-tabs:not(.bag-tabs)').classList.toggle('searching', !!q);
   document.querySelectorAll('[data-shoptab]').forEach(b=>{ const on=!q && b.dataset.shoptab===shopTab; b.classList.toggle('on',on); b.setAttribute('aria-selected',on); });
   let limNote = '';
   if(!q && shopTab==='limited'){
@@ -7236,7 +7267,12 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape' && selected){ selected=null; rotated=0; setHint(); renderMyHouse(); renderBag(); }
 });
 
-document.querySelector('.shop-tabs').addEventListener('click', e=>{
+document.getElementById('bagTabs').addEventListener('click', e=>{
+  const b = e.target.closest('[data-bagtab]'); if(!b) return;
+  bagTab = b.dataset.bagtab; try{ localStorage.setItem('majam-bag-tab', bagTab); }catch(e){}
+  renderBag();
+});
+document.querySelector('.shop-tabs:not(.bag-tabs)').addEventListener('click', e=>{
   const b = e.target.closest('[data-shoptab]'); if(!b) return;
   shopTab = b.dataset.shoptab; try{ localStorage.setItem('majam-shop-tab', shopTab); }catch(e){}
   if(shopQ){ shopQ = ''; document.getElementById('shopQ').value = ''; }
@@ -7869,6 +7905,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-21 판 ⑨</p>
+<p class="site-ver">마감의 숲 · 10-21 판 ⑩</p>
 </body>
 </html>
