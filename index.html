@@ -2750,6 +2750,7 @@ RAINBOW_RUGS.forEach(([code,emoji,name])=>{
 //    tint: 비어 있으면 원래 색 · c1~c11 색 견본(무늬는 그대로 한 색으로 물들이기) · h0~h359 무지개 막대(색을 빙글 돌리기)
 const RUG_TINTS = [['c1','빨강','#E06A5E'],['c2','주황','#EE9A4A'],['c3','노랑','#E9C44A'],['c4','초록','#6FAE5E'],['c5','민트','#5FC0AC'],['c6','하늘','#6FB2E0'],
   ['c7','남색','#4E5E9E'],['c8','보라','#9E84D6'],['c9','분홍','#EE8FB4'],['c10','갈색','#A8794E'],['c11','회색','#9A958E']];
+let TINT_MODE = false, TINT_CUR = null, TINT_ERR = '';   // 🎨 러그 색 바꾸기 중 · 서버에서 색 못 읽을 때 이유
 const isRug = code => !!code && (code.startsWith('rug_') || code==='hellrug');
 const tintCSS = t => !t ? '' : t[0]==='h' ? `hue-rotate(${(+t.slice(1))||0}deg) saturate(1.15)` : RUG_TINTS.some(x=>x[0]===t) ? `url(#rugT_${t})` : '';
 const tintName = t => !t ? '원래 색' : t[0]==='h' ? `🌈 직접 고른 색` : ((RUG_TINTS.find(x=>x[0]===t)||[])[1] || '원래 색');
@@ -4071,11 +4072,14 @@ const supaApi = (() => {
     async placements(id){
       const who = id==='me'?myId:id;
       const t = await sb.from('placements').select('id,item_code,r,c,w,h,room,rot,tint').eq('discord_id', who);   // 🎨 rugtint.sql 뒤
-      if(!t.error) return t.data;
+      if(!t.error){ TINT_ERR = ''; return t.data; }
+      TINT_ERR = '표: ' + (t.error.message || t.error.code || '?');
       const r = await sb.from('placements').select('id,item_code,r,c,w,h,room,rot').eq('discord_id', who);
       if(!r.error){   // 🎨 러그 색 칸을 표에서 못 읽으면 get_rug_tints 로 색만 따로 받아서 붙여요
-        try{ const g = await sb.rpc('get_rug_tints', {p_who:who});
-          if(!g.error){ const m = new Map((g.data||[]).map(x=>[String(x.id), x.tint])); r.data.forEach(p=>{ p.tint = m.get(String(p.id)) || null; }); } }catch(e){}
+        try{ const g = await sb.rpc('get_rug_tints', {p_who:String(who)});
+          if(!g.error){ const raw = typeof g.data==='string' ? JSON.parse(g.data) : g.data, list = Array.isArray(raw) ? raw : (raw && raw.get_rug_tints) || [];
+            const m = new Map(list.map(x=>[String(x.id), x.tint])); r.data.forEach(p=>{ p.tint = m.get(String(p.id)) || null; }); }
+          else TINT_ERR += ' / 함수: ' + (g.error.message || g.error.code || '?'); }catch(e){ TINT_ERR += ' / ' + e.message; }
         return r.data; }
       return ok(await sb.from('placements').select('id,item_code,r,c,w,h,room').eq('discord_id', who));   // rotate.sql 넣기 전 예비
     },
@@ -4345,9 +4349,9 @@ document.getElementById('cabDlg').addEventListener('click', e=>{
 
 /* ---------- 알림 ---------- */
 let toastT;
-function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg;
+function toast(msg, ms){ const t=document.getElementById('toast'); t.textContent=msg;
   if(t.showPopover){ try{ if(!t.hasAttribute('popover')) t.setAttribute('popover','manual'); if(t.matches(':popover-open')) t.hidePopover(); t.showPopover(); void t.offsetWidth; }catch(e){} }   // 열린 창(상점 등) 위에도 보여요
-  t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+  t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),ms||2600); }
 
 /* ---------- 그리기 ---------- */
 function renderTop(){
@@ -7115,7 +7119,6 @@ document.getElementById('plazaWork').addEventListener('click', async e=>{
   }catch(err){ toast(err.message||'보내지 못했어요'); g.disabled=false; }
 });
 
-let TINT_MODE = false, TINT_CUR = null;   // 🎨 러그 색 바꾸기 중
 function tintArt(it, t){ return `<span class="tart" style="${t?`--tf:${tintCSS(t)}`:''}">${ico(it)}</span>`; }
 function openTint(f){
   TINT_CUR = {f, t: f.tint || ''};
@@ -7141,7 +7144,7 @@ document.getElementById('tintSave').addEventListener('click', ()=>act(async()=>{
   if(!TINT_CUR) return; const {f, t} = TINT_CUR;
   if((f.tint||'') !== t){ await api.setTint(f.id, t); await refreshMine(); renderMyHouse();
     const n = PLACED.find(p=>p.id===f.id);   // 저장됐는지 한 번 더 확인
-    if(n && !('tint' in n)) toast('🎨 색은 보냈는데 서버에 러그 색 칸이 아직 안 보여요. 숲지기에게 알려 주세요 (rugtint.sql)');
+    if(n && !('tint' in n)) toast(`🎨 색은 저장했는데 다시 불러오지 못했어요 (10-22 판 ⑦) · ${TINT_ERR||'이유 모름'}`, 12000);
     else if(n && (n.tint||'') !== t) toast('🎨 색이 저장되지 않았어요. 잠시 뒤 다시 해 주세요');
     else toast(`🎨 ${itemOf(f.item_code).name} · ${tintName(t)}${t?'으로 바꿨어요!':'으로 돌려놨어요'}`); }
   TINT_CUR = null; document.getElementById('tintDlg').close();
@@ -8427,6 +8430,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑥</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑦</p>
 </body>
 </html>
