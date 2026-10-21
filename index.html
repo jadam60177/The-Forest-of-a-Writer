@@ -1681,6 +1681,7 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 .wloot-pop.big{font-size:clamp(18px,2.2vw,34px);color:#FFE070}
 @keyframes wlootPop{0%{opacity:0;margin-top:10px}15%{opacity:1;margin-top:0}100%{opacity:0;margin-top:-50px}}
 .wloot-cnt{white-space:nowrap}
+.wloot-emo{display:block;font-size:clamp(22px,2.6vw,44px);line-height:1;text-align:center}
 .wloot.bonus{filter:drop-shadow(0 0 7px rgba(255,214,90,1)) drop-shadow(0 0 14px rgba(255,190,60,.8)) drop-shadow(0 3px 2px rgba(40,30,10,.35))}
 .wloot.bonus::after{content:'✦✦';color:#FFD24A}
 .wloot-admin{display:inline-flex;gap:.35rem;flex-wrap:wrap}
@@ -6654,12 +6655,20 @@ function renderWalkLoot(){
   const ids = new Set(WLOOT.items.map(i=>String(i.id)));
   map.querySelectorAll('.wloot').forEach(el=>{ if(!ids.has(el.dataset.wloot) && !el.classList.contains('got')) el.remove(); });
   WLOOT.items.forEach(l=>{ if(map.querySelector(`.wloot[data-wloot="${l.id}"]`)) return;
-    map.insertAdjacentHTML('beforeend', `<button type="button" class="wloot${l.bonus?' bonus':''}" data-wloot="${l.id}" style="left:${l.x}%;top:${l.y}%;z-index:${Math.round(l.y*10)+3};--d:${(l.id%7)*.37}s" aria-label="${esc(WLOOT_NAME[l.look]||'분실물')} 줍기" title="${esc(WLOOT_NAME[l.look]||'분실물')}"><img src="walk/loot/${WLOOT_LOOKS.includes(l.look)?l.look:'paper'}.webp" alt="" draggable="false"></button>`); });
+    map.insertAdjacentHTML('beforeend', `<button type="button" class="wloot${l.bonus?' bonus':''}" data-wloot="${l.id}" style="left:${l.x}%;top:${l.y}%;z-index:${Math.round(l.y*10)+3};--d:${(l.id%7)*.37}s" aria-label="${esc(WLOOT_NAME[l.look]||'분실물')} 줍기" title="${esc(WLOOT_NAME[l.look]||'분실물')}"><img src="walk/loot/${WLOOT_LOOKS.includes(l.look)?l.look:'paper'}.webp" data-look="${WLOOT_LOOKS.includes(l.look)?l.look:'paper'}" alt="" draggable="false" onerror="wlootImgErr(this)"></button>`); });
   const c = document.getElementById('wlootCnt');
   if(c){ const any = api.walkLoot && WLOOT_AT; c.hidden = !any; if(any) c.textContent = `🎒 오늘 주운 분실물 ${WLOOT.today}/${WLOOT.max}`; }
   const bar = document.querySelector('#walkBox .wbar');   // 🎁 숲지기만: 분실물 뿌리기
   if(bar && ME && ME.is_admin && api.adminLootDrop && !bar.querySelector('.wloot-admin'))
     bar.insertAdjacentHTML('beforeend', `<span class="wloot-admin"><button class="mini" type="button" data-wlootdrop="me">🎁 내 둘레에 뿌리기</button><button class="mini" type="button" data-wlootdrop="all">🌲 숲 곳곳에 뿌리기</button></span>`);
+}
+// 그림을 못 찾으면 다른 폴더도 차례로 찾아보고(walk/loot → walk → loot → 맨 위), 그래도 없으면 이모지로 (10-22)
+const WLOOT_DIRS = ['walk/loot/', 'walk/', 'loot/', ''], WLOOT_EMO = {paper:'📄', keyboard:'⌨️', mouse:'🖱️', cup:'🥤'};
+function wlootImgErr(img){
+  const k = img.dataset.look || 'paper', i = (+img.dataset.try || 0) + 1;
+  if(i < WLOOT_DIRS.length){ img.dataset.try = i; img.src = WLOOT_DIRS[i] + k + '.webp'; return; }
+  img.onerror = null; img.replaceWith(Object.assign(document.createElement('span'), {className:'wloot-emo', textContent: WLOOT_EMO[k] || '✨'}));
+  if(!window.__wlootWarned && ME && ME.is_admin){ window.__wlootWarned = true; console.warn('분실물 그림을 못 찾았어요: walk/loot/' + k + '.webp'); toast('🔒 숲지기 확인: 분실물 그림 파일을 못 찾았어요.\nwalk 폴더 안 loot 폴더에 paper·keyboard·mouse·cup.webp 가 있는지 봐 주세요', 8000); }
 }
 function walkLootGone(id, cls){
   WLOOT.items = WLOOT.items.filter(i=>i.id!==id);
@@ -8623,6 +8632,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑫</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑬</p>
 </body>
 </html>
