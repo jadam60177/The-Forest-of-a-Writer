@@ -4056,7 +4056,7 @@ const demoApi = (() => {
     bossState(){
       const wk = Math.max(0, bossWeek());
       if(!st.bossS || st.bossS.week!==wk){ const p = st.bossS;
-        st.bossS = {week:wk, monster:MONSTERS[wk%MONSTERS.length].code, max_hp:5000, dmg:3050, att:new Set(['moon','dl','green','dawn','owl']), my:0, coins:0, dex:p?p.dex:[], tickets:p?0:3, fuel:p?0:20}; }   // 공격권은 다음 주로 안 넘어가요
+        st.bossS = {week:wk, monster:MONSTERS[wk%MONSTERS.length].code, max_hp:15000, dmg:3050, att:new Set(['moon','dl','green','dawn','owl']), my:0, coins:0, dex:p?p.dex:[], tickets:p?0:3, fuel:p?0:20}; }   // 공격권은 다음 주로 안 넘어가요
       return st.bossS;
     },
     async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, my_coins:B.coins||0, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
@@ -5706,7 +5706,7 @@ const weaponDmg = (w, m) => w.dmg * (m.weak===w.code ? BOSS_WEAK : 1);
 // 🏆 잡은 괴물은 꽃·물고기처럼 📖 괴물 도감에만 모여요 (가방에 들어가는 전리품은 없어요)
 // ✨ 괴물 수집품 (10-21 ⑯) — 괴물마다 7개, 주민마다 랜덤으로 모아요. 그림 monster/코드.webp · boss.sql 의 boss_items 와 같아야 해요
 //    때릴 때마다 BOSS_DROP 확률로 1개 · 쓰러뜨리면 때린 주민 모두 1개 더(아직 없는 것부터). 새 괴물 수집품은 매주 목요일에 여기 + boss.sql 에 한 줄씩
-const BOSS_DROP = .10;
+const BOSS_DROP = .04;   // (10-22 새벽 10% → 4%, boss.sql 의 boss_hit 과 같아야 해요)
 const BOSS_ITEMS = {
   slump: [['slump_cushion','회색 털뭉치 쿠션'],['slump_eyemask','반쯤 감긴 눈안대'],['slump_coldcoffee','다 식어버린 커피 머그잔'],['slump_clock','태엽이 멈춘 시계'],
           ['slump_sandbag','무거운 모래주머니'],['slump_postit',"'내일부터 해야지' 포스트잇"],['slump_penholder','먼지 쌓인 펜 거치대']],
@@ -6662,8 +6662,8 @@ function renderWalkLoot(){
   if(bar && ME && ME.is_admin && api.adminLootDrop && !bar.querySelector('.wloot-admin'))
     bar.insertAdjacentHTML('beforeend', `<span class="wloot-admin"><button class="mini" type="button" data-wlootdrop="me">🎁 내 둘레에 뿌리기</button><button class="mini" type="button" data-wlootdrop="all">🌲 숲 곳곳에 뿌리기</button></span>`);
 }
-// 그림을 못 찾으면 다른 폴더도 차례로 찾아보고(walk/loot → walk → loot → 맨 위), 그래도 없으면 이모지로 (10-22)
-const WLOOT_DIRS = ['walk/loot/', 'walk/', 'loot/', ''], WLOOT_EMO = {paper:'📄', keyboard:'⌨️', mouse:'🖱️', cup:'🥤'};
+// 그림을 못 찾으면 다른 폴더도 차례로 찾아보고(walk/loot → walk/char/loot(라밀이 처음 넣은 곳) → walk → loot → 맨 위), 그래도 없으면 이모지로 (10-22)
+const WLOOT_DIRS = ['walk/loot/', 'walk/char/loot/', 'walk/', 'loot/', ''], WLOOT_EMO = {paper:'📄', keyboard:'⌨️', mouse:'🖱️', cup:'🥤'};
 function wlootImgErr(img){
   const k = img.dataset.look || 'paper', i = (+img.dataset.try || 0) + 1;
   if(i < WLOOT_DIRS.length){ img.dataset.try = i; img.src = WLOOT_DIRS[i] + k + '.webp'; return; }
@@ -8632,6 +8632,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑬</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑭</p>
 </body>
 </html>
