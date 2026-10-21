@@ -1834,6 +1834,130 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 /* 🧸 1칸 소품은 칸 안에서 조금 작게 (10-21) — 바닥에 붙여서 */
 #room .furn.acc-small > .fsvg,#room .furn.acc-small > .emo,#room .furn.acc-small > img,
 .visit .room .furn.acc-small > .fsvg,.visit .room .furn.acc-small > .emo,.visit .room .furn.acc-small > img{transform:scale(var(--acc-s,.72));transform-origin:50% 92%}
+
+/* ⚔️ 이번 주 괴물 토벌 (10-21) */
+.boss-panel{overflow:hidden}
+.boss-head{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem}.boss-head h3{margin:0}
+.boss-scene{position:relative;border-radius:16px;padding:.7rem .8rem .5rem;background:radial-gradient(ellipse 70% 55% at 50% 100%,rgba(255,170,70,.22),transparent 70%),linear-gradient(#232A52,#18203F 70%,#2C3B2E);border:1px solid rgba(255,215,120,.22)}
+.boss-hp{display:flex;align-items:center;gap:.6rem;max-width:520px;margin:0 auto}
+.boss-hp .bar{flex:1;max-width:none;height:14px;margin:0;background:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.boss-hp .bar span{background:linear-gradient(90deg,#E9584A,#F0A04B);transition:width .6s ease}
+.boss-hp .small{color:#F4F1FF;white-space:nowrap}
+.boss-stage{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:.4rem;min-height:210px;padding-top:.4rem}
+.boss-mon{position:relative;border:0;background:none;padding:0;cursor:pointer;width:min(46vw,210px);justify-self:center}
+.boss-mon:disabled{cursor:default}
+.boss-mon.m-short{width:min(34vw,160px)}.boss-mon.m-slump{width:min(52vw,250px)}.boss-mon.m-proof{width:min(40vw,180px)}
+.boss-mon .mon-svg,.boss-mon .mon-img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+@media (prefers-reduced-motion:no-preference){
+  .boss-mon:not(:disabled) .mon-svg,.boss-mon:not(:disabled) .mon-img{animation:monIdle 2.4s ease-in-out infinite}
+  @keyframes monIdle{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-4px) scale(1.02,.98)}}
+  .boss-mon.hit .mon-svg,.boss-mon.hit .mon-img{animation:monHit .45s ease-in-out}
+  @keyframes monHit{0%{transform:translateX(0)}20%{transform:translateX(-10px) rotate(-5deg);filter:brightness(1.6)}45%{transform:translateX(9px) rotate(4deg)}70%{transform:translateX(-5px)}100%{transform:none}}
+}
+.boss-mon:not(:disabled):hover .mon-svg,.boss-mon:not(:disabled):hover .mon-img{filter:drop-shadow(0 0 12px rgba(255,206,92,.6))}
+.boss-scene.down .mon-svg,.boss-scene.down .mon-img{transform:rotate(-80deg) translate(-18%,10%);filter:grayscale(.5) brightness(.85)}
+.boss-mon .ko{position:absolute;left:50%;top:20%;transform:translateX(-50%) rotate(-8deg);font-family:"Jua",sans-serif;font-size:2rem;color:#FFE29A;text-shadow:0 2px 0 #B4513E,0 0 12px rgba(255,190,80,.8)}
+.boss-wolf{justify-self:start;text-align:center;color:#E9E6F5;min-width:0}
+@media (max-width:600px){.boss-wolf .small{display:none}.boss-mon{width:min(40vw,170px)}.boss-fire .small{font-size:.7rem}}
+.boss-wolf img{width:min(22vw,96px);height:auto;display:block;margin:0 auto;transform:scaleX(-1);filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))}
+.boss-fire{justify-self:end;text-align:center;color:#FFE29A;line-height:1.1}
+.boss-fire .fl{display:block;font-size:1.8rem;filter:drop-shadow(0 0 8px rgba(255,150,40,.7))}
+.boss-fire.lv1 .fl{font-size:2.3rem}.boss-fire.lv2 .fl{font-size:2.9rem}.boss-fire.lv3 .fl{font-size:3.6rem;filter:drop-shadow(0 0 16px rgba(255,150,40,.95))}
+@media (prefers-reduced-motion:no-preference){ .boss-fire .fl{animation:fireFl 1.2s ease-in-out infinite alternate} @keyframes fireFl{to{transform:scale(1.08,.94) translateY(1px)}} }
+.boss-say{text-align:center;margin:.3rem 0 0;color:#F4F1FF;font-family:"Jua",sans-serif;font-size:1rem;min-height:1.4em}
+.dmg-pop{position:absolute;z-index:3;pointer-events:none;font-family:"Jua",sans-serif;font-size:1.5rem;color:#FFF;text-shadow:0 2px 0 #B4513E,0 0 6px rgba(0,0,0,.6);opacity:0;animation:dmgUp 1.2s ease-out forwards}
+.dmg-pop.weak{color:#FFE29A;font-size:1.8rem}
+.dmg-pop.sum{color:#FFCE5C;font-size:1.3rem;left:50%!important;top:8%!important;transform:translateX(-50%)}
+.dmg-pop.eff{color:#9BE3B0;font-size:1.1rem;left:50%!important;top:0!important}
+@keyframes dmgUp{0%{opacity:0;transform:translateY(10px) scale(.6)}15%{opacity:1;transform:translateY(0) scale(1.15)}100%{opacity:0;transform:translateY(-46px) scale(1)}}
+.boss-ctrl{margin-top:.8rem}
+.boss-tix{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.5rem}
+.boss-tix .tix{font-family:"Jua",sans-serif;font-size:1.15rem}.boss-tix b{font-weight:400;color:var(--accent);font-size:1.35rem}
+.wpn-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.35rem}
+@media (max-width:640px){.wpn-row{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.wpn{display:flex;flex-direction:column;align-items:center;gap:.05rem;padding:.35rem .2rem;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font:inherit;cursor:pointer;text-align:center}
+.wpn .we{font-size:1.5rem;line-height:1.2}.wpn b{font-weight:400;font-size:.76rem;line-height:1.25;word-break:keep-all}.wpn .wd{font-family:"Jua",sans-serif;font-size:.8rem;color:var(--muted)}
+.wpn.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 0 12px rgba(255,190,80,.35)}
+.wpn.weak .wd{color:#FFB27A}
+.wpn.lock{opacity:.5;cursor:default;border-style:dashed}
+.boss-hint{margin:.5rem 0 .6rem}
+.boss-btns{display:flex;gap:.5rem;flex-wrap:wrap}
+.boss-done{margin:.7rem 0 0;padding:.6rem .8rem;border-radius:12px;background:rgba(255,206,92,.12);border:1px solid rgba(255,206,92,.3)}
+.boss-dex{margin-top:.8rem;border:1px solid var(--line);border-radius:14px;padding:.45rem .7rem}
+.boss-dex summary{cursor:pointer;font-family:"Jua",sans-serif}
+.bdex{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.45rem;margin-top:.5rem}
+.bdx{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.1rem;padding:.4rem .2rem;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04)}
+.bdx .bart{width:64px;height:64px;display:grid;place-items:center}.bdx .bart svg,.bdx .bart img{width:100%;height:auto}
+.bdx .bart.q{font-family:"Jua",sans-serif;font-size:2rem;color:var(--muted)}
+.bdx b{font-weight:400;font-family:"Jua",sans-serif;font-size:.85rem}.bdx.peek{opacity:.7;border-style:dashed}
+:root[data-mode="day"] .boss-scene{background:radial-gradient(ellipse 70% 55% at 50% 100%,rgba(255,170,70,.25),transparent 70%),linear-gradient(#9FD3F2,#CFE8C0 75%,#8FB86A)}
+:root[data-mode="day"] .boss-hp .small,:root[data-mode="day"] .boss-say,:root[data-mode="day"] .boss-wolf{color:#24331F}
+:root[data-mode="day"] .wpn,:root[data-mode="day"] .bdx{background:rgba(255,255,255,.75)}
+
+/* 🌀 이세계 탭 (10-21 ⑮) — 괴물 토벌을 광장에서 따로 떼어 판타지 느낌으로 */
+#tab-isekai{position:relative;isolation:isolate;border-radius:22px;overflow:hidden;padding:1.3rem 1rem 1.2rem;color:#F1ECFF;
+  background:radial-gradient(ellipse 80% 60% at 50% 105%,rgba(255,120,200,.28),transparent 70%),radial-gradient(ellipse 60% 50% at 15% 10%,rgba(90,200,255,.22),transparent 70%),
+  radial-gradient(ellipse 60% 50% at 90% 20%,rgba(170,110,255,.3),transparent 70%),linear-gradient(#120B2E,#1E1048 45%,#2A1346);
+  box-shadow:0 0 0 1px rgba(190,160,255,.35),0 18px 40px rgba(20,8,50,.5)}
+.isekai-sky{position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(1.2px 1.2px at 12% 18%,#fff,transparent),radial-gradient(1px 1px at 28% 42%,#E6DBFF,transparent),radial-gradient(1.6px 1.6px at 47% 12%,#fff,transparent),
+  radial-gradient(1px 1px at 63% 33%,#BFF3FF,transparent),radial-gradient(1.4px 1.4px at 81% 9%,#fff,transparent),radial-gradient(1px 1px at 92% 46%,#FFD7F2,transparent),
+  radial-gradient(1.2px 1.2px at 7% 58%,#fff,transparent),radial-gradient(1px 1px at 38% 66%,#E6DBFF,transparent),radial-gradient(1.3px 1.3px at 72% 62%,#fff,transparent)}
+@media (prefers-reduced-motion:no-preference){ .isekai-sky{animation:skyTw 4s ease-in-out infinite alternate} @keyframes skyTw{to{opacity:.55}} }
+.isekai-head{text-align:center;margin-bottom:1rem}
+.isekai-head h2{margin:0;font-size:1.9rem;letter-spacing:.08em;background:linear-gradient(90deg,#9FE7FF,#D9B8FF,#FFB8E4);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 12px rgba(180,140,255,.55))}
+.isekai-head p{margin:.3rem auto 0;max-width:34rem;font-size:.92rem;color:#D8CCF5;text-wrap:balance}
+#tab-isekai .boss-panel{background:rgba(20,10,48,.55);border:1px solid rgba(190,160,255,.3);border-radius:20px;padding:1rem;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#tab-isekai .boss-head h3{color:#F1ECFF}#tab-isekai .small{color:#C9BCEB}
+#tab-isekai .boss-scene{background:radial-gradient(ellipse 60% 30% at 50% 96%,rgba(160,120,255,.35),transparent 70%),linear-gradient(#1A0F40,#24124F 70%,#311659);border-color:rgba(190,160,255,.35)}
+#tab-isekai .boss-stage{min-height:250px}
+#tab-isekai .boss-stage::before{content:"";position:absolute;left:50%;bottom:4%;width:min(64vw,300px);aspect-ratio:1;translate:-50% 0;border-radius:50%;z-index:0;pointer-events:none;
+  background:conic-gradient(from 0deg,#7A5CFF,#3FD0E0,#F27BD0,#FFD27A,#7A5CFF);filter:blur(16px);opacity:.5;animation:portalSpin 14s linear infinite}
+#tab-isekai .boss-stage::after{content:"";position:absolute;left:50%;bottom:10%;width:min(48vw,220px);aspect-ratio:1;translate:-50% 0;border-radius:50%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle,#0A0420 30%,rgba(40,16,90,.9) 55%,transparent 72%)}
+#tab-isekai .boss-stage > *{position:relative;z-index:1}
+@keyframes portalSpin{to{rotate:360deg}}
+@media (prefers-reduced-motion:reduce){#tab-isekai .boss-stage::before{animation:none}}
+#tab-isekai .boss-fire .fl{filter:drop-shadow(0 0 10px rgba(120,200,255,.8)) hue-rotate(200deg)}
+#tab-isekai .boss-fire .small::before{content:"✨ "}
+#tab-isekai .wpn{background:rgba(255,255,255,.06);border-color:rgba(190,160,255,.3);color:#F1ECFF}
+#tab-isekai .wpn.on{border-color:#C9A8FF;box-shadow:0 0 0 2px #B48CFF,0 0 16px rgba(180,140,255,.6)}
+#tab-isekai .boss-tix b{color:#FFD27A}
+#tab-isekai .pull{background:linear-gradient(#EADFFF,#C9B4FF);color:#2A1350}
+#tab-isekai .pull.ten{background:linear-gradient(#FFDC86,#F2AA45);color:#3A2600}
+#tab-isekai .boss-dex,#tab-isekai .bdx{border-color:rgba(190,160,255,.3);background:rgba(255,255,255,.04)}
+.isekai-empty{text-align:center;padding:1.5rem 1rem 1rem}
+.isekai-empty p{margin:.8rem 0 0;font-family:"Jua",sans-serif;font-size:1.1rem}
+.portal-mini{width:160px;aspect-ratio:1;margin:0 auto;border-radius:50%;background:radial-gradient(circle,#0A0420 32%,transparent 60%),conic-gradient(from 0deg,#7A5CFF,#3FD0E0,#F27BD0,#FFD27A,#7A5CFF);filter:drop-shadow(0 0 18px rgba(180,140,255,.7));animation:portalSpin 10s linear infinite}
+
+/* ✨ 괴물 수집품 (10-21 ⑯) */
+.boss-items{margin-top:.9rem}
+.boss-items h4{margin:0 0 .45rem;font-family:"Jua",sans-serif;font-weight:400;font-size:1.05rem}
+.bi-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.4rem}
+@media (max-width:640px){.bi-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.bi{position:relative;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.4rem .2rem;border-radius:12px;border:1px solid rgba(190,160,255,.3);background:rgba(255,255,255,.05);color:inherit;font:inherit;text-align:center;cursor:pointer}
+.bi .bi-img{width:100%;max-width:72px;aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))}
+.bi b{font-weight:400;font-size:.72rem;line-height:1.25;word-break:keep-all}
+.bi.no{cursor:default}.bi .bi-img.shadow{filter:brightness(0) invert(.8);opacity:.22}
+.bi.peek{opacity:.6;border-style:dashed}
+.bi .bq{position:absolute;top:.25rem;right:.3rem;font-family:"Jua",sans-serif;font-size:.72rem;background:#FFD27A;color:#3A2600;border-radius:999px;padding:0 .35rem}
+.zoom-art img.zbi{display:block;width:min(56vw,220px);height:auto;margin:0 auto;filter:drop-shadow(0 0 14px rgba(255,206,92,.5))}
+
+/* 🌀 이세계 배경 그림 (10-21 ⑰) — bg/isekai.webp (밤). 괴물은 아래 빛나는 풀밭에 서요 */
+#tab-isekai .boss-scene,#tab-isekai .isekai-empty{background:linear-gradient(rgba(14,8,40,.35),rgba(14,8,40,0) 30%,rgba(14,8,40,0) 75%,rgba(14,8,40,.45)),url(bg/isekai.webp) center bottom/cover no-repeat,#1A0F40}
+#tab-isekai .isekai-empty{border-radius:16px;border:1px solid rgba(190,160,255,.35);min-height:300px;display:flex;flex-direction:column;justify-content:flex-end}
+#tab-isekai .isekai-empty .portal-mini{display:none}
+#tab-isekai .isekai-empty p{text-shadow:0 2px 6px rgba(10,6,30,.9)}
+#tab-isekai .boss-stage{min-height:300px}
+#tab-isekai .boss-stage::before,#tab-isekai .boss-stage::after{display:none}
+#tab-isekai .boss-hp{background:rgba(14,8,40,.55);border-radius:999px;padding:.3rem .7rem}
+#tab-isekai .boss-say,#tab-isekai .boss-fire,#tab-isekai .boss-wolf{text-shadow:0 2px 6px rgba(10,6,30,.95)}
+#tab-isekai .boss-mon .mon-img{filter:drop-shadow(0 0 14px rgba(150,200,255,.45)) drop-shadow(0 8px 10px rgba(0,0,0,.45))}
+@media (max-width:600px){ #tab-isekai .boss-scene,#tab-isekai .isekai-empty{background-position:center bottom,68% bottom,0 0}
+  #tab-isekai .boss-stage{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-height:270px;padding-top:1rem}
+  #tab-isekai .boss-mon{display:block;margin:0 auto;width:min(48vw,190px)} #tab-isekai .boss-mon.m-short{width:min(34vw,130px)} #tab-isekai .boss-mon.m-slump{width:min(56vw,210px)}
+  #tab-isekai .boss-fire{position:absolute;left:2px;bottom:4px;z-index:2} #tab-isekai .boss-fire .fl{font-size:1.5rem}
+  #tab-isekai .boss-wolf{position:absolute;right:0;bottom:2px;z-index:2} #tab-isekai .boss-wolf img{width:58px} }
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -1893,6 +2017,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
     <button role="tab" aria-selected="false" data-tab="walk" aria-label="산책로"><span class="tab-ic" aria-hidden="true">🪧</span><span class="tab-tx" aria-hidden="true">산책로</span><span class="tab-sh" aria-hidden="true">산책로</span></button>
     <button role="tab" aria-selected="false" data-tab="home" aria-label="우리 집 꾸미기"><span class="tab-ic" aria-hidden="true">🏡</span><span class="tab-tx" aria-hidden="true">우리 집 꾸미기</span><span class="tab-sh" aria-hidden="true">우리 집</span></button>
     <button role="tab" aria-selected="false" data-tab="plaza" aria-label="마을 광장"><span class="tab-ic" aria-hidden="true">🏘️</span><span class="tab-tx" aria-hidden="true">마을 광장</span><span class="tab-sh" aria-hidden="true">광장</span></button>
+    <button role="tab" aria-selected="false" data-tab="isekai" aria-label="이세계"><span class="tab-ic" aria-hidden="true">🌀</span><span class="tab-tx" aria-hidden="true">이세계</span><span class="tab-sh" aria-hidden="true">이세계</span></button>
     <button role="tab" aria-selected="false" data-tab="lotto" aria-label="복권"><span class="tab-ic" aria-hidden="true">🎟️</span><span class="tab-tx" aria-hidden="true">복권</span><span class="tab-sh" aria-hidden="true">복권</span></button>
     <button role="tab" aria-selected="false" data-tab="tree" aria-label="세계수"><span class="tab-ic" aria-hidden="true">🌳</span><span class="tab-tx" aria-hidden="true">세계수</span><span class="tab-sh" aria-hidden="true">세계수</span></button>
     <button role="tab" aria-selected="false" data-tab="lake" aria-label="호숫가"><span class="tab-ic" aria-hidden="true">🎣</span><span class="tab-tx" aria-hidden="true">호숫가</span><span class="tab-sh" aria-hidden="true">호숫가</span></button>
@@ -1987,6 +2112,19 @@ document.documentElement.setAttribute('data-mode', modeNow());
         <p>주민들이 모은 코인으로 광장에 건물을 하나씩 지어요. 건물이 생기면 상점에 그 건물에서만 파는 소품이 들어와요.</p>
       </div>
       <div class="lots" id="lots"></div>
+    </div>
+  </section>
+
+  <section id="tab-isekai" class="isekai" hidden>
+    <div class="isekai-sky" aria-hidden="true"></div>
+    <div class="isekai-head">
+      <h2>🌀 이세계</h2>
+      <p>숲 너머 균열 저편, 원고를 막는 괴물들이 사는 곳이에요. 작업실 불빛을 모아 온 작가님만 이 문을 건널 수 있어요.</p>
+    </div>
+    <div class="boss-panel" id="bossBox" hidden></div>
+    <div class="isekai-empty" id="isekaiEmpty">
+      <div class="portal-mini" aria-hidden="true"></div>
+      <p>균열이 아직 조용해요.<br><span class="small">곧 이세계 괴물이 넘어올 거예요…</span></p>
     </div>
   </section>
 
@@ -3789,8 +3927,33 @@ const demoApi = (() => {
       t.claims.push({id:'me', name:st.me.display_name, reward}); st.me.coins += reward; persist();
       return {reward, coins:st.me.coins};
     },
+    // ⚔️ 이번 주 괴물 (미리보기)
+    bossState(){
+      const wk = Math.max(0, bossWeek());
+      if(!st.bossS || st.bossS.week!==wk){ const p = st.bossS;
+        st.bossS = {week:wk, monster:MONSTERS[wk%MONSTERS.length].code, max_hp:5000, dmg:3050, att:new Set(['moon','dl','green','dawn','owl']), my:0, dex:p?p.dex:[], tickets:p?0:3, fuel:p?0:20}; }   // 공격권은 다음 주로 안 넘어가요
+      return st.bossS;
+    },
+    async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
+    async bossHit(code, n){
+      const B = this.bossState(), w = weaponOf(code), m = monsterOf(B.monster);
+      if(B.dmg>=B.max_hp) fail('이번 주 괴물은 벌써 쓰러졌어요');
+      if(!weaponOpen(w, st.me.total_minutes)) fail('아직 못 쓰는 무기예요');
+      n = Math.min(n|0, B.tickets); if(n<1) fail('공격권이 없어요');
+      const each = weaponDmg(w, m); let used = 0, dealt = 0;
+      while(used<n && B.dmg<B.max_hp){ used++; const d = Math.min(each, B.max_hp-B.dmg); B.dmg += d; dealt += d; }
+      B.tickets -= used; B.my += dealt; B.att.add('me');
+      st.bitems = st.bitems || {}; const set = (BOSS_ITEMS[m.code]||[]).map(r=>r[0]), drops = [];
+      const give = fresh => { if(!set.length) return null; const pool = fresh && set.some(c=>!st.bitems[c]) ? set.filter(c=>!st.bitems[c]) : set; const c = pool[Math.floor(Math.random()*pool.length)]; st.bitems[c] = (st.bitems[c]||0)+1; return c; };
+      for(let k=0;k<used;k++) if(Math.random()<BOSS_DROP){ const c = give(false); if(c) drops.push(c); }
+      const down = B.dmg>=B.max_hp; let kill_item = null; if(down) kill_item = give(true);
+      if(down){ B.tickets = 0; B.fuel = 0; if(!B.dex.includes(m.code)) B.dex.push(m.code); st.me.coins += BOSS_REWARD; st.gifts.push({id:Date.now(), amount:BOSS_REWARD, reason:`⚔️ ${m.name} 토벌`}); persist(); }
+      persist(); return {each, used, dealt, hp:B.max_hp-B.dmg, down, drops, kill_item};
+    },
     // 미리보기 전용
     tick(){
+      { const B = this.bossState(); if(st.me.in_voice && B.tickets<BOSS_TICKET_MAX && B.dmg<B.max_hp){ const lit = 1 + st.others.filter(o=>o.in_voice && !o.removed).length; B.fuel += bossFire(lit);
+          while(B.fuel>=BOSS_TICKET_FUEL && B.tickets<BOSS_TICKET_MAX){ B.fuel -= BOSS_TICKET_FUEL; B.tickets++; } if(B.tickets>=BOSS_TICKET_MAX) B.fuel = 0; } }
       if(st.me.in_voice){ this.streakTick(); st.me.total_minutes++; st.me.coins+=currentMult(); st.me.today_minutes++; persist(); }
       st.others.forEach(o=>{ if(o.in_voice && !o.removed){ o.today_minutes++; o.total_minutes++; } });
     },
@@ -3953,6 +4116,8 @@ const supaApi = (() => {
     async tankBuySkin(code){ return ok(await sb.rpc('buy_tank_skin', {p_skin:code})); },
     async tankSetSkin(code){ ok(await sb.rpc('set_tank_skin', {p_skin:code})); },
     async lotto(){ return ok(await sb.rpc('get_lotto')); },
+    async boss(){ const r = ok(await sb.rpc('get_boss')); return Array.isArray(r) ? r[0] : r; },              // ⚔️ 이번 주 괴물 (boss.sql)
+    async bossHit(w, n){ const r = ok(await sb.rpc('boss_hit', {p_weapon:w, p_count:n})); return Array.isArray(r) ? r[0] : r; },
     async playLotto(){ return ok(await sb.rpc('play_lotto')); },
     async trucks(){ return ok(await sb.rpc('get_trucks')) || []; },
     async callTruck(kind){ const r = ok(await sb.rpc('call_truck', {p_kind:kind})); return Array.isArray(r) ? r[0] : r; },
@@ -5343,6 +5508,203 @@ document.addEventListener('click', async e=>{
       } else if(p) toast(`🪙 ${p.reward}코인을 받았어요`);
     }catch(err){ toast(err.message||'고르지 못했어요'); document.querySelectorAll('[data-legend]').forEach(x=>x.disabled = false); }
   }
+});
+
+/* ---------- ⚔️ 이번 주 괴물 토벌 (10-21) — boss.sql 과 숫자가 같아야 해요 ----------
+   매주 금요일 0시에 광장에 괴물이 와서 다음 목요일 밤 12시까지 머물러요.
+   작업실에 있으면 🎫 공격권이 모이고(60분에 1장, 같이 있는 사람이 많을수록 빨리), 광장에 와서 무기를 골라 직접 때려요.
+   무기는 누적 작업 시간(집이 커지는 시간)으로 열리고, 괴물마다 잘 듣는 무기가 있어요(2배).
+   쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 + 괴물 도감 등록. 못 잡아도 잃는 건 없어요.
+   공격권은 그 주에만 써요 (다음 주로 안 넘어가요). 첫 괴물은 10-22(목) 0시 ~ 10-30(금) 0시. */
+const BOSS_TICKET_FUEL = 60, BOSS_TICKET_MAX = 24, BOSS_REWARD = 500, BOSS_WEAK = 2;
+const BOSS_FIRE = [[5,2],[3,1.5],[2,1.2],[0,1]];   // 작업실에 같이 있는 사람 수 → 공격권 모이는 속도
+const bossFire = n => (BOSS_FIRE.find(([k])=>n>=k) || [0,1])[1];
+const bossWeek = () => Date.now() < Date.parse('2026-10-30T00:00:00+09:00') ? 0 : Math.floor((Date.now() - Date.parse('2026-10-30T00:00:00+09:00'))/604800e3) + 1;   // 미리보기용 (진짜는 서버가 정해요)
+const MONSTERS = [
+  {code:'slump',  name:'슬럼프 괴물',   color:'#A9AEC2', dark:'#7A8098', weak:'coffee',
+   lines:['한 줄도 안 써지지? 그냥 누워 있자~','오늘은 날이 아닌 것 같은데…','다음 주에 쓰면 되잖아…']},
+  {code:'typo',   name:'오탈자 괴물',   color:'#B79AE0', dark:'#8C6CC0', weak:'dict',
+   lines:['됬다! 안됀다! 몇일!','올리고 나서야 보일걸?','띄어쓰기도 내 거야~']},
+  {code:'proof',  name:'교정고 괴물',   color:'#F1EADA', dark:'#C9B98F', weak:'pen',
+   lines:['여기도… 여기도 고쳐 주세요.','빨간 줄이 아직 이만큼 남았어요!','2교도 금방 갈게요~']},
+  {code:'blank',  name:'백지 괴물',     color:'#F7F8FC', dark:'#C9CEDF', weak:'pencil',
+   lines:['…………','(하얗다)','첫 문장, 생각나요?']},
+  {code:'plot',   name:'플롯 구멍 괴물', color:'#F4D06A', dark:'#D9A932', weak:'needle',
+   lines:['그 떡밥 어디 갔어요?','설정이 숭숭 비었는데~','3권 복선은 회수했어요?']},
+  {code:'short',  name:'분량 부족 괴물', color:'#95C982', dark:'#5E9A55', weak:'keyboard',
+   lines:['5천 자 모자라요!','작아도 안 쓰러져요!','오늘 목표 분량은요?']},
+  {code:'revise', name:'수정 요청 괴물', color:'#F2A56C', dark:'#D07C40', weak:'hammer',
+   lines:['한 번만 더 고쳐 주실 수 있을까요?','최종_진짜최종_수정본이 맞나요?','이 부분만 살짝…']},
+];
+const WEAPONS = [   // h: 누적 작업 시간(시간) — 집이 한 단계 커질 때마다 하나씩 열려요
+  {code:'pencil',   emoji:'✏️', name:'연필',       h:0,   dmg:10},
+  {code:'coffee',   emoji:'☕', name:'커피 머그',   h:5,   dmg:11},
+  {code:'dict',     emoji:'📕', name:'두꺼운 사전', h:15,  dmg:12},
+  {code:'pen',      emoji:'🖋️', name:'만년필',     h:30,  dmg:13},
+  {code:'needle',   emoji:'🪡', name:'바느질 바늘', h:50,  dmg:14},
+  {code:'keyboard', emoji:'⌨️', name:'키보드',     h:80,  dmg:15},
+  {code:'hammer',   emoji:'🔨', name:'확정 망치',   h:120, dmg:16},
+];
+const monsterOf = c => MONSTERS.find(m=>m.code===c) || MONSTERS[0];
+const weaponOf = c => WEAPONS.find(w=>w.code===c) || WEAPONS[0];
+const weaponOpen = (w, minutes) => (minutes||0) >= w.h*60;
+const weaponDmg = (w, m) => w.dmg * (m.weak===w.code ? BOSS_WEAK : 1);
+// 🏆 잡은 괴물은 꽃·물고기처럼 📖 괴물 도감에만 모여요 (가방에 들어가는 전리품은 없어요)
+// ✨ 괴물 수집품 (10-21 ⑯) — 괴물마다 7개, 주민마다 랜덤으로 모아요. 그림 monster/코드.webp · boss.sql 의 boss_items 와 같아야 해요
+//    때릴 때마다 BOSS_DROP 확률로 1개 · 쓰러뜨리면 때린 주민 모두 1개 더(아직 없는 것부터). 새 괴물 수집품은 매주 목요일에 여기 + boss.sql 에 한 줄씩
+const BOSS_DROP = .10;
+const BOSS_ITEMS = {
+  slump: [['slump_cushion','회색 털뭉치 쿠션'],['slump_eyemask','반쯤 감긴 눈안대'],['slump_coldcoffee','다 식어버린 커피 머그잔'],['slump_clock','태엽이 멈춘 시계'],
+          ['slump_sandbag','무거운 모래주머니'],['slump_postit',"'내일부터 해야지' 포스트잇"],['slump_penholder','먼지 쌓인 펜 거치대']],
+};
+const bossItem = code => { for(const [m,l] of Object.entries(BOSS_ITEMS)){ const x = l.find(r=>r[0]===code); if(x) return {code, name:x[1], monster:m}; } return {code, name:'이세계 수집품', monster:''}; };
+const bossItemImg = (code, cls='') => `<img class="bi-img ${cls}" src="monster/${code}.webp" alt="" draggable="false" loading="lazy">`;
+// 🎨 제미나이 괴물 그림 (monster/코드.webp) — 올라오면 여기에 코드를 넣어요. 없으면 임시 그림
+const MONSTER_IMG = new Set(['slump','typo','proof','blank','plot','short','revise']);   // (10-21 ⑭) 제미나이 그림 7종
+function monsterArt(m){
+  if(MONSTER_IMG.has(m.code)) return `<img class="mon-img" src="monster/${m.code}.webp" alt="" draggable="false">`;
+  const c = m.color, d = m.dark;
+  const eyes = m.code==='slump' ? `<path d="M44 58 q6 4 12 0 M64 58 q6 4 12 0" stroke="#3A3346" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    : m.code==='blank' ? `<circle cx="50" cy="56" r="7" fill="#fff" stroke="#9AA0B5" stroke-width="2"/><circle cx="70" cy="56" r="7" fill="#fff" stroke="#9AA0B5" stroke-width="2"/>`
+    : `<ellipse cx="50" cy="56" rx="4.5" ry="5.5" fill="#3A3346"/><ellipse cx="70" cy="56" rx="4.5" ry="5.5" fill="#3A3346"/><circle cx="51.5" cy="54" r="1.6" fill="#fff"/><circle cx="71.5" cy="54" r="1.6" fill="#fff"/>`;
+  const mouth = m.code==='blank' ? '' : m.code==='slump' ? `<path d="M54 72 q6 -3 12 0" stroke="#3A3346" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+    : `<path d="M53 70 q7 7 14 0" stroke="#3A3346" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M57 72.6 l1.6 3 l1.6 -3" fill="#fff"/>`;
+  const deco = {
+    slump: `<path d="M30 98 q-2 10 3 12 q4 -2 1 -12 M88 100 q-1 9 4 10 q4 -3 0 -11" fill="${c}"/><path d="M40 34 q20 -8 40 0" stroke="${d}" stroke-width="2" fill="none" opacity=".6"/>`,
+    typo:  `<text x="34" y="88" font-size="13" fill="${d}" font-family="Jua,sans-serif" transform="rotate(-12 34 88)">됬</text><text x="76" y="92" font-size="12" fill="${d}" font-family="Jua,sans-serif" transform="rotate(14 76 92)">몇일</text><text x="80" y="44" font-size="12" fill="${d}" font-family="Jua,sans-serif">?!</text>`,
+    proof: `<path d="M34 80 l18 -3 M66 84 q6 -4 14 0 M40 92 h22 M70 40 l12 4" stroke="#D24B45" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M26 46 l10 -14 l6 12" fill="${c}" stroke="${d}" stroke-width="1.5"/><path d="M94 46 l-10 -14 l-6 12" fill="${c}" stroke="${d}" stroke-width="1.5"/>`,
+    blank: `<path d="M36 40 h48 M34 86 h52 M36 94 h46" stroke="#DCE0EC" stroke-width="1.6"/>`,
+    plot:  `<circle cx="38" cy="84" r="6" fill="${d}"/><circle cx="82" cy="80" r="7.5" fill="${d}"/><circle cx="66" cy="94" r="4.5" fill="${d}"/><circle cx="44" cy="40" r="4" fill="${d}"/>`,
+    short: `<path d="M44 102 l-4 8 h8z M76 102 l4 8 h-8z" fill="${d}"/><path d="M38 64 l-12 -6 M82 64 l12 -6" stroke="${d}" stroke-width="5" stroke-linecap="round"/>`,
+    revise:`<rect x="30" y="74" width="20" height="7" rx="2" fill="#F7E6CC" transform="rotate(-25 40 77)"/><rect x="72" y="40" width="18" height="6" rx="2" fill="#F7E6CC" transform="rotate(30 81 43)"/><path d="M92 62 l10 -14" stroke="${d}" stroke-width="6" stroke-linecap="round"/><circle cx="103" cy="45" r="5" fill="${c}" stroke="${d}" stroke-width="2"/>`,
+  }[m.code] || '';
+  const body = `<path d="M22 102 Q14 52 40 32 Q60 18 80 32 Q106 52 98 102 Q60 112 22 102Z" fill="${c}" stroke="${d}" stroke-width="3"/>`;
+  const sc = m.code==='short' ? ' transform="translate(60 112) scale(.78) translate(-60 -112)"' : '';
+  return `<svg class="mon-svg" viewBox="0 0 120 120" aria-hidden="true"><ellipse cx="60" cy="112" rx="40" ry="6" fill="#000" opacity=".22"/><g${sc}>${body}${deco}${eyes}${mouth}<ellipse cx="42" cy="66" rx="5" ry="3" fill="#F4A6B8" opacity=".7"/><ellipse cx="78" cy="66" rx="5" ry="3" fill="#F4A6B8" opacity=".7"/></g></svg>`;
+}
+
+let BOSS = null, BOSS_ANIM_UNTIL = 0, BOSS_LINE = 0;
+let BOSS_PICK = null; try{ BOSS_PICK = localStorage.getItem('majam-boss-weapon'); }catch(e){}
+async function refreshBoss(){ try{ const r = await api.boss(); BOSS = r && r.monster ? r : null; }catch(e){ BOSS = null; } }   // boss.sql 전이면 조용히 안 보여요
+const bossLit = () => VILLAGE.filter(p=>p.in_voice && !p.removed).length;
+function bossWeaponNow(){
+  const m = monsterOf(BOSS.monster), mins = ME ? ME.total_minutes : 0, open = WEAPONS.filter(w=>weaponOpen(w, mins));
+  if(BOSS_PICK && open.some(w=>w.code===BOSS_PICK)) return weaponOf(BOSS_PICK);
+  return open.slice().sort((a,b)=>weaponDmg(b,m)-weaponDmg(a,m))[0] || WEAPONS[0];   // 처음엔 제일 센 무기를 골라 둬요
+}
+function bossBadge(){
+  const tb = document.querySelector('.tabs [data-tab="isekai"]'); if(!tb) return;
+  let bd = tb.querySelector('.tab-badge'); if(!bd){ bd = document.createElement('span'); bd.className = 'tab-badge'; tb.appendChild(bd); }
+  const n = BOSS && BOSS.hp>0 ? (BOSS.tickets||0) : 0; bd.textContent = n ? `⚔️${n}` : ''; bd.hidden = !n;
+}
+function renderBoss(force){
+  const box = document.getElementById('bossBox'); if(!box) return;
+  bossBadge();
+  { const em = document.getElementById('isekaiEmpty'); if(em) em.hidden = !!(BOSS && ME); }
+  if(!BOSS || !ME){ box.hidden = true; box.innerHTML = ''; box._html = ''; return; }
+  if(!force && Date.now() < BOSS_ANIM_UNTIL) return;
+  box.hidden = false;
+  const m = monsterOf(BOSS.monster), down = BOSS.hp <= 0, pct = Math.max(0, BOSS.hp/BOSS.max_hp*100);
+  const left = Math.max(0, (BOSS.ends_at ? Date.parse(BOSS.ends_at) : lottoWeekEnds()) - Date.now()), dd = Math.floor(left/864e5), hh = Math.floor(left%864e5/36e5);
+  const lit = bossLit(), mult = bossFire(lit), fireLv = lit>=5?3:lit>=3?2:lit>=2?1:0;
+  const mine = ME.in_voice, t = BOSS.tickets||0, full = t >= BOSS_TICKET_MAX;
+  const nextMin = Math.ceil((BOSS_TICKET_FUEL - (BOSS.fuel||0)) / mult);
+  const w = bossWeaponNow(), mins = ME.total_minutes;
+  const wpns = WEAPONS.map(x=>{ const open = weaponOpen(x, mins), weak = m.weak===x.code, dmg = weaponDmg(x, m);
+    return open ? `<button type="button" class="wpn ${x.code===w.code?'on':''} ${weak?'weak':''}" data-bosswpn="${x.code}" title="${esc(x.name)} · 한 번에 ${dmg}"><span class="we">${x.emoji}</span><b>${esc(x.name)}</b><span class="wd">${weak?'💥 ':''}${dmg}</span></button>`
+      : `<span class="wpn lock" title="누적 작업 ${x.h}시간에 열려요"><span class="we">🔒</span><b>${peek()?esc(x.name):'???'}</b><span class="wd">${x.h}시간</span></span>`; }).join('');
+  const weakW = weaponOf(m.weak), knowWeak = weaponOpen(weakW, mins) || peek();
+  const dex = new Set(BOSS.dex||[]);
+  const html = `
+    <div class="boss-head"><h3>⚔️ 이번 주 괴물 · ${esc(m.name)}</h3><span class="small">${down ? '다음 괴물은 금요일 0시에 와요' : `${dd?`${dd}일 `:''}${hh}시간 뒤에 떠나요 · 공격권은 이번 주에만 쓸 수 있어요`}</span></div>
+    <div class="boss-scene ${down?'down':''}">
+      <div class="boss-hp"><div class="bar"><span style="width:${pct.toFixed(1)}%"></span></div><span class="small">❤️ ${Math.max(0,BOSS.hp).toLocaleString()} / ${BOSS.max_hp.toLocaleString()}</span></div>
+      <div class="boss-stage">
+        <div class="boss-fire lv${fireLv}" title="지금 작업실 ${lit}명 · 공격권이 ×${mult} 빠르게 모여요"><span class="fl">🔥</span><span class="small">모닥불 ×${mult}</span></div>
+        <button type="button" class="boss-mon m-${m.code}" id="bossMon" ${down||!t?'disabled':''} aria-label="${esc(m.name)} 때리기">${monsterArt(m)}${down?'<span class="ko">KO</span>':''}</button>
+        <div class="boss-wolf"><img src="bg/Wolf_Watcher.webp" alt="" draggable="false"><span class="small">담당자도 같이 싸워요</span></div>
+      </div>
+      <p class="boss-say">${down ? `「${esc(m.name)}」${jo(m.name,'을','를')} 쓰러뜨렸어요! 🎉` : `“${esc(m.lines[BOSS_LINE % m.lines.length])}”`}</p>
+    </div>
+    ${down ? `<p class="boss-done">${BOSS.my_damage ? `이번 주 내가 준 피해 <b>${BOSS.my_damage.toLocaleString()}</b> · 🪙 ${BOSS_REWARD}를 보내고 📖 괴물 도감에 올렸어요` : '이번 주엔 못 때렸지만, 다음 주 괴물은 같이 잡아요!'}</p>` : `
+    <div class="boss-ctrl">
+      <div class="boss-tix"><span class="tix">🎫 공격권 <b>${t}</b>장</span>
+        <span class="small">${full ? `가득 찼어요 (최대 ${BOSS_TICKET_MAX}장) · 얼른 쓰러 와요!` : mine ? `다음 장까지 약 ${nextMin}분` : `작업실에 있으면 1시간에 1장씩 모여요`}</span></div>
+      <div class="wpn-row" role="group" aria-label="무기 고르기">${wpns}</div>
+      <p class="small boss-hint">${knowWeak ? `💥 이번 주 괴물은 <b>${weakW.emoji} ${esc(weakW.name)}</b>에 약해요 (피해 ${BOSS_WEAK}배)` : `💥 이번 주 괴물에게 잘 듣는 무기가 있대요. 집이 더 커지면 알 수 있어요`}</p>
+      <div class="boss-btns">
+        <button class="pull" type="button" data-bosshit="1" ${t<1?'disabled':''}>${w.emoji} 한 번 때리기</button>
+        <button class="pull ten" type="button" data-bosshit="all" ${t<2?'disabled':''}>${w.emoji} 공격권 ${t}장 다 쓰기</button>
+      </div>
+      <p class="small" style="margin:.5rem 0 0">이번 주 내가 준 피해 ${(BOSS.my_damage||0).toLocaleString()} · ${BOSS.attackers||0}명이 함께 싸우는 중 · 쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 ${BOSS_REWARD} + 📖 괴물 도감 등록</p>
+    </div>`}
+    ${bossItemsHTML(m)}
+    <details class="boss-dex"><summary>📖 괴물 도감 <span class="small">${dex.size} / ${MONSTERS.length}</span></summary>
+      <div class="bdex">${MONSTERS.map(x=>dex.has(x.code)||peek()
+        ? `<div class="bdx ${dex.has(x.code)?'':'peek'}"><span class="bart">${monsterArt(x)}</span><b>${esc(x.name)}</b><span class="small">${dex.has(x.code)?'쓰러뜨렸어요!':'👁️ 아직 못 잡았어요'}</span></div>`
+        : `<div class="bdx no"><span class="bart q">？</span><b>???</b><span class="small">아직 못 잡았어요</span></div>`).join('')}</div></details>`;
+  if(box._html === html) return; box._html = html; box.innerHTML = html;
+}
+function bossItemsHTML(m){
+  const list = BOSS_ITEMS[m.code]; if(!list) return '';
+  const mine = (BOSS && BOSS.items) || {}, have = list.filter(([c])=>mine[c]>0).length;
+  const others = Object.entries(BOSS_ITEMS).filter(([k])=>k!==m.code);
+  const cell = ([c,n]) => mine[c]>0 || peek()
+    ? `<button type="button" class="bi ${mine[c]>0?'':'peek'}" data-bitem="${c}" title="${esc(n)}">${bossItemImg(c)}<b>${esc(n)}</b>${mine[c]>1?`<span class="bq">×${mine[c]}</span>`:''}</button>`
+    : `<span class="bi no">${bossItemImg(c,'shadow')}<b>???</b></span>`;
+  return `<div class="boss-items"><h4>✨ ${esc(m.name)} 수집품 <span class="small">${have} / ${list.length} · 때릴 때마다 가끔 떨어뜨리고, 쓰러뜨리면 하나 더! 주민마다 랜덤이에요</span></h4>
+    <div class="bi-grid">${list.map(cell).join('')}</div>
+    ${others.length ? `<details class="boss-dex"><summary>🎒 다른 괴물 수집품</summary>${others.map(([k,l])=>`<p class="small" style="margin:.5rem 0 .2rem">${esc(monsterOf(k).name)} · ${l.filter(([c])=>mine[c]>0).length} / ${l.length}</p><div class="bi-grid">${l.map(cell).join('')}</div>`).join('')}</details>` : ''}</div>`;
+}
+function bossItemShow(code, isNew, qty, why){
+  const it = bossItem(code), d = document.getElementById('zoomDlg'), art = document.getElementById('zoomArt');
+  art.className = 'zoom-art legend'; art.innerHTML = bossItemImg(code, 'zbi');
+  document.getElementById('zoomName').textContent = it.name;
+  document.getElementById('zoomBadge').innerHTML = isNew ? '<span class="rb legend">✨ 새 수집품!</span>' : `<span class="rb rare">×${qty}</span>`;
+  document.getElementById('zoomMeta').innerHTML = `<span class="zoom-about">${esc(why)}</span>`;
+  if(!d.open) d.showModal();
+}
+document.addEventListener('click', e=>{ const b = e.target.closest('[data-bitem]'); if(!b) return; const q = (BOSS && BOSS.items && BOSS.items[b.dataset.bitem]) || 0;
+  bossItemShow(b.dataset.bitem, false, q, q ? `${monsterOf(bossItem(b.dataset.bitem).monster).name}에게서 얻은 수집품이에요` : '👁️ 아직 못 모았어요'); });
+function bossPop(stage, text, cls, k){
+  const s = document.createElement('span'); s.className = 'dmg-pop ' + (cls||''); s.textContent = text;
+  s.style.left = (38 + Math.random()*24) + '%'; s.style.top = (18 + Math.random()*22) + '%'; s.style.animationDelay = (k*90) + 'ms';
+  stage.appendChild(s); setTimeout(()=>s.remove(), 1300 + k*90);
+}
+async function bossAttack(n){
+  if(!BOSS || BOSS.hp<=0 || busy) return;
+  const w = bossWeaponNow(), m = monsterOf(BOSS.monster), cnt = n==='all' ? BOSS.tickets : 1;
+  if(!(cnt>=1)) return toast('공격권이 없어요. 작업실에 있으면 1시간에 1장씩 모여요');
+  busy = true;
+  try{
+    const r = await api.bossHit(w.code, cnt), x = Array.isArray(r) ? r[0] : r;
+    BOSS_LINE++; BOSS_ANIM_UNTIL = Date.now() + 1500;
+    const stage = document.querySelector('#bossBox .boss-stage'), mon = document.getElementById('bossMon');
+    if(stage && mon){
+      mon.classList.remove('hit'); void mon.offsetWidth; mon.classList.add('hit');
+      const hits = Math.min(cnt, 8), weak = m.weak===w.code;
+      for(let k=0;k<hits;k++) bossPop(stage, `-${x.each}`, weak?'weak':'', k);
+      if(cnt > hits) bossPop(stage, `총 -${(x.dealt||0).toLocaleString()}`, 'sum', hits);
+      if(weak) bossPop(stage, '효과 굉장!', 'eff', 0);
+    }
+    const before = {...((BOSS && BOSS.items) || {})};
+    await refreshBoss();
+    setTimeout(()=>renderBoss(true), 1300);
+    const got = [...(x.drops||[]), ...(x.kill_item ? [x.kill_item] : [])];
+    if(got.length){ const c = got[got.length-1], isNew = !(before[c]>0), q = (BOSS && BOSS.items && BOSS.items[c]) || 1;
+      setTimeout(()=>bossItemShow(c, isNew, q, got.length>1 ? `${m.name}${jo(m.name,'이','가')} 수집품 ${got.length}개를 떨어뜨렸어요! (마지막 것)` : `${m.name}${jo(m.name,'이','가')} 떨어뜨렸어요!`), x.down ? 2600 : 1250); }
+    if(x && x.down){
+      await refreshMine(); renderTop(); renderBag();
+      setTimeout(()=>{ showGifts(); petParty('⚔️', `「${m.name}」${jo(m.name,'을','를')} 쓰러뜨렸어요!\n막타는 ${ME.display_name||'나'}님이에요 🎉\n\n함께 때린 주민 모두에게 🪙 ${BOSS_REWARD}와\n수집품 하나씩이 가요!`); }, 1350);
+    } else if(cnt>1) toast(`${w.emoji} ${cnt}번 때렸어요! 피해 ${(x.dealt||0).toLocaleString()}`);
+  }catch(err){ toast(err.message || '때리지 못했어요'); await refreshBoss(); renderBoss(true); }
+  finally{ busy = false; }
+}
+document.addEventListener('click', e=>{
+  const wp = e.target.closest('[data-bosswpn]');
+  if(wp){ BOSS_PICK = wp.dataset.bosswpn; try{ localStorage.setItem('majam-boss-weapon', BOSS_PICK); }catch(err){} renderBoss(true); return; }
+  const h = e.target.closest('[data-bosshit]'); if(h){ bossAttack(h.dataset.bosshit); return; }
+  if(e.target.closest('#bossMon')) bossAttack(1);
 });
 
 /* ---------- 🐾 펫 그림 (64×64, 앉아 있는 꼬마 모습) ---------- */
@@ -6811,6 +7173,7 @@ async function showGifts(){   // 📬 우편함으로 모아요 (넣은 개수�
     mailAdd(list.map(g=>{ const r = String(g.reason||'');
       if(r.startsWith('🔥')){ const n = parseInt(r.replace(/[^0-9]/g,''),10)||1, c = ((n-1)%14)+1;
         return {icon:'🔥', title:`연속 출석 ${n}일째!`, body:`오늘도 숲에 와 줘서 고마워요. ${c}일차 보상을 받았어요.` + (c===14 ? '\n14일 한 바퀴 완주! 내일부터 새 바퀴가 시작돼요.' : `\n내일 오면 🪙 ${streakReward(n+1)}코인!`), coin:g.amount}; }
+      if(r.startsWith('⚔️')) return {icon:'⚔️', title:`${r.replace(/^⚔️\s*/,'').replace(/ 토벌$/,'')}${jo(r.replace(/ 토벌$/,''),'을','를')} 쓰러뜨렸어요!`, body:'함께 때린 주민 모두에게 코인이 가요. 수집품도 하나씩 떨어졌어요 — 🌀 이세계 탭에서 확인해 보세요!', coin:g.amount};
       if(r.startsWith('🌳')) return {icon:'🌳', title:'세계수가 다 자랐어요!', body:'다 같이 물을 준 덕분이에요. 물을 준 주민 모두에게 코인이 도착했어요.', coin:g.amount};
       return {icon:'🎉', title:`「${r}」 축하해요!`, body:'숲지기가 축하 코인을 보냈어요.', coin:g.amount}; }));
     await api.giftsSeen();
@@ -6912,10 +7275,10 @@ async function cabsFor(owner, list){
 }
 async function refreshVillage(){ VILLAGE = await api.village(); }
 async function loadAll(){
-  await Promise.all([refreshMine(), refreshVillage(), refreshPlaza(), refreshGacha(), refreshGarden(), refreshLake(), refreshTank(), refreshTree(), refreshBanners(), refreshBoard(), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPets(), refreshPetsOn(), refreshWinter(), refreshNameplates(), refreshPetBabies(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
+  await Promise.all([refreshMine(), refreshVillage(), refreshPlaza(), refreshGacha(), refreshGarden(), refreshLake(), refreshTank(), refreshTree(), refreshBanners(), refreshBoard(), refreshBoss(), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPets(), refreshPetsOn(), refreshWinter(), refreshNameplates(), refreshPetBabies(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
   refreshStreak();
   MAIL_BOOT_UNTIL = Date.now() + 10000; renderMailBadge();   // 들어오자마자 온 소식은 우편함을 한 번만 열어 보여 줘요
-  renderPlaza(); renderWinter(); winterMailCheck(); celebratePlaza(); renderGacha(); renderBanners(); renderFloatDrops(); renderBoard();
+  renderPlaza(); renderBoss(); renderWinter(); winterMailCheck(); celebratePlaza(); renderGacha(); renderBanners(); renderFloatDrops(); renderBoard();
   refreshTrucks().then(renderTrucks); showTruckReport();
   setInterval(()=>refreshTrucks().then(renderTrucks), 5*60e3);
   renderTop(); renderVillage(); renderMyHouse(); renderBag(); renderRoad(); setHint();
@@ -7174,7 +7537,7 @@ function goTab(b, e){
   if(!b) return; e = e || {};
   const same = b.getAttribute('aria-selected')==='true';
   document.querySelectorAll('.tabs button, #adminTabBtn').forEach(x=>{ x.setAttribute('aria-selected', x===b); x.classList.toggle('on', x===b); });
-  ['village','walk','home','plaza','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
+  ['village','walk','home','plaza','isekai','lotto','tree','lake','pet','gacha','admin'].forEach(t=>document.getElementById('tab-'+t).hidden = b.dataset.tab!==t);
   if(b.dataset.tab==='walk'){ renderWalk(); refreshWalk().then(()=>{ renderWalk(); if(WALK_ME) walkSetLook(WALK_ME, WALK.look); walkJoin(); }); } else walkLeave();
   try{ sessionStorage.setItem('majam-tab', b.dataset.tab); }catch(err){}
   if(!e.tour) logTabOnce(b.dataset.tab);
@@ -7182,6 +7545,7 @@ function goTab(b, e){
   if(b.dataset.tab==='village'){ renderBanners(); renderVillage(); renderVillageTrucks(); }
   if(b.dataset.tab==='lotto'){ renderLotto(); refreshLotto().then(renderLotto); }
   if(b.dataset.tab==='admin'){ renderAdmin(); renderTabStats(); }
+  if(b.dataset.tab==='isekai'){ renderBoss(); refreshBoss().then(()=>renderBoss()); }
   if(b.dataset.tab==='plaza'){ refreshPlaza().then(renderPlaza); refreshTrucks().then(renderTrucks); renderBoard(); refreshBoard().then(renderBoard); }
   if(b.dataset.tab==='gacha') refreshGacha().then(renderGacha);
   if(b.dataset.tab==='lake'){ renderLake(); refreshLake().then(renderLake); }
@@ -7553,6 +7917,7 @@ async function start(){
       await refreshTree(); renderFloatDrops(); if(!document.getElementById('tab-tree').hidden) renderTree();
       if(!document.getElementById('tab-lake').hidden){ await refreshLake(); if(!document.querySelector('#lakeBox [data-legend]:disabled')) renderLake(); }
       if(!document.getElementById('tab-pet').hidden && !busy) renderPets();
+      await refreshBoss(); renderBoss();
       if(!document.getElementById('tab-gacha').hidden){ document.querySelector('[data-pull="1"]').disabled = ME.coins<PULL_PRICE; document.querySelector('[data-pull="10"]').disabled = ME.coins<PULL10_PRICE; }
     }, 1000);
     setInterval(async ()=>{
@@ -7577,6 +7942,7 @@ async function start(){
         if(!document.getElementById('tab-lake').hidden){ await refreshLake(); renderLake(); }
         await refreshBanners(); renderBanners();
         await refreshTree(); renderFloatDrops(); if(!document.getElementById('tab-tree').hidden) renderTree();
+        await refreshBoss(); renderBoss();
         if(!document.getElementById('tab-plaza').hidden && !document.activeElement?.closest('#boardBox')){ await refreshBoard(); renderBoard(); }
         showGifts(); showRaids(); showFlowerNotices(); showTreatNotices(); refreshEvents(); refreshNotes(); refreshStreak();
       }catch(e){}
@@ -7804,6 +8170,7 @@ const TOUR = [
   {tab:'home', el:'#roomTabs .garden-tab', title:'🐠 어항 · 🌷 마당', text:'방 이름 옆 「어항」에는 어항이, 「마당」에는 화단이 있어요.\n씨앗을 심으면 작업실에 있는 동안 자라서 꽃이 피고, 호숫가에서 많이 잡은 물고기는 어항에 넣어 헤엄치게 할 수 있어요.'},
   {tab:'home', el:'.deco-open', title:'🎨 집 겉모습 꾸미기', text:'여기를 누르면 집이 커지는 단계를 미리 보고, 집 스타일을 골라 꾸밀 수 있어요. 지나온 집 모습으로 되돌려 둘 수도 있어요.'},
   {tab:'plaza', el:'.plaza-scene', title:'🏘️ 마을 광장', text:'주민들이 코인을 모아 건물을 하나씩 지어요.\n동물 보호소가 지어지면 펫을, 꽃집이 지어지면 씨앗을 살 수 있어요. 간식차가 오면 커피도 얻어 마실 수 있어요.'},
+  {tab:'isekai', el:'#tab-isekai .boss-scene', title:'🌀 이세계', text:'숲 너머 이세계에 매주 금요일마다 괴물이 나타나요. 작업실에 1시간 있을 때마다 🎫 공격권이 생기고, 여기 와서 무기를 골라 직접 때려요.\n같이 작업실에 있는 사람이 많을수록 공격권이 빨리 모이고, 쓰러뜨리면 때린 주민 모두 코인을 받고 괴물 도감이 채워져요. 공격권은 그 주에만 쓸 수 있어요.'},
   {tab:'lotto', el:'#lottoBox', title:'🎟️ 마감 복권', text:'한 장 🪙30, 하루 5장까지 긁을 수 있어요.\n같은 그림 3개가 나오면 당첨! 이번 주 전설 가구도 나와요.'},
   {tab:'tree', el:'#treeBox', title:'🌳 세계수', text:'작업실에 있으면 주머니에 물방울이 모이고, 세계수 둘레에 떠오르는 물방울도 주울 수 있어요.\n다 같이 물을 줘서 나무가 다 자라면, 물을 준 주민 모두 코인을 받아요.'},
   {tab:'lake', el:'#lakeBox', title:'🎣 호숫가', text:'어망을 던져 두고 1시간 뒤에 걷으면 물고기가 1~2마리 걸려요.\n처음 잡거나 내 기록보다 크면 코인을 더 받아요. 미끼를 달면 귀한 물고기가 더 잘 나와요.'},
@@ -7912,6 +8279,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-21 판 ⑫</p>
+<p class="site-ver">마감의 숲 · 10-21 판 ⑰</p>
 </body>
 </html>
