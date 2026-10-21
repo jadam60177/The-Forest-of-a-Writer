@@ -2632,7 +2632,7 @@ const NEW_FURN66 = [
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'); DEFAULT_SHOP.splice(at<0?DEFAULT_SHOP.length:at, 0, ...NEW_FURN66.map(([code,emoji,name,price,w,h,category])=>({code,emoji,name,price,w,h,active:true,category,icon:code,layer:'furniture'}))); NEW_FURN66.forEach(r=>FURN_IMG.add(r[0])); }
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
 // 🧽 누끼를 다시 딴 그림 (같은 이름으로 덮어쓰니까 ?v= 를 붙여 옛 그림 캐시를 피해요) — 또 고치면 숫자만 올리기
-const FURN_VER = {tbl_side:3, tbl_two:3, tbl_long:3, tbl_wide:3, lantern:2, tr_medal:2, tr_scarf:2, oldkey:2, gears:2, globe:2, wall_trellis:2, eggchair:2, hammock:2, hammock2:2, diningtable:2, rocking:2, rocking2:2, clip:2, glasses:2};
+const FURN_VER = {candlestick:2, tbl_side:3, tbl_two:3, tbl_long:3, tbl_wide:3, lantern:2, tr_medal:2, tr_scarf:2, oldkey:2, gears:2, globe:2, wall_trellis:2, eggchair:2, hammock:2, hammock2:2, diningtable:2, rocking:2, rocking2:2, clip:2, glasses:2};
 const furnV = k => FURN_VER[k] ? `?v=${FURN_VER[k]}` : '';
 const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp${furnV(fimgKey(it))}` : null;
 const icoSrc = it => it && WALL_H.has(it.code) && fimg(it) ? `furn/${it.code}_h.webp` : fimg(it);   // 예전 벽 4종은 상점·가방에서 앞모습으로
@@ -7912,6 +7912,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-21 판 ⑪</p>
+<p class="site-ver">마감의 숲 · 10-21 판 ⑫</p>
 </body>
 </html>
