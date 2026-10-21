@@ -2309,7 +2309,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <div class="tint-pv" id="tintPv"></div>
   <p class="small tint-now" id="tintNow"></p>
   <div class="tint-sw" id="tintSw" role="group" aria-label="색 견본"></div>
-  <label class="tint-hue"><span class="small">🌈 직접 돌리기 <span class="tint-hue-tip">막대를 밀면 무늬 속 색들이 같이 빙글 돌아가요</span></span><input type="range" id="tintHue" min="0" max="359" step="1" value="0"></label>
+  <label class="tint-hue"><span class="small">🌈 직접 돌리기 <span class="tint-hue-tip">막대를 밀면 무늬 속 색들이 같이 빙글 돌아가요 (하얀·회색 러그는 막대로는 잘 안 바뀌니 위 색 견본을 골라 주세요)</span></span><input type="range" id="tintHue" min="0" max="359" step="1" value="0"></label>
   <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem">
     <button class="mini" id="tintCancel" type="button">취소</button>
     <button class="mini ask-yes" id="tintSave" type="button">🎨 이 색으로</button>
@@ -2755,7 +2755,7 @@ const tintCSS = t => !t ? '' : t[0]==='h' ? `hue-rotate(${(+t.slice(1))||0}deg) 
 const tintName = t => !t ? '원래 색' : t[0]==='h' ? `🌈 직접 고른 색` : ((RUG_TINTS.find(x=>x[0]===t)||[])[1] || '원래 색');
 (() => {
   const hex = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
-  const defs = RUG_TINTS.map(([k,,h])=>{ const c = hex(h), tab = i => `${(c[i]*.32).toFixed(3)} ${c[i].toFixed(3)} ${(c[i]+(1-c[i])*.8).toFixed(3)}`;
+  const defs = RUG_TINTS.map(([k,,h])=>{ const c = hex(h), tab = i => `${(c[i]*.3).toFixed(3)} ${(c[i]*.7).toFixed(3)} ${(c[i]*.95).toFixed(3)} ${(c[i]+(1-c[i])*.45).toFixed(3)}`;   // (10-22 고침) 하얀 러그도 확실히 물들게: 제일 밝은 곳 = 고른 색 + 흰색 45%
     return `<filter id="rugT_${k}" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="table" tableValues="${tab(0)}"/><feFuncG type="table" tableValues="${tab(1)}"/><feFuncB type="table" tableValues="${tab(2)}"/></feComponentTransfer></filter>`; }).join('');
   const put = () => { const sv = document.createElementNS('http://www.w3.org/2000/svg','svg'); sv.setAttribute('width','0'); sv.setAttribute('height','0'); sv.setAttribute('aria-hidden','true');
     sv.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden'; sv.innerHTML = defs; document.body.prepend(sv); };
@@ -4091,7 +4091,7 @@ const supaApi = (() => {
     async renameRoom(k, name){ ok(await sb.rpc('rename_room', {p_idx:k, p_name:name})); },
     async house(id){ const r = ok(await sb.rpc('get_house', {p_discord_id:id})); return Array.isArray(r) ? r[0] : r; },
     async remove(id){ ok(await sb.rpc('remove_item_ex', {p_id:id})); },
-    async setTint(id, t){ const { error } = await sb.rpc('set_rug_tint', {p_id:id, p_tint:t||''});
+    async setTint(id, t){ const { error } = await sb.rpc('set_rug_tint', {p_id:String(id), p_tint:t||''});
       if(error) throw new Error(/set_rug_tint|function/i.test(error.message) ? '러그 색 바꾸기는 곧 열려요! 조금만 기다려 주세요' : error.message); },
     async adminList(){ return ok(await sb.rpc('admin_list')); },
     async finishTour(){ return ok(await sb.rpc('finish_tour')); },
@@ -7136,7 +7136,11 @@ document.getElementById('tintHue').addEventListener('input', e=>{ if(!TINT_CUR) 
 document.getElementById('tintCancel').addEventListener('click', ()=>{ TINT_CUR = null; document.getElementById('tintDlg').close(); });
 document.getElementById('tintSave').addEventListener('click', ()=>act(async()=>{
   if(!TINT_CUR) return; const {f, t} = TINT_CUR;
-  if((f.tint||'') !== t){ await api.setTint(f.id, t); await refreshMine(); renderMyHouse(); toast(`🎨 ${itemOf(f.item_code).name} · ${tintName(t)}${t?'으로 바꿨어요!':'으로 돌려놨어요'}`); }
+  if((f.tint||'') !== t){ await api.setTint(f.id, t); await refreshMine(); renderMyHouse();
+    const n = PLACED.find(p=>p.id===f.id);   // 저장됐는지 한 번 더 확인
+    if(n && !('tint' in n)) toast('🎨 색은 보냈는데 서버에 러그 색 칸이 아직 안 보여요. 숲지기에게 알려 주세요 (rugtint.sql)');
+    else if(n && (n.tint||'') !== t) toast('🎨 색이 저장되지 않았어요. 잠시 뒤 다시 해 주세요');
+    else toast(`🎨 ${itemOf(f.item_code).name} · ${tintName(t)}${t?'으로 바꿨어요!':'으로 돌려놨어요'}`); }
   TINT_CUR = null; document.getElementById('tintDlg').close();
 }));
 function setHint(){
@@ -8420,6 +8424,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ④</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑤</p>
 </body>
 </html>
