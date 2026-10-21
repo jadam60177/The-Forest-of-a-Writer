@@ -4070,18 +4070,27 @@ const supaApi = (() => {
       return Object.fromEntries(rows.filter(r=>r.qty>0).map(r=>[r.item_code, r.qty]));
     },
     async placements(id){
-      const who = id==='me'?myId:id;
-      const t = await sb.from('placements').select('id,item_code,r,c,w,h,room,rot,tint').eq('discord_id', who);   // 🎨 rugtint.sql 뒤
-      if(!t.error){ TINT_ERR = ''; return t.data; }
-      TINT_ERR = '표: ' + (t.error.message || t.error.code || '?');
-      const r = await sb.from('placements').select('id,item_code,r,c,w,h,room,rot').eq('discord_id', who);
-      if(!r.error){   // 🎨 러그 색 칸을 표에서 못 읽으면 get_rug_tints 로 색만 따로 받아서 붙여요
-        try{ const g = await sb.rpc('get_rug_tints', {p_who:String(who)});
-          if(!g.error){ const raw = typeof g.data==='string' ? JSON.parse(g.data) : g.data, list = Array.isArray(raw) ? raw : (raw && raw.get_rug_tints) || [];
-            const m = new Map(list.map(x=>[String(x.id), x.tint])); r.data.forEach(p=>{ p.tint = m.get(String(p.id)) || null; }); }
-          else TINT_ERR += ' / 함수: ' + (g.error.message || g.error.code || '?'); }catch(e){ TINT_ERR += ' / ' + e.message; }
-        return r.data; }
-      return ok(await sb.from('placements').select('id,item_code,r,c,w,h,room').eq('discord_id', who));   // rotate.sql 넣기 전 예비
+      const who = id==='me'?myId:id, base = 'id,item_code,r,c,w,h,room';
+      // 🎨 (10-22 판 ⑧) 서버 표에 rot(돌린 방향) 칸이 없을 수도 있어서, 되는 모양을 차례로 시도해요. 러그 색(tint)은 꼭 같이 받아요
+      let errs = [];
+      for(const cols of [base+',rot,tint', base+',tint']){
+        const q = await sb.from('placements').select(cols).eq('discord_id', who);
+        if(!q.error){ TINT_ERR = ''; return q.data; }
+        errs.push(q.error.message || q.error.code || '?');
+      }
+      let rows = null;
+      for(const cols of [base+',rot', base]){
+        const q = await sb.from('placements').select(cols).eq('discord_id', who);
+        if(!q.error){ rows = q.data; break; }
+        errs.push(q.error.message || q.error.code || '?');
+      }
+      if(!rows) throw new Error(errs[errs.length-1] || '가구를 불러오지 못했어요');
+      TINT_ERR = '표: ' + errs.join(' / ');
+      try{ const g = await sb.rpc('get_rug_tints', {p_who:String(who)});   // 러그 색 칸을 표에서 못 읽으면 색만 따로 받아서 붙여요
+        if(!g.error){ const raw = typeof g.data==='string' ? JSON.parse(g.data) : g.data, list = Array.isArray(raw) ? raw : (raw && raw.get_rug_tints) || [];
+          const m = new Map(list.map(x=>[String(x.id), x.tint])); rows.forEach(p=>{ p.tint = m.get(String(p.id)) || null; }); }
+        else TINT_ERR += ' / 함수: ' + (g.error.message || g.error.code || '?'); }catch(e){ TINT_ERR += ' / ' + e.message; }
+      return rows;
     },
     async buy(code){ return ok(await sb.rpc('buy_item_ex', {p_code:code})); },
     async sell(code){ return ok(await sb.rpc('sell_item', {p_code:code})); },
@@ -7144,7 +7153,7 @@ document.getElementById('tintSave').addEventListener('click', ()=>act(async()=>{
   if(!TINT_CUR) return; const {f, t} = TINT_CUR;
   if((f.tint||'') !== t){ await api.setTint(f.id, t); await refreshMine(); renderMyHouse();
     const n = PLACED.find(p=>p.id===f.id);   // 저장됐는지 한 번 더 확인
-    if(n && !('tint' in n)) toast(`🎨 색은 저장했는데 다시 불러오지 못했어요 (10-22 판 ⑦) · ${TINT_ERR||'이유 모름'}`, 12000);
+    if(n && !('tint' in n)) toast(`🎨 색은 저장했는데 다시 불러오지 못했어요 (10-22 판 ⑧) · ${TINT_ERR||'이유 모름'}`, 12000);
     else if(n && (n.tint||'') !== t) toast('🎨 색이 저장되지 않았어요. 잠시 뒤 다시 해 주세요');
     else toast(`🎨 ${itemOf(f.item_code).name} · ${tintName(t)}${t?'으로 바꿨어요!':'으로 돌려놨어요'}`); }
   TINT_CUR = null; document.getElementById('tintDlg').close();
@@ -8430,6 +8439,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑦</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑧</p>
 </body>
 </html>
