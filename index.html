@@ -903,6 +903,7 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .furn.wide:has(> img.fimg){overflow:visible;z-index:2}
 .furn.wide > img.fimg.fsvg{top:auto;bottom:2px;height:calc(140% - 4px)}
 .furn.wide.wtop > img.fimg.fsvg{top:2px;bottom:auto;object-position:center top}
+.furn.wide.winfit > img.fimg.fsvg{height:calc(100% - 4px);object-position:center}
 .furn.turn > img.fimg.fsvg{left:50%;top:50%;width:var(--rh);height:var(--rw);object-position:center;transform:translate(-50%,-50%) rotate(90deg)}
 .furn.turn.r3 > img.fimg.fsvg{transform:translate(-50%,-50%) rotate(-90deg)}
 /* ===== 광장 건물 그림 (10-12) ===== */
@@ -2535,6 +2536,10 @@ TILE_WALL.forEach(c=>FURN_IMG.add(c)); WALL_H.forEach(c=>FURN_IMG.add(c));
 // 🪟 새 창문 20종 (10-12 밤, newwins.sql 과 같아요) — 전부 1×1. 유리는 옅은 하늘색으로 칠했어요
 const NEW_WINS = [["win_lace", "🪟", "레이스 커튼 창문", 120, 1, 1], ["win_pinkarch", "🪟", "분홍 아치 창문", 120, 1, 1], ["win_roundval", "🪟", "동그란 커튼 창문", 120, 1, 1], ["win_gingham", "🪟", "체크 커튼 창문", 120, 1, 1], ["win_green", "🪟", "초록 커튼 창문", 120, 1, 1], ["win_lattice", "🪟", "동그란 격자 창문", 100, 1, 1], ["win_pots", "🪟", "화분 창문", 120, 1, 1], ["win_twin", "🪟", "쌍둥이 아치 창문", 120, 1, 1], ["win_catnap", "🪟", "낮잠 고양이 창문", 150, 1, 1], ["win_octa", "🪟", "팔각 창문", 100, 1, 1], ["win_ivyshut", "🪟", "담쟁이 덧창 창문", 130, 1, 1], ["win_stained", "🪟", "스테인드글라스 창문", 150, 1, 1], ["win_ivyarch", "🪟", "담쟁이 아치 창문", 130, 1, 1], ["win_gable", "🪟", "지붕 모양 창문", 120, 1, 1], ["win_nook", "🪟", "책 읽는 창가", 150, 1, 1], ["win_blueshut", "🪟", "파란 덧창 꽃 창문", 130, 1, 1], ["win_roundcat", "🪟", "동그란 고양이 창문", 150, 1, 1], ["win_awning", "🪟", "차양 창문", 130, 1, 1], ["win_hanging", "🪟", "행잉 화분 창문", 130, 1, 1], ["win_potion", "🪟", "물약 창문", 150, 1, 1]];
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='window_3')+1 || DEFAULT_SHOP.length; DEFAULT_SHOP.splice(at, 0, ...NEW_WINS.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); NEW_WINS.forEach(r=>FURN_IMG.add(r[0])); }
+// 🪟 넓은 창문 18종 (10-21, wins2.sql 과 같아요) — 전부 2×1. 작은 창문 바로 뒤에 놓여요
+const NEW_WINS2 = [["win_lace2", "🪟", "넓은 레이스 커튼 창문", 200, 2, 1], ["win_pinkarch2", "🪟", "넓은 분홍 아치 창문", 200, 2, 1], ["win_roundval2", "🪟", "넓은 동그란 커튼 창문", 200, 2, 1], ["win_gingham2", "🪟", "넓은 체크 커튼 창문", 200, 2, 1], ["win_green2", "🪟", "넓은 초록 커튼 창문", 200, 2, 1], ["win_lattice2", "🪟", "넓은 동그란 격자 창문", 170, 2, 1], ["win_pots2", "🪟", "넓은 화분 창문", 200, 2, 1], ["win_catnap2", "🪟", "넓은 낮잠 고양이 창문", 250, 2, 1], ["win_octa2", "🪟", "넓은 팔각 창문", 170, 2, 1], ["win_ivyshut2", "🪟", "넓은 담쟁이 덧창 창문", 220, 2, 1], ["win_ivyarch2", "🪟", "넓은 담쟁이 아치 창문", 220, 2, 1], ["win_gable2", "🪟", "넓은 지붕 모양 창문", 200, 2, 1], ["win_nook2", "🪟", "넓은 책 읽는 창가", 250, 2, 1], ["win_blueshut2", "🪟", "넓은 파란 덧창 꽃 창문", 220, 2, 1], ["win_awning2", "🪟", "넓은 차양 창문", 220, 2, 1], ["win_hanging2", "🪟", "넓은 행잉 화분 창문", 220, 2, 1], ["win_potion2", "🪟", "넓은 물약 창문", 250, 2, 1], ["win_snow2", "🪟", "넓은 눈 오는 커튼 창문", 220, 2, 1]];
+{ const at = DEFAULT_SHOP.findIndex(x=>x.code==='win_potion')+1 || DEFAULT_SHOP.length; DEFAULT_SHOP.splice(at, 0, ...NEW_WINS2.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); NEW_WINS2.forEach(r=>FURN_IMG.add(r[0])); }
+const WIN2 = new Set(NEW_WINS2.map(r=>r[0]));   // 넓은 창문은 칸 안에 딱 맞게 (위로 크게 안 그려요)
 // 🛋️ 새 가구 66종 (10-13, newfurn66.sql 과 같아요) — code, emoji, 이름, 가격, 가로, 세로, 분류
 const NEW_FURN66 = [
   ["foldtable","📐","접이식 제도대",180,2,1,"furniture"],
@@ -4182,7 +4187,7 @@ function roomHTML(list, cur, {editable, cabs={}}){
     const rs = rot%2 ? `;--rw:calc(${f.w}*var(--tile) + ${f.w-1}*3px - 4px);--rh:calc(${f.h}*var(--tile) + ${f.h-1}*3px - 4px)` : '';
     // 세로로 긴 그림 가구(1×2 등)는 키를 칸에 꽉 맞추고, 그림이 통통하면 옆으로 조금 삐져나와요 (10-13 옷장 제보)
     const tallfit = !!fimg(it) && f.h>f.w && !stretch && !turn && !wallH && !tile && !floor && !TURN_IMG.has(f.item_code);
-    const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${small?'acc-small':''} ${rot?'rot r'+rot:''}`;
+    const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${small?'acc-small':''} ${WIN2.has(f.item_code)?'winfit':''} ${rot?'rot r'+rot:''}`;
     const art = tableV ? `<img class="fsvg fimg" src="furn/${f.item_code}_v.webp${furnV(f.item_code)}" alt="" draggable="false" loading="lazy">` : wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
     html += editable
@@ -7864,6 +7869,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-21 판 ⑧</p>
+<p class="site-ver">마감의 숲 · 10-21 판 ⑨</p>
 </body>
 </html>
