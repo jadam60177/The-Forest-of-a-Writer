@@ -1869,6 +1869,11 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 .dmg-pop.weak{color:#FFE29A;font-size:1.8rem}
 .dmg-pop.sum{color:#FFCE5C;font-size:1.3rem;left:50%!important;top:8%!important;transform:translateX(-50%)}
 .dmg-pop.eff{color:#9BE3B0;font-size:1.1rem;left:50%!important;top:0!important}
+
+.dmg-pop.coin{color:#FFD86B;font-size:1.25rem;left:60%!important;top:14%!important;text-shadow:0 2px 0 #8A5A12,0 0 8px rgba(0,0,0,.55)}
+.dmg-pop.coin.lucky{font-size:1.7rem;color:#FFE9A0;text-shadow:0 2px 0 #8A5A12,0 0 14px rgba(255,210,80,.95)}
+.boss-coinrule{margin:.35rem 0 0;color:#E9B949}
+:root[data-mode="day"] .boss-coinrule{color:#B06E0E}
 @keyframes dmgUp{0%{opacity:0;transform:translateY(10px) scale(.6)}15%{opacity:1;transform:translateY(0) scale(1.15)}100%{opacity:0;transform:translateY(-46px) scale(1)}}
 .boss-ctrl{margin-top:.8rem}
 .boss-tix{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.5rem}
@@ -1958,6 +1963,21 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
   #tab-isekai .boss-mon{display:block;margin:0 auto;width:min(48vw,190px)} #tab-isekai .boss-mon.m-short{width:min(34vw,130px)} #tab-isekai .boss-mon.m-slump{width:min(56vw,210px)}
   #tab-isekai .boss-fire{position:absolute;left:2px;bottom:4px;z-index:2} #tab-isekai .boss-fire .fl{font-size:1.5rem}
   #tab-isekai .boss-wolf{position:absolute;right:0;bottom:2px;z-index:2} #tab-isekai .boss-wolf img{width:58px} }
+
+/* ☀️ 낮 이세계 (10-21 ⑱) — bg/isekai_day.webp */
+:root[data-mode="day"] #tab-isekai{color:#2A2350;background:radial-gradient(ellipse 70% 50% at 85% 10%,rgba(170,120,255,.35),transparent 70%),linear-gradient(#BFE6FF,#DCEBFF 45%,#E9DEFF);box-shadow:0 0 0 1px rgba(150,120,230,.35),0 14px 34px rgba(80,60,150,.18)}
+:root[data-mode="day"] #tab-isekai .isekai-sky{display:none}
+:root[data-mode="day"] #tab-isekai .isekai-head h2{background:linear-gradient(90deg,#3A8FD8,#7A5CD6,#D45BA8);-webkit-background-clip:text;background-clip:text;filter:none}
+:root[data-mode="day"] #tab-isekai .isekai-head p{color:#4A4270}
+:root[data-mode="day"] #tab-isekai .boss-panel{background:rgba(255,255,255,.7);border-color:rgba(150,120,230,.35)}
+:root[data-mode="day"] #tab-isekai .boss-head h3{color:#2A2350}
+:root[data-mode="day"] #tab-isekai .small{color:#5A5280}
+:root[data-mode="day"] #tab-isekai .boss-scene,:root[data-mode="day"] #tab-isekai .isekai-empty{background-image:linear-gradient(rgba(40,30,90,.12),rgba(40,30,90,0) 30%,rgba(40,30,90,0) 75%,rgba(40,30,90,.3)),url(bg/isekai_day.webp)}
+:root[data-mode="day"] #tab-isekai .boss-say,:root[data-mode="day"] #tab-isekai .boss-fire,:root[data-mode="day"] #tab-isekai .boss-wolf,:root[data-mode="day"] #tab-isekai .isekai-empty p{color:#FFFFFF;text-shadow:0 2px 6px rgba(30,20,70,.85)}
+:root[data-mode="day"] #tab-isekai .boss-hp .small,:root[data-mode="day"] #tab-isekai .boss-fire .small,:root[data-mode="day"] #tab-isekai .boss-wolf .small{color:#FFFFFF;text-shadow:0 2px 5px rgba(30,20,70,.9)}
+:root[data-mode="day"] #tab-isekai .boss-tix b{color:#C27A12}
+:root[data-mode="day"] #tab-isekai .wpn,:root[data-mode="day"] #tab-isekai .bi,:root[data-mode="day"] #tab-isekai .boss-dex,:root[data-mode="day"] #tab-isekai .bdx{background:rgba(255,255,255,.75);color:#2A2350;border-color:rgba(150,120,230,.35)}
+:root[data-mode="day"] #tab-isekai .bi .bi-img.shadow{filter:brightness(0);opacity:.18}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -3931,10 +3951,10 @@ const demoApi = (() => {
     bossState(){
       const wk = Math.max(0, bossWeek());
       if(!st.bossS || st.bossS.week!==wk){ const p = st.bossS;
-        st.bossS = {week:wk, monster:MONSTERS[wk%MONSTERS.length].code, max_hp:5000, dmg:3050, att:new Set(['moon','dl','green','dawn','owl']), my:0, dex:p?p.dex:[], tickets:p?0:3, fuel:p?0:20}; }   // 공격권은 다음 주로 안 넘어가요
+        st.bossS = {week:wk, monster:MONSTERS[wk%MONSTERS.length].code, max_hp:5000, dmg:3050, att:new Set(['moon','dl','green','dawn','owl']), my:0, coins:0, dex:p?p.dex:[], tickets:p?0:3, fuel:p?0:20}; }   // 공격권은 다음 주로 안 넘어가요
       return st.bossS;
     },
-    async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
+    async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, my_coins:B.coins||0, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
     async bossHit(code, n){
       const B = this.bossState(), w = weaponOf(code), m = monsterOf(B.monster);
       if(B.dmg>=B.max_hp) fail('이번 주 괴물은 벌써 쓰러졌어요');
@@ -3946,9 +3966,12 @@ const demoApi = (() => {
       st.bitems = st.bitems || {}; const set = (BOSS_ITEMS[m.code]||[]).map(r=>r[0]), drops = [];
       const give = fresh => { if(!set.length) return null; const pool = fresh && set.some(c=>!st.bitems[c]) ? set.filter(c=>!st.bitems[c]) : set; const c = pool[Math.floor(Math.random()*pool.length)]; st.bitems[c] = (st.bitems[c]||0)+1; return c; };
       for(let k=0;k<used;k++) if(Math.random()<BOSS_DROP){ const c = give(false); if(c) drops.push(c); }
+      let coins = 0, lucky = 0;
+      for(let k=0;k<used;k++){ if(Math.random()<BOSS_LUCKY){ coins += BOSS_LUCKY_COIN; lucky++; } else coins += BOSS_HIT_COIN[0] + Math.floor(Math.random()*(BOSS_HIT_COIN[1]-BOSS_HIT_COIN[0]+1)); }
+      st.me.coins += coins; B.coins = (B.coins||0) + coins;
       const down = B.dmg>=B.max_hp; let kill_item = null; if(down) kill_item = give(true);
       if(down){ B.tickets = 0; B.fuel = 0; if(!B.dex.includes(m.code)) B.dex.push(m.code); st.me.coins += BOSS_REWARD; st.gifts.push({id:Date.now(), amount:BOSS_REWARD, reason:`⚔️ ${m.name} 토벌`}); persist(); }
-      persist(); return {each, used, dealt, hp:B.max_hp-B.dmg, down, drops, kill_item};
+      persist(); return {each, used, dealt, hp:B.max_hp-B.dmg, down, drops, kill_item, coins, lucky};
     },
     // 미리보기 전용
     tick(){
@@ -5516,7 +5539,9 @@ document.addEventListener('click', async e=>{
    무기는 누적 작업 시간(집이 커지는 시간)으로 열리고, 괴물마다 잘 듣는 무기가 있어요(2배).
    쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 + 괴물 도감 등록. 못 잡아도 잃는 건 없어요.
    공격권은 그 주에만 써요 (다음 주로 안 넘어가요). 첫 괴물은 10-22(목) 0시 ~ 10-30(금) 0시. */
-const BOSS_TICKET_FUEL = 60, BOSS_TICKET_MAX = 24, BOSS_REWARD = 500, BOSS_WEAK = 2;
+const BOSS_TICKET_FUEL = 60, BOSS_TICKET_MAX = 24, BOSS_REWARD = 2000, BOSS_WEAK = 2;
+// 🪙 때릴 때마다 코인 (10-22): 5~20개 랜덤, BOSS_LUCKY 확률로 💰 50개 대박 — boss.sql 의 boss_hit 과 같아야 해요
+const BOSS_HIT_COIN = [5, 20], BOSS_LUCKY = .05, BOSS_LUCKY_COIN = 50;
 const BOSS_FIRE = [[5,2],[3,1.5],[2,1.2],[0,1]];   // 작업실에 같이 있는 사람 수 → 공격권 모이는 속도
 const bossFire = n => (BOSS_FIRE.find(([k])=>n>=k) || [0,1])[1];
 const bossWeek = () => Date.now() < Date.parse('2026-10-30T00:00:00+09:00') ? 0 : Math.floor((Date.now() - Date.parse('2026-10-30T00:00:00+09:00'))/604800e3) + 1;   // 미리보기용 (진짜는 서버가 정해요)
@@ -5537,13 +5562,13 @@ const MONSTERS = [
    lines:['한 번만 더 고쳐 주실 수 있을까요?','최종_진짜최종_수정본이 맞나요?','이 부분만 살짝…']},
 ];
 const WEAPONS = [   // h: 누적 작업 시간(시간) — 집이 한 단계 커질 때마다 하나씩 열려요
-  {code:'pencil',   emoji:'✏️', name:'연필',       h:0,   dmg:10},
-  {code:'coffee',   emoji:'☕', name:'커피 머그',   h:5,   dmg:11},
-  {code:'dict',     emoji:'📕', name:'두꺼운 사전', h:15,  dmg:12},
-  {code:'pen',      emoji:'🖋️', name:'만년필',     h:30,  dmg:13},
-  {code:'needle',   emoji:'🪡', name:'바느질 바늘', h:50,  dmg:14},
-  {code:'keyboard', emoji:'⌨️', name:'키보드',     h:80,  dmg:15},
-  {code:'hammer',   emoji:'🔨', name:'확정 망치',   h:120, dmg:16},
+  {code:'pencil',   emoji:'✏️', name:'연필',       h:0,   dmg:7},
+  {code:'coffee',   emoji:'☕', name:'커피 머그',   h:5,   dmg:8},
+  {code:'dict',     emoji:'📕', name:'두꺼운 사전', h:15,  dmg:9},
+  {code:'pen',      emoji:'🖋️', name:'만년필',     h:30,  dmg:10},
+  {code:'needle',   emoji:'🪡', name:'바느질 바늘', h:50,  dmg:11},
+  {code:'keyboard', emoji:'⌨️', name:'키보드',     h:80,  dmg:12},
+  {code:'hammer',   emoji:'🔨', name:'확정 망치',   h:120, dmg:13},
 ];
 const monsterOf = c => MONSTERS.find(m=>m.code===c) || MONSTERS[0];
 const weaponOf = c => WEAPONS.find(w=>w.code===c) || WEAPONS[0];
@@ -5626,7 +5651,7 @@ function renderBoss(force){
       </div>
       <p class="boss-say">${down ? `「${esc(m.name)}」${jo(m.name,'을','를')} 쓰러뜨렸어요! 🎉` : `“${esc(m.lines[BOSS_LINE % m.lines.length])}”`}</p>
     </div>
-    ${down ? `<p class="boss-done">${BOSS.my_damage ? `이번 주 내가 준 피해 <b>${BOSS.my_damage.toLocaleString()}</b> · 🪙 ${BOSS_REWARD}를 보내고 📖 괴물 도감에 올렸어요` : '이번 주엔 못 때렸지만, 다음 주 괴물은 같이 잡아요!'}</p>` : `
+    ${down ? `<p class="boss-done">${BOSS.my_damage ? `이번 주 내가 준 피해 <b>${BOSS.my_damage.toLocaleString()}</b> · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · 토벌 보상 🪙 ${BOSS_REWARD.toLocaleString()}를 보내고 📖 괴물 도감에 올렸어요` : '이번 주엔 못 때렸지만, 다음 주 괴물은 같이 잡아요!'}</p>` : `
     <div class="boss-ctrl">
       <div class="boss-tix"><span class="tix">🎫 공격권 <b>${t}</b>장</span>
         <span class="small">${full ? `가득 찼어요 (최대 ${BOSS_TICKET_MAX}장) · 얼른 쓰러 와요!` : mine ? `다음 장까지 약 ${nextMin}분` : `작업실에 있으면 1시간에 1장씩 모여요`}</span></div>
@@ -5636,7 +5661,8 @@ function renderBoss(force){
         <button class="pull" type="button" data-bosshit="1" ${t<1?'disabled':''}>${w.emoji} 한 번 때리기</button>
         <button class="pull ten" type="button" data-bosshit="all" ${t<2?'disabled':''}>${w.emoji} 공격권 ${t}장 다 쓰기</button>
       </div>
-      <p class="small" style="margin:.5rem 0 0">이번 주 내가 준 피해 ${(BOSS.my_damage||0).toLocaleString()} · ${BOSS.attackers||0}명이 함께 싸우는 중 · 쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 ${BOSS_REWARD} + 📖 괴물 도감 등록</p>
+      <p class="small boss-coinrule">🪙 한 번 때릴 때마다 코인 ${BOSS_HIT_COIN[0]}~${BOSS_HIT_COIN[1]}개 · 가끔 💰 ${BOSS_LUCKY_COIN}개 대박!</p>
+      <p class="small" style="margin:.5rem 0 0">이번 주 내가 준 피해 ${(BOSS.my_damage||0).toLocaleString()} · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · ${BOSS.attackers||0}명이 함께 싸우는 중 · 쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 등록</p>
     </div>`}
     ${bossItemsHTML(m)}
     <details class="boss-dex"><summary>📖 괴물 도감 <span class="small">${dex.size} / ${MONSTERS.length}</span></summary>
@@ -5686,7 +5712,9 @@ async function bossAttack(n){
       for(let k=0;k<hits;k++) bossPop(stage, `-${x.each}`, weak?'weak':'', k);
       if(cnt > hits) bossPop(stage, `총 -${(x.dealt||0).toLocaleString()}`, 'sum', hits);
       if(weak) bossPop(stage, '효과 굉장!', 'eff', 0);
+      if(x.coins) bossPop(stage, x.lucky ? `💰 +${x.coins}` : `🪙 +${x.coins}`, 'coin' + (x.lucky ? ' lucky' : ''), 0);
     }
+    if(x.coins){ if(ME) ME.coins = (ME.coins||0) + x.coins; renderTop(); refreshMine().then(()=>renderTop()).catch(()=>{}); }
     const before = {...((BOSS && BOSS.items) || {})};
     await refreshBoss();
     setTimeout(()=>renderBoss(true), 1300);
@@ -5695,8 +5723,9 @@ async function bossAttack(n){
       setTimeout(()=>bossItemShow(c, isNew, q, got.length>1 ? `${m.name}${jo(m.name,'이','가')} 수집품 ${got.length}개를 떨어뜨렸어요! (마지막 것)` : `${m.name}${jo(m.name,'이','가')} 떨어뜨렸어요!`), x.down ? 2600 : 1250); }
     if(x && x.down){
       await refreshMine(); renderTop(); renderBag();
-      setTimeout(()=>{ showGifts(); petParty('⚔️', `「${m.name}」${jo(m.name,'을','를')} 쓰러뜨렸어요!\n막타는 ${ME.display_name||'나'}님이에요 🎉\n\n함께 때린 주민 모두에게 🪙 ${BOSS_REWARD}와\n수집품 하나씩이 가요!`); }, 1350);
-    } else if(cnt>1) toast(`${w.emoji} ${cnt}번 때렸어요! 피해 ${(x.dealt||0).toLocaleString()}`);
+      setTimeout(()=>{ showGifts(); petParty('⚔️', `「${m.name}」${jo(m.name,'을','를')} 쓰러뜨렸어요!\n막타는 ${ME.display_name||'나'}님이에요 🎉\n\n함께 때린 주민 모두에게 🪙 ${BOSS_REWARD.toLocaleString()}와\n수집품 하나씩이 가요!`); }, 1350);
+    } else if(cnt>1) toast(`${w.emoji} ${x.used||cnt}번 때렸어요! 피해 ${(x.dealt||0).toLocaleString()} · 🪙 ${x.coins||0}${x.lucky?` (💰 대박 ${x.lucky}번!)`:''}`);
+    else if(x.lucky) toast(`💰 대박! 코인 ${x.coins}개가 쏟아졌어요`);
   }catch(err){ toast(err.message || '때리지 못했어요'); await refreshBoss(); renderBoss(true); }
   finally{ busy = false; }
 }
@@ -8279,6 +8308,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-21 판 ⑰</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ①</p>
 </body>
 </html>
