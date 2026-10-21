@@ -1824,6 +1824,10 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 /* ❄️ 시즌 한정 펫 */
 .rb.season{background:linear-gradient(90deg,#E6F4FF,#BFDDF7,#E6F4FF);color:#24476D}
 .season-dex .wq-pet{width:72px;font-size:2rem;margin:0 auto}
+
+/* 🧸 1칸 소품은 칸 안에서 조금 작게 (10-21) — 바닥에 붙여서 */
+#room .furn.acc-small > .fsvg,#room .furn.acc-small > .emo,#room .furn.acc-small > img,
+.visit .room .furn.acc-small > .fsvg,.visit .room .furn.acc-small > .emo,.visit .room .furn.acc-small > img{transform:scale(var(--acc-s,.72));transform-origin:50% 92%}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -2603,7 +2607,7 @@ const NEW_FURN66 = [
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'); DEFAULT_SHOP.splice(at<0?DEFAULT_SHOP.length:at, 0, ...NEW_FURN66.map(([code,emoji,name,price,w,h,category])=>({code,emoji,name,price,w,h,active:true,category,icon:code,layer:'furniture'}))); NEW_FURN66.forEach(r=>FURN_IMG.add(r[0])); }
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
 // 🧽 누끼를 다시 딴 그림 (같은 이름으로 덮어쓰니까 ?v= 를 붙여 옛 그림 캐시를 피해요) — 또 고치면 숫자만 올리기
-const FURN_VER = {lantern:2, tr_medal:2, tr_scarf:2, oldkey:2, gears:2, globe:2, wall_trellis:2, eggchair:2, hammock:2, hammock2:2, diningtable:2, rocking:2, rocking2:2, clip:2, glasses:2};
+const FURN_VER = {tbl_side:3, tbl_two:3, tbl_long:3, tbl_wide:3, lantern:2, tr_medal:2, tr_scarf:2, oldkey:2, gears:2, globe:2, wall_trellis:2, eggchair:2, hammock:2, hammock2:2, diningtable:2, rocking:2, rocking2:2, clip:2, glasses:2};
 const furnV = k => FURN_VER[k] ? `?v=${FURN_VER[k]}` : '';
 const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp${furnV(fimgKey(it))}` : null;
 const icoSrc = it => it && WALL_H.has(it.code) && fimg(it) ? `furn/${it.code}_h.webp` : fimg(it);   // 예전 벽 4종은 상점·가방에서 앞모습으로
@@ -3958,7 +3962,7 @@ const TABLE_SURFACE = new Set(['table','roundtable','lowtable','teatable','tbl_s
 // (10-21) 1칸짜리 소품이면 전부 식탁 위에 올라가요 — 새 소품도 저절로 (서버 tabletop2.sql 은 1칸짜리면 받아 줘요)
 const TABLE_FOOD = {has: code => { const it = itemOf(code); return !!it && catOf(it)==='accessory' && it.w===1 && it.h===1 && it.layer!=='floor' && !TABLE_SURFACE.has(code) && !CAPACITY[code]; }};
 const TABLE_SPOT = {table:{dx:30, dy:-44, s:.56}, teatable:{dx:14, dy:-40, s:.42}, lowtable:{dx:30, dy:-36, s:.56}, roundtable:{dx:0, dy:-36, s:.56},
-  tbl_side:{dx:0, dy:-26, s:.5}, tbl_two:{dx:26, dy:-16, s:.5, v:{pull:20, dy:-10}}, tbl_long:{dx:52, dy:-26, s:.5, v:{pull:58, dy:-6}}, tbl_wide:{dx:22, dyTop:22, dyBot:-34, s:.52}};   // 상판 자리·크기 (10-20 진짜 그림으로 맞춤)
+  tbl_side:{dx:0, dy:-18, s:.5}, tbl_two:{dx:26, dy:-16, s:.5, v:{pull:35, dy:8}}, tbl_long:{dx:52, dy:-46, s:.5, v:{pull:73, dy:27}}, tbl_wide:{dx:22, dyTop:29, dyBot:-48, s:.52}};   // 상판 자리·크기 (10-20 진짜 그림으로 맞춤)
 const spotOf = (f, t) => { const sp = TABLE_SPOT[t.item_code] || {dx:0, dy:-30, s:.56}, ci = f.c - t.c, ri = f.r - t.r;
   let dx = 0, dy = sp.dy;
   if(t.w>1) dx = ci===0 ? sp.dx : ci===t.w-1 ? -sp.dx : 0;          // 가로로 긴 식탁: 양쪽 칸 소품을 가운데로
@@ -3968,7 +3972,7 @@ const spotOf = (f, t) => { const sp = TABLE_SPOT[t.item_code] || {dx:0, dy:-30, 
     dx = v ? (sv.dx ?? 0) : (sv.dx ?? 6); const pull = v ? (sv.pull ?? 14) : (sv.pull ?? 16);
     dy = (v ? (sv.dy ?? -24) : (sv.dy ?? -8)) + (ri===0 ? pull : ri===t.h-1 ? -pull : 0); }
   return `;--tx:${dx}%;--ty:${dy}%;--ts:${sp.s}`; };
-const TABLE_V_IMG = new Set([]);   // 세로 그림(furn/코드_v.webp)이 있는 테이블 — 그림이 오면 코드를 넣어요
+const TABLE_V_IMG = new Set(['tbl_two','tbl_long']);   // 세로 그림(furn/코드_v.webp)이 있는 테이블 — 그림이 오면 코드를 넣어요
 const tableUnder = (f, list) => TABLE_FOOD.has(f.item_code) ? list.find(g => g.id!==f.id && TABLE_SURFACE.has(g.item_code) && (g.room||0)===(f.room||0) && f.r>=g.r && f.r<g.r+g.h && f.c>=g.c && f.c<g.c+g.w) : null;
 const topsOn = (t, list) => TABLE_SURFACE.has(t.item_code) ? list.filter(g => g.id!==t.id && TABLE_FOOD.has(g.item_code) && (g.room||0)===(t.room||0) && g.r>=t.r && g.r<t.r+t.h && g.c>=t.c && g.c<t.c+t.w) : [];
 const layerOf = code => { const it = itemOf(code); return it.layer || (FLOOR_CODES.has(code) ? 'floor' : 'furniture'); };
@@ -4155,6 +4159,7 @@ function roomHTML(list, cur, {editable, cabs={}}){
     const it = itemOf(f.item_code), big = Math.min(f.w,f.h)>=2, floor = layerOf(f.item_code)==='floor';
     const onRug = !floor && list.some(g => layerOf(g.item_code)==='floor' && f.r < g.r+g.h && g.r < f.r+f.h && f.c < g.c+g.w && g.c < f.c+f.w);
     const onTable = tableUnder(f, list);
+    const small = !onTable && !floor && f.w===1 && f.h===1 && catOf(it)==='accessory' && !CAPACITY[f.item_code];   // (10-21) 1칸 소품은 칸 안에서 조금 작게 → 가구가 상대적으로 커 보여요
     const style = `grid-row:${f.r+1}/span ${f.h};grid-column:${f.c+1}/span ${f.w}` + (fimg(it) ? (floor ? ';z-index:0' : `;z-index:${2+f.r+f.h}`) : '') + (onTable ? `;z-index:${2+onTable.r+onTable.h+1}${spotOf(f, onTable)}` : '');
     if(CAPACITY[f.item_code]){
       const n = (cabs[f.id]||[]).length;
@@ -4177,8 +4182,8 @@ function roomHTML(list, cur, {editable, cabs={}}){
     const rs = rot%2 ? `;--rw:calc(${f.w}*var(--tile) + ${f.w-1}*3px - 4px);--rh:calc(${f.h}*var(--tile) + ${f.h-1}*3px - 4px)` : '';
     // 세로로 긴 그림 가구(1×2 등)는 키를 칸에 꽉 맞추고, 그림이 통통하면 옆으로 조금 삐져나와요 (10-13 옷장 제보)
     const tallfit = !!fimg(it) && f.h>f.w && !stretch && !turn && !wallH && !tile && !floor && !TURN_IMG.has(f.item_code);
-    const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${rot?'rot r'+rot:''}`;
-    const art = tableV ? `<img class="fsvg fimg" src="furn/${f.item_code}_v.webp" alt="" draggable="false" loading="lazy">` : wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
+    const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${small?'acc-small':''} ${rot?'rot r'+rot:''}`;
+    const art = tableV ? `<img class="fsvg fimg" src="furn/${f.item_code}_v.webp${furnV(f.item_code)}" alt="" draggable="false" loading="lazy">` : wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
     html += editable
       ? `<button class="${cls}" data-pid="${f.id}" style="${style}${rs}" aria-label="${esc(it.name)} 치우기">${art}</button>`
@@ -7859,6 +7864,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-21 판 ⑤</p>
+<p class="site-ver">마감의 숲 · 10-21 판 ⑧</p>
 </body>
 </html>
