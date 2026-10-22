@@ -1903,6 +1903,17 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 .lot.memorial .b{font-size:1.9rem;filter:drop-shadow(0 0 8px rgba(190,222,255,.8))}
 .lot.memorial .n,.lot.memorial .s{text-shadow:0 1px 4px rgba(0,0,0,.7);color:#fff}
 dialog.mem-dlg{max-width:min(94vw,760px);width:100%}
+/* 📖 이세계 안내서 (10-22) */
+dialog.isk-guide{max-width:min(94vw,620px);width:100%}
+.isk-guide-btn{margin-top:.6rem}
+.ig-tabs{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.6rem}
+.ig-tabs button{border-radius:999px;border:1px solid rgba(150,120,230,.5);background:rgba(150,120,230,.08);color:inherit;font:inherit;font-size:.8rem;padding:.2rem .7rem;cursor:pointer}
+.ig-tabs button.on{background:linear-gradient(#E3CCFF,#A887EC);color:#22113F;border-color:#C9B2FF}
+.ig-body h4{margin:.2rem 0 .4rem;font-family:"Jua",sans-serif;font-weight:400;font-size:1.1rem}
+.ig-body ul{margin:.2rem 0 .6rem;padding-left:1.2rem}.ig-body li{margin:.25rem 0;line-height:1.5}
+.ig-body .tip{margin:.5rem 0 0;padding:.5rem .7rem;border-radius:10px;background:rgba(150,120,230,.12);font-size:.85rem;line-height:1.5}
+.ig-body .flow{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;justify-content:center;margin:.3rem 0 .7rem;font-size:.85rem}
+.ig-body .flow span{padding:.2rem .55rem;border-radius:8px;background:rgba(150,120,230,.14)}
 .mem-stage{position:relative;width:100%;aspect-ratio:1920/1072;container-type:inline-size;border-radius:14px;overflow:hidden;background:url(plaza/memorial_night.webp) center/cover no-repeat,#1C2448}
 :root[data-mode="day"] .mem-stage{background:url(plaza/memorial_day.webp) center/cover no-repeat,#9FD3F0}
 .mem-spot{position:absolute;transform:translate(-50%,0);bottom:var(--b);left:var(--x);display:flex;flex-direction:column;align-items:center;border:0;background:none;padding:0;cursor:pointer;color:#fff;font:inherit}
@@ -2381,6 +2392,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
     <div class="isekai-head">
       <h2>🌀 이세계</h2>
       <p>숲 너머 균열 저편, 원고를 막는 괴물들이 사는 곳이에요. 작업실 불빛을 모아 온 작가님만 이 문을 건널 수 있어요.</p>
+      <button class="mini isk-guide-btn" type="button" data-iskguide>📖 이세계 안내서</button>
     </div>
     <div class="boss-panel" id="bossBox" hidden></div>
     <div class="isekai-empty" id="isekaiEmpty">
@@ -2547,6 +2559,13 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <div class="tpets" id="visitPets"></div>
 </dialog>
 
+<dialog class="visit isk-guide" id="iskGuide" aria-label="이세계 안내서">
+  <button class="mini visit-close" type="button" data-iskguide-close>닫기</button>
+  <h3 style="margin:0 0 .2rem">📖 이세계 안내서</h3>
+  <p class="small" style="margin:0 0 .6rem">궁금한 칸을 눌러 보세요.</p>
+  <div class="ig-tabs" role="tablist"></div>
+  <div class="ig-body" id="iskGuideBody"></div>
+</dialog>
 <dialog class="visit mem-dlg" id="memDlg">
   <button class="mini visit-close" id="memClose" type="button">닫기</button>
   <h3 style="margin:0 0 .2rem">🏛️ 기념 광장</h3>
@@ -6823,7 +6842,7 @@ function voidCraftHTML(V){
       ${own ? `<button class="mini ask-yes" type="button" data-vcraft="${f.code}" ${maxed||shards<f.price?'disabled':''}>${maxed?'다 만들었어요':`🔨 만들기 · 💠 ${f.price}`}</button>` : `<span class="small lockt">📜 도안이 아직 없어요</span>`}
     </div>`; }).join('');
   const b = VOID_BGS[vcraftTab] || {emoji:'🔮', name:vcraftTab};
-  return `<h4>📜 제작대 <span class="small">도안 ${have}/${total} · 만든 가구는 🔮 아공간 창고로 가요 (아공간 밖으로는 못 가져가요)</span></h4>
+  return `<h4>📜 제작대 <button class="mini" type="button" data-iskguide="craft">📖</button> <span class="small">도안 ${have}/${total} · 만든 가구는 🔮 아공간 창고로 가요 (아공간 밖으로는 못 가져가요)</span></h4>
     <div class="vbag-tabs">${tb}</div>
     <p class="vset small">${sets.has(vcraftTab) ? `🪞 ${b.emoji} ${esc(b.name)} 세트 완성! 「${VOID_SET_FX[vcraftTab]?.name||'세트 효과'}」가 반짝이고 있어요` : `🪞 ${b.emoji} ${esc(b.name)} 가구 ${setN.length}개를 아공간에 다 놓으면 「${VOID_SET_FX[vcraftTab]?.name||'세트 효과'}」가 저절로 켜져요 · 지금 ${setPlaced}/${setN.length}`}</p>
     <div class="vcraft">${cards}</div>`;
@@ -6859,7 +6878,7 @@ function renderVoid(){
   if(!VOID.open){
     const k = 'closed' + shards; if(box._k === k) return; box._k = k;
     box.innerHTML = `<div class="void-head"><h3>🔮 아공간</h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
-      <div class="void-door"><span class="portal">🌀</span><p style="margin:.6rem 0">균열 깊숙한 곳에 나만의 공간을 열 수 있어요.<br><span class="small">뒷배경을 바꿔 끼우고, 파편으로 칸을 넓히고, 이세계 마물 농장도 생겨요.</span></p>
+      <div class="void-door"><span class="portal">🌀</span><p style="margin:.6rem 0">균열 깊숙한 곳에 나만의 공간을 열 수 있어요.<br><span class="small">뒷배경을 바꿔 끼우고, 파편으로 칸을 넓히고, 이세계 마물 농장도 생겨요.</span><br><button class="mini" type="button" data-iskguide="void" style="margin-top:.4rem">📖 아공간 안내 보기</button></p>
       <button class="pull" type="button" data-vopen ${shards<(VOID.price||VOID_OPEN_PRICE)?'disabled':''}>🔮 문 열기 · 💠 ${(VOID.price||VOID_OPEN_PRICE).toLocaleString()}</button></div>`;
     return;
   }
@@ -6867,7 +6886,7 @@ function renderVoid(){
   const k = JSON.stringify([shards, V.fx, V.fxs, V.cap_lv, V.rate_lv, ME.stars, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).map(x=>x.item_code).join(), (V.farm_pets||[]).join(), VSEL, vbagTab, vcraftTab, V.vinv, V.bps, V.sets, Object.entries(INV||{}).filter(([c,n])=>n>0 && isLegendFurn(c)).length]);
   if(box._k === k){ renderVoidRoom(); renderVoidFarmBar(); return; }
   box._k = k;
-  box.innerHTML = `<div class="void-head"><h3>🔮 아공간 <span class="small">${V.cols}×${V.rows}칸</span></h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
+  box.innerHTML = `<div class="void-head"><h3>🔮 아공간 <span class="small">${V.cols}×${V.rows}칸</span> <button class="mini" type="button" data-iskguide="void">📖 안내</button></h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
     <div class="void-bar">${Object.entries(VOID_BGS).map(([c,b])=>{ const own = bgs.includes(c);
       return `<button class="vbg ${V.bg===c?'on':''} ${own?'':'lock'}" type="button" data-vbgk="${c}">${b.emoji} ${esc(b.name)}${own?'':` · 💠 ${(V.bg_price||VOID_BG_PRICE).toLocaleString()}`}</button>`; }).join('')}
       <button class="vbg pub ${V.public?'on':''}" type="button" data-vpub>${V.public?'🔓 공개 중':'🔒 비공개'}</button></div>
@@ -6945,6 +6964,66 @@ document.addEventListener('click', e=>{
   if(e.target.closest('[data-vsnack]')) return act(async()=>{ const p = VOID.snack_price||100, hr = VOID.snack_hours||6;
     if(!(await ask(`🪙 ${p}코인으로 마물들에게 🍖 간식을 줄까요?\n앞으로 ${hr}시간 동안 💠 파편과 📜 도안 게이지를 2배로 물어와요. (하루 한 번)`))) return;
     await voidAfter(await api.voidSnack()); box_void_reset(); renderVoid(); toast('🍖 마물들이 신나게 간식을 먹어요! 이제 두 배로 물어올 거예요'); });
+});
+/* 📖 이세계 안내서 (10-22) — 숫자는 위 상수와 서버 값을 그대로 써요 */
+const ISK_GUIDE = [
+  {k:'all', t:'🗺️ 한눈에', h:()=>`<h4>🗺️ 이세계 한눈에 보기</h4>
+    <div class="flow"><span>🎧 작업실</span>→<span>🎫 공격권</span>→<span>⚔️ 괴물</span>→<span>💠 파편 · 🥚 알</span>→<span>🌳 세계수에서 정화</span>→<span>👾 마물</span>→<span>🐾 농장</span>→<span>📜 도안</span>→<span>🔮 아공간 꾸미기</span></div>
+    <ul><li>작업실에서 원고를 쓰면 🎫 공격권이 생기고, 괴물을 때리면 💠 이세계 파편과 🥚 마물 알이 나와요.</li>
+    <li>알을 부화시킨 이세계 마물은 🔮 아공간의 🐾 마물 농장에서 놀며 💠 파편과 📜 가구 도안을 물어와요.</li>
+    <li>도안으로 아공간 전용 가구를 만들어, 나만의 아공간을 꾸며요.</li></ul>
+    <p class="tip">💠 파편은 아공간에 쓰는 돈이에요. ⭐ 별조각은 🥚 알 정화를 빨리 하는 데만 써요.</p>`},
+  {k:'boss', t:'⚔️ 괴물', h:()=>`<h4>⚔️ 이번 주 괴물</h4>
+    <ul><li>매주 금요일 0시에 새 괴물이 와요. 마을이 다 같이 체력을 깎아요.</li>
+    <li>작업실에 1시간 있으면 🎫 공격권 1장. 무기를 골라 직접 때려요. 약점 무기는 피해가 ${BOSS_WEAK}배예요.</li>
+    <li>때릴 때마다 🪙 ${BOSS_HIT_COIN[0]}~${BOSS_HIT_COIN[1]} (가끔 💰 ${BOSS_LUCKY_COIN}), ${Math.round(BOSS_DROP*100)}% 확률로 괴물 수집품.</li>
+    <li>쓰러뜨리면 <b>이번 주 ${BOSS_REWARD_HITS}번 이상 때린 주민</b> 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 + 수집품 하나.</li></ul>`},
+  {k:'rift', t:'🌀 균열 · 파편', h:()=>`<h4>🌀 균열과 💠 이세계 파편</h4>
+    <ul><li>괴물 체력이 처음으로 ${RIFT_OPEN_HP.toLocaleString()} 아래로 내려가면 숲 너머 균열이 열려요. 한 번 열리면 계속 열려 있어요.</li>
+    <li>그때부터 한 대 때릴 때마다 💠 파편 10~40개, ${Math.round(RIFT_BIG_P*100)}% 확률로 💎 100개 대박.</li>
+    <li>💠 파편은 아공간 문 열기 · 넓히기 · 배경 · 농장 강화 · 가구 만들기에 써요.</li></ul>`},
+  {k:'egg', t:'🥚 알 · 마물', h:()=>`<h4>🥚 마물 알과 👾 이세계 마물</h4>
+    <ul><li>한 대 때릴 때마다 ${Math.round(RIFT_EGG_P*100)}% 확률로 미지의 알을 주워요. (마감 펑크 · 투고 실패 · 휴식 유혹)</li>
+    <li>알은 🌳 세계수에 하나씩 맡겨요. 세계수에 💧 물방울을 부으면 맡긴 알도 같이 정화돼요. ${RIFT_NEED}방울이면 정화 끝!</li>
+    <li>⭐ 별조각 ${STAR_PER_DROP}개 = 💧 1방울로 정화를 빨리 할 수 있어요.</li>
+    <li>부화하면 그 알의 마물 3종 중 하나가 나와요. 이미 있는 마물이면 💠 파편 ${RIFT_DUP}개로 바뀌어요.</li>
+    <li>마물 9종을 다 모으면 👾 이세계 마물 명찰을 받아요.</li></ul>`},
+  {k:'void', t:'🔮 아공간', h:()=>`<h4>🔮 나만의 아공간</h4>
+    <ul><li>균열이 열리면 💠 ${VOID_OPEN_PRICE}개로 아공간 문을 열어요. 처음엔 4×4칸.</li>
+    <li>➕ 가로나 세로 한 줄씩 넓혀요. 값은 지금 칸 수 × 10 💠, 최대 ${VOID_MAX_C}×${VOID_MAX_R}칸.</li>
+    <li>뒷배경 테마는 하나에 💠 ${VOID_BG_PRICE}. 한 번 사면 언제든 바꿔 끼워요. 깔아 둔 배경은 📜 도안이 나오는 테마에도 영향을 줘요.</li>
+    <li>🔓 공개로 켜면 이웃이 집 구경할 때 아공간도 볼 수 있어요.</li></ul>`},
+  {k:'farm', t:'🐾 마물 농장', h:()=>`<h4>🐾 마물 농장</h4>
+    <ul><li>내가 가진 이세계 마물(종류마다 1마리)이 농장에서 놀며 마물 1종당 1시간에 💠 ${VOID_FARM_RATE}개를 물어와요.</li>
+    <li>최대 ${VOID_FARM_CAP}시간치까지 쌓여요. 꽉 차면 더 안 쌓이니 틈틈이 🧺 받아 주세요.</li>
+    <li>🧺 바구니: 쌓이는 시간 +4시간씩 · 🦴 간식 그릇: 1종당 1시간 💠 +1씩 (💠로 강화)</li>
+    <li>🍖 마물 간식: 하루 한 번 🪙 100 → 6시간 동안 💠 파편과 📜 도안 게이지가 2배.</li></ul>
+    <p class="tip">마물 종류가 많을수록 파편도 도안도 빨리 모여요!</p>`},
+  {k:'craft', t:'📜 도안 · 제작대', h:()=>`<h4>📜 도안과 제작대</h4>
+    <ul><li>농장 아래 📜 도안 게이지: 마물 1종이 1시간 놀면 1칸, 60칸이 차면 도안 1장 (마물 5종이면 12시간에 1장).</li>
+    <li>도안 테마는 <b>지금 깔아 둔 배경 테마가 50%</b>, 나머지 테마가 나눠 가져요. 원하는 테마 배경을 깔아 두세요!</li>
+    <li>이미 있는 도안이 또 나오면 💠 50개로 바뀌어요.</li>
+    <li>도안은 한 번 얻으면 영구 레시피. 📜 제작대에서 💠 파편을 내고 몇 개든 만들어요. (😈 마왕의 옥좌만 1개)</li></ul>`},
+  {k:'rule', t:'🔮 창고 · 규칙', h:()=>`<h4>🔮 아공간 창고와 놓기 규칙</h4>
+    <ul><li>만든 가구는 🔮 <b>아공간 창고</b>로 가요. 아공간 가구는 <b>아공간 밖으로 못 꺼내요</b> — 집에 못 두고, 팔 수도 없어요.</li>
+    <li>아공간에는 🔮 아공간 가구와 👑 복권 전설 가구만 놓을 수 있어요. 전설 가구는 집과 아공간 양쪽에 다 놓을 수 있어요.</li>
+    <li>놓인 가구를 누르면 창고(전설 가구는 가방)로 돌아가요.</li></ul>`},
+  {k:'set', t:'🪞 세트 · 효과', h:()=>`<h4>🪞 세트 효과와 ✨ 아공간 효과</h4>
+    <ul><li>한 테마 가구 6개(침대·책상·러그·램프·창문·책장)를 아공간에 다 놓으면 그 테마 반짝임이 저절로 켜져요.</li>
+    <li>✨ 아공간 효과(반딧불 · 별똥별 · 비눗방울 · 꽃잎)는 하나에 💠 ${VOID_FX_PRICE}. 한 번 사면 바꿔 끼우거나 끌 수 있어요.</li></ul>`},
+];
+let ISK_GUIDE_K = 'all';
+function openIskGuide(k){
+  if(k) ISK_GUIDE_K = k;
+  const d = document.getElementById('iskGuide'); if(!d) return;
+  d.querySelector('.ig-tabs').innerHTML = ISK_GUIDE.map(g=>`<button type="button" class="${g.k===ISK_GUIDE_K?'on':''}" data-igk="${g.k}">${g.t}</button>`).join('');
+  document.getElementById('iskGuideBody').innerHTML = (ISK_GUIDE.find(g=>g.k===ISK_GUIDE_K) || ISK_GUIDE[0]).h();
+  if(!d.open) d.showModal();
+}
+document.addEventListener('click', e=>{
+  const g = e.target.closest('[data-iskguide]'); if(g){ openIskGuide(g.dataset.iskguide || null); return; }
+  if(e.target.closest('[data-iskguide-close]')){ document.getElementById('iskGuide').close(); return; }
+  const t = e.target.closest('[data-igk]'); if(t){ openIskGuide(t.dataset.igk); return; }
 });
 function box_void_reset(){ const b = document.getElementById('voidBox'); if(b) b._k = ''; }
 document.addEventListener('mouseover', e=>{
@@ -9481,7 +9560,7 @@ document.getElementById('peekBtn').addEventListener('click', ()=>{
 });
 renderPeekBtn();
 
-const TAB_STAT_NAME = {enter:'🌲 숲에 들어옴', village:'🌲 마을', home:'🏡 우리 집', road:'🎨 꾸미기', plaza:'🏘️ 광장', lotto:'🎟️ 복권', tree:'🌳 세계수',
+const TAB_STAT_NAME = {enter:'🌲 숲에 들어옴', walk:'🪧 산책로', isekai:'🌀 이세계', village:'🌲 마을', home:'🏡 우리 집', road:'🎨 꾸미기', plaza:'🏘️ 광장', lotto:'🎟️ 복권', tree:'🌳 세계수',
   lake:'🎣 호숫가', pet:'🐾 펫', gacha:'🎁 보따리', shop:'🛒 가구 상점', mail:'📬 우편함', coinlog:'🪙 코인 내역', visit:'🏠 이웃 집 구경'};
 const TAB_LOGGED = new Set();
 function logTabOnce(t){   // 한 번 들어와서(새로 고침 전까지) 같은 곳은 1번만 세요
@@ -9632,6 +9711,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㊲</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㊳</p>
 </body>
 </html>
