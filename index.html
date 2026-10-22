@@ -2174,7 +2174,8 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .vfarm .vfp.walk img{animation:vfbob .45s ease-in-out infinite alternate}
 @keyframes vfbob{to{translate:0 -4%}}
 .vfarm .vfp .nm{display:block;text-align:center;font-size:.62rem;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9);white-space:nowrap}
-.vfarm-empty{position:absolute;left:0;right:0;bottom:1rem;text-align:center;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.85);padding:0 1rem}
+.vfarm-empty{position:absolute;left:50%;transform:translateX(-50%);bottom:1rem;width:max-content;max-width:calc(100% - 2rem);text-align:center;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);padding:.5rem 1rem;border-radius:14px;background:rgba(18,10,40,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.vfarm-empty,.vfarm-empty .small,#tab-isekai .vfarm-empty .small{color:#fff!important}
 .vfarm-bar{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;justify-content:center;margin:.6rem 0 0}
 :root[data-mode="day"] .void{background:linear-gradient(160deg,rgba(238,228,255,.95),rgba(214,202,250,.95));color:#2A2350}
 :root[data-mode="day"] .void .shards{color:#2F6FB8}
@@ -5936,7 +5937,7 @@ function renderRift(){
     ${eggs.length ? `<div class="rift-eggs">${eggs.map(eggCard).join('')}</div>` : `<p class="small" style="margin:.2rem 0">아직 주운 알이 없어요. 괴물을 때리다 보면 가끔 떨어져요!</p>`}
     <h4>👾 이세계 마물 도감 <span class="small">${nHave} / 9 · 알에서만 태어나요</span></h4>
     <div class="rift-dex">${dex}</div>
-    <p class="rift-soon">🔮 모은 파편은 곧 열릴 「아공간」에서 쓸 수 있대요. 차곡차곡 모아 두세요!</p>`;
+`;
   if(box){ box.hidden = false; if(box._html !== html){ box._html = html; box.innerHTML = html; } }
   if(te){
     if(!setE){ te.hidden = true; te.innerHTML = ''; }
@@ -6077,7 +6078,7 @@ function voidCraftHTML(V){
   const b = VOID_BGS[vcraftTab] || {emoji:'🔮', name:vcraftTab};
   return `<h4>📜 제작대 <button class="mini" type="button" data-iskguide="craft">📖</button> <span class="small">도안 ${have}/${total} · 만든 가구는 🔮 아공간 창고로 가요 (아공간 밖으로는 못 가져가요)</span></h4>
     <div class="vbag-tabs">${tb}</div>
-    <p class="vset small">${sets.has(vcraftTab) ? `🪞 ${b.emoji} ${esc(b.name)} 세트 완성! 「${VOID_SET_FX[vcraftTab]?.name||'세트 효과'}」가 반짝이고 있어요` : `🪞 ${b.emoji} ${esc(b.name)} 가구 ${setN.length}개를 아공간에 다 놓으면 「${VOID_SET_FX[vcraftTab]?.name||'세트 효과'}」가 저절로 켜져요 · 지금 ${setPlaced}/${setN.length}`}</p>
+    <p class="vset small">${sets.has(vcraftTab) ? `🪞 ${b.emoji} ${esc(b.name)} 세트 완성! 「${VOID_SET_FX[vcraftTab]?.name||'세트'}」 효과가 반짝이고 있어요` : `🪞 ${b.emoji} ${esc(b.name)} 가구 ${setN.length}개를 아공간에 모두 놓으면 「${VOID_SET_FX[vcraftTab]?.name||'세트'}」 효과가 켜져요 · 지금 ${setPlaced}/${setN.length}개`}</p>
     <div class="vcraft">${cards}</div>`;
 }
 function renderVoidRoom(){
@@ -6129,7 +6130,7 @@ function renderVoid(){
     <p class="void-hint small" id="voidHint"></p>
     <div class="void-grow"><button class="mini" type="button" data-vgrow="col" ${V.cols>=(V.max_cols||VOID_MAX_C)||shards<gp?'disabled':''}>➕ 가로 한 줄 · 💠 ${gp.toLocaleString()}</button>
       <button class="mini" type="button" data-vgrow="row" ${V.rows>=(V.max_rows||VOID_MAX_R)||shards<gp?'disabled':''}>➕ 세로 한 줄 · 💠 ${gp.toLocaleString()}</button>
-      <span class="small">최대 ${V.max_cols||VOID_MAX_C}×${V.max_rows||VOID_MAX_R}칸 · 값은 지금 칸 수 × 10</span></div>
+      <span class="small">최대 ${V.max_cols||VOID_MAX_C}×${V.max_rows||VOID_MAX_R}칸</span></div>
     <h4>🎒 아공간에 놓을 것 <span class="small">🔮 아공간 가구와 👑 전설 가구만 놓을 수 있어요</span></h4>
     ${voidBagHTML()}
     ${voidCraftHTML(V)}
@@ -6226,7 +6227,7 @@ const ISK_GUIDE = [
     <li>마물 9종을 다 모으면 👾 이세계 마물 명찰을 받아요.</li></ul>`},
   {k:'void', t:'🔮 아공간', h:()=>`<h4>🔮 나만의 아공간</h4>
     <ul><li>균열이 열리면 💠 ${VOID_OPEN_PRICE}개로 아공간 문을 열어요. 처음엔 4×4칸.</li>
-    <li>➕ 가로나 세로 한 줄씩 넓혀요. 값은 지금 칸 수 × 10 💠, 최대 ${VOID_MAX_C}×${VOID_MAX_R}칸.</li>
+    <li>➕ 가로나 세로 한 줄씩 넓혀요. 넓을수록 💠 값이 조금씩 올라가요. 최대 ${VOID_MAX_C}×${VOID_MAX_R}칸.</li>
     <li>뒷배경 테마는 하나에 💠 ${VOID_BG_PRICE}. 한 번 사면 언제든 바꿔 끼워요. 깔아 둔 배경은 📜 도안이 나오는 테마에도 영향을 줘요.</li>
     <li>🔓 공개로 켜면 이웃이 집 구경할 때 아공간도 볼 수 있어요.</li></ul>`},
   {k:'farm', t:'🐾 마물 농장', h:()=>`<h4>🐾 마물 농장</h4>
@@ -8947,6 +8948,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㊺</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㊻</p>
 </body>
 </html>
