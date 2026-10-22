@@ -2126,7 +2126,9 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .rift-dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem}
 .rdx{text-align:center;font-size:.72rem;line-height:1.35;display:flex;flex-direction:column;align-items:center;gap:.15rem}
 .rdx img{width:76px;height:76px;object-fit:contain}
-.rdx.no img{filter:brightness(0) opacity(.5)}
+.rdx.no img{filter:brightness(0) opacity(.5)}.rdx.no.peek img{filter:grayscale(.6) opacity(.6)}
+.rdx .rq{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;font:700 2rem/1 "Jua",sans-serif;color:#E3CCFF;background:radial-gradient(circle,rgba(160,110,255,.35),rgba(40,20,90,.5));border:2px dashed rgba(200,170,255,.6);text-shadow:0 0 10px #A887EC;animation:rqglow 3s ease-in-out infinite alternate}
+@keyframes rqglow{to{box-shadow:0 0 14px rgba(170,120,255,.55)}}
 .rdx .eg{font-size:.66rem;opacity:.75}
 .rift-soon{opacity:.8;font-size:.85rem;margin:.8rem 0 0;text-align:center}
 .rb.isekai{background:linear-gradient(90deg,#3B1E6E,#7A3FB8,#C24F8F);color:#FFE9FF}
@@ -4342,7 +4344,7 @@ const demoApi = (() => {
     bossState(){
       const wk = Math.max(0, bossWeek());
       if(!st.bossS || st.bossS.week!==wk){ const p = st.bossS;
-        st.bossS = {week:wk, monster:(wk===0 ? 'slump' : MONSTERS[Math.floor(Math.random()*MONSTERS.length)].code),   /* (10-22) 괴물은 매주 랜덤 */ max_hp:15000, dmg:3050, att:new Set(['moon','dl','green','dawn','owl']), my:0, coins:0, dex:p?p.dex:[], tickets:p?0:3, fuel:p?0:20}; }   // 공격권은 다음 주로 안 넘어가요
+        st.bossS = {week:wk, monster:(wk===0 ? 'slump' : MONSTERS[Math.floor(Math.random()*MONSTERS.length)].code),   /* (10-22) 괴물은 매주 랜덤 */ max_hp:15000, dmg:3050, att:new Set(['moon','dl','green','dawn','owl']), my:0, coins:0, dex:p?p.dex:[], tickets:p?Math.min(24, p.tickets||0):3, fuel:p?(p.fuel||0):20}; }   // 공격권은 다음 주로 넘어가요 (최대 24장)
       return st.bossS;
     },
     async bossTrade(item, kind){ const B = this.bossState(); st.bitems = st.bitems || {}; let n = 0;
@@ -6108,7 +6110,7 @@ document.addEventListener('click', async e=>{
    작업실에 있으면 🎫 공격권이 모이고(60분에 1장, 같이 있는 사람이 많을수록 빨리), 광장에 와서 무기를 골라 직접 때려요.
    무기는 누적 작업 시간(집이 커지는 시간)으로 열리고, 괴물마다 잘 듣는 무기가 있어요(2배).
    쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 + 괴물 도감 등록. 못 잡아도 잃는 건 없어요.
-   공격권은 그 주에만 써요 (다음 주로 안 넘어가요). 첫 괴물은 10-22(목) 0시 ~ 10-30(금) 0시. */
+   공격권은 다음 주로 넘어가요 (10-22 bosslv.sql · 최대 24장). 첫 괴물은 10-22(목) 0시 ~ 10-30(금) 0시. */
 const BOSS_TICKET_FUEL = 60, BOSS_TICKET_MAX = 24, BOSS_REWARD = 2000, BOSS_WEAK = 2, BOSS_REWARD_HITS = 10, BOSS_LV_COIN = 1000, BOSS_LV_SHARDS = 200, BOSS_LV_UP = .5;   // ⭐ 강화 괴물 (bosslv.sql)   // 토벌 보상은 이번 주 10번 이상 때린 주민만 (boss10.sql)
 const numJo = (n, a, b) => '2459'.includes(String(n).slice(-1)) ? b : a;   // 숫자 뒤 조사 (3을 · 2를)
 const bossNeed = () => (BOSS && BOSS.reward_hits) || BOSS_REWARD_HITS, bossMyHits = () => (BOSS && BOSS.my_hits) || 0;
@@ -6246,7 +6248,9 @@ function renderBoss(force){
   const dex = new Set(BOSS.dex||[]);
   const html = `
     <button class="boss-q" type="button" data-iskguide title="이세계 안내서" aria-label="이세계 안내서">?</button>
-    <div class="boss-head"><h3>⚔️ 이번 주 괴물 · ${lv>1?`<span class="boss-lv">⭐ Lv.${lv}</span> `:''}${esc(m.name)}</h3><span class="small">${down ? '다음 괴물은 금요일 0시에 와요' : `${dd?`${dd}일 `:''}${hh}시간 뒤에 떠나요 · 공격권은 이번 주에만 쓸 수 있어요`}</span></div>
+    <div class="boss-head"><h3>⚔️ 이번 주 괴물 · ${lv>1?`<span class="boss-lv">⭐ Lv.${lv}</span> `:''}${esc(m.name)}</h3><span class="small">${(()=>{ const e = new Date(BOSS.ends_at ? Date.parse(BOSS.ends_at) : lottoWeekEnds()), k = new Date(e.getTime() + 9*36e5 - 1);
+        const day = `${k.getUTCMonth()+1}월 ${k.getUTCDate()}일(${'일월화수목금토'[k.getUTCDay()]})`;
+        return down ? `다음 괴물은 금요일 0시에 와요` : `⏳ ${day} 밤 12시에 새 괴물과 교대해요 · ${dd?`${dd}일 `:''}${hh}시간 남음 · 🎫 남은 공격권은 다음 괴물에게 이어서 써요`; })()}</span></div>
     <div class="boss-scene ${down?'down':''} ${riftLv?'rift-lv'+riftLv:''}">
       <div class="boss-hp"><div class="bar"><span style="width:${pct.toFixed(1)}%"></span>${riftWait?`<i class="rift-tick" style="left:${(RIFT_OPEN_HP/BOSS.max_hp*100).toFixed(1)}%" title="여기까지 깎으면… ？"></i>`:''}</div><span class="small">❤️ ${Math.max(0,BOSS.hp).toLocaleString()} / ${BOSS.max_hp.toLocaleString()}</span></div>
       <div class="boss-stage">
@@ -6712,7 +6716,8 @@ function renderRift(){
         : `<button class="mini" type="button" title="${esc(E.about)}" data-riftset="${e.id}" ${setE?'disabled title="세계수에는 알을 하나씩만 맡길 수 있어요"':''}>🌳 세계수에 맡기기</button>`) + `</div>`; };
   const nHave = Object.values(RIFT_EGGS).flatMap(E=>E.pets).filter(c=>have.has(c)).length;
   const dex = Object.entries(RIFT_EGGS).map(([k,E])=>E.pets.map(c=>{ const s = petOf(c), on = have.has(c);
-    return `<div class="rdx ${on?'':'no'}"><img src="pets/${c}.webp" alt="" loading="lazy"><b>${on||peek()?esc(s.name):'???'}</b><span class="eg">${esc(E.name)}</span></div>`; }).join('')).join('');
+    return (on || peek()) ? `<div class="rdx ${on?'':'no peek'}"><img src="pets/${c}.webp" alt="" loading="lazy"><b>${on?'':'👁️ '}${esc(s.name)}</b><span class="eg">${esc(E.name)}</span></div>`
+      : `<div class="rdx no"><span class="rq">？</span><b>???</b><span class="eg">${esc(E.name)}에서…?</span></div>`; }).join('')).join('');   // 못 만난 마물은 그림도 이름도 비밀
   const html = `<div class="rift-head"><h3>🌀 균열 너머</h3><span class="shards">💠 이세계 파편 ${(RIFT.shards||0).toLocaleString()}</span></div>
     ${(ev=>ev ? `<p class="event-banner on" style="margin:.5rem 0 0">${/^💠/.test(ev.name)?'':'💠 '}${esc(ev.name)} 진행 중! 괴물을 때리면 파편 ${ev.mult}배 · ${when(ev.ends_at)}까지</p>` : '')(riftEventNow())}
     <p class="small" style="margin:.3rem 0 0">괴물을 때릴 때마다 💠 파편 10~40개, 가끔 💎 100개! 아주 가끔은 🥚 미지의 마물 알이 떨어져요.<br>알은 세계수에 맡기고 물방울 ${need}개를 부으면 정화돼서 깨어나요. 이미 있는 친구가 나오면 💠 파편 ${RIFT.dup_shards||RIFT_DUP}개로 바뀌어요.</p>
@@ -6997,7 +7002,7 @@ const ISK_GUIDE = [
     <li>쓰러뜨리면 <b>${BOSS_REWARD_HITS}번 이상 때린 주민</b> 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 + 수집품 하나.</li>
     <li>⭐ 쓰러뜨리면 더 강해진 같은 괴물(Lv.2, 3 …)이 바로 다시 나타나요. 레벨마다 체력이 늘어요. 금요일 0시에 새 괴물은 Lv.1부터.</li>
     <li>⭐ 강화판을 쓰러뜨리면 <b>그 레벨에서 ${BOSS_REWARD_HITS}번 이상</b> 때린 주민 모두 🪙 ${BOSS_LV_COIN.toLocaleString()} + 💠 ${BOSS_LV_SHARDS}.</li>
-    <li>🎫 공격권은 괴물이 쓰러져도 사라지지 않고 이어서 써요. (다음 주로는 안 넘어가요)</li></ul>`},
+    <li>🎫 공격권은 괴물이 쓰러져도, 금요일에 새 괴물로 바뀌어도 사라지지 않고 이어서 써요. (최대 ${BOSS_TICKET_MAX}장)</li></ul>`},
   {k:'rift', t:'🌀 균열 · 파편', h:()=>`<h4>🌀 균열과 💠 이세계 파편</h4>
     <ul><li>괴물 체력이 처음으로 ${RIFT_OPEN_HP.toLocaleString()} 아래로 내려가면 숲 너머 균열이 열려요. 한 번 열리면 계속 열려 있어요.</li>
     <li>그때부터 한 대 때릴 때마다 💠 파편 10~40개, ${Math.round(RIFT_BIG_P*100)}% 확률로 💎 100개 대박.</li>
@@ -9731,6 +9736,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㊵</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㊷</p>
 </body>
 </html>
