@@ -361,6 +361,17 @@ dialog.visit h3{margin:0 0 .25rem}
 .room.view .furn{cursor:default;pointer-events:none}
 .loading{opacity:.6}
 .err{color:#B4513E}
+.myweek{margin:0 0 1rem;padding:.6rem .8rem;border-radius:14px;background:var(--panel);border:1px solid color-mix(in srgb,var(--lamp) 40%,transparent)}
+.myweek summary{cursor:pointer;list-style:none;display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap}.myweek summary::-webkit-details-marker{display:none}
+.myweek summary .jua{font-size:1.05rem}
+.mw-tabs{display:flex;gap:.3rem;margin:.5rem 0}
+.mw-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem}
+.mw-tile{border-radius:10px;padding:.45rem .55rem;background:color-mix(in srgb,var(--lamp) 14%,transparent)}
+.mw-tile b{display:block;font-family:"Jua",sans-serif;font-weight:400;font-size:1.15rem;line-height:1.2}
+.mw-tile .small{display:block;line-height:1.3}
+.mw-tile.big{grid-column:1/-1}
+.mw-up{color:#3E9A5A}.mw-down{opacity:.75}
+.mw-foot{margin:.5rem 0 0;text-align:center}
 .earn{margin:0 0 1rem;padding:.55rem .8rem;border-radius:10px;background:color-mix(in srgb,var(--lamp) 28%,var(--panel));font-family:"Jua",sans-serif;font-size:1rem}
 .shop-box{border:1px solid var(--line);border-radius:12px;padding:.2rem .8rem;margin-bottom:.5rem}
 .shop-box summary{cursor:pointer;padding:.55rem 0;font-size:1.2rem;list-style:none;display:flex;align-items:baseline;gap:.4rem}
@@ -2360,6 +2371,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
     </div>
     <div class="panel home-side">
       <p class="earn" id="earn">🎧 작업실에 있으면 1분마다 🪙 1개씩 쌓여요</p>
+      <details class="myweek" id="myWeek" open><summary><span class="jua">📊 나의 한 주</span> <span class="small" id="myWeekWhen"></span></summary><div id="myWeekBody"><p class="small">불러오는 중…</p></div></details>
       <button class="shop-open" id="shopOpen" type="button"><span class="so-ic" aria-hidden="true">🛒</span><span class="so-tx"><b>가구 상점</b><span class="small" id="shopOpenSub"></span></span><span class="so-go" aria-hidden="true">열기 ›</span></button>
       <button class="shop-open deco-open" type="button" data-goto-deco><span class="so-ic" aria-hidden="true">🎨</span><span class="so-tx"><b>집 겉모습 꾸미기</b><span class="small" id="decoOpenSub"></span></span><span class="so-go" aria-hidden="true">열기 ›</span></button>
       <details class="shop-box bag-box" id="bagBox" open>
@@ -2764,7 +2776,7 @@ const CONFIG = {
 };
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 </script>
-<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1022a"><\/script>');</script>
+<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1022b"><\/script>');</script>
 <script>
 
 /* ---------- 기준 데이터 (schema.sql 의 room_size 와 같아야 해요) ---------- */
@@ -3892,6 +3904,7 @@ const supaApi = (() => {
     async checkPlates(){ const r = await sb.rpc('check_nameplates'); if(r.error) return null; return r.data; },   // 🏅 plates.sql
     async voidFarmUp(kind){ return ok(await sb.rpc('void_farm_up', {p_kind:kind})); },
     async voidCraft(code){ return ok(await sb.rpc('void_craft', {p_code:code})); },
+    async myWeek(wk){ const r = ok(await sb.rpc('get_my_week', {p_week: wk==null ? null : wk})); return Array.isArray(r) ? r[0] : r; },
     async voidSnack(){ return ok(await sb.rpc('void_snack')); },
     async riftStarFeed(id, n){ return ok(await sb.rpc('isekai_star_feed', {p_egg:id, p_drops:n})); },
     async adminShards(id, amount, reason){ return ok(await sb.rpc('admin_isekai_give', {p_discord_id:id, p_amount:amount, p_reason:reason})); },
@@ -6274,6 +6287,37 @@ document.addEventListener('click', e=>{
   if(e.target.closest('[data-iskguide-close]')){ document.getElementById('iskGuide').close(); return; }
   const t = e.target.closest('[data-igk]'); if(t){ openIskGuide(t.dataset.igk); return; }
 });
+/* 📊 나의 한 주 (10-22 · bosslv.sql 의 get_my_week) — 첫 주는 10/22(목) 0시 ~ 10/30(금) 0시 */
+let MYWEEK_TAB = 'now', MYWEEK_AT = 0, MYWEEK = {};
+const mwHM = m => m>=60 ? `${Math.floor(m/60)}시간${m%60?` ${m%60}분`:''}` : `${m}분`;
+const mwDay = d => { const k = new Date(Date.parse(d) + 9*36e5); return `${k.getUTCMonth()+1}/${k.getUTCDate()}(${'일월화수목금토'[k.getUTCDay()]})`; };
+async function renderMyWeek(force){
+  const body = document.getElementById('myWeekBody'), when = document.getElementById('myWeekWhen'); if(!body || !ME || !api.myWeek) return;
+  if(force || Date.now() - MYWEEK_AT > 60e3){
+    MYWEEK_AT = Date.now();
+    try{ const cur = await api.myWeek(null); MYWEEK.now = cur; MYWEEK.last = (cur && !cur.skip && cur.week_no >= 1) ? await api.myWeek(cur.week_no - 1) : null; }
+    catch(e){ body.innerHTML = `<p class="small">기록을 불러오지 못했어요${/get_my_week|schema cache/i.test(e.message||'')?' (bosslv.sql 을 다시 Run 해 주세요)':''}</p>`; return; }
+  }
+  const cur = MYWEEK.now;
+  if(!cur || cur.skip){ when.textContent = ''; body.innerHTML = `<p class="small" style="margin:.4rem 0 0">📅 ${cur && cur.from ? mwDay(cur.from) : '10/30(금)'}부터 나의 한 주를 세기 시작해요!<br>그때부터 작업 시간 · 괴물 공격 · 주운 알 · 받은 도안이 여기 모여요.</p>`; return; }
+  const hasLast = !!(MYWEEK.last && !MYWEEK.last.skip); if(!hasLast) MYWEEK_TAB = 'now';
+  const W = MYWEEK_TAB==='last' ? MYWEEK.last : cur;
+  const endTxt = mwDay(new Date(Date.parse(W.ends_at) - 6e4).toISOString());
+  when.textContent = `${mwDay(W.starts_at)} ~ ${endTxt}${W.done ? '' : ' · 지금까지'}`;
+  const diff = W.prev_mins!=null ? W.mins - W.prev_mins : null;
+  const m = monsterOf(W.monster);
+  body.innerHTML = (hasLast ? `<div class="mw-tabs"><button class="mini ${MYWEEK_TAB==='now'?'ask-yes':''}" type="button" data-mwtab="now">이번 주</button><button class="mini ${MYWEEK_TAB==='last'?'ask-yes':''}" type="button" data-mwtab="last">지난주</button></div>` : '')
+    + `<div class="mw-grid">
+      <div class="mw-tile big">🎧 작업실<b>${mwHM(W.mins)}</b><span class="small">${diff==null ? '작업실에 있던 시간이에요' : diff>0 ? `<span class="mw-up">지난주보다 ${mwHM(diff)} 더 ↑</span>` : diff<0 ? `<span class="mw-down">지난주보다 ${mwHM(-diff)} 덜</span>` : '지난주랑 똑같아요'}</span></div>
+      <div class="mw-tile">⚔️ 공격<b>${W.hits.toLocaleString()}번</b><span class="small">피해 ${W.damage.toLocaleString()}</span></div>
+      <div class="mw-tile">🪙 괴물 코인<b>${W.coins.toLocaleString()}</b><span class="small">때려서 받은 코인</span></div>
+      <div class="mw-tile">🥚 주운 알<b>${W.eggs}개</b><span class="small">${W.hatched ? `깨어난 마물 ${W.hatched}마리` : '세계수에서 정화해요'}</span></div>
+      <div class="mw-tile">📜 받은 도안<b>${W.bps}장</b><span class="small">마물 농장에서</span></div>
+      ${W.drops!=null ? `<div class="mw-tile big">💧 세계수에 부은 물<b>${W.drops}방울</b></div>` : ''}
+    </div>
+    <p class="small mw-foot">${W.kills ? `숲 다 함께 「${esc(m.name)}」${jo(m.name,'을','를')} ${W.kills}번 쓰러뜨렸어요 ⚔️` : `「${esc(m.name)}」${jo(m.name,'과','와')} 싸우는 중이에요`}${W.done ? '' : ' · 이번 주도 마감 화이팅!'}</p>`;
+}
+document.addEventListener('click', e=>{ const t = e.target.closest('[data-mwtab]'); if(t){ MYWEEK_TAB = t.dataset.mwtab; renderMyWeek(); } });
 function box_void_reset(){ const b = document.getElementById('voidBox'); if(b) b._k = ''; }
 document.addEventListener('mouseover', e=>{
   if(!VSEL) return; const t = e.target.closest && e.target.closest('#voidStage .tile[data-vr]');
@@ -8208,6 +8252,7 @@ function goTab(b, e){
   if(b.dataset.tab==='walk'){ renderWalk(); refreshWalk().then(()=>{ renderWalk(); if(WALK_ME) walkSetLook(WALK_ME, WALK.look); walkJoin(); }); } else walkLeave();
   try{ sessionStorage.setItem('majam-tab', b.dataset.tab); }catch(err){}
   if(!e.tour) logTabOnce(b.dataset.tab);
+  if(b.dataset.tab==='home') renderMyWeek();
   if(!e.keepScroll) window.scrollTo({top:0, behavior: same ? 'smooth' : 'auto'});   // 탭마다 한 화면 — 늘 맨 위에서 시작해요
   if(b.dataset.tab==='village'){ renderBanners(); renderVillage(); renderVillageTrucks(); }
   if(b.dataset.tab==='lotto'){ renderLotto(); refreshLotto().then(renderLotto); }
@@ -8960,6 +9005,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㊾</p>
+<p class="site-ver">마감의 숲 · 10-22 판 51</p>
 </body>
 </html>
