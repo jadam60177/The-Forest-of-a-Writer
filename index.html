@@ -362,8 +362,9 @@ dialog.visit h3{margin:0 0 .25rem}
 .loading{opacity:.6}
 .err{color:#B4513E}
 .myweek{margin:0 0 1rem;padding:.6rem .8rem;border-radius:14px;background:var(--panel);border:1px solid color-mix(in srgb,var(--lamp) 40%,transparent)}
-.myweek summary{cursor:pointer;list-style:none;display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap}.myweek summary::-webkit-details-marker{display:none}
-.myweek summary .jua{font-size:1.05rem}
+.mw-head{display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap}.mw-head .jua{font-size:1.05rem}
+.mw-fold{margin-left:auto;padding:.1rem .6rem;font-size:.75rem}
+.myweek.folded #myWeekBody{display:none}.myweek.folded .mw-foot{margin-top:.35rem}
 .mw-tabs{display:flex;gap:.3rem;margin:.5rem 0}
 .mw-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem}
 .mw-tile{border-radius:10px;padding:.45rem .55rem;background:color-mix(in srgb,var(--lamp) 14%,transparent)}
@@ -371,7 +372,7 @@ dialog.visit h3{margin:0 0 .25rem}
 .mw-tile .small{display:block;line-height:1.3}
 .mw-tile.big{grid-column:1/-1}
 .mw-up{color:#3E9A5A}.mw-down{opacity:.75}
-.mw-foot{margin:.5rem 0 0;text-align:center}
+.mw-foot{margin:.5rem 0 0;text-align:center;line-height:1.5}.mw-foot:empty{display:none}
 .earn{margin:0 0 1rem;padding:.55rem .8rem;border-radius:10px;background:color-mix(in srgb,var(--lamp) 28%,var(--panel));font-family:"Jua",sans-serif;font-size:1rem}
 .shop-box{border:1px solid var(--line);border-radius:12px;padding:.2rem .8rem;margin-bottom:.5rem}
 .shop-box summary{cursor:pointer;padding:.55rem 0;font-size:1.2rem;list-style:none;display:flex;align-items:baseline;gap:.4rem}
@@ -2371,7 +2372,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
     </div>
     <div class="panel home-side">
       <p class="earn" id="earn">🎧 작업실에 있으면 1분마다 🪙 1개씩 쌓여요</p>
-      <details class="myweek" id="myWeek" open><summary><span class="jua">📊 나의 한 주</span> <span class="small" id="myWeekWhen"></span></summary><div id="myWeekBody"><p class="small">불러오는 중…</p></div></details>
+      <div class="myweek" id="myWeek"><div class="mw-head"><span class="jua">📊 나의 한 주</span> <span class="small" id="myWeekWhen"></span><button class="mini mw-fold" type="button" data-mwfold>접기</button></div><div id="myWeekBody"><p class="small">불러오는 중…</p></div><p class="small mw-foot" id="myWeekFoot"></p></div>
       <button class="shop-open" id="shopOpen" type="button"><span class="so-ic" aria-hidden="true">🛒</span><span class="so-tx"><b>가구 상점</b><span class="small" id="shopOpenSub"></span></span><span class="so-go" aria-hidden="true">열기 ›</span></button>
       <button class="shop-open deco-open" type="button" data-goto-deco><span class="so-ic" aria-hidden="true">🎨</span><span class="so-tx"><b>집 겉모습 꾸미기</b><span class="small" id="decoOpenSub"></span></span><span class="so-go" aria-hidden="true">열기 ›</span></button>
       <details class="shop-box bag-box" id="bagBox" open>
@@ -6288,18 +6289,19 @@ document.addEventListener('click', e=>{
   const t = e.target.closest('[data-igk]'); if(t){ openIskGuide(t.dataset.igk); return; }
 });
 /* 📊 나의 한 주 (10-22 · bosslv.sql 의 get_my_week) — 첫 주는 10/22(목) 0시 ~ 10/30(금) 0시 */
-let MYWEEK_TAB = 'now', MYWEEK_AT = 0, MYWEEK = {};
+let MYWEEK_TAB = 'now', MYWEEK_AT = 0, MYWEEK = {}, MYWEEK_FOLD = false; try{ MYWEEK_FOLD = localStorage.getItem('majam-myweek-fold')==='1'; }catch(e){}
 const mwHM = m => m>=60 ? `${Math.floor(m/60)}시간${m%60?` ${m%60}분`:''}` : `${m}분`;
 const mwDay = d => { const k = new Date(Date.parse(d) + 9*36e5); return `${k.getUTCMonth()+1}/${k.getUTCDate()}(${'일월화수목금토'[k.getUTCDay()]})`; };
 async function renderMyWeek(force){
-  const body = document.getElementById('myWeekBody'), when = document.getElementById('myWeekWhen'); if(!body || !ME || !api.myWeek) return;
+  const body = document.getElementById('myWeekBody'), when = document.getElementById('myWeekWhen'), foot = document.getElementById('myWeekFoot'), card = document.getElementById('myWeek'); if(!body || !ME || !api.myWeek) return;
+  card.classList.toggle('folded', MYWEEK_FOLD); const fb = card.querySelector('[data-mwfold]'); if(fb) fb.textContent = MYWEEK_FOLD ? '펼치기' : '접기';
   if(force || Date.now() - MYWEEK_AT > 60e3){
     MYWEEK_AT = Date.now();
     try{ const cur = await api.myWeek(null); MYWEEK.now = cur; MYWEEK.last = (cur && !cur.skip && cur.week_no >= 1) ? await api.myWeek(cur.week_no - 1) : null; }
     catch(e){ body.innerHTML = `<p class="small">기록을 불러오지 못했어요${/get_my_week|schema cache/i.test(e.message||'')?' (bosslv.sql 을 다시 Run 해 주세요)':''}</p>`; return; }
   }
   const cur = MYWEEK.now;
-  if(!cur || cur.skip){ when.textContent = ''; body.innerHTML = `<p class="small" style="margin:.4rem 0 0">📅 ${cur && cur.from ? mwDay(cur.from) : '10/30(금)'}부터 나의 한 주를 세기 시작해요!<br>그때부터 작업 시간 · 괴물 공격 · 주운 알 · 받은 도안이 여기 모여요.</p>`; return; }
+  if(!cur || cur.skip){ when.textContent = ''; foot.textContent = ''; body.innerHTML = `<p class="small" style="margin:.4rem 0 0">📅 ${cur && cur.from ? mwDay(cur.from) : '10/30(금)'}부터 나의 한 주를 세기 시작해요!<br>그때부터 작업 시간 · 괴물 공격 · 주운 알 · 받은 도안이 여기 모여요.</p>`; return; }
   const hasLast = !!(MYWEEK.last && !MYWEEK.last.skip); if(!hasLast) MYWEEK_TAB = 'now';
   const W = MYWEEK_TAB==='last' ? MYWEEK.last : cur;
   const endTxt = mwDay(new Date(Date.parse(W.ends_at) - 6e4).toISOString());
@@ -6314,10 +6316,12 @@ async function renderMyWeek(force){
       <div class="mw-tile">🥚 주운 알<b>${W.eggs}개</b><span class="small">${W.hatched ? `깨어난 마물 ${W.hatched}마리` : '세계수에서 정화해요'}</span></div>
       <div class="mw-tile">📜 받은 도안<b>${W.bps}장</b><span class="small">마물 농장에서</span></div>
       ${W.drops!=null ? `<div class="mw-tile big">💧 세계수에 부은 물<b>${W.drops}방울</b></div>` : ''}
-    </div>
-    <p class="small mw-foot">${W.kills ? `숲 다 함께 「${esc(m.name)}」${jo(m.name,'을','를')} ${W.kills}번 쓰러뜨렸어요 ⚔️` : `「${esc(m.name)}」${jo(m.name,'과','와')} 싸우는 중이에요`}${W.done ? '' : ' · 이번 주도 마감 화이팅!'}</p>`;
+    </div>`;
+  foot.innerHTML = W.kills ? `숲 다 함께 「${esc(m.name)}」${jo(m.name,'을','를')} ${W.kills}번 쓰러뜨렸어요 ⚔️<br>${W.done ? '한 주 동안 마감 고생 많았어요!' : '이번 주도 마감 화이팅!'}`
+    : W.done ? `「${esc(m.name)}」${jo(m.name,'과','와')} 싸운 한 주였어요<br>한 주 동안 마감 고생 많았어요!` : `현재 「${esc(m.name)}」${jo(m.name,'과','와')} 싸우는 중이에요<br>이번 주도 마감 화이팅!`;
 }
-document.addEventListener('click', e=>{ const t = e.target.closest('[data-mwtab]'); if(t){ MYWEEK_TAB = t.dataset.mwtab; renderMyWeek(); } });
+document.addEventListener('click', e=>{ const t = e.target.closest('[data-mwtab]'); if(t){ MYWEEK_TAB = t.dataset.mwtab; renderMyWeek(); return; }
+  if(e.target.closest('[data-mwfold]')){ MYWEEK_FOLD = !MYWEEK_FOLD; try{ localStorage.setItem('majam-myweek-fold', MYWEEK_FOLD?'1':'0'); }catch(err){} renderMyWeek(); } });
 function box_void_reset(){ const b = document.getElementById('voidBox'); if(b) b._k = ''; }
 document.addEventListener('mouseover', e=>{
   if(!VSEL) return; const t = e.target.closest && e.target.closest('#voidStage .tile[data-vr]');
@@ -9005,6 +9009,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 51</p>
+<p class="site-ver">마감의 숲 · 10-22 판 52</p>
 </body>
 </html>
