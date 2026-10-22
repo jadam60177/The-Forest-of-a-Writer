@@ -1897,7 +1897,26 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 .house.me .nm.plate-snow,.wnm.me.plate-snow{color:#1B5E9C}
 .plate-chip{display:inline-block;padding:.05rem .55rem;border-radius:7px;border:2px solid #4E321C;background:linear-gradient(#A0703F,#7A5230);color:#FFF3DC;font-family:"Jua",sans-serif;font-size:.85rem}
 .hs-btn.plate-btn{padding:.2rem .3rem}
+/* 🏛️ 기념 광장 (10-22) — plaza/memorial_day·night.webp, 가운데 큰 받침대 + 작은 받침대 4 */
+.lot.memorial{cursor:pointer;background:linear-gradient(rgba(20,26,56,.15),rgba(20,26,56,.55)),url(plaza/memorial_night.webp) center/cover no-repeat!important;border:1px solid rgba(190,222,255,.5);font:inherit;color:inherit}
+:root[data-mode="day"] .lot.memorial{background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.55)),url(plaza/memorial_day.webp) center/cover no-repeat!important}
+.lot.memorial .b{font-size:1.9rem;filter:drop-shadow(0 0 8px rgba(190,222,255,.8))}
+.lot.memorial .n,.lot.memorial .s{text-shadow:0 1px 4px rgba(0,0,0,.7);color:#fff}
+dialog.mem-dlg{max-width:min(94vw,760px);width:100%}
+.mem-stage{position:relative;width:100%;aspect-ratio:1920/1072;border-radius:14px;overflow:hidden;background:url(plaza/memorial_night.webp) center/cover no-repeat,#1C2448}
+:root[data-mode="day"] .mem-stage{background:url(plaza/memorial_day.webp) center/cover no-repeat,#9FD3F0}
+.mem-spot{position:absolute;transform:translate(-50%,0);bottom:var(--b);left:var(--x);display:flex;flex-direction:column;align-items:center;border:0;background:none;padding:0;cursor:pointer;color:#fff;font:inherit}
+.mem-spot .mon{font-size:var(--fs,4rem);line-height:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.35))}
+.mem-spot img.mon{width:var(--w,22%);height:auto}
+.mem-spot.empty{cursor:default}
+.mem-spot .q{font-family:"Jua",sans-serif;font-size:1.6rem;width:2.2em;height:2.2em;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.18);border:2px dashed rgba(255,255,255,.75);text-shadow:0 1px 4px rgba(0,0,0,.6);animation:rtick 2s ease-in-out infinite alternate}
+.mem-spot .sign{margin-top:.25rem;font-size:.72rem;padding:.1rem .5rem;border-radius:8px;background:rgba(30,24,16,.72);white-space:nowrap}
+.mem-plaque{margin-top:.6rem;padding:.6rem .8rem;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:.9rem;min-height:2.4em}
+:root[data-mode="day"] .mem-plaque{background:rgba(255,255,255,.7)}
 /* ✦ 겨울 100% 너머 (10-22) */
+.wb-pick{display:flex;gap:.4rem;flex-wrap:wrap;margin:.3rem 0 0 2.1rem}
+.wb-pick .mini{line-height:1.3;padding:.35rem .7rem;text-align:center}
+button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .wb-slot .wq.wq-ic{font-size:2.2rem;background:none;border:0;box-shadow:none}
 .wb-bar2{margin-top:.4rem;height:8px;position:relative}
 .wb-bar2 span{background:linear-gradient(90deg,#BFE3FF,#E6CCFF,#FFD6F0)!important}
@@ -2500,6 +2519,14 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <div class="tpets" id="visitPets"></div>
 </dialog>
 
+<dialog class="visit mem-dlg" id="memDlg">
+  <button class="mini visit-close" id="memClose" type="button">닫기</button>
+  <h3 style="margin:0 0 .2rem">🏛️ 기념 광장</h3>
+  <p class="small" style="margin:0 0 .6rem">마을이 함께 해낸 일을 하나씩 기념물로 남겨요. 기념물을 누르면 그때 이야기가 나와요.</p>
+  <div class="mem-stage" id="memStage"></div>
+  <div class="mem-plaque" id="memPlaque"></div>
+</dialog>
+
 <dialog class="visit ask" id="flowerDlg">
   <h3 style="margin:0 0 .2rem" id="flowerTitle">💐 꽃 보내기</h3>
   <p class="small" style="margin:0">받은 주민 집 앞에 하루 동안 꽃이 피고, 받은 주민도 코인을 조금 받아요. 누가 보냈는지는 받은 주민만 알 수 있어요.</p>
@@ -2696,7 +2723,8 @@ const RAID_PER_DAY = 5;   // 하루 서리 횟수 — schema 의 raid_house 와 
 const FRUITS = ['🍑','🍎','🍐','🍇','🍊','🍓'];
 const CAPACITY = {shelf:4, cabinet:6, vitrine:9};   // schema 의 shop_items.capacity 와 같아요
 const MAX_ROOMS = 4;
-const ROOM_PRICE = n => n*1000;   // 방이 n개일 때 다음 방 가격 — schema 의 buy_room 과 같아요
+const ROOM_PRICE = n => n*1000;
+const roomPriceMe = n => (ME && ME.room_coupon > 0) ? Math.floor(ROOM_PRICE(n)/2) : ROOM_PRICE(n);   // 🚪 겨울 행사 반값 쿠폰 (winterperks.sql)   // 방이 n개일 때 다음 방 가격 — schema 의 buy_room 과 같아요
 const ROOM_NAMES = ['거실','침실','서재','다락방'];
 const roomOf = (minutes, blocks) => { const s = STAGES[stageIdx(minutes)]; return {...s, extraW: Math.min(s.cols, (blocks||0)*2), maxBlocks: Math.ceil(s.cols/2), blocks: blocks||0}; };
 const DECAY = [
@@ -2729,7 +2757,9 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&l
 
 // 소품(악세서리)으로 분류할 가구 — schema 의 category 와 같아요
 const ACC_CODES = new Set(["chestnut","letter","stamp","croissant","cake","baguette","sunflower","tulip","blossom","openbook","newspaper","teapot","cupcake","balloon","windchime","koinobori","compass","urn","coffee", "candle", "firewood", "plant", "teddy", "books", "moonlamp", "frame", "cat", "tea", "cookie", "mushroom", "notebook", "cactus", "pen", "bouquet", "radio", "lantern", "mirror", "headphone", "keyboard", "guitar", "contract", "laptop", "fishbowl", "rabbit", "dog", "violin", "wolfdoll", "trophy"]);
-const isLive = it => !it.limited_until || new Date(it.limited_until).getTime() > Date.now();
+// 기간 한정: limited_from(있으면 그때부터) ~ limited_until 까지만 상점에 보여요 (10-22 겨울 가구는 11/1 0시부터)
+const limFrom = it => it.limited_from || (DEFAULT_SHOP.find(x=>x.code===it.code)||{}).limited_from;
+const isLive = it => { const n = Date.now(), f = limFrom(it); return (!f || new Date(f).getTime() <= n) && (!it.limited_until || new Date(it.limited_until).getTime() > n); };
 // 보따리 소품은 언제나 소품이에요 (get_gacha 결과에는 category 칸이 없어서 등급으로 알아봐요)
 const catOf = it => it.category || ((it.rarity || it.gacha_rarity || ACC_CODES.has(it.code)) ? 'accessory' : 'furniture');
 const DEFAULT_SHOP = [
@@ -2902,6 +2932,14 @@ const HALLOWEEN_UNTIL = '2026-11-01T00:00:00+09:00';
 [['ghost','👻','유령',66,1,1,'accessory'],['pumpkin','🎃','할로윈 호박',40,1,1,'accessory'],['bat','🦇','박쥐',45,1,1,'accessory'],
  ['witchhat','🧙','마녀 모자',55,1,1,'accessory'],['cauldron','🧪','마녀의 솥',90,1,1,'furniture']]
  .forEach(([code,emoji,name,price,w,h,category])=>DEFAULT_SHOP.push({code,emoji,name,price,w,h,active:true,category,icon:code,limited_until:HALLOWEEN_UNTIL,season:'🎃 할로윈'}));
+// 🎄 26 겨울 한정 가구 7종 (10-22, winterfurn.sql 과 같아요) — 11/1 0시 ~ 12/31 밤 12시 · 「❄️ 26 겨울 한정」 딱지
+const WINTER26_FROM = '2026-11-01T00:00:00+09:00', WINTER26_UNTIL = '2027-01-01T00:00:00+09:00';
+const WINTER26_FURN = [['w26_tree','🎄','커다란 크리스마스 트리',300,2,2,'furniture'],['w26_kotatsu','🍊','귤 바구니 코타츠',250,2,1,'furniture'],
+  ['w26_sled','🛷','썰매 책꽂이',200,2,1,'furniture'],['w26_lamp','🏮','얼음 요정 등불 스탠드',180,1,2,'furniture'],
+  ['w26_igloo','🐾','작은 이글루 펫 집',120,1,1,'furniture'],['w26_wreath','🌿','빨간 리본 겨울 리스',100,1,1,'accessory'],
+  ['w26_rug','❄️','눈꽃 무늬 털 러그',160,2,2,'furniture']];
+WINTER26_FURN.forEach(([code,emoji,name,price,w,h,category])=>DEFAULT_SHOP.push({code,emoji,name,price,w,h,active:true,category,icon:code,
+  ...(code==='w26_rug'?{layer:'floor'}:{}), limited_from:WINTER26_FROM, limited_until:WINTER26_UNTIL, season:'❄️ 겨울'}));
 // 원래 이모지였던 가구도 그림으로
 ["chair", "clock", "bed", "sofa", "desk", "bathtub", "piano", "tree", "fireplace", "telescope", "camptent", "fountain", "carousel", "xmastree"].forEach(c=>{ const it = DEFAULT_SHOP.find(x=>x.code===c); if(it) it.icon = c; });
 const iconKey = it => it && (it.icon || (CAPACITY[it.code] ? it.code : null));   // 진열장은 DB 설정 없이도 그림으로
@@ -2948,6 +2986,7 @@ const TILE_WALLS = [["wall_brick1", "🧱", "벽돌 벽", 40, 1, 1], ["wall_bric
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='wall_arch')+1; DEFAULT_SHOP.splice(at, 0, ...TILE_WALLS.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); }
 const TILE_WALL = new Set(['wall_brick', ...TILE_WALLS.map(r=>r[0])]);
 TILE_WALL.forEach(c=>FURN_IMG.add(c)); WALL_H.forEach(c=>FURN_IMG.add(c));
+WINTER26_FURN.forEach(([c])=>FURN_IMG.add(c)); FLOOR_CODES.add('w26_rug'); TILE_WALL.add('w26_rug');   // 🎄 겨울 가구 그림 (furn 폴더)
 // 🌈 무지개 러그 크게 (10-21, rugsizes.sql 과 같아요) — 2×1 · 3×1 · 2×2 · 3×3. 칸에 꽉 맞춰 깔려서 벽지처럼 이어 붙일 수 있어요 (긴 건 돌리면 세로)
 const RUG_SIZES = [['2',2,1,55], ['3',3,1,80], ['22',2,2,100], ['33',3,3,210]];
 RAINBOW_RUGS.forEach(([code,emoji,name])=>{
@@ -3815,7 +3854,7 @@ const demoApi = (() => {
     },
     async addRoom(name){
       const n = st.me.room_names.length; if(n>=MAX_ROOMS) fail('방은 4개까지 만들 수 있어요');
-      const price = ROOM_PRICE(n); if(st.me.coins<price) fail('코인이 부족해요');
+      const price = st.me.room_coupon>0 ? Math.floor(ROOM_PRICE(n)/2) : ROOM_PRICE(n); if(st.me.coins<price) fail('코인이 부족해요'); if(st.me.room_coupon>0) st.me.room_coupon--;
       st.me.coins-=price; st.me.room_names=[...st.me.room_names, name]; persist(); return st.me.coins;
     },
     async renameRoom(k, name){ st.me.room_names=[...st.me.room_names]; st.me.room_names[k]=name; persist(); },
@@ -4009,7 +4048,7 @@ const demoApi = (() => {
       st.me.coins -= n*SEED_PRICE; st.me.seeds = (st.me.seeds||0)+n; persist(); return st.me.coins;
     },
     async plant(slot){
-      if(slot<0 || slot>=gardenSlots(st.me.total_minutes)) fail('아직 열리지 않은 화단이에요');
+      if(slot<0 || slot>=gardenSlots(st.me.total_minutes)+(st.me.garden_bonus||0)) fail('아직 열리지 않은 화단이에요');
       if(st.garden.some(x=>x.slot===slot)) fail('이미 뭔가 자라고 있어요');
       if(!((st.me.seeds||0)>0)) fail('씨앗이 없어요');
       st.me.seeds--; st.garden.push({slot, flower:this.roll(), planted:st.me.total_minutes}); persist();
@@ -4288,6 +4327,7 @@ const demoApi = (() => {
       return {open:true, cols:V.cols, rows:V.rows, bg:V.bg, bgs:[...V.bgs], public:V.pub, items:V.items.map(x=>({...x})), farm_pets, farm_at:V.farm_at, farm_rate:VOID_FARM_RATE+rl, farm_cap:VOID_FARM_CAP+4*cl,
         cap_lv:cl, rate_lv:rl, cap_price:[300,500,800][cl] ?? null, rate_price:[500,800][rl] ?? null, fx:V.fx||'', fxs:[...(V.fxs||[])], fx_price:VOID_FX_PRICE, stars:st.me.stars||0,
         max_cols:VOID_MAX_C, max_rows:VOID_MAX_R, grow_price:V.cols*V.rows*10, bg_price:VOID_BG_PRICE}; },
+    async winterPick(k){ const W = st.winter || {}; W.pick = k; if(k==='lotto') st.me.lotto_bonus = (st.me.lotto_bonus||0)+3; else if(k==='room') st.me.room_coupon = (st.me.room_coupon||0)+1; else st.me.garden_bonus = (st.me.garden_bonus||0)+1; persist(); return null; },
     async checkPlates(){ const have = new Set(st.me.nameplates||['wood']), fresh = [], g = st.coll.size;
       [[100,'ribbon'],[200,'starlight'],[300,'jewel'],[400,'rainbow'],[500,'goldleaf']].forEach(([n,k])=>{ if(g>=n && !have.has(k)) fresh.push(k); });
       const P = this.pstate(); if(['isk_ink','isk_clock','isk_paper','isk_reject','isk_blank','isk_scrap','isk_sleep','isk_game','isk_vamp'].every(c=>P.dex.includes(c)) && !have.has('isekai')) fresh.push('isekai');
@@ -4553,6 +4593,7 @@ const supaApi = (() => {
     async voidRemove(id){ return ok(await sb.rpc('void_remove', {p_id:id})); },
     async voidCollect(){ return ok(await sb.rpc('void_farm_collect')); },
     async voidFx(fx){ return ok(await sb.rpc('void_set_fx', {p_fx:fx||''})); },
+    async winterPick(k){ return ok(await sb.rpc('winter_pick', {p_pick:k})); },   // 🎁 골라 받기 (winter.sql)
     async checkPlates(){ const r = await sb.rpc('check_nameplates'); if(r.error) return null; return r.data; },   // 🏅 plates.sql
     async voidFarmUp(kind){ return ok(await sb.rpc('void_farm_up', {p_kind:kind})); },
     async riftStarFeed(id, n){ return ok(await sb.rpc('isekai_star_feed', {p_egg:id, p_drops:n})); },
@@ -4861,7 +4902,7 @@ function renderRoomTabs(){
   el.innerHTML = names.map((n,k)=>{ const on = k===curRoom && !inGarden && !inTank; return `<button class="rtab ${on?'on':''}" data-room="${k}">${esc(n)}${on?` <span class="ren" data-rename="${k}" title="이름 바꾸기">✏️</span>`:''}</button>`; }).join('') +
     `<button class="rtab garden-tab ${inTank?'on':''}" data-tankview>🐠 어항</button>` +
     `<button class="rtab garden-tab ${inGarden?'on':''}" data-garden>🌷 마당</button>` +
-    (names.length < MAX_ROOMS ? `<button class="rtab add" data-addroom ${ME.coins<ROOM_PRICE(names.length)?'disabled':''}>＋ 방 늘리기 🪙 ${ROOM_PRICE(names.length).toLocaleString()}</button>` : '');
+    (names.length < MAX_ROOMS ? `<button class="rtab add" data-addroom ${ME.coins<roomPriceMe(names.length)?'disabled':''}>＋ 방 늘리기 🪙 ${roomPriceMe(names.length).toLocaleString()}${ME.room_coupon>0?' 🎟️반값':''}</button>` : '');
 }
 
 // 🎨 집 꾸미기 (성장 단계 탭): 누르면 미리보기만 바뀌고, 마음에 들 때 적용 버튼으로 칠하기·스타일·겉모습을 정해요
@@ -5107,7 +5148,7 @@ function plotHTML(p, k, editable){
   return `<div class="plot"><img class="gstage ${stg}" src="${GARDEN_STAGE_IMG[stg]}" alt="" draggable="false" loading="lazy"><span class="pl">${STAGE_NAME[p.stage]||'씨앗'}<br>작업 ${fmt(p.grown||0)}째${tease}</span></div>`;
 }
 function gardenBedHTML(plots, minutes, editable){
-  const n = gardenSlots(minutes), i = stageIdx(minutes);
+  const n = gardenSlots(minutes) + (editable ? ((ME && ME.garden_bonus) || 0) : 0), i = stageIdx(minutes);   // 🌱 겨울 행사 텃밭 +칸 (내 화단만)
   let html = '';
   for(let k=0;k<n;k++) html += plotHTML((plots||[]).find(x=>x.slot===k), k, editable);
   if(editable){
@@ -5169,7 +5210,7 @@ document.addEventListener('click', e=>{
 function renderGarden(){
   const box = document.getElementById('gardenBox'); if(!box || !ME) return;
   const prevOpen = box.querySelector('details.fs-pick') ? box.querySelector('details.fs-pick').open : false;
-  const n = gardenSlots(ME.total_minutes), seeds = ME.seeds||0, open = floristOpen();
+  const n = gardenSlots(ME.total_minutes) + (ME.garden_bonus||0), seeds = ME.seeds||0, open = floristOpen();
   const seedRow = `<div class="seed-row"><span>🌰 이름 모를 씨앗 <b>${seeds}</b>개</span>`
     + (open
       ? `<button class="mini" data-seeds="1" ${ME.coins<SEED_PRICE?'disabled':''}>1봉투 · 🪙 ${SEED_PRICE}</button><button class="mini" data-seeds="5" ${ME.coins<SEED_PRICE*5?'disabled':''}>5봉투 · 🪙 ${SEED_PRICE*5}</button>`
@@ -7790,6 +7831,34 @@ async function refreshPlaza(){ try{ PLAZA = (await api.plaza()) || []; }catch(e)
 const PLAZA_IMG = new Set(['campfire','postbox','bakery','florist','lake','bookstore','teahouse','festival','library','shelter']);
 const plazaArt = b => PLAZA_IMG.has(b.code) ? `<img class="pimg" src="plaza/${b.code}.webp" alt="" draggable="false" loading="lazy">` : b.emoji;
 function plazaBox(code){ return GACHA_BOXES.find(b=>b.unlock_by===code); }
+/* ---------- 🏛️ 기념 광장 (10-22) — 행사마다 기념물 하나씩 ---------- */
+// spot: c 가운데 큰 받침대 · l1 l2 r1 r2 작은 받침대 (그림 위 위치 %) · img 는 그림이 생기면 (없으면 emoji)
+const MEM_SPOTS = {c:{x:50.5, b:46.5, fs:'4.6rem'}, l1:{x:21.2, b:37.5, fs:'2.8rem'}, l2:{x:34.4, b:43, fs:'2.4rem'}, r2:{x:67.4, b:43, fs:'2.4rem'}, r1:{x:80.6, b:37.5, fs:'2.8rem'}};
+const MONUMENTS = [
+  {code:'winter26', spot:'c', emoji:'⛄', name:'26 겨울 눈사람', img:null, season:'❄️ 26 겨울', how:'겨울 행사 마을 100%',
+   done:()=> WINTER && WINTER.code==='winter26' && WINTER.monument_at ? {at:WINTER.monument_at, givers:WINTER.givers||0, total:WINTER.total||0} : null},
+];
+function memorialLotHTML(){
+  const got = MONUMENTS.filter(m=>m.done()).length;
+  return `<button class="lot memorial" type="button" data-memorial><div class="b">${got ? MONUMENTS.filter(m=>m.done()).map(m=>m.emoji).join('') : '🏛️'}</div><div class="n">기념 광장</div><div class="s">${got ? `기념물 ${got}개` : '？ 첫 기념물을 기다려요'}</div></button>`;
+}
+function renderMemorial(){
+  const st = document.getElementById('memStage'), pl = document.getElementById('memPlaque'); if(!st) return;
+  st.innerHTML = Object.entries(MEM_SPOTS).map(([k,sp])=>{ const m = MONUMENTS.find(x=>x.spot===k), d = m && (m.done() || (peek() ? {at:new Date().toISOString(), givers:0, total:0, peek:true} : null));
+    if(d) return `<button class="mem-spot" type="button" data-mon="${m.code}" style="--x:${sp.x}%;--b:${sp.b}%;--fs:${sp.fs}">${m.img?`<img class="mon" src="${m.img}" alt="">`:`<span class="mon">${m.emoji}</span>`}<span class="sign">${esc(m.season)}</span></button>`;
+    if(m) return `<span class="mem-spot empty" style="--x:${sp.x}%;--b:${sp.b}%"><span class="q">？</span><span class="sign">첫 기념물은 ${esc(m.how)}에서</span></span>`;
+    return '';
+  }).join('');
+  pl.innerHTML = '🪧 받침대를 눌러 보세요. 아직 빈 받침대는 앞으로 행사마다 하나씩 채워져요.';
+}
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-memorial]')){ renderMemorial(); const d = document.getElementById('memDlg'); if(!d.open) d.showModal(); return; }
+  if(e.target.closest('#memClose')){ document.getElementById('memDlg').close(); return; }
+  const mb = e.target.closest('[data-mon]');
+  if(mb){ const m = MONUMENTS.find(x=>x.code===mb.dataset.mon), d = m && m.done();
+    document.getElementById('memPlaque').innerHTML = d ? `<b>${m.emoji} ${esc(m.name)}</b><br><span class="small">${esc(m.season)} · ${esc(m.how)} 달성 · ${new Date(d.at).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',timeZone:'Asia/Seoul'})} · 함께한 주민 ${d.givers}명 · 모은 눈송이 🪙 ${(d.total||0).toLocaleString()}</span>`
+      : `<b>${m ? m.emoji+' '+esc(m.name) : ''}</b> <span class="small">(👁️ 숲지기 미리 보기)</span>`; }
+});
 function renderPlaza(){
   const list = [...PLAZA].sort((a,b)=>a.sort-b.sort);
   const cur = list.find(b=>!b.built_at);
@@ -7800,7 +7869,7 @@ function renderPlaza(){
       return `<div class="lot building"><div class="b"><span class="ghost">${plazaArt(b)}</span><span class="crane">🚧</span></div><div class="n">${esc(b.name)}</div><div class="mbar"><span style="width:${pct}%"></span></div><div class="s">짓는 중 · ${pct}%</div></div>`;
     }
     return `<div class="lot fog"><div class="b">🌫️</div><div class="n">빈 터</div><div class="s">아직 안개 속</div></div>`;
-  }).join('');
+  }).join('') + memorialLotHTML();
   const w = document.getElementById('plazaWork');
   if(!list.length){ w.innerHTML = `<p class="small">광장을 불러오지 못했어요.</p>`; return; }
   w.hidden = false;
@@ -7865,10 +7934,10 @@ function winterBoardHTML(){
     : `<div class="wb-slot"><div class="wq">？</div><b>？？？</b><span>🔒 ${WINTER_PCT[s.t]}%에서 공개</span></div>`;
   // ✦ 100% 너머 3단계 (10-22) — 열린 단계는 보여 주고, 다음 단계 하나만 ？
   const BY = peek() ? 3 : (W.beyond ?? (W.revealed ? 1 : 0));
-  const BEYOND = [
-    {pct:100, open:`<div class="wb-slot beyond open"><div class="wq wq-ic">🎟️</div><b>복권 하루 +3장</b><span>100% 너머 · 영구</span></div>`},
-    {pct:150, open:`<div class="wb-slot beyond open"><img src="pets/icefairy26.webp" alt="" loading="lazy"><b>❄️ 얼음 요정</b><span>150% 너머 · 시즌 한정 펫</span></div>`},
-    {pct:200, open:`<div class="wb-slot beyond open"><div class="wq wq-ic">⛄</div><b>26 겨울 눈사람</b><span>200% · 기념 광장 첫 기념물</span></div>`},
+  const BEYOND = [   // (10-22 라밀 결정 · 겨울100너머_수정)
+    {pct:100, open:`<button class="wb-slot beyond open" type="button" data-memorial><div class="wq wq-ic">⛄</div><b>26 겨울 눈사람</b><span>100% · 기념 광장 첫 기념물</span></button>`},
+    {pct:150, open:`<div class="wb-slot beyond open"><div class="wq wq-ic">🎁</div><b>골라 받기</b><span>150% 너머 · 복권 / 방 쿠폰 / 텃밭</span></div>`},
+    {pct:200, open:`<div class="wb-slot beyond open"><img src="pets/icefairy26.webp" alt="" loading="lazy"><b>❄️ 얼음 요정</b><span>200% 너머 · 시즌 한정 펫</span></div>`},
   ];
   const beyond = BEYOND.map((b,i)=> i < BY ? b.open : i === BY ? `<div class="wb-slot beyond"><div class="wq">✦</div><b>${b.pct}%${i?'에':' 너머에'}</b><span>무언가 더 있어요!</span></div>` : '').join('');
   const row = (icon, name, sub, have, max, ok) => `<div class="wb-mine-row ${ok?'ok':''}"><span class="wm-ic">${icon}</span><span class="wm-tx"><b>${name}</b><span class="small">${sub}</span></span>
@@ -7886,15 +7955,23 @@ function winterBoardHTML(){
       ${row('❄️','눈꽃 이름표', `내가 ${need.plate.toLocaleString()}코인 보태면 · 마을·산책로 이름표가 눈꽃으로`, W.my_total||0, need.plate, got.has('plate'))}
       ${row('⛄','26 겨울 집', `내가 ${need.style.toLocaleString()}코인 보태면 · 마을이 연 크기의 겨울 집만 입혀져요`, W.my_total||0, need.style, got.has('style'))}
       ${got.has('style') ? winterMyHouseNote() : ''}
-      ${BY >= 1 ? row('🎟️', `복권 하루 +${need.lotto_bonus||3}장 (영구)`, `마을이 100%를 넘긴 뒤에 내가 ${(need.lotto||2000).toLocaleString()}코인 더 보태면`, W.my_after||0, need.lotto||2000, got.has('lotto')) : ''}
-      ${BY >= 2 ? row('❄️','얼음 요정 (시즌 한정 펫)', `마을이 150%를 넘긴 뒤에 내가 ${(need.pet||2000).toLocaleString()}코인 더 보태면`, W.my_after150||0, need.pet||2000, got.has('pet')) : ''}
-      ${BY >= 3 ? `<div class="wb-mine-row ok"><span class="wm-ic">⛄</span><span class="wm-tx"><b>26 겨울 눈사람 기념물</b><span class="small">마을 200% 달성! 마을 광장 기념 광장에 세워져요 · 함께한 모두의 것</span></span><span class="wm-st">✓ 달성</span></div>`
-        : `<div class="wb-mine-row secret"><span class="wm-ic">✦</span><span class="wm-tx"><b>？？？</b><span class="small">마을이 ${[100,150,200][BY]}%를 넘기면 정체가 밝혀져요</span></span></div>`}</div>
+      ${BY >= 1 ? `<div class="wb-mine-row ok"><span class="wm-ic">⛄</span><span class="wm-tx"><b>26 겨울 눈사람 기념물</b><span class="small">마을 100% 달성! 광장의 🏛️ 기념 광장에 세워졌어요 · 함께한 모두의 것</span></span><span class="wm-st"><button class="mini" type="button" data-memorial>보러 가기</button></span></div>` : ''}
+      ${BY >= 2 ? row('🎁','골라 받기 (하나만)', `마을이 150%를 넘긴 뒤에 내가 ${(need.choice||2000).toLocaleString()}코인 더 보태면`, W.my_after150||0, need.choice||2000, got.has('choice')) + winterPickHTML(W) : ''}
+      ${BY >= 3 ? row('❄️','얼음 요정 (시즌 한정 펫)', `마을이 200%를 넘긴 뒤에 내가 ${(need.pet||2000).toLocaleString()}코인 더 보태면`, W.my_after200||0, need.pet||2000, got.has('pet')) : ''}
+      ${BY < 3 ? `<div class="wb-mine-row secret"><span class="wm-ic">✦</span><span class="wm-tx"><b>？？？</b><span class="small">마을이 ${[100,150,200][BY]}%를 넘기면 정체가 밝혀져요</span></span></div>` : ''}</div>
     ${open ? `<div class="give-row">
       ${[10,50,100,500].map(n=>`<button class="give" data-wgive="${n}" ${ME.coins<1?'disabled':''}>❄️ ${n}</button>`).join('')}
       <input type="number" min="1" inputmode="numeric" id="wgiveCustom" placeholder="직접 입력">
       <button class="give" data-wgive="custom" ${ME.coins<1?'disabled':''}>보내기</button></div>
       <p class="small" style="margin:.4rem 0 0">보탠 코인은 돌려받을 수 없어요. 상점에선 절대 안 파는 한정 보상이에요.</p>` : ''}`;
+}
+// 🎁 골라 받기 (150% + 2,000) — 복권 +3장(영구) / 방 반값 쿠폰(1회) / 텃밭 +1칸(영구)
+const WINTER_PICKS = {lotto:{ic:'🎟️', name:'복권 하루 +3장', sub:'영구 · 5장 → 8장'}, room:{ic:'🚪', name:'방 늘리기 반값 쿠폰', sub:'1회 · 다음 방을 반값에'}, garden:{ic:'🌱', name:'텃밭 +1칸', sub:'영구 · 마당 화단 한 칸 더'}};
+function winterPickHTML(W){
+  const got = new Set(W.got||[]); if(!got.has('choice')) return '';
+  if(W.pick) return `<p class="small wb-note ok">🎁 ${WINTER_PICKS[W.pick]?.ic||''} ${esc(WINTER_PICKS[W.pick]?.name||W.pick)}${jo(WINTER_PICKS[W.pick]?.name||'', '을','를')} 골랐어요!</p>`;
+  const full = (W.rooms||1) >= 4;
+  return `<div class="wb-pick">${Object.entries(WINTER_PICKS).map(([k,v])=>`<button class="mini ${k==='room'&&full?'':'ask-yes'}" type="button" data-wpick="${k}" ${k==='room'&&full?'disabled title="방을 이미 다 열었어요"':''}>${v.ic} ${v.name}<br><span class="small">${k==='room'&&full?'방을 다 열었어요':v.sub}</span></button>`).join('')}</div><p class="small wb-note">🎁 셋 중 <b>하나만</b> 고를 수 있어요. 고르면 바꿀 수 없어요!</p>`;
 }
 function winterMyHouseNote(){   // (10-21) 받았는데 기본 집으로 보이는 주민에게 이유를 알려 줘요
   const stg = stageIdx(ME.total_minutes);
@@ -7924,13 +8001,20 @@ function winterMailCheck(){   // 📬 행사 시작·집 공개·100% 너머 소
   now.by = WINTER.beyond ?? (now.rev ? 1 : 0);
   const sb = seen ? (seen.by ?? (seen.rev ? 1 : 0)) : 0, nd = WINTER.need || {};
   const BYMAIL = [null,
-    {icon:'🎟️', title:'100% 너머 첫 번째 비밀이 풀렸어요!', body:`마을이 100%를 넘겼어요! 지금부터 ${(nd.lotto||2000).toLocaleString()}코인을 더 보태면 🎟️ 복권을 하루 ${nd.lotto_bonus||3}장 더 긁을 수 있어요 (영구).\n다음 비밀은 150%에서!`},
-    {icon:'❄️', title:'150% — 얼음 요정이 나타났어요!', body:`마을이 150%를 넘겼어요! 지금부터 ${(nd.pet||2000).toLocaleString()}코인을 더 보태면 시즌 한정 펫 ❄️ 얼음 요정이 우리 집에 와요.\n마지막 비밀은 200%에서!`},
-    {icon:'⛄', title:'200% 달성! 기념 광장에 눈사람이 세워져요', body:'다 같이 해낸 마을 200%! 마을 광장 기념 광장에 「26 겨울 눈사람」이 첫 기념물로 세워져요.'}];
+    {icon:'⛄', title:'100% 달성! 기념 광장에 눈사람이 세워졌어요', body:'다 같이 해낸 마을 100%! 마을 광장 🏛️ 기념 광장에 「26 겨울 눈사람」이 첫 기념물로 세워졌어요.\n그런데… 100% 너머에도 무언가 더 있대요. 다음 비밀은 150%에서!'},
+    {icon:'🎁', title:'150% — 골라 받기가 열렸어요!', body:`마을이 150%를 넘겼어요! 지금부터 ${(nd.choice||2000).toLocaleString()}코인을 더 보태면 🎟️ 복권 하루 +3장 / 🚪 방 반값 쿠폰 / 🌱 텃밭 +1칸 중 하나를 골라 받아요.\n마지막 비밀은 200%에서!`},
+    {icon:'❄️', title:'200% — 얼음 요정이 나타났어요!', body:`마을이 200%를 넘겼어요! 지금부터 ${(nd.pet||2000).toLocaleString()}코인을 더 보태면 시즌 한정 펫 ❄️ 얼음 요정이 우리 집에 와요.`}];
   if(seen) for(let t = sb+1; t <= now.by; t++) if(BYMAIL[t]) items.push(BYMAIL[t]);
   if(seen || now.state==='open') mailAdd(items);
 }
 document.getElementById('winterBox').addEventListener('click', e=>{
+  const pk = e.target.closest('[data-wpick]');
+  if(pk) return act(async()=>{ const k = pk.dataset.wpick, v = WINTER_PICKS[k];
+    if(!(await ask(`🎁 「${v.ic} ${v.name}」${jo(v.name,'을','를')} 고를까요?\n(${v.sub}) · 고르면 바꿀 수 없어요!`))) return;
+    await api.winterPick(k); await Promise.all([refreshWinter(), refreshMine()]);
+    if(k==='lotto' && typeof refreshLotto==='function') refreshLotto().then(()=>{ try{ renderLotto(); }catch(e){} });
+    renderTop(); renderWinter(); renderMyHouse();
+    petParty(v.ic, k==='lotto' ? '🎟️ 이제 복권을 하루 8장 긁을 수 있어요! (영구)' : k==='room' ? '🚪 방 반값 쿠폰을 받았어요!\n우리 집에서 방을 늘릴 때 반값으로 늘어나요 (1회).' : '🌱 텃밭이 한 칸 늘었어요! (영구)\n마당 화단에서 꽃을 하나 더 심을 수 있어요.'); });
   const g = e.target.closest('[data-wgive]'); if(!g) return;
   let n = g.dataset.wgive==='custom' ? parseInt(document.getElementById('wgiveCustom').value,10) : +g.dataset.wgive;
   if(!(n>=1)) return toast('1코인 이상 적어 주세요');
@@ -7942,9 +8026,8 @@ document.getElementById('winterBox').addEventListener('click', e=>{
     if(fresh.length) await refreshMine();
     renderTop(); renderWinter(); renderPets(); winterMailCheck();
     if(fresh.length){
-      const L = {lotto:`🎟️ 복권을 이제 하루 ${(WINTER.need||{}).lotto_bonus||3}장 더 긁을 수 있어요! (영구)`, plate:'❄️ 눈꽃 이름표를 받았어요! 집 겉모습 꾸미기에서 바꿔 끼울 수 있어요.', style:'⛄ 26 겨울 집을 받았어요! 집 겉모습 꾸미기에서 입을 수 있어요.\n(마을이 연 크기의 집부터 입혀져요)', pet:'❄️ 얼음 요정이 우리 집에 왔어요! 시즌 한정 친구예요.'};
-      if(fresh.includes('lotto') && typeof refreshLotto==='function') refreshLotto().then(()=>{ try{ renderLotto(); }catch(e){} });
-      petParty(fresh.includes('pet')?'❄️':fresh.includes('lotto')?'🎟️':'⛄', fresh.map(k=>L[k]).join('\n\n'));
+      const L = {choice:'🎁 골라 받기 자격을 얻었어요! 행사판에서 복권 +3장 · 방 반값 쿠폰 · 텃밭 +1칸 중 하나를 골라 주세요.', plate:'❄️ 눈꽃 이름표를 받았어요! 집 겉모습 꾸미기에서 바꿔 끼울 수 있어요.', style:'⛄ 26 겨울 집을 받았어요! 집 겉모습 꾸미기에서 입을 수 있어요.\n(마을이 연 크기의 집부터 입혀져요)', pet:'❄️ 얼음 요정이 우리 집에 왔어요! 시즌 한정 친구예요.'};
+      petParty(fresh.includes('pet')?'❄️':fresh.includes('choice')?'🎁':'⛄', fresh.map(k=>L[k]).join('\n\n'));
     } else toast(`❄️ 눈송이 ${n.toLocaleString()}개를 보탰어요!`);
   });
 });
@@ -8446,8 +8529,8 @@ document.addEventListener('click', e=>{
 
   const ar = e.target.closest('[data-addroom]');
   if(ar) return act(async()=>{
-    const n = myRooms().length, price = ROOM_PRICE(n);
-    const name = await askText(`방을 하나 더 만들까요? 🪙 ${price.toLocaleString()}코인이 들어요.\n새 방 이름을 지어 주세요.`, ROOM_NAMES[n] || `방 ${n+1}`);
+    const n = myRooms().length, price = roomPriceMe(n);
+    const name = await askText(`방을 하나 더 만들까요? 🪙 ${price.toLocaleString()}코인이 들어요.${ME.room_coupon>0?' (🚪 반값 쿠폰을 써요)':''}\n새 방 이름을 지어 주세요.`, ROOM_NAMES[n] || `방 ${n+1}`);
     if(name==null) return;
     await api.addRoom(name); await refreshMine();
     curRoom = myRooms().length-1; try{ localStorage.setItem('majam-room', curRoom); }catch(e){}
@@ -9390,6 +9473,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㉘</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㉚</p>
 </body>
 </html>
