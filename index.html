@@ -1961,7 +1961,12 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .visit .room .furn.acc-small > .fsvg,.visit .room .furn.acc-small > .emo,.visit .room .furn.acc-small > img{transform:scale(var(--acc-s,.72));transform-origin:50% 92%}
 
 /* ⚔️ 이번 주 괴물 토벌 (10-21) */
-.boss-panel{overflow:hidden}
+.boss-panel{overflow:hidden;position:relative}
+.boss-q{position:absolute;top:.7rem;right:.7rem;z-index:3;width:1.9rem;height:1.9rem;border-radius:50%;border:1px solid rgba(190,160,255,.6);background:rgba(255,255,255,.1);color:inherit;font:700 1rem/1 inherit;cursor:pointer;display:grid;place-items:center}
+.boss-q:hover{background:rgba(190,160,255,.3)}
+.boss-head{padding-right:2.4rem}
+.boss-lv{display:inline-block;padding:.05rem .5rem;border-radius:999px;font-size:.85em;background:linear-gradient(90deg,#FFE28A,#FFB86B);color:#4A2A00;vertical-align:.08em}
+.boss-coll{margin-top:1rem}.boss-coll .boss-dex{margin-top:.6rem}
 .boss-head{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem}.boss-head h3{margin:0}
 .boss-scene{position:relative;border-radius:16px;padding:.7rem .8rem .5rem;background:radial-gradient(ellipse 70% 55% at 50% 100%,rgba(255,170,70,.22),transparent 70%),linear-gradient(#232A52,#18203F 70%,#2C3B2E);border:1px solid rgba(255,215,120,.22)}
 .boss-hp{display:flex;align-items:center;gap:.6rem;max-width:520px;margin:0 auto}
@@ -2392,15 +2397,15 @@ document.documentElement.setAttribute('data-mode', modeNow());
     <div class="isekai-head">
       <h2>🌀 이세계</h2>
       <p>숲 너머 균열 저편, 원고를 막는 괴물들이 사는 곳이에요. 작업실 불빛을 모아 온 작가님만 이 문을 건널 수 있어요.</p>
-      <button class="mini isk-guide-btn" type="button" data-iskguide>📖 이세계 안내서</button>
     </div>
     <div class="boss-panel" id="bossBox" hidden></div>
     <div class="isekai-empty" id="isekaiEmpty">
       <div class="portal-mini" aria-hidden="true"></div>
       <p>균열이 아직 조용해요.<br><span class="small">곧 이세계 괴물이 넘어올 거예요…</span></p>
     </div>
-    <div class="rift" id="riftBox" hidden></div>
     <div class="void" id="voidBox" hidden></div>
+    <div class="rift" id="riftBox" hidden></div>
+    <div class="boss-panel boss-coll" id="bossColl" hidden></div>
   </section>
 
   <section id="tab-lotto" hidden>
@@ -4345,7 +4350,7 @@ const demoApi = (() => {
       if(!n) fail('바꿀 수 있는 겹친 수집품이 없어요');
       if(kind==='coin') st.me.coins += BOSS_TRADE_COIN*n; else B.tickets += n;
       persist(); return {kind, n, coins:st.me.coins, tickets:B.tickets}; },
-    async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, my_hits:B.hits||0, reward_hits:BOSS_REWARD_HITS, my_coins:B.coins||0, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
+    async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, my_hits:B.lvHits||0, week_hits:B.hits||0, reward_hits:BOSS_REWARD_HITS, lv:B.lv||1, lv_coin:BOSS_LV_COIN, lv_shards:BOSS_LV_SHARDS, my_coins:B.coins||0, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
     async bossHit(code, n){
       const B = this.bossState(), w = weaponOf(code), m = monsterOf(B.monster);
       if(B.dmg>=B.max_hp) fail('이번 주 괴물은 벌써 쓰러졌어요');
@@ -4353,17 +4358,19 @@ const demoApi = (() => {
       n = Math.min(n|0, B.tickets); if(n<1) fail('공격권이 없어요');
       const each = weaponDmg(w, m); let used = 0, dealt = 0;
       while(used<n && B.dmg<B.max_hp){ used++; const d = Math.min(each, B.max_hp-B.dmg); B.dmg += d; dealt += d; }
-      B.tickets -= used; B.my += dealt; B.hits = (B.hits||0) + used; B.att.add('me');
+      B.tickets -= used; B.my += dealt; B.hits = (B.hits||0) + used; B.lvHits = (B.lvHits||0) + used; B.att.add('me');
       st.bitems = st.bitems || {}; const set = (BOSS_ITEMS[m.code]||[]).map(r=>r[0]), drops = [];
       const give = fresh => { if(!set.length) return null; const pool = fresh && set.some(c=>!st.bitems[c]) ? set.filter(c=>!st.bitems[c]) : set; const c = pool[Math.floor(Math.random()*pool.length)]; st.bitems[c] = (st.bitems[c]||0)+1; return c; };
       for(let k=0;k<used;k++) if(Math.random()<BOSS_DROP){ const c = give(false); if(c) drops.push(c); }
       let coins = 0, lucky = 0;
       for(let k=0;k<used;k++){ if(Math.random()<BOSS_LUCKY){ coins += BOSS_LUCKY_COIN; lucky++; } else coins += BOSS_HIT_COIN[0] + Math.floor(Math.random()*(BOSS_HIT_COIN[1]-BOSS_HIT_COIN[0]+1)); }
       st.me.coins += coins; B.coins = (B.coins||0) + coins;
-      const down = B.dmg>=B.max_hp, rewarded = (B.hits||0) >= BOSS_REWARD_HITS; let kill_item = null; if(down && rewarded) kill_item = give(true);
-      if(down){ B.tickets = 0; B.fuel = 0; } if(down && rewarded){ if(!B.dex.includes(m.code)) B.dex.push(m.code); st.me.coins += BOSS_REWARD; st.gifts.push({id:Date.now(), amount:BOSS_REWARD, reason:`⚔️ ${m.name} 토벌`}); persist(); }
+      const down = B.dmg>=B.max_hp, L = B.lv||1, myLv = B.lvHits||0, rewarded = myLv >= BOSS_REWARD_HITS; let kill_item = null; if(down && rewarded && L===1) kill_item = give(true);
+      if(down && rewarded && L>1){ st.me.coins += BOSS_LV_COIN; this.iskState().shards += BOSS_LV_SHARDS; st.gifts.push({id:Date.now(), amount:BOSS_LV_COIN, reason:`⭐ Lv.${L} ${m.name} 토벌`}); }
+      if(down && rewarded && L===1){ if(!B.dex.includes(m.code)) B.dex.push(m.code); st.me.coins += BOSS_REWARD; st.gifts.push({id:Date.now(), amount:BOSS_REWARD, reason:`⚔️ ${m.name} 토벌`}); persist(); }
       const isekai = this.iskHit(used, B.max_hp-B.dmg);
-      persist(); return {each, used, dealt, hp:B.max_hp-B.dmg, down, drops, kill_item, coins, lucky, isekai, my_hits:B.hits, reward_hits:BOSS_REWARD_HITS};
+      let next_hp = null; if(down){ B.base = B.base || B.max_hp; B.lv = L + 1; next_hp = Math.round(B.base * (1 + BOSS_LV_UP*L) / 100) * 100; B.max_hp = next_hp; B.dmg = 0; B.lvHits = 0; }
+      persist(); return {each, used, dealt, hp: down ? 0 : B.max_hp-B.dmg, down, drops, kill_item, coins, lucky, isekai, my_hits:myLv, reward_hits:BOSS_REWARD_HITS, got_reward:rewarded, lv:L, next_lv: down ? L+1 : null, next_hp, lv_coin:BOSS_LV_COIN, lv_shards:BOSS_LV_SHARDS};
     },
     // 🌀 균열 너머 (미리보기) — isekai.sql 과 같은 규칙
     iskState(){ if(!st.isk) st.isk = {open:false, shards:0, eggs:[], nid:1}; if(!st.isk.ev) st.isk.ev = []; if(!st.isk.gifts) st.isk.gifts = []; return st.isk; },
@@ -6101,7 +6108,8 @@ document.addEventListener('click', async e=>{
    무기는 누적 작업 시간(집이 커지는 시간)으로 열리고, 괴물마다 잘 듣는 무기가 있어요(2배).
    쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 + 괴물 도감 등록. 못 잡아도 잃는 건 없어요.
    공격권은 그 주에만 써요 (다음 주로 안 넘어가요). 첫 괴물은 10-22(목) 0시 ~ 10-30(금) 0시. */
-const BOSS_TICKET_FUEL = 60, BOSS_TICKET_MAX = 24, BOSS_REWARD = 2000, BOSS_WEAK = 2, BOSS_REWARD_HITS = 10;   // 토벌 보상은 이번 주 10번 이상 때린 주민만 (boss10.sql)
+const BOSS_TICKET_FUEL = 60, BOSS_TICKET_MAX = 24, BOSS_REWARD = 2000, BOSS_WEAK = 2, BOSS_REWARD_HITS = 10, BOSS_LV_COIN = 1000, BOSS_LV_SHARDS = 200, BOSS_LV_UP = .5;   // ⭐ 강화 괴물 (bosslv.sql)   // 토벌 보상은 이번 주 10번 이상 때린 주민만 (boss10.sql)
+const numJo = (n, a, b) => '2459'.includes(String(n).slice(-1)) ? b : a;   // 숫자 뒤 조사 (3을 · 2를)
 const bossNeed = () => (BOSS && BOSS.reward_hits) || BOSS_REWARD_HITS, bossMyHits = () => (BOSS && BOSS.my_hits) || 0;
 // 🪙 때릴 때마다 코인 (10-22): 5~20개 랜덤, BOSS_LUCKY 확률로 💰 50개 대박 — boss.sql 의 boss_hit 과 같아야 해요
 const BOSS_HIT_COIN = [5, 20], BOSS_LUCKY = .05, BOSS_LUCKY_COIN = 50;
@@ -6216,10 +6224,10 @@ function renderBoss(force){
   const box = document.getElementById('bossBox'); if(!box) return;
   bossBadge(); renderRift();
   { const em = document.getElementById('isekaiEmpty'); if(em) em.hidden = !!(BOSS && ME); }
-  if(!BOSS || !ME){ box.hidden = true; box.innerHTML = ''; box._html = ''; return; }
+  if(!BOSS || !ME){ box.hidden = true; box.innerHTML = ''; box._html = ''; const cb = document.getElementById('bossColl'); if(cb){ cb.hidden = true; cb.innerHTML = ''; cb._html = ''; } return; }
   if(!force && Date.now() < BOSS_ANIM_UNTIL) return;
   box.hidden = false;
-  const m = monsterOf(BOSS.monster), down = BOSS.hp <= 0, pct = Math.max(0, BOSS.hp/BOSS.max_hp*100);
+  const m = monsterOf(BOSS.monster), down = BOSS.hp <= 0, pct = Math.max(0, BOSS.hp/BOSS.max_hp*100), lv = BOSS.lv || 1;
   // 🌀 균열 오픈 예고 — 아직 안 열렸고(RIFT.open false) 피가 1만 위일 때만
   const riftWait = !!(RIFT && RIFT.open===false) && !down && BOSS.max_hp > RIFT_OPEN_HP && BOSS.hp > RIFT_OPEN_HP;
   const riftGap = BOSS.hp - RIFT_OPEN_HP;
@@ -6236,7 +6244,8 @@ function renderBoss(force){
   const weakW = weaponOf(m.weak), knowWeak = weaponOpen(weakW, mins) || peek();
   const dex = new Set(BOSS.dex||[]);
   const html = `
-    <div class="boss-head"><h3>⚔️ 이번 주 괴물 · ${esc(m.name)}</h3><span class="small">${down ? '다음 괴물은 금요일 0시에 와요' : `${dd?`${dd}일 `:''}${hh}시간 뒤에 떠나요 · 공격권은 이번 주에만 쓸 수 있어요`}</span></div>
+    <button class="boss-q" type="button" data-iskguide title="이세계 안내서" aria-label="이세계 안내서">?</button>
+    <div class="boss-head"><h3>⚔️ 이번 주 괴물 · ${lv>1?`<span class="boss-lv">⭐ Lv.${lv}</span> `:''}${esc(m.name)}</h3><span class="small">${down ? '다음 괴물은 금요일 0시에 와요' : `${dd?`${dd}일 `:''}${hh}시간 뒤에 떠나요 · 공격권은 이번 주에만 쓸 수 있어요`}</span></div>
     <div class="boss-scene ${down?'down':''} ${riftLv?'rift-lv'+riftLv:''}">
       <div class="boss-hp"><div class="bar"><span style="width:${pct.toFixed(1)}%"></span>${riftWait?`<i class="rift-tick" style="left:${(RIFT_OPEN_HP/BOSS.max_hp*100).toFixed(1)}%" title="여기까지 깎으면… ？"></i>`:''}</div><span class="small">❤️ ${Math.max(0,BOSS.hp).toLocaleString()} / ${BOSS.max_hp.toLocaleString()}</span></div>
       <div class="boss-stage">
@@ -6258,13 +6267,17 @@ function renderBoss(force){
         <button class="pull ten" type="button" data-bosshit="all" ${t<2?'disabled':''}>${w.emoji} 공격권 ${t}장 다 쓰기</button>
       </div>
       <p class="small boss-coinrule">🪙 한 번 때릴 때마다 코인 ${BOSS_HIT_COIN[0]}~${BOSS_HIT_COIN[1]}개 · 가끔 💰 ${BOSS_LUCKY_COIN}개 대박!</p>
-      <p class="small" style="margin:.5rem 0 0">이번 주 내가 준 피해 ${(BOSS.my_damage||0).toLocaleString()} · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · ${BOSS.attackers||0}명이 함께 싸우는 중 · 쓰러뜨리면 <b>${bossNeed()}번 이상</b> 때린 주민 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 등록 · ${bossMyHits()>=bossNeed() ? `✅ 나는 ${bossMyHits()}번, 보상 확정!` : `나는 지금 ${bossMyHits()}/${bossNeed()}번`}</p>
+      <p class="small" style="margin:.5rem 0 0">이번 주 내가 준 피해 ${(BOSS.my_damage||0).toLocaleString()} · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · ${BOSS.attackers||0}명이 함께 싸우는 중</p>
+      <p class="small boss-reward">${lv>1 ? `⭐ Lv.${lv}${numJo(lv,'을','를')} 쓰러뜨리면 <b>이번 레벨에서 ${bossNeed()}번 이상</b> 때린 주민 모두 🪙 ${(BOSS.lv_coin||BOSS_LV_COIN).toLocaleString()} + 💠 ${BOSS.lv_shards||BOSS_LV_SHARDS}` : `쓰러뜨리면 <b>${bossNeed()}번 이상</b> 때린 주민 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 등록`} · ${bossMyHits()>=bossNeed() ? `✅ 나는 ${bossMyHits()}번, 보상 확정!` : `나는 지금 ${bossMyHits()}/${bossNeed()}번`}<br>⭐ 쓰러뜨리면 더 강해진 Lv.${lv+1}${numJo(lv+1,'이','가')} 바로 다시 나타나요 (체력 ↑) · 공격권은 그대로 이어서 써요</p>
     </div>`}
-    ${bossItemsHTML(m)}
+    `;
+  const coll = `${bossItemsHTML(m)}
     <details class="boss-dex"><summary>📖 괴물 도감 <span class="small">${dex.size} / ${MONSTERS.length}</span></summary>
       <div class="bdex">${MONSTERS.map(x=>dex.has(x.code)||peek()
         ? `<div class="bdx ${dex.has(x.code)?'':'peek'}"><span class="bart">${monsterArt(x)}</span><b>${esc(x.name)}</b><span class="small">${dex.has(x.code)?'쓰러뜨렸어요!':'👁️ 아직 못 잡았어요'}</span></div>`
         : `<div class="bdx no"><span class="bart q">？</span><b>???</b><span class="small">아직 못 잡았어요</span></div>`).join('')}</div></details>`;
+  const cb = document.getElementById('bossColl');
+  if(cb){ cb.hidden = false; if(cb._html !== coll){ cb._html = coll; cb.innerHTML = coll; } }
   if(box._html === html) return; box._html = html; box.innerHTML = html;
 }
 function bossItemsHTML(m){
@@ -6351,8 +6364,11 @@ async function bossAttack(n){
       setTimeout(()=>bossItemShow(c, isNew, q, got.length>1 ? `${m.name}${jo(m.name,'이','가')} 수집품 ${got.length}개를 떨어뜨렸어요! (마지막 것)` : `${m.name}${jo(m.name,'이','가')} 떨어뜨렸어요!`), x.down ? 2600 : 1250); }
     if(x && x.down){
       await refreshMine(); renderTop(); renderBag();
-      setTimeout(()=>{ showGifts(); { const need = x.reward_hits || BOSS_REWARD_HITS, mine = x.my_hits ?? need;
-        petParty('⚔️', `「${m.name}」${jo(m.name,'을','를')} 쓰러뜨렸어요!\n막타는 ${ME.display_name||'나'}님이에요 🎉\n\n이번 주 ${need}번 이상 때린 주민 모두에게 🪙 ${BOSS_REWARD.toLocaleString()}와\n수집품 하나씩이 가요!` + (mine < need ? `\n\n(나는 ${mine}번이라 이번 토벌 보상은 아쉽게 못 받았어요)` : '')); } }, 1350);
+      setTimeout(()=>{ showGifts(); { const need = x.reward_hits || BOSS_REWARD_HITS, mine = x.my_hits ?? need, L = x.lv || 1, N = x.next_lv || (L+1), ga = numJo(N, '이', '가');
+        const head = L>1 ? `⭐ 강화된 「Lv.${L} ${m.name}」${jo(m.name,'을','를')} 쓰러뜨렸어요!` : `「${m.name}」${jo(m.name,'을','를')} 쓰러뜨렸어요!`;
+        const prize = L>1 ? `이번 레벨에서 ${need}번 이상 때린 주민 모두에게\n🪙 ${(x.lv_coin||BOSS_LV_COIN).toLocaleString()} + 💠 ${x.lv_shards||BOSS_LV_SHARDS}가 가요!` : `이번 주 ${need}번 이상 때린 주민 모두에게 🪙 ${BOSS_REWARD.toLocaleString()}과\n수집품 하나씩이 가요!`;
+        petParty(L>1 ? '⭐' : '⚔️', `${head}\n막타는 ${ME.display_name||'나'}님이에요 🎉\n\n${prize}` + (mine < need ? `\n\n(나는 이번 레벨에서 ${mine}번이라 토벌 보상은 아쉽게 못 받았어요)` : '')
+          + `\n\n그런데… 더 강해진 ⭐ Lv.${N}${ga} 나타났어요!\n남은 공격권으로 계속 싸울 수 있어요.`); } }, 1350);
     } else if(cnt>1) toast(`${w.emoji} ${x.used||cnt}번 때렸어요! 피해 ${(x.dealt||0).toLocaleString()} · 🪙 ${x.coins||0}${x.lucky?` (💰 대박 ${x.lucky}번!)`:''}${x.isekai && x.isekai.shards ? ` · 💠 ${x.isekai.shards}` : ''}`);
     else if(x.lucky) toast(`💰 대박! 코인 ${x.coins}개가 쏟아졌어요`);
   }catch(err){ toast(err.message || '때리지 못했어요'); await refreshBoss(); renderBoss(true); }
@@ -6977,7 +6993,10 @@ const ISK_GUIDE = [
     <ul><li>매주 금요일 0시에 새 괴물이 와요. 마을이 다 같이 체력을 깎아요.</li>
     <li>작업실에 1시간 있으면 🎫 공격권 1장. 무기를 골라 직접 때려요. 약점 무기는 피해가 ${BOSS_WEAK}배예요.</li>
     <li>때릴 때마다 🪙 ${BOSS_HIT_COIN[0]}~${BOSS_HIT_COIN[1]} (가끔 💰 ${BOSS_LUCKY_COIN}), ${Math.round(BOSS_DROP*100)}% 확률로 괴물 수집품.</li>
-    <li>쓰러뜨리면 <b>이번 주 ${BOSS_REWARD_HITS}번 이상 때린 주민</b> 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 + 수집품 하나.</li></ul>`},
+    <li>쓰러뜨리면 <b>${BOSS_REWARD_HITS}번 이상 때린 주민</b> 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 + 수집품 하나.</li>
+    <li>⭐ 쓰러뜨리면 더 강해진 같은 괴물(Lv.2, 3 …)이 바로 다시 나타나요. 레벨마다 체력이 늘어요. 금요일 0시에 새 괴물은 Lv.1부터.</li>
+    <li>⭐ 강화판을 쓰러뜨리면 <b>그 레벨에서 ${BOSS_REWARD_HITS}번 이상</b> 때린 주민 모두 🪙 ${BOSS_LV_COIN.toLocaleString()} + 💠 ${BOSS_LV_SHARDS}.</li>
+    <li>🎫 공격권은 괴물이 쓰러져도 사라지지 않고 이어서 써요. (다음 주로는 안 넘어가요)</li></ul>`},
   {k:'rift', t:'🌀 균열 · 파편', h:()=>`<h4>🌀 균열과 💠 이세계 파편</h4>
     <ul><li>괴물 체력이 처음으로 ${RIFT_OPEN_HP.toLocaleString()} 아래로 내려가면 숲 너머 균열이 열려요. 한 번 열리면 계속 열려 있어요.</li>
     <li>그때부터 한 대 때릴 때마다 💠 파편 10~40개, ${Math.round(RIFT_BIG_P*100)}% 확률로 💎 100개 대박.</li>
@@ -9711,6 +9730,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㊳</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㊴</p>
 </body>
 </html>
