@@ -2205,7 +2205,8 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .vcard .vart{height:78px;width:100%;display:flex;align-items:center;justify-content:center}
 .vcard .vart img{max-height:78px;max-width:100%;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))}
 .vcard .vart .emo{font-size:2.4rem}
-.vcard.locked .vart img{filter:brightness(0) opacity(.35)}.vcard.locked .vart .emo{filter:grayscale(1) brightness(.2);opacity:.5}
+.vcard.locked .vart img{filter:grayscale(.6) opacity(.55)}
+.vcard .vart .rq{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;font:700 1.8rem/1 "Jua",sans-serif;color:#E3CCFF;background:radial-gradient(circle,rgba(160,110,255,.35),rgba(40,20,90,.5));border:2px dashed rgba(200,170,255,.6);text-shadow:0 0 10px #A887EC;animation:rqglow 3s ease-in-out infinite alternate}.vcard.locked .vart .emo{filter:grayscale(1) brightness(.2);opacity:.5}
 .vcard .nm{font-size:.78rem;line-height:1.25;font-weight:700}
 .vcard .lockt{opacity:.75}
 .vset{margin:.1rem 0 .5rem;text-align:center}
@@ -6068,9 +6069,9 @@ function voidCraftHTML(V){
   const cards = list.map(f=>{ const own = bps.has(f.code), n = (V.vinv||{})[f.code]||0, onfloor = (V.items||[]).filter(x=>x.item_code===f.code).length;
     const maxed = f.max_own && (n + onfloor) >= f.max_own;
     return `<div class="vcard ${own?'':'locked'}">
-      <div class="vart">${VFURN_ART.has(f.code) ? `<img src="furn/${f.code}.webp" alt="" loading="lazy" draggable="false">` : `<span class="emo">${f.emoji}</span>`}</div>
-      <div class="nm">${own ? esc(f.name) : '？？？'}</div>
-      <div class="sz small">${f.w}×${f.h}칸${f.layer==='floor'?' · 바닥':''}${f.max_own?` · ${f.max_own}개만`:''}${n?` · 창고 ${n}`:''}</div>
+      <div class="vart">${!own && !peek() ? `<span class="rq">？</span>` : VFURN_ART.has(f.code) ? `<img src="furn/${f.code}.webp" alt="" loading="lazy" draggable="false">` : `<span class="emo">${f.emoji}</span>`}</div>
+      <div class="nm">${own ? esc(f.name) : peek() ? '👁️ '+esc(f.name) : '？？？'}</div>
+      ${own || peek() ? `<div class="sz small">${f.w}×${f.h}칸${f.layer==='floor'?' · 바닥':''}${f.max_own?` · ${f.max_own}개만`:''}${n?` · 창고 ${n}`:''}</div>` : ''}
       ${own ? `<button class="mini ask-yes" type="button" data-vcraft="${f.code}" ${maxed||shards<f.price?'disabled':''}>${maxed?'다 만들었어요':`🔨 만들기 · 💠 ${f.price}`}</button>` : `<span class="small lockt">📜 도안이 아직 없어요</span>`}
     </div>`; }).join('');
   const b = VOID_BGS[vcraftTab] || {emoji:'🔮', name:vcraftTab};
@@ -8422,7 +8423,7 @@ function renderVisit(){
   room.parentElement.hidden = outside; vg.hidden = !outside;
   if(VISIT.room==='v' && VISIT.void){
     const V = VISIT.void, b = VOID_BGS[V.bg] || VOID_BGS.base; if(V.catalog) setVCAT(V.catalog);
-    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸</span></h4><div class="void-stage" style="--vbg:${voidBgCSS(V.bg)}">${voidFxHTML(V.fx)}${voidSetFxHTML(V.sets)}${voidRoomHTML(V, false)}</div>`
+    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸${isMe(p) && !V.public ? ' · 🔒 비공개라 나만 보여요' : ''}</span></h4><div class="void-stage" style="--vbg:${voidBgCSS(V.bg)}">${voidFxHTML(V.fx)}${voidSetFxHTML(V.sets)}${voidRoomHTML(V, false)}</div>`
       + `<h4 class="tank-title farm-title">🐾 마물 농장 <span class="small">${(V.farm_pets||[]).length}종</span></h4>${voidFarmHTML(V, false)}`;
     startFarm(vg.querySelector('.vfarm'));
   }
@@ -8946,6 +8947,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㊸</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㊺</p>
 </body>
 </html>
