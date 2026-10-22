@@ -1903,11 +1903,12 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 .lot.memorial .b{font-size:1.9rem;filter:drop-shadow(0 0 8px rgba(190,222,255,.8))}
 .lot.memorial .n,.lot.memorial .s{text-shadow:0 1px 4px rgba(0,0,0,.7);color:#fff}
 dialog.mem-dlg{max-width:min(94vw,760px);width:100%}
-.mem-stage{position:relative;width:100%;aspect-ratio:1920/1072;border-radius:14px;overflow:hidden;background:url(plaza/memorial_night.webp) center/cover no-repeat,#1C2448}
+.mem-stage{position:relative;width:100%;aspect-ratio:1920/1072;container-type:inline-size;border-radius:14px;overflow:hidden;background:url(plaza/memorial_night.webp) center/cover no-repeat,#1C2448}
 :root[data-mode="day"] .mem-stage{background:url(plaza/memorial_day.webp) center/cover no-repeat,#9FD3F0}
 .mem-spot{position:absolute;transform:translate(-50%,0);bottom:var(--b);left:var(--x);display:flex;flex-direction:column;align-items:center;border:0;background:none;padding:0;cursor:pointer;color:#fff;font:inherit}
 .mem-spot .mon{font-size:var(--fs,4rem);line-height:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.35))}
-.mem-spot img.mon{width:var(--w,22%);height:auto}
+.mem-spot img.mon{width:var(--w,17cqw);height:auto;filter:drop-shadow(0 6px 6px rgba(0,0,0,.35))}
+.mem-spot.has-img{bottom:var(--ib)}.mem-spot.has-img .sign{position:absolute;top:100%;margin-top:.2rem}
 .mem-spot.empty{cursor:default}
 .mem-spot .q{font-family:"Jua",sans-serif;font-size:1.6rem;width:2.2em;height:2.2em;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.18);border:2px dashed rgba(255,255,255,.75);text-shadow:0 1px 4px rgba(0,0,0,.6);animation:rtick 2s ease-in-out infinite alternate}
 .mem-spot .sign{margin-top:.25rem;font-size:.72rem;padding:.1rem .5rem;border-radius:8px;background:rgba(30,24,16,.72);white-space:nowrap}
@@ -7974,9 +7975,9 @@ const plazaArt = b => PLAZA_IMG.has(b.code) ? `<img class="pimg" src="plaza/${b.
 function plazaBox(code){ return GACHA_BOXES.find(b=>b.unlock_by===code); }
 /* ---------- 🏛️ 기념 광장 (10-22) — 행사마다 기념물 하나씩 ---------- */
 // spot: c 가운데 큰 받침대 · l1 l2 r1 r2 작은 받침대 (그림 위 위치 %) · img 는 그림이 생기면 (없으면 emoji)
-const MEM_SPOTS = {c:{x:50.5, b:46.5, fs:'4.6rem'}, l1:{x:21.2, b:37.5, fs:'2.8rem'}, l2:{x:34.4, b:43, fs:'2.4rem'}, r2:{x:67.4, b:43, fs:'2.4rem'}, r1:{x:80.6, b:37.5, fs:'2.8rem'}};
+const MEM_SPOTS = {c:{x:50.5, b:46.5, ib:23.5, fs:'4.6rem'}, l1:{x:21.2, b:37.5, fs:'2.8rem'}, l2:{x:34.4, b:43, fs:'2.4rem'}, r2:{x:67.4, b:43, fs:'2.4rem'}, r1:{x:80.6, b:37.5, fs:'2.8rem'}};
 const MONUMENTS = [
-  {code:'winter26', spot:'c', emoji:'⛄', name:'26 겨울 눈사람', img:null, season:'❄️ 26 겨울', how:'겨울 행사 마을 100%',
+  {code:'winter26', spot:'c', emoji:'⛄', name:'26 겨울 눈사람', img:'plaza/mon_winter26.webp', season:'❄️ 26 겨울', how:'겨울 행사 마을 100%',
    done:()=> WINTER && WINTER.code==='winter26' && WINTER.monument_at ? {at:WINTER.monument_at, givers:WINTER.givers||0, total:WINTER.total||0} : null},
 ];
 function memorialLotHTML(){
@@ -7986,7 +7987,7 @@ function memorialLotHTML(){
 function renderMemorial(){
   const st = document.getElementById('memStage'), pl = document.getElementById('memPlaque'); if(!st) return;
   st.innerHTML = Object.entries(MEM_SPOTS).map(([k,sp])=>{ const m = MONUMENTS.find(x=>x.spot===k), d = m && (m.done() || (peek() ? {at:new Date().toISOString(), givers:0, total:0, peek:true} : null));
-    if(d) return `<button class="mem-spot" type="button" data-mon="${m.code}" style="--x:${sp.x}%;--b:${sp.b}%;--fs:${sp.fs}">${m.img?`<img class="mon" src="${m.img}" alt="">`:`<span class="mon">${m.emoji}</span>`}<span class="sign">${esc(m.season)}</span></button>`;
+    if(d) return `<button class="mem-spot ${m.img?'has-img':''}" type="button" data-mon="${m.code}" style="--x:${sp.x}%;--b:${sp.b}%;--ib:${sp.ib??sp.b}%;--fs:${sp.fs}">${m.img?`<img class="mon" src="${m.img}" alt="">`:`<span class="mon">${m.emoji}</span>`}<span class="sign">${esc(m.season)}</span></button>`;
     if(m) return `<span class="mem-spot empty" style="--x:${sp.x}%;--b:${sp.b}%"><span class="q">？</span><span class="sign">첫 기념물은 ${esc(m.how)}에서</span></span>`;
     return '';
   }).join('');
@@ -9629,6 +9630,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㉞</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㉟</p>
 </body>
 </html>
