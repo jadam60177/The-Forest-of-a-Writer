@@ -2063,6 +2063,45 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 :root[data-mode="day"] .rift .shards{color:#2F6FB8;text-shadow:none}
 :root[data-mode="day"] .regg{background:rgba(255,255,255,.6)}
 :root[data-mode="day"] .tree-egg{background:rgba(220,205,255,.7);color:#2A2350}
+/* 🔮 아공간 · 🐾 마물 농장 (10-22 void.sql) — 그림: void/base·heaven·hell·magic·fairy·farm.webp (없으면 그라데이션) */
+.void{margin-top:1rem;border-radius:16px;padding:.9rem 1rem 1rem;background:linear-gradient(160deg,rgba(40,20,90,.62),rgba(12,6,36,.86));border:1px solid rgba(190,160,255,.42)}
+.void-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.6rem}.void-head h3{margin:0}
+.void .shards{font-family:"Jua",sans-serif;font-size:1.05rem;color:#BFE8FF}
+.void h4{margin:1rem 0 .4rem;font-family:"Jua",sans-serif;font-weight:400}
+.void-door{text-align:center;padding:1.4rem .8rem;border-radius:16px;background:radial-gradient(ellipse at 50% 45%,#7B4FD0 0%,#2A1650 50%,#0E0824 100%);margin-top:.6rem}
+.void-door .portal{font-size:3rem;display:block;animation:vspin 6s linear infinite}
+@keyframes vspin{to{transform:rotate(360deg)}}
+.void-bar{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin:.6rem 0}
+.vbg{border-radius:999px;border:1px solid rgba(190,160,255,.45);background:rgba(255,255,255,.06);color:inherit;font:inherit;font-size:.8rem;padding:.2rem .7rem;cursor:pointer}
+.vbg.on{background:linear-gradient(#E3CCFF,#A887EC);color:#22113F;border-color:#EEDDFF}
+.vbg.lock{opacity:.78;border-style:dashed}
+.vbg.pub{margin-left:auto}
+.void-stage{position:relative;border-radius:16px;padding:1.4rem .6rem;background:var(--vbg);overflow-x:auto;box-shadow:inset 0 0 40px rgba(0,0,0,.35);transition:background .4s}
+.room.void-room{background:rgba(255,255,255,.07);border:2px solid rgba(228,210,255,.6);box-shadow:0 0 30px rgba(190,150,255,.4),inset 0 0 18px rgba(255,255,255,.14);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}
+.void-room .tile.a{background:rgba(255,255,255,.14)} .void-room .tile.b{background:rgba(255,255,255,.06)}
+.void-room .tile.pv-ok{outline:2px dashed #E3CCFF;background:rgba(227,204,255,.35)} .void-room .tile.pv-no{outline:2px dashed #FF8A7A;background:rgba(255,120,100,.3)}
+.void-room .furn.acc-small > .fsvg,.void-room .furn.acc-small > .emo,.void-room .furn.acc-small > img{transform:scale(var(--acc-s,.72));transform-origin:50% 92%}
+.void-room.view .furn{pointer-events:none}
+.void-room .furn[data-vpid]{cursor:pointer}
+.void-grow{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:center;margin:.6rem 0 .2rem}
+.void-hint{text-align:center;margin:.3rem 0;font-size:.85rem}
+.vbag-tabs{display:flex;gap:.3rem;flex-wrap:wrap;margin:.3rem 0}
+.vbag{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:.35rem;max-height:250px;overflow:auto;padding:.2rem}
+.vbag .item{padding:.3rem .15rem;font:inherit;cursor:pointer}
+.vbag .item .em{font-size:1.4rem}.vbag .item .em img.fimg{height:1.6rem}
+.vbag .item .t{font-size:.64rem;line-height:1.25}
+.vfarm{position:relative;width:100%;aspect-ratio:16/9;max-height:420px;border-radius:16px;overflow:hidden;background:var(--fbg)}
+.vfarm .vfp{position:absolute;width:calc(var(--s,1)*14%);max-width:150px;transform:translate(-50%,-100%);transition-property:left,top;transition-timing-function:ease-in-out}
+.vfarm .vfp img{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 4px rgba(0,0,0,.35));transition:transform .5s}
+.vfarm .vfp.flip img{transform:scaleX(-1)}
+.vfarm .vfp.walk img{animation:vfbob .45s ease-in-out infinite alternate}
+@keyframes vfbob{to{translate:0 -4%}}
+.vfarm .vfp .nm{display:block;text-align:center;font-size:.62rem;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9);white-space:nowrap}
+.vfarm-empty{position:absolute;left:0;right:0;bottom:1rem;text-align:center;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.85);padding:0 1rem}
+.vfarm-bar{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;justify-content:center;margin:.6rem 0 0}
+:root[data-mode="day"] .void{background:linear-gradient(160deg,rgba(238,228,255,.95),rgba(214,202,250,.95));color:#2A2350}
+:root[data-mode="day"] .void .shards{color:#2F6FB8}
+#visitGarden .void-stage{margin-top:.3rem}
 /* ☀️ 낮 이세계 (10-21 ⑱) — bg/isekai_day.webp */
 :root[data-mode="day"] #tab-isekai{color:#2A2350;background:radial-gradient(ellipse 70% 50% at 85% 10%,rgba(170,120,255,.35),transparent 70%),linear-gradient(#BFE6FF,#DCEBFF 45%,#E9DEFF);box-shadow:0 0 0 1px rgba(150,120,230,.35),0 14px 34px rgba(80,60,150,.18)}
 :root[data-mode="day"] #tab-isekai .isekai-sky{display:none}
@@ -2247,6 +2286,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <p>균열이 아직 조용해요.<br><span class="small">곧 이세계 괴물이 넘어올 거예요…</span></p>
     </div>
     <div class="rift" id="riftBox" hidden></div>
+    <div class="void" id="voidBox" hidden></div>
   </section>
 
   <section id="tab-lotto" hidden>
@@ -3597,8 +3637,8 @@ const demoApi = (() => {
       {id:1, discord_id:'dl', category:'건의', body:'담당자 대사에 \'수정고 부탁드려요\'도 넣어 주세요 ㅋㅋㅋ', created_at:new Date(Date.now()-86400e3).toISOString(), read:true, members:{display_name:'마감요정'}},
     ],
   };
-  try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; st.coll=new Set(s.coll||[]); st.cabs=s.cabs||{}; st.garden=s.garden||[]; st.gdex=s.gdex||{}; st.fdex=s.fdex||{}; st.fpend=s.fpend||[]; st.fpid=s.fpid||1; st.net=s.net||null; st.fday=s.fday||''; st.fused=s.fused||0; st.pt=s.pt||null; st.looks=s.looks||null; st.lotto=s.lotto||null; st.isk=s.isk||null; } }catch(e){}
-  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId, coll:[...st.coll], cabs:st.cabs, garden:st.garden, gdex:st.gdex, fdex:st.fdex, fpend:st.fpend, fpid:st.fpid, net:st.net, fday:st.fday, fused:st.fused, pt:st.pt, looks:st.looks, lotto:st.lotto, isk:st.isk})); }catch(e){} };
+  try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; st.coll=new Set(s.coll||[]); st.cabs=s.cabs||{}; st.garden=s.garden||[]; st.gdex=s.gdex||{}; st.fdex=s.fdex||{}; st.fpend=s.fpend||[]; st.fpid=s.fpid||1; st.net=s.net||null; st.fday=s.fday||''; st.fused=s.fused||0; st.pt=s.pt||null; st.looks=s.looks||null; st.lotto=s.lotto||null; st.isk=s.isk||null; st.vd=s.vd||null; } }catch(e){}
+  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId, coll:[...st.coll], cabs:st.cabs, garden:st.garden, gdex:st.gdex, fdex:st.fdex, fpend:st.fpend, fpid:st.fpid, net:st.net, fday:st.fday, fused:st.fused, pt:st.pt, looks:st.looks, lotto:st.lotto, isk:st.isk, vd:st.vd})); }catch(e){} };
   DEFAULT_SHOP.forEach(it=>{ if(it.unlock_by && st.plaza.find(b=>b.code===it.unlock_by && b.built_at)) it.active=true; });
   const item = code => DEFAULT_SHOP.find(s=>s.code===code);
   const fail = msg => { throw new Error(msg); };
@@ -4186,6 +4226,27 @@ const demoApi = (() => {
     },
     // 🌀 균열 너머 (미리보기) — isekai.sql 과 같은 규칙
     iskState(){ if(!st.isk) st.isk = {open:false, shards:0, eggs:[], nid:1}; if(!st.isk.ev) st.isk.ev = []; if(!st.isk.gifts) st.isk.gifts = []; return st.isk; },
+    // 🔮 아공간 (미리보기)
+    vdJson(){ const V = st.vd, P = this.pstate(), I = this.iskState(); if(!V) return {open:false, price:VOID_OPEN_PRICE, shards:I.shards};
+      const farm_pets = [...new Set(P.pets.filter(p=>/^isk_/.test(p.code)).map(p=>p.code))].sort();
+      return {open:true, cols:V.cols, rows:V.rows, bg:V.bg, bgs:[...V.bgs], public:V.pub, items:V.items.map(x=>({...x})), farm_pets, farm_at:V.farm_at, farm_rate:VOID_FARM_RATE, farm_cap:VOID_FARM_CAP,
+        max_cols:VOID_MAX_C, max_rows:VOID_MAX_R, grow_price:V.cols*V.rows*10, bg_price:VOID_BG_PRICE}; },
+    vdPay(n){ const I = this.iskState(); if(I.shards < n) fail(`💠 이세계 파편이 모자라요 (💠 ${n}개 필요)`); I.shards -= n; },
+    async void(){ return this.vdJson(); },
+    async voidOf(id){ return id==='me' && st.vd ? this.vdJson() : null; },
+    async voidOpen(){ if(st.vd) fail('이미 아공간이 있어요'); this.vdPay(VOID_OPEN_PRICE); st.vd = {cols:4, rows:4, bg:'base', bgs:['base'], pub:false, items:[], nid:1, farm_at:new Date().toISOString()}; persist(); return this.vdJson(); },
+    async voidGrow(dir){ const V = st.vd; if(!V) fail('먼저 아공간 문을 열어 주세요');
+      if(dir==='col' ? V.cols>=VOID_MAX_C : V.rows>=VOID_MAX_R) fail('더 넓힐 수 없어요'); this.vdPay(V.cols*V.rows*10); if(dir==='col') V.cols++; else V.rows++; persist(); return this.vdJson(); },
+    async voidBg(bg){ const V = st.vd; if(!(bg in VOID_BGS)) fail('없는 배경이에요'); if(!V.bgs.includes(bg)){ this.vdPay(VOID_BG_PRICE); V.bgs.push(bg); } V.bg = bg; persist(); return this.vdJson(); },
+    async voidPublic(on){ st.vd.pub = !!on; persist(); return this.vdJson(); },
+    async voidPlace(code, r, c, rot, w, h, layer){ const V = st.vd; if(!(st.inv[code]>0)) fail('가방에 없는 가구예요');
+      if(r<0||c<0||c+w>V.cols||r+h>V.rows) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
+      const ly = layer==='floor' ? 'floor' : 'furniture';
+      if(V.items.some(f=>f.layer===ly && r<f.r+f.h && f.r<r+h && c<f.c+f.w && f.c<c+w)) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
+      st.inv[code]--; V.items.push({id:V.nid++, item_code:code, r, c, w, h, rot:rot||0, layer:ly}); persist(); return this.vdJson(); },
+    async voidRemove(id){ const V = st.vd, f = V.items.find(x=>x.id===id); if(!f) fail('내 가구가 아니에요'); V.items = V.items.filter(x=>x!==f); st.inv[f.item_code] = (st.inv[f.item_code]||0)+1; persist(); return this.vdJson(); },
+    async voidCollect(){ const j = this.vdJson(), n = j.farm_pets.length; if(!n) fail('농장에서 놀 이세계 마물이 아직 없어요. 알을 부화시켜 보세요');
+      const gain = voidFarmReady(j) || n*6;   /* 미리보기는 바로 받아 볼 수 있게 */ const I = this.iskState(); I.shards += gain; st.vd.farm_at = new Date().toISOString(); persist(); return {gain, shards:I.shards, pets:n}; },
     iskMult(){ const n = Date.now(); return Math.max(1, ...this.iskState().ev.filter(e=>Date.parse(e.starts_at)<=n && Date.parse(e.ends_at)>n).map(e=>e.mult)); },
     async adminShards(id, amount, reason){ const I = this.iskState(); if(!(amount>=1)) fail('파편 개수를 적어 주세요');
       if(!id || id==='*' || id==='me'){ I.shards += amount; I.gifts.push({amount, reason, at:new Date().toISOString()}); }
@@ -4414,6 +4475,16 @@ const supaApi = (() => {
     async rift(){ const r = await sb.rpc('get_isekai'); if(r.error) return null; return Array.isArray(r.data) ? r.data[0] : r.data; },
     async riftSetEgg(id){ return ok(await sb.rpc('isekai_set_egg', {p_egg:id})); },
     async riftHatch(id){ return ok(await sb.rpc('isekai_hatch', {p_egg:id})); },
+    // 🔮 아공간 (void.sql) — 아직 안 돌렸으면 null 이라 화면에 안 보여요
+    async void(){ const r = await sb.rpc('get_void'); if(r.error) return null; return Array.isArray(r.data) ? r.data[0] : r.data; },
+    async voidOf(id){ const r = await sb.rpc('get_void_of', {p_discord_id:id}); if(r.error) return null; return Array.isArray(r.data) ? r.data[0] : r.data; },
+    async voidOpen(){ return ok(await sb.rpc('void_open')); },
+    async voidGrow(dir){ return ok(await sb.rpc('void_grow', {p_dir:dir})); },
+    async voidBg(bg){ return ok(await sb.rpc('void_bg', {p_bg:bg})); },
+    async voidPublic(on){ return ok(await sb.rpc('void_set_public', {p_on:!!on})); },
+    async voidPlace(code, r, c, rot, w, h, layer){ return ok(await sb.rpc('void_place', {p_code:code, p_r:r, p_c:c, p_rot:rot||0, p_w:w, p_h:h, p_layer:layer})); },
+    async voidRemove(id){ return ok(await sb.rpc('void_remove', {p_id:id})); },
+    async voidCollect(){ return ok(await sb.rpc('void_farm_collect')); },
     async adminShards(id, amount, reason){ return ok(await sb.rpc('admin_isekai_give', {p_discord_id:id, p_amount:amount, p_reason:reason})); },
     async shardEventAdd(name, mult, start, end){ return ok(await sb.rpc('admin_isekai_event_add', {p_name:name, p_mult:mult, p_start:start, p_end:end})); },
     async shardEventDel(id){ ok(await sb.rpc('admin_isekai_event_delete', {p_id:id})); },              // ⚔️ 이번 주 괴물 (boss.sql)
@@ -4628,7 +4699,7 @@ function cabHTML(f, cabs){
   let cells=''; for(let k=0;k<cap;k++){ const x = inside.find(i=>i.slot===k); cells += `<span>${x?ico(itemOf(x.item_code)):''}</span>`; }
   return `<span class="cab ${f.w===2&&f.h===2?'big':''} c${cols}" style="grid-template-columns:repeat(${cols},minmax(0,1fr));grid-template-rows:repeat(${Math.ceil(cap/cols)},minmax(0,1fr))">${cells}</span>`;
 }
-function roomHTML(list, cur, {editable, cabs={}}){
+function roomHTML(list, cur, {editable, cabs={}, maxR, maxC}){
   let prev = null;
   if(editable && selected && hover){
     const fp = footprint(selected);
@@ -4636,7 +4707,8 @@ function roomHTML(list, cur, {editable, cabs={}}){
     for(let y=0;y<fp.h;y++) for(let x=0;x<fp.w;x++) prev.cells.add(`${hover.r+y}-${hover.c+x}`);
   }
   let html='';
-  for(let r=0;r<MAXR+EXTRA_ROWS;r++) for(let c=0;c<MAXC;c++){
+  const MR = maxR ?? (MAXR+EXTRA_ROWS), MC = maxC ?? MAXC;   // 🔮 아공간은 자기 크기만큼만 그려요
+  for(let r=0;r<MR;r++) for(let c=0;c<MC;c++){
     const pos = `grid-row:${r+1};grid-column:${c+1}`;
     const inBase = c<cur.cols && r<cur.rows;
     const inExt = c<cur.cols && r>=cur.rows && r<cur.rows+EXTRA_ROWS;
@@ -6393,6 +6465,7 @@ function riftSurprise(){
 }
 function riftHave(){ const s = new Set((PETS && PETS.dex) || []); ((PETS && (PETS.all || PETS.pets)) || []).forEach(p=>s.add(p.code)); return s; }
 function renderRift(){
+  try{ renderVoid(); }catch(e){ console.error('아공간 그리기 오류', e); }
   const box = document.getElementById('riftBox'), te = document.getElementById('treeEgg');
   if(!RIFT || !RIFT.open || !ME){ if(box){ box.hidden = true; box.innerHTML = ''; } if(te){ te.hidden = true; te.innerHTML = ''; } return; }
   riftSurprise();
@@ -6437,6 +6510,154 @@ document.addEventListener('click', e=>{
     else petParty('🐣', `알이 깨졌어요!\n\n「${r.name}」${jo(r.name,'이','가')} 태어났어요!\n${r.lodge ? '마당이 꽉 차서 🏡 펫 숙소에서 기다리고 있어요.' : '🐾 펫 마당에서 만나 보세요.'}`);
   });
 });
+/* ---------- 🔮 아공간 · 🐾 마물 농장 (10-22 void.sql) ---------- */
+// 아래 숫자들은 void.sql 과 같아야 해요
+const VOID_OPEN_PRICE = 500, VOID_BG_PRICE = 500, VOID_MAX_C = 12, VOID_MAX_R = 8, VOID_FARM_RATE = 2, VOID_FARM_CAP = 12;
+const VOID_BGS = {
+  base:  {name:'텅 빈 아공간', emoji:'🌌', grad:'radial-gradient(ellipse at 50% 40%,#6A45B8 0%,#2A1650 45%,#0E0824 100%)'},
+  heaven:{name:'천계 성소',   emoji:'☁️', grad:'radial-gradient(ellipse at 50% 0%,#FFFBEA 0%,#E8EEFF 45%,#AFC3EC 100%)'},
+  hell:  {name:'마계 딥다크', emoji:'🔥', grad:'radial-gradient(ellipse at 50% 100%,#C2421E 0%,#4A0F1A 45%,#14060C 100%)'},
+  magic: {name:'마법진 연구실', emoji:'🔯', grad:'radial-gradient(circle at 50% 55%,#46D3E6 0%,#1C3A78 38%,#0D1530 100%)'},
+  fairy: {name:'요정나라 숲', emoji:'🍄', grad:'radial-gradient(ellipse at 50% 30%,#E6FFD9 0%,#8FD3A6 45%,#2F6B55 100%)'},
+};
+const voidBgCSS = k => `url(void/${k in VOID_BGS ? k : 'base'}.webp) center/cover no-repeat, ${(VOID_BGS[k]||VOID_BGS.base).grad}`;
+const VOID_FARM_BG = 'url(void/farm.webp) center/cover no-repeat, url(bg/Pet_background.webp) center/cover no-repeat, linear-gradient(#24124F 0%,#5B3E9A 38%,#4F8A5E 39%,#2D5A3A 100%)';
+let VOID = null, VSEL = null, VROT = 0, VHOVER = null, vbagTab = 'all';
+async function refreshVoid(){ try{ VOID = api.void ? await api.void() : null; }catch(e){ VOID = null; } }
+const voidFoot = code => { const it = itemOf(code); return VROT%2 ? {w:it.h, h:it.w} : {w:it.w, h:it.h}; };
+function voidRoomHTML(V, editable){
+  const cur = {cols:V.cols, rows:V.rows, extraW:0, name:'아공간'}, list = (V.items||[]).map(x=>({...x}));
+  const sv = [selected, hover, rotated];
+  if(editable){ selected = VSEL; hover = VHOVER; rotated = VROT; } else { selected = null; hover = null; }
+  let h; try{ h = roomHTML(list, cur, {editable, maxR:V.rows, maxC:V.cols}); } finally { [selected, hover, rotated] = sv; }
+  if(editable) h = h.replace(/data-pid=/g,'data-vpid=').replace(/data-r=/g,'data-vr=').replace(/data-c=/g,'data-vc=');
+  return `<div class="room void-room ${editable?'':'view'}" style="grid-template-columns:repeat(${V.cols},var(--tile));grid-template-rows:repeat(${V.rows},var(--tile))">${h}</div>`;
+}
+function voidFarmReady(V){
+  const n = (V.farm_pets||[]).length; if(!n || !V.farm_at) return 0;
+  const hrs = Math.min(V.farm_cap||VOID_FARM_CAP, (Date.now() - Date.parse(V.farm_at)) / 36e5);
+  return Math.max(0, Math.floor(hrs * (V.farm_rate||VOID_FARM_RATE) * n));
+}
+function voidFarmHTML(V, owner){
+  const pets = V.farm_pets || [], all = owner ? ((PETS && (PETS.all||PETS.pets)) || []) : [];
+  const cells = pets.map((c,i)=>{ const mine = all.find(p=>p.code===c), big = mine ? petShowBig(petLevel(mine.affection), babyById(mine.id)) : false;
+    const x = 12 + ((i*37) % 76), y = 52 + ((i*23) % 34);
+    return `<span class="vfp" data-vfp="${i}" style="left:${x}%;top:${y}%;--s:${(.8 + (y-45)/40*.45).toFixed(2)};z-index:${Math.round(y)}"><img src="pets/${c}${big?'_2':''}.webp" alt="" draggable="false" loading="lazy"><span class="nm">${esc(mine ? mine.name : petOf(c).name)}</span></span>`; }).join('');
+  return `<div class="vfarm" style="--fbg:${VOID_FARM_BG}">${cells}${pets.length ? '' : `<p class="vfarm-empty">아직 농장이 조용해요.<br><span class="small">🥚 알에서 이세계 마물이 태어나면 여기서 뛰어놀며 💠 파편을 물어와요.</span></p>`}</div>`;
+}
+const FARM_RUN = new WeakSet();
+function startFarm(el){
+  if(!el || FARM_RUN.has(el)) return; FARM_RUN.add(el);
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  el.querySelectorAll('.vfp').forEach((p,i)=>{
+    let x = parseFloat(p.style.left), y = parseFloat(p.style.top);
+    const step = () => {
+      if(!el.isConnected) return;
+      if(document.hidden || calm || Math.random() < .3){ p.classList.remove('walk'); setTimeout(step, 1500 + Math.random()*3500); return; }
+      const nx = Math.max(8, Math.min(92, x + (Math.random()-.5)*44)), ny = Math.max(48, Math.min(90, y + (Math.random()-.5)*20));
+      const dur = Math.max(1.8, Math.hypot(nx-x, (ny-y)*1.8) / (5 + Math.random()*4));
+      if(Math.abs(nx-x) > .5) p.classList.toggle('flip', nx > x);
+      p.classList.add('walk'); p.style.transitionDuration = dur.toFixed(1)+'s';
+      p.style.left = nx.toFixed(1)+'%'; p.style.top = ny.toFixed(1)+'%';
+      p.style.setProperty('--s', (.8 + (ny-45)/40*.45).toFixed(2)); p.style.zIndex = Math.round(ny);
+      x = nx; y = ny; setTimeout(()=>{ p.classList.remove('walk'); setTimeout(step, 800 + Math.random()*3000); }, dur*1000);
+    };
+    setTimeout(step, 500 + i*400 + Math.random()*1200);
+  });
+}
+function voidBagHTML(){
+  const entries = Object.entries(INV||{}).filter(([c,n])=>n>0 && !CAPACITY[c]);
+  const kinds = {all:'전체', furniture:'🪑 가구', accessory:'✨ 소품', wall:'🧱 벽', window:'🪟 창문', rug:'🧶 러그'};
+  const shown = vbagTab==='all' ? entries : entries.filter(([c])=>bagKind(c)===vbagTab);
+  return `<div class="vbag-tabs">${Object.entries(kinds).map(([k,l])=>`<button class="vbg ${k===vbagTab?'on':''}" type="button" data-vbtab="${k}">${l}</button>`).join('')}</div>
+    <div class="vbag">${shown.length ? shown.map(([c,n])=>{ const it = itemOf(c); return `<button class="item ${gradeCls(c)} ${VSEL===c?'sel':''}" type="button" data-vbag="${esc(c)}" title="${esc(it.name)}"><span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span><span class="p">×${n}</span></button>`; }).join('') : `<p class="small" style="grid-column:1/-1">${entries.length ? '이 칸엔 가구가 없어요.' : '가방이 비어 있어요. 상점에서 가구를 사 오면 여기서도 쓸 수 있어요.'}</p>`}</div>`;
+}
+function renderVoidRoom(){
+  const st = document.getElementById('voidStage'); if(!st || !VOID || !VOID.open) return;
+  st.style.setProperty('--vbg', voidBgCSS(VOID.bg)); st.innerHTML = voidRoomHTML(VOID, true);
+  const h = document.getElementById('voidHint');
+  if(h) h.innerHTML = VSEL ? `「${esc(itemOf(VSEL).name)}」${jo(itemOf(VSEL).name,'을','를')} 놓을 칸을 누르세요 <button class="mini" type="button" data-vrot>↻ 돌리기</button> <button class="mini" type="button" data-vcancel>그만 놓기</button>`
+    : '아래 가방에서 가구를 고르고 칸을 누르면 놓여요 · 놓인 가구를 누르면 가방으로 돌아가요';
+}
+function renderVoidFarmBar(){
+  const b = document.getElementById('voidFarmBar'); if(!b || !VOID || !VOID.open) return;
+  const n = (VOID.farm_pets||[]).length, ready = voidFarmReady(VOID), max = n * (VOID.farm_rate||VOID_FARM_RATE) * (VOID.farm_cap||VOID_FARM_CAP);
+  b.innerHTML = n ? `<button class="mini ask-yes" type="button" data-vfarm ${ready<1?'disabled':''}>🧺 물어온 💠 ${ready.toLocaleString()}개 받기</button><span class="small">마물 ${n}종 · 1종당 1시간에 💠 ${VOID.farm_rate||VOID_FARM_RATE} · 최대 ${VOID.farm_cap||VOID_FARM_CAP}시간치(💠 ${max})까지 쌓여요${ready>=max?' · 꽉 찼어요!':''}</span>`
+    : `<span class="small">이세계 마물이 생기면 1종당 1시간에 💠 ${VOID.farm_rate||VOID_FARM_RATE}개씩 물어와요</span>`;
+}
+function renderVoid(){
+  const box = document.getElementById('voidBox'); if(!box) return;
+  if(!RIFT || !RIFT.open || !ME || !VOID){ box.hidden = true; box.innerHTML = ''; box._k = ''; return; }
+  box.hidden = false;
+  const shards = (RIFT.shards ?? VOID.shards ?? 0);
+  if(!VOID.open){
+    const k = 'closed' + shards; if(box._k === k) return; box._k = k;
+    box.innerHTML = `<div class="void-head"><h3>🔮 아공간</h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
+      <div class="void-door"><span class="portal">🌀</span><p style="margin:.6rem 0">균열 깊숙한 곳에 나만의 공간을 열 수 있어요.<br><span class="small">뒷배경을 바꿔 끼우고, 파편으로 칸을 넓히고, 이세계 마물 농장도 생겨요.</span></p>
+      <button class="pull" type="button" data-vopen ${shards<(VOID.price||VOID_OPEN_PRICE)?'disabled':''}>🔮 문 열기 · 💠 ${(VOID.price||VOID_OPEN_PRICE).toLocaleString()}</button></div>`;
+    return;
+  }
+  const V = VOID, gp = V.grow_price ?? V.cols*V.rows*10, bgs = V.bgs || ['base'];
+  const k = JSON.stringify([shards, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).length, (V.farm_pets||[]).join(), VSEL, vbagTab, Object.entries(INV||{}).filter(([,n])=>n>0).length]);
+  if(box._k === k){ renderVoidRoom(); renderVoidFarmBar(); return; }
+  box._k = k;
+  box.innerHTML = `<div class="void-head"><h3>🔮 아공간 <span class="small">${V.cols}×${V.rows}칸</span></h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
+    <div class="void-bar">${Object.entries(VOID_BGS).map(([c,b])=>{ const own = bgs.includes(c);
+      return `<button class="vbg ${V.bg===c?'on':''} ${own?'':'lock'}" type="button" data-vbgk="${c}">${b.emoji} ${esc(b.name)}${own?'':` · 💠 ${(V.bg_price||VOID_BG_PRICE).toLocaleString()}`}</button>`; }).join('')}
+      <button class="vbg pub ${V.public?'on':''}" type="button" data-vpub>${V.public?'🔓 공개 중':'🔒 비공개'}</button></div>
+    <div class="void-stage" id="voidStage"></div>
+    <p class="void-hint small" id="voidHint"></p>
+    <div class="void-grow"><button class="mini" type="button" data-vgrow="col" ${V.cols>=(V.max_cols||VOID_MAX_C)||shards<gp?'disabled':''}>➕ 가로 한 줄 · 💠 ${gp.toLocaleString()}</button>
+      <button class="mini" type="button" data-vgrow="row" ${V.rows>=(V.max_rows||VOID_MAX_R)||shards<gp?'disabled':''}>➕ 세로 한 줄 · 💠 ${gp.toLocaleString()}</button>
+      <span class="small">최대 ${V.max_cols||VOID_MAX_C}×${V.max_rows||VOID_MAX_R}칸 · 값은 지금 칸 수 × 10</span></div>
+    <h4>🎒 가방 <span class="small">우리 집과 같은 가방이에요 · 진열장은 아직 못 놓아요</span></h4>
+    ${voidBagHTML()}
+    <h4>🐾 마물 농장</h4>
+    ${voidFarmHTML(V, true)}
+    <div class="vfarm-bar" id="voidFarmBar"></div>`;
+  renderVoidRoom(); renderVoidFarmBar(); startFarm(box.querySelector('.vfarm'));
+}
+async function voidAfter(r){ const x = Array.isArray(r) ? r[0] : r; if(x && x.open) VOID = x; else await refreshVoid(); await Promise.all([refreshRift(), refreshMine()]); renderTop(); renderBag(); renderRift(); }
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#voidBox')) return;
+  if(e.target.closest('[data-vopen]')) return act(async()=>{
+    if(!(await ask(`💠 이세계 파편 ${(VOID.price||VOID_OPEN_PRICE).toLocaleString()}개로 아공간 문을 열까요?\n4×4칸 공간과 마물 농장이 생겨요.`))) return;
+    await voidAfter(await api.voidOpen()); petParty('🔮', '아공간 문이 열렸어요!\n\n균열 깊숙한 곳에 나만의 공간이 생겼어요.\n가방의 가구를 꺼내 꾸미고, 뒷배경도 바꿔 끼워 보세요.\n아래 🐾 마물 농장에선 이세계 마물들이 파편을 물어와요!');
+  });
+  const bgk = e.target.closest('[data-vbgk]');
+  if(bgk) return act(async()=>{ const c = bgk.dataset.vbgk, b = VOID_BGS[c], own = (VOID.bgs||[]).includes(c);
+    if(VOID.bg===c) return;
+    if(!own && !(await ask(`${b.emoji} 「${b.name}」 뒷배경을 💠 ${(VOID.bg_price||VOID_BG_PRICE).toLocaleString()}개에 살까요?\n한 번 사면 언제든 무료로 바꿔 끼울 수 있어요.`))) return;
+    await voidAfter(await api.voidBg(c)); toast(`${b.emoji} ${b.name}${jo(b.name,'으로','로')} 바꿨어요`); });
+  if(e.target.closest('[data-vpub]')) return act(async()=>{ const on = !VOID.public;
+    await voidAfter(await api.voidPublic(on)); toast(on ? '🔓 이제 이웃이 집 구경할 때 아공간도 볼 수 있어요' : '🔒 아공간을 비공개로 바꿨어요'); });
+  const gr = e.target.closest('[data-vgrow]');
+  if(gr) return act(async()=>{ const gp = VOID.grow_price ?? VOID.cols*VOID.rows*10, col = gr.dataset.vgrow==='col';
+    if(!(await ask(`💠 ${gp.toLocaleString()}개로 ${col?'가로':'세로'} 한 줄을 늘릴까요?\n${VOID.cols}×${VOID.rows} → ${col?VOID.cols+1:VOID.cols}×${col?VOID.rows:VOID.rows+1}칸`))) return;
+    await voidAfter(await api.voidGrow(gr.dataset.vgrow)); toast('🔮 아공간이 넓어졌어요!'); });
+  const vt = e.target.closest('[data-vbtab]'); if(vt){ vbagTab = vt.dataset.vbtab; renderVoid(); return; }
+  const vb = e.target.closest('[data-vbag]'); if(vb){ VSEL = VSEL===vb.dataset.vbag ? null : vb.dataset.vbag; VROT = 0; VHOVER = null; renderVoid(); return; }
+  if(e.target.closest('[data-vrot]')){ VROT = (VROT+1)%4; renderVoidRoom(); return; }
+  if(e.target.closest('[data-vcancel]')){ VSEL = null; VHOVER = null; renderVoid(); return; }
+  const tl = e.target.closest('.tile[data-vr]');
+  if(tl && VSEL) return act(async()=>{ const code = VSEL, fp = voidFoot(code);
+    await voidAfter(await api.voidPlace(code, +tl.dataset.vr, +tl.dataset.vc, VROT, fp.w, fp.h, layerOf(code)));
+    if(!(INV[code]>0)){ VSEL = null; VROT = 0; } VHOVER = null; box_void_reset(); renderVoid(); });
+  const fu = e.target.closest('.furn[data-vpid]');
+  if(fu) return act(async()=>{ const id = +fu.dataset.vpid, f = (VOID.items||[]).find(x=>x.id===id); if(!f) return;
+    if(VSEL){ toast('가구를 놓는 중이에요. 「그만 놓기」를 누른 뒤 치워 주세요'); return; }
+    if(!(await ask(`「${itemOf(f.item_code).name}」${jo(itemOf(f.item_code).name,'을','를')} 가방에 넣을까요?`))) return;
+    await voidAfter(await api.voidRemove(id)); box_void_reset(); renderVoid(); });
+  if(e.target.closest('[data-vfarm]')) return act(async()=>{ const r0 = await api.voidCollect(), r = Array.isArray(r0) ? r0[0] : r0;
+    await refreshVoid(); await refreshRift(); renderRift(); toast(`🧺 마물들이 물어온 💠 이세계 파편 ${r.gain.toLocaleString()}개를 받았어요!`); });
+});
+function box_void_reset(){ const b = document.getElementById('voidBox'); if(b) b._k = ''; }
+document.addEventListener('mouseover', e=>{
+  if(!VSEL) return; const t = e.target.closest && e.target.closest('#voidStage .tile[data-vr]');
+  const h = t ? {r:+t.dataset.vr, c:+t.dataset.vc} : null;
+  if(JSON.stringify(h)!==JSON.stringify(VHOVER)){ VHOVER = h; renderVoidRoom(); }
+});
+setInterval(()=>{ if(VOID && VOID.open && !document.getElementById('tab-isekai').hidden) renderVoidFarmBar(); }, 60e3);
 function petParty(emoji, msg){
   const d = document.getElementById('party'), pe = d.querySelector('.party-emoji');
   pe.textContent = emoji; document.getElementById('partyMsg').textContent = msg;
@@ -7958,6 +8179,7 @@ async function loadAll(){
   await Promise.all([refreshMine(), refreshVillage(), refreshPlaza(), refreshGacha(), refreshGarden(), refreshLake(), refreshTank(), refreshTree(), refreshBanners(), refreshBoard(), refreshBoss(), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPets(), refreshPetsOn(), refreshWinter(), refreshNameplates(), refreshPetBabies(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
   refreshStreak();
   MAIL_BOOT_UNTIL = Date.now() + 10000; renderMailBadge();   // 들어오자마자 온 소식은 우편함을 한 번만 열어 보여 줘요
+  await refreshVoid();
   renderPlaza(); renderBoss(); renderWinter(); winterMailCheck(); celebratePlaza(); renderGacha(); renderBanners(); renderFloatDrops(); renderBoard();
   refreshTrucks().then(renderTrucks); showTruckReport();
   setInterval(()=>refreshTrucks().then(renderTrucks), 5*60e3);
@@ -8276,7 +8498,7 @@ function goTab(b, e){
   if(b.dataset.tab==='village'){ renderBanners(); renderVillage(); renderVillageTrucks(); }
   if(b.dataset.tab==='lotto'){ renderLotto(); refreshLotto().then(renderLotto); }
   if(b.dataset.tab==='admin'){ renderAdmin(); renderTabStats(); }
-  if(b.dataset.tab==='isekai'){ renderBoss(); refreshBoss().then(()=>renderBoss()); }
+  if(b.dataset.tab==='isekai'){ renderBoss(); refreshBoss().then(()=>renderBoss()); refreshVoid().then(()=>{ box_void_reset(); renderVoid(); }); }
   if(b.dataset.tab==='plaza'){ refreshPlaza().then(renderPlaza); refreshTrucks().then(renderTrucks); renderBoard(); refreshBoard().then(renderBoard); }
   if(b.dataset.tab==='gacha') refreshGacha().then(renderGacha);
   if(b.dataset.tab==='lake'){ renderLake(); refreshLake().then(renderLake); }
@@ -8473,9 +8695,9 @@ async function openVisit(id){
   room.innerHTML = '<span class="small">불러오는 중…</span>';
   dlg.showModal();
   try{
-    const [list, info, garden, fishBest, vpets, vtank, vflora] = await Promise.all([api.placements(id), api.house(id).catch(()=>null), api.garden(id).catch(()=>[]), api.fishBest(id).catch(()=>null), api.petsOf(id).catch(()=>[]), api.tankOf(id).catch(()=>null), api.flowerShowOf(id).catch(()=>[])]);
+    const [list, info, garden, fishBest, vpets, vtank, vflora, vvoid] = await Promise.all([api.placements(id), api.house(id).catch(()=>null), api.garden(id).catch(()=>[]), api.fishBest(id).catch(()=>null), api.petsOf(id).catch(()=>[]), api.tankOf(id).catch(()=>null), api.flowerShowOf(id).catch(()=>[]), api.voidOf ? api.voidOf(id).catch(()=>null) : null]);
     const h = info || {room_blocks:0, room_names:['거실']};
-    VISIT = {p, list, info:h, garden:garden||[], fishBest, pets:vpets||[], tank:vtank, flora:vflora||[], cabs: await cabsFor(id, list), room:0, raid: await api.raidStatus().catch(()=>null)};
+    VISIT = {p, list, info:h, garden:garden||[], fishBest, pets:vpets||[], tank:vtank, flora:vflora||[], void:(vvoid && vvoid.open) ? vvoid : null, cabs: await cabsFor(id, list), room:0, raid: await api.raidStatus().catch(()=>null)};
     renderVisit();
   }catch(e){
     console.error('집 구경 오류', e);
@@ -8489,13 +8711,21 @@ function renderVisit(){
   const {p, list, info, cabs} = VISIT, names = (info.room_names && info.room_names.length) ? info.room_names : ['거실'];
   const cur = roomOf(p.total_minutes, info.room_blocks||0);
   const hasGarden = gardenSlots(p.total_minutes) > 0 || (VISIT.flora||[]).length > 0, hasTank = !!(VISIT.tank && VISIT.tank.fish && VISIT.tank.fish.length);
-  document.getElementById('visitTabs').innerHTML = (names.length>1 || hasGarden || hasTank)
+  const hasVoid = !!VISIT.void;
+  document.getElementById('visitTabs').innerHTML = (names.length>1 || hasGarden || hasTank || hasVoid)
     ? names.map((n,k)=>`<button class="rtab ${k===VISIT.room?'on':''}" data-vroom="${k}">${esc(n)}</button>`).join('')
       + (hasTank ? `<button class="rtab garden-tab ${VISIT.room==='k'?'on':''}" data-vroom="k">🐠 어항</button>` : '')
       + (hasGarden ? `<button class="rtab garden-tab ${VISIT.room==='g'?'on':''}" data-vroom="g">🌷 마당</button>` : '')
+      + (hasVoid ? `<button class="rtab garden-tab ${VISIT.room==='v'?'on':''}" data-vroom="v">🔮 아공간</button>` : '')
     : '';
-  const room = document.getElementById('visitRoom'), vg = document.getElementById('visitGarden'), outside = VISIT.room==='g' || VISIT.room==='k';
+  const room = document.getElementById('visitRoom'), vg = document.getElementById('visitGarden'), outside = VISIT.room==='g' || VISIT.room==='k' || VISIT.room==='v';
   room.parentElement.hidden = outside; vg.hidden = !outside;
+  if(VISIT.room==='v' && VISIT.void){
+    const V = VISIT.void, b = VOID_BGS[V.bg] || VOID_BGS.base;
+    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸</span></h4><div class="void-stage" style="--vbg:${voidBgCSS(V.bg)}">${voidRoomHTML(V, false)}</div>`
+      + `<h4 class="tank-title farm-title">🐾 마물 농장 <span class="small">${(V.farm_pets||[]).length}종</span></h4>${voidFarmHTML(V, false)}`;
+    startFarm(vg.querySelector('.vfarm'));
+  }
   if(VISIT.room==='g'){
     const blooms = VISIT.garden.filter(x=>x.stage==='bloom').length;
     const fl = VISIT.flora || [];
@@ -8557,7 +8787,7 @@ async function showRaids(){   // 📬 우편함으로 모아요
 }
 document.getElementById('visitTabs').addEventListener('click', e=>{
   const b = e.target.closest('[data-vroom]'); if(!b || !VISIT) return;
-  const v = b.dataset.vroom; VISIT.room = (v==='g' || v==='k') ? v : +v; renderVisit();
+  const v = b.dataset.vroom; VISIT.room = (v==='g' || v==='k' || v==='v') ? v : +v; renderVisit();
 });
 document.getElementById('visitGift').addEventListener('click', e=>{ if(!e.target.closest('[data-gohome]')) return; document.getElementById('visit').close(); const b = document.querySelector('.tabs [data-tab="home"]') || [...document.querySelectorAll('.tabs button')].find(x=>x.textContent.includes('우리 집')); if(b) b.click(); });
 document.addEventListener('click', e=>{   // 🏷️ 이름표 바꿔 끼우기
@@ -9016,6 +9246,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㉒</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㉓</p>
 </body>
 </html>
