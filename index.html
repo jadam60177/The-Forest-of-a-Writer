@@ -3979,7 +3979,7 @@ const demoApi = (() => {
       const amt = Math.min(n, m.drops, t.goal - t.poured); if(!(amt>=1)) fail('주머니에 물방울이 없어요');
       m.drops -= amt; t.poured += amt; t.mine += amt; t.givers.add('me'); let grown = false;
       if(st.isk){ const e = st.isk.eggs.find(x=>x.set_at); if(e) e.fed = Math.min(RIFT_NEED, e.fed + amt); }   // 🌀 맡긴 알 정화
-      if(t.poured>=t.goal){ grown = true; m.coins += t.reward; st.gifts.push({id:Date.now(), amount:t.reward, reason:'🌳 세계수가 다 자랐어요'});
+      if(t.poured>=t.goal){ grown = true; if(t.mine>=TREE_REWARD_DROPS){ m.coins += t.reward; st.gifts.push({id:Date.now(), amount:t.reward, reason:'🌳 세계수가 다 자랐어요'}); }
         const cs = Object.keys(TREE_COLORS).filter(c=>c!==t.color);
         st.tree = {no:t.no+1, color:cs[Math.floor(Math.random()*cs.length)], goal:t.goal, reward:t.reward, poured:0, givers:new Set(), mine:0}; }
       persist(); return {poured:t.poured, goal:t.goal, drops:m.drops, grown}; },
@@ -4326,7 +4326,7 @@ const demoApi = (() => {
       if(!n) fail('바꿀 수 있는 겹친 수집품이 없어요');
       if(kind==='coin') st.me.coins += BOSS_TRADE_COIN*n; else B.tickets += n;
       persist(); return {kind, n, coins:st.me.coins, tickets:B.tickets}; },
-    async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, my_coins:B.coins||0, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
+    async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, my_hits:B.hits||0, reward_hits:BOSS_REWARD_HITS, my_coins:B.coins||0, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
     async bossHit(code, n){
       const B = this.bossState(), w = weaponOf(code), m = monsterOf(B.monster);
       if(B.dmg>=B.max_hp) fail('이번 주 괴물은 벌써 쓰러졌어요');
@@ -4334,17 +4334,17 @@ const demoApi = (() => {
       n = Math.min(n|0, B.tickets); if(n<1) fail('공격권이 없어요');
       const each = weaponDmg(w, m); let used = 0, dealt = 0;
       while(used<n && B.dmg<B.max_hp){ used++; const d = Math.min(each, B.max_hp-B.dmg); B.dmg += d; dealt += d; }
-      B.tickets -= used; B.my += dealt; B.att.add('me');
+      B.tickets -= used; B.my += dealt; B.hits = (B.hits||0) + used; B.att.add('me');
       st.bitems = st.bitems || {}; const set = (BOSS_ITEMS[m.code]||[]).map(r=>r[0]), drops = [];
       const give = fresh => { if(!set.length) return null; const pool = fresh && set.some(c=>!st.bitems[c]) ? set.filter(c=>!st.bitems[c]) : set; const c = pool[Math.floor(Math.random()*pool.length)]; st.bitems[c] = (st.bitems[c]||0)+1; return c; };
       for(let k=0;k<used;k++) if(Math.random()<BOSS_DROP){ const c = give(false); if(c) drops.push(c); }
       let coins = 0, lucky = 0;
       for(let k=0;k<used;k++){ if(Math.random()<BOSS_LUCKY){ coins += BOSS_LUCKY_COIN; lucky++; } else coins += BOSS_HIT_COIN[0] + Math.floor(Math.random()*(BOSS_HIT_COIN[1]-BOSS_HIT_COIN[0]+1)); }
       st.me.coins += coins; B.coins = (B.coins||0) + coins;
-      const down = B.dmg>=B.max_hp; let kill_item = null; if(down) kill_item = give(true);
-      if(down){ B.tickets = 0; B.fuel = 0; if(!B.dex.includes(m.code)) B.dex.push(m.code); st.me.coins += BOSS_REWARD; st.gifts.push({id:Date.now(), amount:BOSS_REWARD, reason:`⚔️ ${m.name} 토벌`}); persist(); }
+      const down = B.dmg>=B.max_hp, rewarded = (B.hits||0) >= BOSS_REWARD_HITS; let kill_item = null; if(down && rewarded) kill_item = give(true);
+      if(down){ B.tickets = 0; B.fuel = 0; } if(down && rewarded){ if(!B.dex.includes(m.code)) B.dex.push(m.code); st.me.coins += BOSS_REWARD; st.gifts.push({id:Date.now(), amount:BOSS_REWARD, reason:`⚔️ ${m.name} 토벌`}); persist(); }
       const isekai = this.iskHit(used, B.max_hp-B.dmg);
-      persist(); return {each, used, dealt, hp:B.max_hp-B.dmg, down, drops, kill_item, coins, lucky, isekai};
+      persist(); return {each, used, dealt, hp:B.max_hp-B.dmg, down, drops, kill_item, coins, lucky, isekai, my_hits:B.hits, reward_hits:BOSS_REWARD_HITS};
     },
     // 🌀 균열 너머 (미리보기) — isekai.sql 과 같은 규칙
     iskState(){ if(!st.isk) st.isk = {open:false, shards:0, eggs:[], nid:1}; if(!st.isk.ev) st.isk.ev = []; if(!st.isk.gifts) st.isk.gifts = []; return st.isk; },
@@ -5601,7 +5601,7 @@ document.addEventListener('keydown', e=>{
 
 /* ---------- 🌳 세계수 ---------- */
 // 아래 숫자들은 worldtree.sql 과 같아야 해요 (목표·보상은 서버 값을 그대로 써요)
-const TREE_WORK_MIN = 10, TREE_FLOAT_MAX = 10, TREE_FLOAT_DAY = 20, TREE_DROP_COIN = 10;
+const TREE_WORK_MIN = 10, TREE_FLOAT_MAX = 10, TREE_FLOAT_DAY = 20, TREE_DROP_COIN = 10, TREE_REWARD_DROPS = 10;   // 다 자라면 💧 10방울 이상 부은 주민만 보상 (tree10.sql)
 const TREE_STAGES = [
   {at:0,   name:'새싹',      about:'방금 싹이 났어요'},
   {at:.25, name:'묘목',      about:'빛 열매가 맺히기 시작해요'},
@@ -5678,13 +5678,13 @@ function renderTree(){
         <button class="give" data-pour="10" ${TREE.drops<1?'disabled':''}>💧 10</button>
         <button class="give" data-pour="all" ${TREE.drops<1?'disabled':''}>💧 전부 붓기</button>
       </div>
-      <p class="tree-num">내가 이 나무에 준 물: 💧 ${TREE.my_poured.toLocaleString()}${TREE.my_poured?` · 다 자라면 🪙 ${TREE.reward}코인을 받아요!`:` · 한 방울이라도 주면 다 자랐을 때 🪙 ${TREE.reward}코인을 받아요`}</p>
+      <p class="tree-num">내가 이 나무에 준 물: 💧 ${TREE.my_poured.toLocaleString()}${TREE.my_poured>=TREE_REWARD_DROPS?` · ✅ 다 자라면 🪙 ${TREE.reward}코인을 받아요!`:` · 💧 ${TREE_REWARD_DROPS}방울 이상 주면 다 자랐을 때 🪙 ${TREE.reward}코인을 받아요 (지금 ${TREE.my_poured}/${TREE_REWARD_DROPS})`}</p>
     </div>
     <div class="panel tree-help">
       <h3 style="margin:0 0 .3rem">💧 물방울 모으는 법</h3>
       <p class="small" style="margin:0 0 .3rem">🎧 작업실에 ${TREE_WORK_MIN}분 있을 때마다 주머니에 1방울씩 저절로 모여요.</p>
       <p class="small" style="margin:0 0 .3rem">✨ 세계수 둘레에 새벽 12시에 1~2개, 그 뒤로 10~20분마다 1개씩 물방울이 떠올라요. 누르면 물방울 1개와 🪙 ${TREE_DROP_COIN}코인! 안 주우면 ${TREE_FLOAT_MAX}개까지 기다려 줘요. (하루 ${TREE_FLOAT_DAY}개까지 · 오늘 ${TREE.float_today}개 주웠어요)</p>
-      <p class="small" style="margin:0">🌳 다 같이 물을 부어 세계수가 다 자라면, 그 나무에 한 방울이라도 준 주민 모두에게 🪙 ${TREE.reward}코인이 도착해요. 그리고 새 씨앗이 심겨요.</p>
+      <p class="small" style="margin:0">🌳 다 같이 물을 부어 세계수가 다 자라면, 그 나무에 💧 ${TREE_REWARD_DROPS}방울 이상 준 주민 모두에게 🪙 ${TREE.reward}코인이 도착해요. 그리고 새 씨앗이 심겨요.</p>
     </div>`;
   if(box._html !== html){ box.innerHTML = html; box._html = html; }
 }
@@ -6082,7 +6082,8 @@ document.addEventListener('click', async e=>{
    무기는 누적 작업 시간(집이 커지는 시간)으로 열리고, 괴물마다 잘 듣는 무기가 있어요(2배).
    쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 + 괴물 도감 등록. 못 잡아도 잃는 건 없어요.
    공격권은 그 주에만 써요 (다음 주로 안 넘어가요). 첫 괴물은 10-22(목) 0시 ~ 10-30(금) 0시. */
-const BOSS_TICKET_FUEL = 60, BOSS_TICKET_MAX = 24, BOSS_REWARD = 2000, BOSS_WEAK = 2;
+const BOSS_TICKET_FUEL = 60, BOSS_TICKET_MAX = 24, BOSS_REWARD = 2000, BOSS_WEAK = 2, BOSS_REWARD_HITS = 10;   // 토벌 보상은 이번 주 10번 이상 때린 주민만 (boss10.sql)
+const bossNeed = () => (BOSS && BOSS.reward_hits) || BOSS_REWARD_HITS, bossMyHits = () => (BOSS && BOSS.my_hits) || 0;
 // 🪙 때릴 때마다 코인 (10-22): 5~20개 랜덤, BOSS_LUCKY 확률로 💰 50개 대박 — boss.sql 의 boss_hit 과 같아야 해요
 const BOSS_HIT_COIN = [5, 20], BOSS_LUCKY = .05, BOSS_LUCKY_COIN = 50;
 const BOSS_FIRE = [[5,2],[3,1.5],[2,1.2],[0,1]];   // 작업실에 같이 있는 사람 수 → 공격권 모이는 속도
@@ -6227,7 +6228,7 @@ function renderBoss(force){
       <p class="boss-say">${down ? `「${esc(m.name)}」${jo(m.name,'을','를')} 쓰러뜨렸어요! 🎉` : `“${esc(m.lines[BOSS_LINE % m.lines.length])}”`}</p>
       ${riftLine ? `<p class="rift-tease lv${riftLv}">🌀 ${riftLine}</p>` : ''}
     </div>
-    ${down ? `<p class="boss-done">${BOSS.my_damage ? `이번 주 내가 준 피해 <b>${BOSS.my_damage.toLocaleString()}</b> · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · 토벌 보상 🪙 ${BOSS_REWARD.toLocaleString()}를 보내고 📖 괴물 도감에 올렸어요` : '이번 주엔 못 때렸지만, 다음 주 괴물은 같이 잡아요!'}</p>` : `
+    ${down ? `<p class="boss-done">${BOSS.my_damage ? `이번 주 내가 준 피해 <b>${BOSS.my_damage.toLocaleString()}</b> · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · ${bossMyHits()>=bossNeed() ? `토벌 보상 🪙 ${BOSS_REWARD.toLocaleString()}를 보내고 📖 괴물 도감에 올렸어요` : `${bossMyHits()}번 때려서 토벌 보상(${bossNeed()}번 이상)은 아쉽게 못 받았어요. 다음 주엔 같이 잡아요!`}` : '이번 주엔 못 때렸지만, 다음 주 괴물은 같이 잡아요!'}</p>` : `
     <div class="boss-ctrl">
       <div class="boss-tix"><span class="tix">🎫 공격권 <b>${t}</b>장</span>
         <span class="small">${full ? `가득 찼어요 (최대 ${BOSS_TICKET_MAX}장) · 얼른 쓰러 와요!` : mine ? `다음 장까지 약 ${nextMin}분` : `작업실에 있으면 1시간에 1장씩 모여요`}</span></div>
@@ -6238,7 +6239,7 @@ function renderBoss(force){
         <button class="pull ten" type="button" data-bosshit="all" ${t<2?'disabled':''}>${w.emoji} 공격권 ${t}장 다 쓰기</button>
       </div>
       <p class="small boss-coinrule">🪙 한 번 때릴 때마다 코인 ${BOSS_HIT_COIN[0]}~${BOSS_HIT_COIN[1]}개 · 가끔 💰 ${BOSS_LUCKY_COIN}개 대박!</p>
-      <p class="small" style="margin:.5rem 0 0">이번 주 내가 준 피해 ${(BOSS.my_damage||0).toLocaleString()} · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · ${BOSS.attackers||0}명이 함께 싸우는 중 · 쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 등록</p>
+      <p class="small" style="margin:.5rem 0 0">이번 주 내가 준 피해 ${(BOSS.my_damage||0).toLocaleString()} · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · ${BOSS.attackers||0}명이 함께 싸우는 중 · 쓰러뜨리면 <b>${bossNeed()}번 이상</b> 때린 주민 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 등록 · ${bossMyHits()>=bossNeed() ? `✅ 나는 ${bossMyHits()}번, 보상 확정!` : `나는 지금 ${bossMyHits()}/${bossNeed()}번`}</p>
     </div>`}
     ${bossItemsHTML(m)}
     <details class="boss-dex"><summary>📖 괴물 도감 <span class="small">${dex.size} / ${MONSTERS.length}</span></summary>
@@ -6331,7 +6332,8 @@ async function bossAttack(n){
       setTimeout(()=>bossItemShow(c, isNew, q, got.length>1 ? `${m.name}${jo(m.name,'이','가')} 수집품 ${got.length}개를 떨어뜨렸어요! (마지막 것)` : `${m.name}${jo(m.name,'이','가')} 떨어뜨렸어요!`), x.down ? 2600 : 1250); }
     if(x && x.down){
       await refreshMine(); renderTop(); renderBag();
-      setTimeout(()=>{ showGifts(); petParty('⚔️', `「${m.name}」${jo(m.name,'을','를')} 쓰러뜨렸어요!\n막타는 ${ME.display_name||'나'}님이에요 🎉\n\n함께 때린 주민 모두에게 🪙 ${BOSS_REWARD.toLocaleString()}와\n수집품 하나씩이 가요!`); }, 1350);
+      setTimeout(()=>{ showGifts(); { const need = x.reward_hits || BOSS_REWARD_HITS, mine = x.my_hits ?? need;
+        petParty('⚔️', `「${m.name}」${jo(m.name,'을','를')} 쓰러뜨렸어요!\n막타는 ${ME.display_name||'나'}님이에요 🎉\n\n이번 주 ${need}번 이상 때린 주민 모두에게 🪙 ${BOSS_REWARD.toLocaleString()}와\n수집품 하나씩이 가요!` + (mine < need ? `\n\n(나는 ${mine}번이라 이번 토벌 보상은 아쉽게 못 받았어요)` : '')); } }, 1350);
     } else if(cnt>1) toast(`${w.emoji} ${x.used||cnt}번 때렸어요! 피해 ${(x.dealt||0).toLocaleString()} · 🪙 ${x.coins||0}${x.lucky?` (💰 대박 ${x.lucky}번!)`:''}${x.isekai && x.isekai.shards ? ` · 💠 ${x.isekai.shards}` : ''}`);
     else if(x.lucky) toast(`💰 대박! 코인 ${x.coins}개가 쏟아졌어요`);
   }catch(err){ toast(err.message || '때리지 못했어요'); await refreshBoss(); renderBoss(true); }
@@ -8456,7 +8458,7 @@ async function showGifts(){   // 📬 우편함으로 모아요 (넣은 개수�
       if(r.startsWith('🔥')){ const n = parseInt(r.replace(/[^0-9]/g,''),10)||1, c = ((n-1)%14)+1;
         return {icon:'🔥', title:`연속 출석 ${n}일째!`, body:`오늘도 숲에 와 줘서 고마워요. ${c}일차 보상을 받았어요.` + (c===14 ? '\n14일 한 바퀴 완주! 내일부터 새 바퀴가 시작돼요.' : `\n내일 오면 🪙 ${streakReward(n+1)}코인!`), coin:g.amount}; }
       if(r.startsWith('⚔️')) return {icon:'⚔️', title:`${r.replace(/^⚔️\s*/,'').replace(/ 토벌$/,'')}${jo(r.replace(/ 토벌$/,''),'을','를')} 쓰러뜨렸어요!`, body:'함께 때린 주민 모두에게 코인이 가요. 수집품도 하나씩 떨어졌어요 — 🌀 이세계 탭에서 확인해 보세요!', coin:g.amount};
-      if(r.startsWith('🌳')) return {icon:'🌳', title:'세계수가 다 자랐어요!', body:'다 같이 물을 준 덕분이에요. 물을 준 주민 모두에게 코인이 도착했어요.', coin:g.amount};
+      if(r.startsWith('🌳')) return {icon:'🌳', title:'세계수가 다 자랐어요!', body:'다 같이 물을 준 덕분이에요. 💧 10방울 이상 물을 준 주민 모두에게 코인이 도착했어요.', coin:g.amount};
       if(r.startsWith('🌱')) return {icon:'🌱', title:'마감의 숲에 온 걸 환영해요!', body:'이사 선물로 🪙 200코인과 🌰 씨앗 3개를 드렸어요.\n상점에서 가구를 사서 우리 집을 꾸미고, 작업실에 들어가면 코인이 쌓여요. 이웃 주민들에게도 이사 소식이 전해졌어요!', coin:g.amount};
       return {icon:'🎉', title:`「${r}」 축하해요!`, body:'숲지기가 축하 코인을 보냈어요.', coin:g.amount}; }));
     await api.giftsSeen();
@@ -9630,6 +9632,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㉟</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㊲</p>
 </body>
 </html>
