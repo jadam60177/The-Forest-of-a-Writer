@@ -2231,6 +2231,21 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .vgauge>b{position:relative;display:block;text-align:center;font-size:.74rem;line-height:22px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8)}
 .vsnack{flex-basis:100%;display:flex;gap:.5rem;align-items:center;justify-content:center;flex-wrap:wrap}
 .vsnack .on{font-size:.82rem;padding:.2rem .7rem;border-radius:999px;background:rgba(255,190,120,.22);border:1px solid rgba(255,190,120,.6)}
+/* 🔒 봉인된 도안 (10-22 판 62) */
+.vseal-box{margin:.6rem 0 .2rem}.vseal-box h4{margin:.2rem 0 .4rem}
+.vseal{display:grid;grid-template-columns:54px 1fr auto;gap:.6rem;align-items:center;padding:.5rem .6rem;margin:.35rem 0;border-radius:14px;background:rgba(255,255,255,.07);border:1px dashed rgba(190,160,255,.55)}
+.vseal.ready{border-style:solid;border-color:#FFE08A;box-shadow:0 0 14px rgba(255,214,120,.35)}
+.vs-art{position:relative;width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font-size:1.5rem;background:radial-gradient(circle,rgba(160,110,255,.35),rgba(40,20,90,.55));border:2px solid rgba(200,170,255,.6)}
+.vs-art span{position:absolute;right:-4px;bottom:-4px;font-size:1rem}
+.vseal.ready .vs-art{animation:rqglow 1.6s ease-in-out infinite alternate;border-color:#FFE08A}
+.vs-bars{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.vs-bar{position:relative;height:18px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+.vs-bar>span{position:absolute;inset:0 auto 0 0;transition:width .6s}
+.vs-bar.w>span{background:linear-gradient(90deg,#4FB6E8,#A8E4FF)}.vs-bar.f>span{background:linear-gradient(90deg,#E8652B,#FFC46B)}
+.vs-bar>b{position:relative;display:block;text-align:center;font-size:.72rem;line-height:18px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.vs-act{display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;text-align:right;max-width:220px}.vs-act .mini{white-space:nowrap}
+.vcharge{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:center;margin:.5rem 0 0}
+@media (max-width:600px){.vseal{grid-template-columns:44px 1fr}.vs-art{width:42px;height:42px;font-size:1.2rem}.vs-act{grid-column:1/-1;align-items:center;text-align:center;max-width:none}}
 .vfx.setfx{z-index:5}
 /* 🖼️ 그림 파티클 (10-22 판 56) — 모양은 그림, 움직임은 아래 keyframes */
 .vfx.vimg i{width:var(--sz);height:var(--sz);background:var(--img) center/contain no-repeat;border:0;border-radius:0;box-shadow:none;clip-path:none}
@@ -3966,6 +3981,10 @@ const supaApi = (() => {
     async voidCraft(code){ return ok(await sb.rpc('void_craft', {p_code:code})); },
     async myWeek(wk){ const r = ok(await sb.rpc('get_my_week', {p_week: wk==null ? null : wk})); return Array.isArray(r) ? r[0] : r; },
     async voidSnack(){ return ok(await sb.rpc('void_snack')); },
+    async voidSeals(){ const r = await sb.rpc('get_void_seals'); if(r.error) return null; return Array.isArray(r.data) ? r.data[0] : r.data; },   // 🔒 봉인된 도안 (voidseal.sql)
+    async voidSealWater(){ return ok(await sb.rpc('void_seal_water')); },
+    async voidSealOpen(id){ return ok(await sb.rpc('void_seal_open', {p_id:id})); },
+    async voidCharge(){ return ok(await sb.rpc('void_charge')); },
     async riftStarFeed(id, n){ return ok(await sb.rpc('isekai_star_feed', {p_egg:id, p_drops:n})); },
     async adminShards(id, amount, reason){ return ok(await sb.rpc('admin_isekai_give', {p_discord_id:id, p_amount:amount, p_reason:reason})); },
     async shardEventAdd(name, mult, start, end){ return ok(await sb.rpc('admin_isekai_event_add', {p_name:name, p_mult:mult, p_start:start, p_end:end})); },
@@ -6106,7 +6125,8 @@ const VOID_SET_FX = {base:{name:'떠도는 차원 조각'}, heaven:{name:'내려
 function voidSetFxHTML(sets){
   return (sets||[]).filter(t=>VOID_SET_FX[t] && VFX_ART['set-'+t]).map(t=>`<div class="vfx vimg setfx set-${t}" aria-hidden="true">${vfxDots('set-'+t)}</div>`).join('');
 }
-async function refreshVoid(){ try{ VOID = api.void ? await api.void() : null; if(VOID && VOID.catalog) setVCAT(VOID.catalog); }catch(e){ VOID = null; } }
+async function refreshVoid(){ try{ VOID = api.void ? await api.void() : null; if(VOID && VOID.catalog) setVCAT(VOID.catalog); }catch(e){ VOID = null; }
+  if(VOID && VOID.open && api.voidSeals){ try{ VOID.seal = await api.voidSeals(); }catch(e){ VOID.seal = null; } } }
 const isLegendFurn = c => LOTTO_FURN.some(x=>x.code===c);
 const voidHave = code => isVoidFurn(code) ? ((VOID && VOID.vinv || {})[code]||0) : ((INV||{})[code]||0);
 function voidFarmHours(V){
@@ -6213,6 +6233,26 @@ function renderVoidFarmBar(){
         : `<button class="mini" type="button" data-vsnack>🍖 간식 주기 · 🪙 ${VOID.snack_price||100}</button><span class="small">하루 한 번 · ${VOID.snack_hours||6}시간 동안 파편과 도안 2배</span>`}</div>`
     : `<span class="small">이세계 마물이 생기면 1종당 1시간에 💠 ${VOID.farm_rate||VOID_FARM_RATE}개씩 물어오고, 📜 아공간 가구 도안도 가끔 물어와요</span>`;
 }
+/* 🔒 봉인된 도안 · 💠 도안 게이지 채우기 (10-22 판 62, voidseal.sql) — 정화: 💧 세계수 물방울 + 🔥 마감의 불(작업실 시간 × 모닥불) */
+function renderVoidSeal(){
+  const el = document.getElementById('voidSealBox'); if(!el) return;
+  const S = VOID && VOID.seal; if(!S){ el.innerHTML = ''; return; }
+  const seals = S.seals || [], wn = S.water_need || 10, fn = S.fire_need || 30, drops = S.drops || 0;
+  const shards = (RIFT && RIFT.shards) ?? VOID.shards ?? 0, ct = S.charge_today || 0, cm = S.charge_max || 3, price = S.charge_price || 100, cells = S.charge_cells || 10;
+  const charge = `<div class="vcharge"><button class="mini" type="button" data-vcharge ${ct>=cm||shards<price?'disabled':''}>💠 ${price}로 📜 도안 게이지 +${cells}칸</button>
+    <span class="small">${ct>=cm ? '오늘은 다 채웠어요 · 새벽 12시에 다시' : `오늘 ${ct}/${cm}번 · 마물이 없어도 채울 수 있어요`}</span></div>`;
+  const firstW = seals.find(x=>x.water < wn), mult = bossFire(bossLit());
+  const card = x => { const wOk = x.water >= wn, fOk = x.fire >= fn, done = wOk && fOk;
+    return `<div class="vseal ${done?'ready':''}"><div class="vs-art">${done?'✨':'🔒'}<span>📜</span></div>
+      <div class="vs-bars"><div class="vs-bar w"><span style="width:${Math.min(100, x.water/wn*100)}%"></span><b>💧 ${x.water}/${wn}</b></div>
+        <div class="vs-bar f"><span style="width:${Math.min(100, x.fire/fn*100)}%"></span><b>🔥 ${Math.floor(x.fire)}/${fn}분</b></div></div>
+      <div class="vs-act">${done ? `<button class="mini ask-yes" type="button" data-vsealopen="${x.id}">✨ 봉인 풀기</button>`
+        : firstW && firstW.id===x.id ? `<button class="mini" type="button" data-vsealwater ${drops<1?'disabled':''}>💧 물방울 붓기 <span class="small">(가진 ${drops})</span></button>` : ''}
+        ${!fOk ? `<span class="small">🎧 작업실에서 일하면 타올라요${mult>1?` · 지금 🔥×${mult}`:''}</span>` : ''}</div></div>`; };
+  el.innerHTML = `<h4>🔒 봉인된 도안 <button class="mini" type="button" data-iskguide="craft">📖</button> <span class="small">${seals.length ? `${seals.length}장 · 💧 세계수 물방울 ${wn}개 + 🔥 마감의 불 ${fn}분이면 풀려요` : '마물이 물어오거나 게이지가 차면 봉인된 채로 들어와요'}</span></h4>
+    ${seals.slice(0,3).map(card).join('')}${seals.length>3 ? `<p class="small" style="text-align:center;margin:.2rem 0">…외 ${seals.length-3}장이 줄 서 있어요</p>` : ''}
+    ${charge}`;
+}
 function renderVoid(){
   const box = document.getElementById('voidBox'); if(!box) return;
   if(!RIFT || !RIFT.open || !ME || !VOID){ box.hidden = true; box.innerHTML = ''; box._k = ''; return; }
@@ -6227,7 +6267,7 @@ function renderVoid(){
   }
   const V = VOID, gp = V.grow_price ?? V.cols*V.rows*10, bgs = V.bgs || ['base'];
   const k = JSON.stringify([shards, V.fx, V.fxs, V.cap_lv, V.rate_lv, ME.stars, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).map(x=>x.item_code).join(), (V.farm_pets||[]).join(), VSEL, vbagTab, vcraftTab, V.vinv, V.bps, V.sets, Object.entries(INV||{}).filter(([c,n])=>n>0 && isLegendFurn(c)).length]);
-  if(box._k === k){ renderVoidRoom(); renderVoidFarmBar(); return; }
+  if(box._k === k){ renderVoidRoom(); renderVoidFarmBar(); renderVoidSeal(); return; }
   box._k = k;
   box.innerHTML = `<div class="void-head"><h3>🔮 아공간 <span class="small">${V.cols}×${V.rows}칸</span> <button class="mini" type="button" data-iskguide="void">📖 안내</button></h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
     <div class="void-bar">${Object.entries(VOID_BGS).map(([c,b])=>{ const own = bgs.includes(c);
@@ -6246,9 +6286,10 @@ function renderVoid(){
     <h4>🐾 마물 농장</h4>
     ${voidFarmHTML(V, true)}
     <div class="vfarm-bar" id="voidFarmBar"></div>
+    <div class="vseal-box" id="voidSealBox"></div>
     <div class="vfarm-up"><button class="mini" type="button" data-vup="cap" ${V.cap_price==null||shards<V.cap_price?'disabled':''}>🧺 바구니 Lv.${V.cap_lv||0} · ${V.farm_cap}시간치${V.cap_price!=null?` → ${V.farm_cap+4}시간 💠 ${V.cap_price}`:' (최대)'}</button>
       <button class="mini" type="button" data-vup="rate" ${V.rate_price==null||shards<V.rate_price?'disabled':''}>🦴 간식 그릇 Lv.${V.rate_lv||0} · 1시간 💠${V.farm_rate}${V.rate_price!=null?` → 💠${V.farm_rate+1} · 💠 ${V.rate_price}`:' (최대)'}</button></div>`;
-  renderVoidRoom(); renderVoidFarmBar(); startFarm(box.querySelector('.vfarm'));
+  renderVoidRoom(); renderVoidFarmBar(); renderVoidSeal(); startFarm(box.querySelector('.vfarm'));
 }
 async function voidAfter(r){ const x = Array.isArray(r) ? r[0] : r; if(x && x.open) VOID = x; else await refreshVoid(); await Promise.all([refreshRift(), refreshMine()]); renderTop(); renderBag(); renderRift(); }
 document.addEventListener('click', e=>{
@@ -6291,8 +6332,9 @@ document.addEventListener('click', e=>{
     await voidAfter(await api.voidFarmUp(up.dataset.vup)); toast(cap ? '🧺 바구니가 커졌어요!' : '🦴 마물들이 신났어요! 더 많이 물어올 거예요'); });
   if(e.target.closest('[data-vfarm]')) return act(async()=>{ const r0 = await api.voidCollect(), r = Array.isArray(r0) ? r0[0] : r0;
     await refreshVoid(); await refreshRift(); box_void_reset(); renderRift();
-    const bps = (r.bps||[]);
-    if(bps.length){ const fresh = bps.filter(b=>!b.dup), dup = bps.filter(b=>b.dup);
+    const sealedN = (r.bps||[]).filter(b=>b && b.sealed).length, bps = (r.bps||[]).filter(b=>b && !b.sealed);
+    if(sealedN) petParty('🔒', `마물들이 💠 이세계 파편 ${r.gain.toLocaleString()}개와 함께\n🔒 봉인된 도안 ${sealedN}장을 물어왔어요!${r.boosted?' 🍖':''}\n\n💧 세계수 물방울과 🔥 마감의 불로\n정화하면 무슨 가구인지 보여요`);
+    else if(bps.length){ const fresh = bps.filter(b=>!b.dup), dup = bps.filter(b=>b.dup);
       const line = b => { const f = vfurnOf(b.code) || {emoji:'📜', name:b.code}, t = (VOID_BGS[b.theme] || VOID_TAB_EXTRA[b.theme]); return `${f.emoji} ${f.name}${t?` (${t.name})`:''}`; };
       petParty('📜', `마물들이 💠 이세계 파편 ${r.gain.toLocaleString()}개와 함께\n가구 도안을 물어왔어요!${r.boosted?' 🍖':''}\n\n`
         + (fresh.length ? `✨ 새 도안\n${fresh.map(line).join('\n')}\n\n` : '')
@@ -6307,6 +6349,18 @@ document.addEventListener('click', e=>{
   if(e.target.closest('[data-vsnack]')) return act(async()=>{ const p = VOID.snack_price||100, hr = VOID.snack_hours||6;
     if(!(await ask(`🪙 ${p}코인으로 마물들에게 🍖 간식을 줄까요?\n앞으로 ${hr}시간 동안 💠 파편과 📜 도안 게이지를 2배로 물어와요. (하루 한 번)`))) return;
     await voidAfter(await api.voidSnack()); box_void_reset(); renderVoid(); toast('🍖 마물들이 신나게 간식을 먹어요! 이제 두 배로 물어올 거예요'); });
+  if(e.target.closest('[data-vcharge]')) return act(async()=>{ const S = VOID.seal || {}, p = S.charge_price||100, c = S.charge_cells||10;
+    if(!(await ask(`💠 이세계 파편 ${p}개로 📜 도안 게이지를 ${c}칸 채울까요?\n게이지가 ${VOID.bp_need||30}칸이 되면 🔒 봉인된 도안이 들어와요. (하루 ${S.charge_max||3}번)`))) return;
+    const r0 = await api.voidCharge(), r = Array.isArray(r0) ? r0[0] : r0; await voidAfter(r); box_void_reset(); renderVoid();
+    if(r && r.sealed) petParty('🔒', `게이지가 가득 찼어요!\n🔒 봉인된 도안 ${r.sealed}장이 들어왔어요\n\n💧 세계수 물방울과 🔥 마감의 불로\n정화하면 무슨 가구인지 보여요`);
+    else toast(`📜 도안 게이지를 ${c}칸 채웠어요!`); });
+  if(e.target.closest('[data-vsealwater]')) return act(async()=>{ await api.voidSealWater(); await voidAfter(null); box_void_reset(); renderVoid(); toast('💧 봉인된 도안에 세계수 물방울을 부었어요'); });
+  const vso = e.target.closest('[data-vsealopen]');
+  if(vso) return act(async()=>{ const r0 = await api.voidSealOpen(+vso.dataset.vsealopen), r = Array.isArray(r0) ? r0[0] : r0;
+    await voidAfter(null); box_void_reset(); renderVoid();
+    const f = vfurnOf(r.code) || {emoji:'📜', name:r.code}, t = VOID_BGS[r.theme] || VOID_TAB_EXTRA[r.theme];
+    petParty('✨', r.dup ? `봉인이 풀렸어요!\n\n${f.emoji} ${f.name}${t?` (${t.name})`:''}\n\n이미 있는 도안이라\n💠 이세계 파편 ${r.dup_shards||50}개로 바꿨어요`
+      : `봉인이 풀렸어요!\n\n${f.emoji} ${f.name}${t?` (${t.name})`:''}\n\n📜 제작대에서 만들 수 있어요!`); });
 });
 /* 📖 이세계 안내서 (10-22) — 숫자는 위 상수와 서버 값을 그대로 써요 */
 const ISK_GUIDE = [
@@ -6347,6 +6401,8 @@ const ISK_GUIDE = [
     <p class="tip">마물 종류가 많을수록 파편도 도안도 빨리 모여요!</p>`},
   {k:'craft', t:'📜 도안 · 제작대', h:()=>`<h4>📜 도안과 제작대</h4>
     <ul><li>농장 아래 📜 도안 게이지: 마물 1종이 1시간 놀면 1칸, 30칸이 차면 도안 1장 (마물 5종이면 6시간에 1장).</li>
+    <li>💠 파편 100개로 게이지를 10칸 채울 수 있어요. 하루 3번 · 마물이 없어도 돼요.</li>
+    <li>새 도안은 <b>🔒 봉인된 채로</b> 들어와요. 💧 세계수 물방울 10개를 붓고, 🎧 작업실에서 일해서 🔥 마감의 불 30분을 채우면 봉인이 풀리고 무슨 가구인지 보여요. 모닥불이 크면 불도 빨리 타요!</li>
     <li>도안 테마는 <b>지금 깔아 둔 배경 테마가 50%</b>, 나머지 테마가 나눠 가져요. 원하는 테마 배경을 깔아 두세요!</li>
     <li>이미 있는 도안이 또 나오면 💠 50개로 바뀌어요.</li>
     <li>도안은 한 번 얻으면 영구 레시피. 📜 제작대에서 💠 파편을 내고 몇 개든 만들어요. (😈 마왕의 옥좌만 1개)</li></ul>`},
@@ -9122,6 +9178,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 61</p>
+<p class="site-ver">마감의 숲 · 10-22 판 62</p>
 </body>
 </html>

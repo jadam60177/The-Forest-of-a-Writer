@@ -626,8 +626,24 @@ function makeDemoApi(){
         snack_from:V.snack_from||null, snack_until:V.snack_until||null, snack_today:V.snack_day===new Date().toDateString(), snack_price:100, snack_hours:6, coins:st.me.coins}; },
     vdSets(){ const V = st.vd; if(!V) return []; const placed = new Set(V.items.map(x=>x.item_code));
       return [...new Set(VCAT.map(f=>f.theme))].filter(t=>{ const s = VCAT.filter(f=>f.theme===t && f.in_set && f.active!==false); return s.length && s.every(f=>placed.has(f.code)); }); },
-    vdRollBp(){ const V = st.vd, themes = [...new Set(VCAT.filter(f=>f.active!==false).map(f=>f.theme))];
-      let th = V.bg; if(!themes.includes(th) || Math.random() >= .5){ const o = themes.filter(t=>t!==V.bg); th = o[Math.floor(Math.random()*o.length)] || themes[0]; }
+    // 🔒 봉인된 도안 (판 62): 생길 땐 봉인 → 풀 때 진짜 뽑기 (서버 voidseal.sql 과 같아요) · 미리보기는 불이 1분에 3분씩 타요
+    vdRollBp(){ const V = st.vd; V.seals = V.seals||[]; V.sid = (V.sid||0)+1; V.seals.push({id:V.sid, bg:V.bg, water:0, born:Date.now()}); return {sealed:true, id:V.sid}; },
+    vdSealFire(x){ return Math.min(30, Math.floor((Date.now() - x.born)/6e4*3)); },
+    async voidSeals(){ const V = st.vd; if(!V) return null; const today = new Date().toDateString(), m = st.me;
+      return {seals:(V.seals||[]).map(x=>({id:x.id, water:x.water, fire:this.vdSealFire(x), created_at:new Date(x.born).toISOString()})), water_need:10, fire_need:30, drops:m.drops||0,
+        charge_today:V.chDay===today ? (V.chN||0) : 0, charge_max:3, charge_price:100, charge_cells:10, gauge:V.bp_gauge||0, bp_need:30}; },
+    async voidSealWater(){ const V = st.vd, m = st.me, x = (V.seals||[]).find(s=>s.water<10); if(!x) fail('물방울이 필요한 봉인된 도안이 없어요');
+      const pour = Math.min(10 - x.water, m.drops||0); if(pour<=0) fail('💧 세계수 물방울이 없어요. 세계수 둘레나 산책로에서 주워 오세요');
+      m.drops -= pour; x.water += pour; persist(); return this.voidSeals(); },
+    async voidSealOpen(id){ const V = st.vd, i = (V.seals||[]).findIndex(s=>s.id===id); if(i<0) fail('이미 풀었거나 없는 도안이에요');
+      const x = V.seals[i]; if(x.water<10 || this.vdSealFire(x)<30) fail(`아직 정화가 덜 됐어요 (💧 ${x.water}/10 · 🔥 ${this.vdSealFire(x)}/30분)`);
+      const b = this.vdRollBpOpen(x.bg); V.seals.splice(i,1); persist(); return {...b, dup_shards:50, shards:this.iskState().shards}; },
+    async voidCharge(){ const V = st.vd; if(!V) fail('먼저 아공간 문을 열어 주세요'); const today = new Date().toDateString();
+      if(V.chDay!==today){ V.chDay = today; V.chN = 0; } if(V.chN>=3) fail('오늘은 다 채웠어요 (하루 3번). 새벽 12시에 다시 채울 수 있어요');
+      this.vdPay(100); V.chN++; let g = (V.bp_gauge||0) + 10, made = 0; while(g >= 30){ g -= 30; this.vdRollBp(); made++; } V.bp_gauge = g; persist();
+      return {sealed:made, gauge:g, bp_need:30, shards:this.iskState().shards, charge_today:V.chN, charge_max:3}; },
+    vdRollBpOpen(bg){ const V = st.vd, themes = [...new Set(VCAT.filter(f=>f.active!==false).map(f=>f.theme))];
+      bg = bg || V.bg; let th = bg; if(!themes.includes(th) || Math.random() >= .5){ const o = themes.filter(t=>t!==bg); th = o[Math.floor(Math.random()*o.length)] || themes[0]; }
       const pool = VCAT.filter(f=>f.theme===th && f.active!==false), f = pool[Math.floor(Math.random()*pool.length)];
       V.bps = V.bps||[]; const dup = V.bps.includes(f.code); if(dup) this.iskState().shards += 50; else V.bps.push(f.code); return {code:f.code, theme:th, dup}; },
     async voidCraft(code){ const V = st.vd, f = vfurnOf(code); if(!f) fail('없는 가구예요'); if(!(V.bps||[]).includes(code)) fail('📜 도안이 아직 없어요');
