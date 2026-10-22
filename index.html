@@ -7767,8 +7767,8 @@ function renderGiftForm(){
 }
 
 // 📢 숲 소식 (news.sql) — 괴물 토벌 · 균열 · 겨울 행사 · 광장 완공 · 새 주민. 디스코드에도 같은 글이 올라가요
-const NEWS_ICON = {boss:'⚔️', rift:'🌀', winter100:'⛄', winter150:'🎁', winter200:'❄️', plaza:'🏗️', welcome:'🌱'};
-const NEWS_TITLE = {boss:'괴물 토벌 소식', rift:'균열 소식', winter100:'겨울 행사 100%!', winter150:'겨울 행사 150%!', winter200:'겨울 행사 200%!', plaza:'광장 소식', welcome:'새 주민이 왔어요'};
+const NEWS_ICON = {weekly:'📰', boss_lv:'⭐', boss:'⚔️', rift:'🌀', winter100:'⛄', winter150:'🎁', winter200:'❄️', plaza:'🏗️', welcome:'🌱'};
+const NEWS_TITLE = {weekly:'마감의 숲 주간 소식', boss_lv:'강화 괴물 토벌!', boss:'괴물 토벌 소식', rift:'균열 소식', winter100:'겨울 행사 100%!', winter150:'겨울 행사 150%!', winter200:'겨울 행사 200%!', plaza:'광장 소식', welcome:'새 주민이 왔어요'};
 async function showNews(){
   if(!api.news) return;
   try{
@@ -7776,7 +7776,7 @@ async function showNews(){
     const list = (await api.news(last ? +last : 0)) || []; if(!list.length) return;
     const top = Math.max(...list.map(x=>+x.id)); try{ localStorage.setItem('majam-news-last', String(top)); }catch(e){}
     if(last == null) return;   // 처음엔 지난 소식은 건너뛰어요
-    mailAdd(list.filter(x=>!(x.kind==='welcome' && ME && String(x.body).includes(`「${ME.display_name}」`))).map(x=>({icon:NEWS_ICON[x.kind]||'📢', title:NEWS_TITLE[x.kind]||'숲 소식', body:String(x.body).replace(/^\S+\s/,'')})));
+    mailAdd(list.filter(x=>!(x.kind==='welcome' && ME && String(x.body).includes(`「${ME.display_name}」`))).map(x=>({icon:NEWS_ICON[x.kind]||'📢', title:NEWS_TITLE[x.kind]||'숲 소식', body: x.kind==='weekly' ? String(x.body).replace(/\*\*/g,'').split('\n').slice(1).join('\n') : String(x.body).replace(/^\S+\s/,'')})));
   }catch(e){}
 }
 async function showGifts(){   // 📬 우편함으로 모아요 (넣은 개수를 돌려줘요)
@@ -8960,6 +8960,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㊽</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㊾</p>
 </body>
 </html>
