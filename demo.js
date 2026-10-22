@@ -622,7 +622,7 @@ function makeDemoApi(){
       return {open:true, cols:V.cols, rows:V.rows, bg:V.bg, bgs:[...V.bgs], public:V.pub, items:V.items.map(x=>({...x})), farm_pets, farm_at:V.farm_at, farm_rate:VOID_FARM_RATE+rl, farm_cap:VOID_FARM_CAP+4*cl,
         cap_lv:cl, rate_lv:rl, cap_price:[300,500,800][cl] ?? null, rate_price:[500,800][rl] ?? null, fx:V.fx||'', fxs:[...(V.fxs||[])], fx_price:VOID_FX_PRICE, stars:st.me.stars||0,
         max_cols:VOID_MAX_C, max_rows:VOID_MAX_R, grow_price:V.cols*V.rows*10, bg_price:VOID_BG_PRICE,
-        catalog:VCAT.map(f=>({...f})), sets:this.vdSets(), bps:[...(V.bps||[])], vinv:{...(V.vinv||{})}, bp_saved:V.bp_gauge||0, bp_need:60, bp_dup:50,
+        catalog:VCAT.map(f=>({...f})), sets:this.vdSets(), bps:[...(V.bps||[])], vinv:{...(V.vinv||{})}, bp_saved:V.bp_gauge||0, bp_need:30, bp_dup:50,
         snack_from:V.snack_from||null, snack_until:V.snack_until||null, snack_today:V.snack_day===new Date().toDateString(), snack_price:100, snack_hours:6, coins:st.me.coins}; },
     vdSets(){ const V = st.vd; if(!V) return []; const placed = new Set(V.items.map(x=>x.item_code));
       return [...new Set(VCAT.map(f=>f.theme))].filter(t=>{ const s = VCAT.filter(f=>f.theme===t && f.in_set && f.active!==false); return s.length && s.every(f=>placed.has(f.code)); }); },
@@ -666,8 +666,8 @@ function makeDemoApi(){
       if(isVoidFurn(f.item_code)){ V.vinv = V.vinv||{}; V.vinv[f.item_code] = (V.vinv[f.item_code]||0)+1; } else st.inv[f.item_code] = (st.inv[f.item_code]||0)+1; persist(); return this.vdJson(); },
     async voidCollect(){ const j = this.vdJson(), n = j.farm_pets.length; if(!n) fail('농장에서 놀 이세계 마물이 아직 없어요. 알을 부화시켜 보세요');
       const gain = voidFarmReady(j) || n*6;   /* 미리보기는 바로 받아 볼 수 있게 */ const I = this.iskState(); I.shards += gain;
-      const f = voidFarmHours(j); let g = (st.vd.bp_gauge||0) + (f.hrs + f.boost) * n + 60;   /* 미리보기는 받을 때마다 도안 1장 더 */
-      const bps = []; while(g >= 60 && bps.length < 20){ g -= 60; bps.push(this.vdRollBp()); }
+      const f = voidFarmHours(j); let g = (st.vd.bp_gauge||0) + (f.hrs + f.boost) * n + 30;   /* 미리보기는 받을 때마다 도안 1장 더 */
+      const bps = []; while(g >= 30 && bps.length < 20){ g -= 30; bps.push(this.vdRollBp()); }
       st.vd.bp_gauge = g; st.vd.farm_at = new Date().toISOString(); persist();
       return {gain, shards:I.shards, pets:n, bps, dup_shards:bps.filter(b=>b.dup).length*50, boosted:f.boost>0}; },
     iskMult(){ const n = Date.now(); return Math.max(1, ...this.iskState().ev.filter(e=>Date.parse(e.starts_at)<=n && Date.parse(e.ends_at)>n).map(e=>e.mult)); },

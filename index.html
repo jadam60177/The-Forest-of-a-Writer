@@ -6202,7 +6202,7 @@ function renderVoidRoom(){
 function renderVoidFarmBar(){
   const b = document.getElementById('voidFarmBar'); if(!b || !VOID || !VOID.open) return;
   const n = (VOID.farm_pets||[]).length, ready = voidFarmReady(VOID), max = n * (VOID.farm_rate||VOID_FARM_RATE) * (VOID.farm_cap||VOID_FARM_CAP);
-  const need = VOID.bp_need || 60, g = voidGauge(VOID), waiting = Math.floor(g / need), pct = Math.min(100, Math.floor((g % need) / need * 100));
+  const need = VOID.bp_need || 30, g = voidGauge(VOID), waiting = Math.floor(g / need), pct = Math.min(100, Math.floor((g % need) / need * 100));
   const snackOn = VOID.snack_until && Date.parse(VOID.snack_until) > Date.now(), left = snackOn ? Math.ceil((Date.parse(VOID.snack_until) - Date.now())/6e4) : 0;
   const perHr = n ? Math.ceil((need - g % need) / n) : 0;
   b.innerHTML = n ? `<button class="mini ask-yes" type="button" data-vfarm ${ready<1?'disabled':''}>🧺 물어온 💠 ${ready.toLocaleString()}개${waiting?` + 📜 도안 ${waiting}장`:''} 받기</button><span class="small">마물 ${n}종 · 1종당 1시간에 💠 ${VOID.farm_rate||VOID_FARM_RATE} · 최대 ${VOID.farm_cap||VOID_FARM_CAP}시간치(💠 ${max})까지 쌓여요${ready>=max*(snackOn?2:1)?' · 꽉 찼어요!':''}</span>
@@ -6345,7 +6345,7 @@ const ISK_GUIDE = [
     <li>🍖 마물 간식: 하루 한 번 🪙 100 → 6시간 동안 💠 파편과 📜 도안 게이지가 2배.</li></ul>
     <p class="tip">마물 종류가 많을수록 파편도 도안도 빨리 모여요!</p>`},
   {k:'craft', t:'📜 도안 · 제작대', h:()=>`<h4>📜 도안과 제작대</h4>
-    <ul><li>농장 아래 📜 도안 게이지: 마물 1종이 1시간 놀면 1칸, 60칸이 차면 도안 1장 (마물 5종이면 12시간에 1장).</li>
+    <ul><li>농장 아래 📜 도안 게이지: 마물 1종이 1시간 놀면 1칸, 30칸이 차면 도안 1장 (마물 5종이면 6시간에 1장).</li>
     <li>도안 테마는 <b>지금 깔아 둔 배경 테마가 50%</b>, 나머지 테마가 나눠 가져요. 원하는 테마 배경을 깔아 두세요!</li>
     <li>이미 있는 도안이 또 나오면 💠 50개로 바뀌어요.</li>
     <li>도안은 한 번 얻으면 영구 레시피. 📜 제작대에서 💠 파편을 내고 몇 개든 만들어요. (😈 마왕의 옥좌만 1개)</li></ul>`},
@@ -9121,6 +9121,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 59</p>
+<p class="site-ver">마감의 숲 · 10-22 판 60</p>
 </body>
 </html>
