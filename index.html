@@ -6237,19 +6237,19 @@ function renderVoidFarmBar(){
 function renderVoidSeal(){
   const el = document.getElementById('voidSealBox'); if(!el) return;
   const S = VOID && VOID.seal; if(!S){ el.innerHTML = ''; return; }
-  const seals = S.seals || [], wn = S.water_need || 10, fn = S.fire_need || 30, drops = S.drops || 0;
+  const seals = S.seals || [], wn = S.water_need ?? 0, fn = S.fire_need || 30, drops = S.drops || 0;   // 10-23 판 63: 물방울 뺌(wn 0) — 접속 짧은 분들도 풀 수 있게, 🔥 마감의 불만
   const shards = (RIFT && RIFT.shards) ?? VOID.shards ?? 0, ct = S.charge_today || 0, cm = S.charge_max || 3, price = S.charge_price || 100, cells = S.charge_cells || 10;
   const charge = `<div class="vcharge"><button class="mini" type="button" data-vcharge ${ct>=cm||shards<price?'disabled':''}>💠 ${price}로 📜 도안 게이지 +${cells}칸</button>
     <span class="small">${ct>=cm ? '오늘은 다 채웠어요 · 새벽 12시에 다시' : `오늘 ${ct}/${cm}번 · 마물이 없어도 채울 수 있어요`}</span></div>`;
-  const firstW = seals.find(x=>x.water < wn), mult = bossFire(bossLit());
+  const firstW = wn > 0 ? seals.find(x=>x.water < wn) : null, mult = bossFire(bossLit());
   const card = x => { const wOk = x.water >= wn, fOk = x.fire >= fn, done = wOk && fOk;
     return `<div class="vseal ${done?'ready':''}"><div class="vs-art">${done?'✨':'🔒'}<span>📜</span></div>
-      <div class="vs-bars"><div class="vs-bar w"><span style="width:${Math.min(100, x.water/wn*100)}%"></span><b>💧 ${x.water}/${wn}</b></div>
+      <div class="vs-bars">${wn > 0 ? `<div class="vs-bar w"><span style="width:${Math.min(100, x.water/wn*100)}%"></span><b>💧 ${x.water}/${wn}</b></div>` : ''}
         <div class="vs-bar f"><span style="width:${Math.min(100, x.fire/fn*100)}%"></span><b>🔥 ${Math.floor(x.fire)}/${fn}분</b></div></div>
       <div class="vs-act">${done ? `<button class="mini ask-yes" type="button" data-vsealopen="${x.id}">✨ 봉인 풀기</button>`
         : firstW && firstW.id===x.id ? `<button class="mini" type="button" data-vsealwater ${drops<1?'disabled':''}>💧 물방울 붓기 <span class="small">(가진 ${drops})</span></button>` : ''}
         ${!fOk ? `<span class="small">🎧 작업실에서 일하면 타올라요${mult>1?` · 지금 🔥×${mult}`:''}</span>` : ''}</div></div>`; };
-  el.innerHTML = `<h4>🔒 봉인된 도안 <button class="mini" type="button" data-iskguide="craft">📖</button> <span class="small">${seals.length ? `${seals.length}장 · 💧 세계수 물방울 ${wn}개 + 🔥 마감의 불 ${fn}분이면 풀려요` : '마물이 물어오거나 게이지가 차면 봉인된 채로 들어와요'}</span></h4>
+  el.innerHTML = `<h4>🔒 봉인된 도안 <button class="mini" type="button" data-iskguide="craft">📖</button> <span class="small">${seals.length ? `${seals.length}장 · ${wn > 0 ? `💧 세계수 물방울 ${wn}개 + ` : '🎧 작업실에서 '}🔥 마감의 불 ${fn}분${wn > 0 ? '' : '을 채우면'} 풀려요` : '마물이 물어오거나 게이지가 차면 봉인된 채로 들어와요'}</span></h4>
     ${seals.slice(0,3).map(card).join('')}${seals.length>3 ? `<p class="small" style="text-align:center;margin:.2rem 0">…외 ${seals.length-3}장이 줄 서 있어요</p>` : ''}
     ${charge}`;
 }
@@ -6333,7 +6333,7 @@ document.addEventListener('click', e=>{
   if(e.target.closest('[data-vfarm]')) return act(async()=>{ const r0 = await api.voidCollect(), r = Array.isArray(r0) ? r0[0] : r0;
     await refreshVoid(); await refreshRift(); box_void_reset(); renderRift();
     const sealedN = (r.bps||[]).filter(b=>b && b.sealed).length, bps = (r.bps||[]).filter(b=>b && !b.sealed);
-    if(sealedN) petParty('🔒', `마물들이 💠 이세계 파편 ${r.gain.toLocaleString()}개와 함께\n🔒 봉인된 도안 ${sealedN}장을 물어왔어요!${r.boosted?' 🍖':''}\n\n💧 세계수 물방울과 🔥 마감의 불로\n정화하면 무슨 가구인지 보여요`);
+    if(sealedN) petParty('🔒', `마물들이 💠 이세계 파편 ${r.gain.toLocaleString()}개와 함께\n🔒 봉인된 도안 ${sealedN}장을 물어왔어요!${r.boosted?' 🍖':''}\n\n🎧 작업실에서 🔥 마감의 불 30분을 채우면\n봉인이 풀리고 무슨 가구인지 보여요`);
     else if(bps.length){ const fresh = bps.filter(b=>!b.dup), dup = bps.filter(b=>b.dup);
       const line = b => { const f = vfurnOf(b.code) || {emoji:'📜', name:b.code}, t = (VOID_BGS[b.theme] || VOID_TAB_EXTRA[b.theme]); return `${f.emoji} ${f.name}${t?` (${t.name})`:''}`; };
       petParty('📜', `마물들이 💠 이세계 파편 ${r.gain.toLocaleString()}개와 함께\n가구 도안을 물어왔어요!${r.boosted?' 🍖':''}\n\n`
@@ -6352,7 +6352,7 @@ document.addEventListener('click', e=>{
   if(e.target.closest('[data-vcharge]')) return act(async()=>{ const S = VOID.seal || {}, p = S.charge_price||100, c = S.charge_cells||10;
     if(!(await ask(`💠 이세계 파편 ${p}개로 📜 도안 게이지를 ${c}칸 채울까요?\n게이지가 ${VOID.bp_need||30}칸이 되면 🔒 봉인된 도안이 들어와요. (하루 ${S.charge_max||3}번)`))) return;
     const r0 = await api.voidCharge(), r = Array.isArray(r0) ? r0[0] : r0; await voidAfter(r); box_void_reset(); renderVoid();
-    if(r && r.sealed) petParty('🔒', `게이지가 가득 찼어요!\n🔒 봉인된 도안 ${r.sealed}장이 들어왔어요\n\n💧 세계수 물방울과 🔥 마감의 불로\n정화하면 무슨 가구인지 보여요`);
+    if(r && r.sealed) petParty('🔒', `게이지가 가득 찼어요!\n🔒 봉인된 도안 ${r.sealed}장이 들어왔어요\n\n🎧 작업실에서 🔥 마감의 불 30분을 채우면\n봉인이 풀리고 무슨 가구인지 보여요`);
     else toast(`📜 도안 게이지를 ${c}칸 채웠어요!`); });
   if(e.target.closest('[data-vsealwater]')) return act(async()=>{ await api.voidSealWater(); await voidAfter(null); box_void_reset(); renderVoid(); toast('💧 봉인된 도안에 세계수 물방울을 부었어요'); });
   const vso = e.target.closest('[data-vsealopen]');
@@ -6402,7 +6402,7 @@ const ISK_GUIDE = [
   {k:'craft', t:'📜 도안 · 제작대', h:()=>`<h4>📜 도안과 제작대</h4>
     <ul><li>농장 아래 📜 도안 게이지: 마물 1종이 1시간 놀면 1칸, 30칸이 차면 도안 1장 (마물 5종이면 6시간에 1장).</li>
     <li>💠 파편 100개로 게이지를 10칸 채울 수 있어요. 하루 3번 · 마물이 없어도 돼요.</li>
-    <li>새 도안은 <b>🔒 봉인된 채로</b> 들어와요. 💧 세계수 물방울 10개를 붓고, 🎧 작업실에서 일해서 🔥 마감의 불 30분을 채우면 봉인이 풀리고 무슨 가구인지 보여요. 모닥불이 크면 불도 빨리 타요!</li>
+    <li>새 도안은 <b>🔒 봉인된 채로</b> 들어와요. 🎧 작업실에서 일해서 🔥 마감의 불 30분을 채우면 봉인이 풀리고 무슨 가구인지 보여요. 모닥불이 크면 불도 빨리 타요!</li>
     <li>도안 테마는 <b>지금 깔아 둔 배경 테마가 50%</b>, 나머지 테마가 나눠 가져요. 원하는 테마 배경을 깔아 두세요!</li>
     <li>이미 있는 도안이 또 나오면 💠 50개로 바뀌어요.</li>
     <li>도안은 한 번 얻으면 영구 레시피. 📜 제작대에서 💠 파편을 내고 몇 개든 만들어요. (😈 마왕의 옥좌만 1개)</li></ul>`},
@@ -9178,6 +9178,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 62</p>
+<p class="site-ver">마감의 숲 · 10-23 판 63</p>
 </body>
 </html>
