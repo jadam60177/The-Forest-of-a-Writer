@@ -964,6 +964,29 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .bag-box .items{margin-top:.25rem}
 .sell-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.1rem 0 .4rem}
 .sell-bar .small{color:var(--muted)}
+/* 🏷️ 한정 딱지 (10-22) — 「🎃 26 할로윈 한정」 상점엔 남은 날짜도 */
+.item .ltag{display:inline-block;margin-top:.15rem;border-radius:999px;padding:0 .45rem;font-size:.62rem;line-height:1.7;font-family:"Jua",sans-serif;white-space:nowrap;background:rgba(224,128,47,.16);color:#FFC594;border:1px solid rgba(224,128,47,.6)}
+.item .ltag.winter{background:rgba(141,184,224,.16);color:#BFDCF5;border-color:rgba(141,184,224,.6)}
+.item .lleft{font-size:.66rem;color:#FFB27A;line-height:1.4}
+:root[data-mode="day"] .item .ltag{background:#FFF1E2;color:#9A4A1E;border-color:#E0802F}
+:root[data-mode="day"] .item .ltag.winter{background:#E6F4FF;color:#24476D;border-color:#8DB8E0}
+:root[data-mode="day"] .item .lleft{color:#B4561E}
+body.compact-items .item .ltag{font-size:.52rem;padding:0 .25rem}
+/* 🧺 여러 개 한꺼번에 팔기 (10-22) */
+.bag-box.multi #bag .item{outline:2px dashed rgba(255,206,92,.4);outline-offset:-3px}
+.bag-box.multi #bag .item.picked{outline:3px solid var(--accent);background:rgba(255,206,92,.12)}
+.bag-box.multi #bag .item.nosell{opacity:.45;outline:none}
+.item .qty{display:flex;align-items:center;justify-content:center;gap:.2rem;margin-top:.2rem;flex-wrap:wrap}
+.item .qty button{min-width:26px;height:26px;padding:0 .3rem;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer}
+.item .qty button:disabled{opacity:.35;cursor:default}
+.item .qty b{min-width:2.2rem;text-align:center;font-weight:400;font-size:.82rem}
+.multi-bar{position:sticky;bottom:0;z-index:2;margin-top:.6rem;padding:.55rem .75rem;border-radius:14px;background:rgba(18,21,38,.95);border:1px solid rgba(255,206,92,.45);display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.multi-bar[hidden]{display:none}
+.multi-bar .sum{flex:1 1 12rem}
+.multi-bar .sum b{font-family:"Jua",sans-serif;font-weight:400;font-size:1.02rem;color:var(--accent)}
+.multi-bar .warn{color:#FFB27A;font-size:.82rem}
+:root[data-mode="day"] .multi-bar{background:rgba(255,250,240,.97)}
+:root[data-mode="day"] .multi-bar .warn{color:#B4561E}
 .bag-box.selling #bag .item{outline:2px dashed rgba(255,206,92,.55);outline-offset:-3px}
 .bag-box.selling #bag .item.nosell{opacity:.45;outline:none}
 
@@ -2147,7 +2170,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <button class="shop-open deco-open" type="button" data-goto-deco><span class="so-ic" aria-hidden="true">🎨</span><span class="so-tx"><b>집 겉모습 꾸미기</b><span class="small" id="decoOpenSub"></span></span><span class="so-go" aria-hidden="true">열기 ›</span></button>
       <details class="shop-box bag-box" id="bagBox" open>
         <summary><span class="jua">🎒 가방</span> <span class="small" id="bagCount"></span></summary>
-        <div class="sell-bar"><button class="mini" id="sellBtn" type="button">🪙 되팔기</button><button class="mini compact-btn" type="button" data-compact>▦ 작게 보기</button><span class="small" id="sellNote"></span></div>
+        <div class="sell-bar"><button class="mini" id="sellBtn" type="button">🪙 되팔기</button><button class="mini" id="multiBtn" type="button">🧺 여러 개 팔기</button><button class="mini compact-btn" type="button" data-compact>▦ 작게 보기</button><span class="small" id="sellNote"></span></div>
         <div class="shop-tabs bag-tabs" id="bagTabs" role="tablist">
           <button class="shop-tab" data-bagtab="all" role="tab">전체 <span id="bcAll"></span></button>
           <button class="shop-tab" data-bagtab="furniture" role="tab">🪑 가구 <span id="bcF"></span></button>
@@ -2157,6 +2180,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
           <button class="shop-tab" data-bagtab="rug" role="tab">🧶 러그 <span id="bcR"></span></button>
         </div>
         <div class="items bag-scroll" id="bag"></div>
+        <div class="multi-bar" id="multiBar" hidden><span class="sum" id="multiSum"></span><button class="mini" id="multiAll" type="button">이 칸 전부 고르기</button><button class="mini" id="multiClear" type="button">비우기</button><button class="mini ask-yes" id="multiGo" type="button">팔기</button></div>
       </details>
       <div class="rules">
         <p>집은 누적 작업 시간으로 커지고, 집이 클수록 방도 넓어져요.</p>
@@ -3652,6 +3676,12 @@ const demoApi = (() => {
       if(!(st.inv[code]>0)) fail('가방에 없는 가구예요');
       st.inv[code]--; st.me.coins+=sp; persist(); return st.me.coins;
     },
+    async sellMany(items){   // 🧺 [{code, qty}] — 하나라도 안 되면 아무것도 안 팔아요
+      let add = 0;
+      for(const {code,qty} of items){ const sp = sellPrice(code); if(!sp) fail('상점 가구만 팔 수 있어요');
+        if(!(qty>0) || (st.inv[code]||0) < qty) fail(`${itemOf(code).name}${jo(itemOf(code).name,'이','가')} 가방에 모자라요`); add += sp*qty; }
+      items.forEach(({code,qty})=>{ st.inv[code]-=qty; }); st.me.coins+=add; persist(); return st.me.coins;
+    },
     async place(code,r,c,rot,room=0){
       const it=item(code); let w=it.w,h=it.h; if((rot||0)%2) [w,h]=[h,w];
       const cur=roomOf(st.me.total_minutes, st.me.room_blocks);
@@ -4154,6 +4184,14 @@ const supaApi = (() => {
     },
     async buy(code){ return ok(await sb.rpc('buy_item_ex', {p_code:code})); },
     async sell(code){ return ok(await sb.rpc('sell_item', {p_code:code})); },
+    // 🧺 여러 개 한꺼번에 (10-22) — sell_items 가 없으면(sell.sql 아직 안 돌렸으면) 하나씩 sell_item 으로
+    async sellMany(items){
+      const r = await sb.rpc('sell_items', {p_items: items.map(x=>({code:x.code, qty:x.qty}))});
+      if(!r.error) return r.data;
+      if(!/sell_items|function|schema cache|PGRST202/i.test(String(r.error.message||'')+String(r.error.code||''))) return ok(r);
+      let last; for(const {code,qty} of items) for(let k=0;k<qty;k++) last = ok(await sb.rpc('sell_item', {p_code:code}));
+      return last;
+    },
     async place(code,r,c,rot,room){
       const { error } = await sb.rpc('place_item_rot', {p_code:code, p_r:r, p_c:c, p_rot:rot||0, p_room:room||0});
       if(!error) return;
@@ -7427,6 +7465,25 @@ function ownedCount(code){
 const sellPrice = code => { if(GACHA.some(g=>g.code===code) || GACHA_DEFAULT.some(g=>g.code===code)) return 0;
   const it = SHOP.find(s=>s.code===code) || DEFAULT_SHOP.find(s=>s.code===code); return it && it.price>0 ? it.price : 0; };
 let sellMode = false;
+// 🧺 여러 개 한꺼번에 팔기 (10-22) — 가방에 든 것만 (방에 놓은 건 안 세요)
+let multiMode = false; const PICK = {};
+// 🏷️ 한정 딱지 (10-22) — limited_until 이 있으면 한정. 「🎃 26 할로윈 한정」 = 시즌 그림 + 끝나는 해 두 자리 + 이름
+// 상점에서 사라진 뒤에도 DEFAULT_SHOP 에서 찾아서 가방엔 딱지가 계속 남아요. 복권·보따리 소품엔 안 붙어요.
+function limInfo(code){
+  if(GACHA.some(g=>g.code===code) || GACHA_DEFAULT.some(g=>g.code===code) || LOTTO_FURN.some(x=>x.code===code)) return null;
+  const it = SHOP.find(s=>s.code===code && s.limited_until) || DEFAULT_SHOP.find(s=>s.code===code && s.limited_until);
+  if(!it) return null;
+  const end = new Date(it.limited_until).getTime(); if(!isFinite(end)) return null;
+  const last = new Date(end - 1);
+  const yy = new Intl.DateTimeFormat('en-US',{year:'2-digit', timeZone:'Asia/Seoul'}).format(last);
+  const parts = String(it.season || '⏰ 기간').trim().split(/\s+/);
+  const emo = parts.length>1 ? parts[0] : '', name = (parts.length>1 ? parts.slice(1) : parts).join(' ');
+  const txt = `${emo?emo+' ':''}${/^\d/.test(name) ? '' : yy+' '}${name} 한정`;
+  const dday = Math.ceil((end - Date.now())/86400000);
+  const left = end > Date.now() ? `${last.toLocaleDateString('ko-KR',{month:'numeric', day:'numeric', timeZone:'Asia/Seoul'}).replace(/\.\s*/g,'/').replace(/\/$/,'')}까지 · ${dday<=1?'오늘 마감!':'D-'+(dday-1)}` : '';
+  return {txt, cls: /겨울|❄/.test(txt) ? 'winter' : '', left};
+}
+const limTag = code => { const L = limInfo(code); return L ? `<span class="ltag ${L.cls}">${esc(L.txt)}</span>` : ''; };
 // 🏅 가방 등급 표시 (10-13 주민 건의 「전설 아이템이 뭔지 헷갈려요」) — 보따리 소품은 일반·희귀·전설, 복권 가구는 👑 전설 가구
 function gradeOf(code){
   const g = GACHA.find(x=>x.code===code) || GACHA_DEFAULT.find(x=>x.code===code), r = g && (g.rarity || g.gacha_rarity);
@@ -7446,6 +7503,22 @@ function bagKind(code){
   if(/^wall_/.test(code) || SHOP_WALL.has(code)) return 'wall';
   return 'furniture';
 }
+function multiSum(){
+  let n = 0, coins = 0, lim = 0; const items = [];
+  for(const [code,q] of Object.entries(PICK)){ if(!(q>0)) continue; const sp = sellPrice(code); if(!sp) continue;
+    n += q; coins += q*sp; if(limInfo(code)) lim += q; items.push({code, qty:q}); }
+  return {n, coins, lim, items};
+}
+function renderMultiBar(){
+  const bar = document.getElementById('multiBar'); if(!bar) return;
+  bar.hidden = !multiMode; if(!multiMode) return;
+  const S = multiSum();
+  document.getElementById('multiSum').innerHTML = S.n
+    ? `<b>${S.n}개 · 🪙 ${S.coins.toLocaleString()} 받아요</b>${S.lim?`<br><span class="warn">⚠️ 이 중 한정 가구 ${S.lim}개는 다시 살 수 없어요</span>`:''}`
+    : '<span class="small">팔 가구를 골라 주세요</span>';
+  document.getElementById('multiGo').disabled = !S.n;
+  document.getElementById('multiClear').disabled = !S.n;
+}
 function renderBag(){
   const GR = {lotto:0, legend:1, rare:2, common:3};   // 🎒 가방은 등급순: 👑 전설 가구 → 전설 → 희귀 → 일반 → 상점 가구 (주민 건의 10-14)
   const entries = Object.entries(INV).filter(([,n])=>n>0).map((e,k)=>[e,k])
@@ -7459,13 +7532,23 @@ function renderBag(){
       b.classList.toggle('on',on); b.classList.toggle('zero',!cnt[k] && !on); b.setAttribute('aria-selected',on);
       document.getElementById(ids[k]).textContent = cnt[k]; }); }
   const shown = bagTab==='all' ? entries : entries.filter(([code])=>bagKind(code)===bagTab);
+  if(multiMode) sellMode = false;
+  for(const k in PICK){ const have = INV[k]||0; if(!(PICK[k]>0) || !sellPrice(k)) delete PICK[k]; else if(PICK[k]>have){ if(have>0) PICK[k]=have; else delete PICK[k]; } }
   document.getElementById('bagBox').classList.toggle('selling', sellMode);
+  document.getElementById('bagBox').classList.toggle('multi', multiMode);
   document.getElementById('sellBtn').textContent = sellMode ? '✔ 되팔기 끝' : '🪙 되팔기';
-  document.getElementById('sellNote').textContent = sellMode ? '팔 가구를 누르세요 · 산 값 그대로 돌려받아요 (방에 놓은 건 먼저 치워 주세요)' : '';
+  document.getElementById('multiBtn').textContent = multiMode ? '✔ 여러 개 팔기 끝' : '🧺 여러 개 팔기';
+  document.getElementById('sellNote').textContent = sellMode ? '팔 가구를 누르세요 · 산 값 그대로 돌려받아요 (방에 놓은 건 먼저 치워 주세요)'
+    : multiMode ? '칸마다 개수를 고르고 아래 「팔기」를 한 번만 누르세요 · 가방에 든 것만 세요 (방에 놓은 건 안 세요)' : '';
+  renderMultiBar();
   document.getElementById('bag').innerHTML = shown.length ? shown.map(([code,n])=>{
     const it = itemOf(code), sp = sellPrice(code);
-    if(sellMode) return `<button class="item ${gradeCls(code)} ${sp?'':'nosell'}" data-sell="${esc(code)}" ${sp?'':'disabled'}>${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span><span class="p">${sp?`🪙 ${sp}에 팔기`:'팔 수 없어요'} · ×${n}</span></button>`;
-    return `<button class="item ${gradeCls(code)} ${selected===code?'sel':''}" data-bag="${esc(code)}" ${gradeOf(code)?`title="${GRADE_LABEL[gradeOf(code)].replace('👑 ','')}"`:''}>${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)} · ${sizeText(it)}</span><span class="p">×${n}</span></button>`;
+    if(multiMode){ const q = PICK[code]||0, c = esc(code);
+      if(!sp) return `<div class="item ${gradeCls(code)} nosell">${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span>${limTag(code)}<span class="p">팔 수 없어요 · ×${n}</span></div>`;
+      return `<div class="item ${gradeCls(code)} ${q?'picked':''}">${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span>${limTag(code)}<span class="p">🪙 ${sp} · 가방 ×${n}</span>`
+        + `<div class="qty"><button type="button" data-pick="${c}" data-d="-1" ${q?'':'disabled'} aria-label="하나 빼기">−</button><b>${q}개</b><button type="button" data-pick="${c}" data-d="1" ${q>=n?'disabled':''} aria-label="하나 더">＋</button><button type="button" data-pick="${c}" data-d="all" ${q>=n?'disabled':''}>전부</button></div></div>`; }
+    if(sellMode) return `<button class="item ${gradeCls(code)} ${sp?'':'nosell'}" data-sell="${esc(code)}" ${sp?'':'disabled'}>${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span>${limTag(code)}<span class="p">${sp?`🪙 ${sp}에 팔기`:'팔 수 없어요'} · ×${n}</span></button>`;
+    return `<button class="item ${gradeCls(code)} ${selected===code?'sel':''}" data-bag="${esc(code)}" ${gradeOf(code)?`title="${GRADE_LABEL[gradeOf(code)].replace('👑 ','')}"`:''}>${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)} · ${sizeText(it)}</span>${limTag(code)}<span class="p">×${n}</span></button>`;
   }).join('') : `<p class="empty" style="grid-column:1/-1">${entries.length ? '이 칸에는 아직 아무것도 없어요.' : '가방이 비어 있어요. 상점에서 가구를 사 보세요.'}</p>`;
   const regular = SHOP.filter(x=>!x.limited_until), lim = SHOP.filter(x=>x.limited_until && isLive(x));
   document.getElementById('shopCount').textContent = `${regular.length+lim.length}개`;
@@ -7512,7 +7595,7 @@ function renderBag(){
   if(q) limNote = `<p class="shop-note">「${esc(shopQ.trim())}」 찾은 물건 ${list.length}개 · 모든 칸에서 찾았어요</p>`;
   const empty = list.length ? '' : `<p class="empty" style="grid-column:1/-1">${q ? '찾는 물건이 없어요. 다른 이름으로 찾아볼까요?' : shopNotOwned ? '이 칸 물건은 벌써 다 갖고 있어요!' : '아직 물건이 없어요.'}</p>`;
   document.getElementById('shop').innerHTML = limNote + empty + list.map(s=>{ const own = ownedCount(s.code); return ''+
-    `<button class="item ${own?'owned':''}" data-buy="${esc(s.code)}" ${ME.coins<s.price?'disabled':''}>${isNewItem(s)?'<span class="nwb">NEW</span>':''}${own?`<span class="own" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${own}</span>`:''}<span class="em">${ico(s)}</span><span class="t">${esc(s.name)} · ${sizeText(s)}</span><span class="p">🪙 ${s.price}</span></button>`; }
+    `<button class="item ${own?'owned':''}" data-buy="${esc(s.code)}" ${ME.coins<s.price?'disabled':''}>${isNewItem(s)?'<span class="nwb">NEW</span>':''}${own?`<span class="own" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${own}</span>`:''}<span class="em">${ico(s)}</span><span class="t">${esc(s.name)} · ${sizeText(s)}</span><span class="p">🪙 ${s.price}</span>${(L=>L?`<span class="ltag ${L.cls}">${esc(L.txt)}</span>${L.left?`<span class="lleft">${esc(L.left)}</span>`:''}`:'')(limInfo(s.code))}</button>`; }
   ).join('');
 }
 
@@ -7699,7 +7782,7 @@ async function act(fn){
 
 document.addEventListener('click', e=>{
   if(e.target.closest('#rotBtn')){ nextRot(); setHint(); renderMyHouse(); return; }
-  if(e.target.closest('#tintBtn')){ TINT_MODE = true; selected = null; sellMode = false; setHint(); renderMyHouse(); renderBag(); return; }
+  if(e.target.closest('#tintBtn')){ TINT_MODE = true; selected = null; sellMode = false; multiMode = false; setHint(); renderMyHouse(); renderBag(); return; }
   if(e.target.closest('#tintDone')){ TINT_MODE = false; setHint(); renderMyHouse(); return; }
 
   const bg = e.target.closest('[data-bag]');
@@ -7707,10 +7790,29 @@ document.addEventListener('click', e=>{
     if(selected && matchMedia('(max-width:820px)').matches) document.querySelector('#tab-home .room-wrap').scrollIntoView({behavior:'smooth', block:'center'});   // 고른 가구를 바로 놓을 수 있게
     return; }
 
-  if(e.target.closest('#sellBtn')){ sellMode = !sellMode; if(sellMode){ selected=null; setHint(); renderMyHouse(); } renderBag(); return; }
+  if(e.target.closest('#sellBtn')){ sellMode = !sellMode; if(sellMode){ multiMode=false; selected=null; setHint(); renderMyHouse(); } renderBag(); return; }
+  if(e.target.closest('#multiBtn')){ multiMode = !multiMode; for(const k in PICK) delete PICK[k]; if(multiMode){ sellMode=false; selected=null; setHint(); renderMyHouse(); } renderBag(); return; }
+  const pk = e.target.closest('[data-pick]');
+  if(pk){ const code = pk.dataset.pick, have = INV[code]||0, d = pk.dataset.d;
+    PICK[code] = d==='all' ? have : Math.max(0, Math.min(have, (PICK[code]||0) + Number(d)));
+    if(!PICK[code]) delete PICK[code]; renderBag(); return; }
+  if(e.target.closest('#multiAll')){
+    Object.entries(INV).filter(([code,n])=>n>0 && sellPrice(code) && (bagTab==='all' || bagKind(code)===bagTab)).forEach(([code,n])=>{ PICK[code]=n; });
+    renderBag(); return; }
+  if(e.target.closest('#multiClear')){ for(const k in PICK) delete PICK[k]; renderBag(); return; }
+  if(e.target.closest('#multiGo')) return act(async()=>{
+    const S = multiSum(); if(!S.n) return;
+    if(!(await ask(`${S.n}개를 🪙 ${S.coins.toLocaleString()}코인에 팔까요?${S.lim?`\n\n⚠️ 이 중 한정 가구 ${S.lim}개는 다시 살 수 없어요!`:''}`))) return;
+    await api.sellMany(S.items);
+    for(const k in PICK) delete PICK[k];
+    await refreshMine(); toast(`🧺 ${S.n}개를 팔고 ${S.coins.toLocaleString()}코인을 받았어요`);
+    renderTop(); renderBag();
+  });
   const sl = e.target.closest('[data-sell]');
   if(sl) return act(async()=>{
     const it = itemOf(sl.dataset.sell), sp = sellPrice(it.code); if(!sp) return;
+    const L = limInfo(it.code);
+    if(L && !(await ask(`${L.txt} 가구예요. 팔면 다시 살 수 없어요!\n정말 팔까요?`))) return;
     if(!(await ask(`${it.name} 1개를 🪙 ${sp}코인에 팔까요?`))) return;
     await api.sell(it.code); await refreshMine(); toast(`🪙 ${it.name}${jo(it.name,'을','를')} 팔고 ${sp}코인을 받았어요`);
     renderTop(); renderBag();
@@ -8683,6 +8785,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑱</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑲</p>
 </body>
 </html>
