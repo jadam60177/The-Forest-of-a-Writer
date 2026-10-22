@@ -5326,11 +5326,11 @@ document.addEventListener('click', async e=>{
    무기는 누적 작업 시간(집이 커지는 시간)으로 열리고, 괴물마다 잘 듣는 무기가 있어요(2배).
    쓰러뜨리면 한 번이라도 때린 주민 모두 🪙 + 괴물 도감 등록. 못 잡아도 잃는 건 없어요.
    공격권은 다음 주로 넘어가요 (10-22 bosslv.sql · 최대 24장). 첫 괴물은 10-22(목) 0시 ~ 10-30(금) 0시. */
-const BOSS_TICKET_FUEL = 60, BOSS_TICKET_MAX = 24, BOSS_REWARD = 2000, BOSS_WEAK = 2, BOSS_REWARD_HITS = 10, BOSS_LV_COIN = 1000, BOSS_LV_SHARDS = 200, BOSS_LV_UP = .5;   // ⭐ 강화 괴물 (bosslv.sql)   // 토벌 보상은 이번 주 10번 이상 때린 주민만 (boss10.sql)
+const BOSS_TICKET_FUEL = 30, BOSS_TICKET_MAX = 24, BOSS_REWARD = 2000, BOSS_WEAK = 2, BOSS_REWARD_HITS = 10, BOSS_LV_COIN = 1000, BOSS_LV_SHARDS = 200, BOSS_LV_UP = .5;   // ⭐ 강화 괴물 (bosslv.sql)   // 토벌 보상은 이번 주 10번 이상 때린 주민만 (boss10.sql)
 const numJo = (n, a, b) => '2459'.includes(String(n).slice(-1)) ? b : a;   // 숫자 뒤 조사 (3을 · 2를)
 const bossNeed = () => (BOSS && BOSS.reward_hits) || BOSS_REWARD_HITS, bossMyHits = () => (BOSS && BOSS.my_hits) || 0;
 // 🪙 때릴 때마다 코인 (10-22): 5~20개 랜덤, BOSS_LUCKY 확률로 💰 50개 대박 — boss.sql 의 boss_hit 과 같아야 해요
-const BOSS_HIT_COIN = [5, 20], BOSS_LUCKY = .05, BOSS_LUCKY_COIN = 50;
+const BOSS_HIT_COIN = [3, 10], BOSS_LUCKY = .05, BOSS_LUCKY_COIN = 50;
 const BOSS_FIRE = [[5,2],[3,1.5],[2,1.2],[0,1]];   // 작업실에 같이 있는 사람 수 → 공격권 모이는 속도
 const bossFire = n => (BOSS_FIRE.find(([k])=>n>=k) || [0,1])[1];
 const bossWeek = () => Date.now() < Date.parse('2026-10-30T00:00:00+09:00') ? 0 : Math.floor((Date.now() - Date.parse('2026-10-30T00:00:00+09:00'))/604800e3) + 1;   // 미리보기용 (진짜는 서버가 정해요)
@@ -5481,7 +5481,7 @@ function renderBoss(force){
     ${down ? `<p class="boss-done">${BOSS.my_damage ? `이번 주 내가 준 피해 <b>${BOSS.my_damage.toLocaleString()}</b> · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · ${bossMyHits()>=bossNeed() ? `토벌 보상 🪙 ${BOSS_REWARD.toLocaleString()}를 보내고 📖 괴물 도감에 올렸어요` : `${bossMyHits()}번 때려서 토벌 보상(${bossNeed()}번 이상)은 아쉽게 못 받았어요. 다음 주엔 같이 잡아요!`}` : '이번 주엔 못 때렸지만, 다음 주 괴물은 같이 잡아요!'}</p>` : `
     <div class="boss-ctrl">
       <div class="boss-tix"><span class="tix">🎫 공격권 <b>${t}</b>장</span>
-        <span class="small">${full ? `가득 찼어요 (최대 ${BOSS_TICKET_MAX}장) · 얼른 쓰러 와요!` : mine ? `다음 장까지 약 ${nextMin}분` : `작업실에 있으면 1시간에 1장씩 모여요`}</span></div>
+        <span class="small">${full ? `가득 찼어요 (최대 ${BOSS_TICKET_MAX}장) · 얼른 쓰러 와요!` : mine ? `다음 장까지 약 ${nextMin}분` : `작업실에 있으면 30분에 1장씩 모여요`}</span></div>
       <div class="wpn-row" role="group" aria-label="무기 고르기">${wpns}</div>
       <p class="small boss-hint">${knowWeak ? `💥 이번 주 괴물은 <b>${weakW.emoji} ${esc(weakW.name)}</b>에 약해요 (피해 ${BOSS_WEAK}배)` : `💥 이번 주 괴물에게 잘 듣는 무기가 있대요. 집이 더 커지면 알 수 있어요`}</p>
       <div class="boss-btns">
@@ -5556,7 +5556,7 @@ function bossPop(stage, text, cls, k){
 async function bossAttack(n){
   if(!BOSS || BOSS.hp<=0 || busy) return;
   const w = bossWeaponNow(), m = monsterOf(BOSS.monster), cnt = n==='all' ? BOSS.tickets : 1;
-  if(!(cnt>=1)) return toast('공격권이 없어요. 작업실에 있으면 1시간에 1장씩 모여요');
+  if(!(cnt>=1)) return toast('공격권이 없어요. 작업실에 있으면 30분에 1장씩 모여요');
   busy = true;
   try{
     const r = await api.bossHit(w.code, cnt), x = Array.isArray(r) ? r[0] : r;
@@ -6221,7 +6221,7 @@ const ISK_GUIDE = [
     <p class="tip">💠 파편은 아공간에 쓰는 돈이에요. ⭐ 별조각은 🥚 알 정화를 빨리 하는 데만 써요.</p>`},
   {k:'boss', t:'⚔️ 괴물', h:()=>`<h4>⚔️ 이번 주 괴물</h4>
     <ul><li>매주 금요일 0시에 새 괴물이 와요. 마을이 다 같이 체력을 깎아요.</li>
-    <li>작업실에 1시간 있으면 🎫 공격권 1장. 무기를 골라 직접 때려요. 약점 무기는 피해가 ${BOSS_WEAK}배예요.</li>
+    <li>작업실에 30분 있으면 🎫 공격권 1장 (같이 있는 작가님이 많을수록 🔥 더 빨리). 무기를 골라 직접 때려요. 약점 무기는 피해가 ${BOSS_WEAK}배예요.</li>
     <li>때릴 때마다 🪙 ${BOSS_HIT_COIN[0]}~${BOSS_HIT_COIN[1]} (가끔 💰 ${BOSS_LUCKY_COIN}), ${Math.round(BOSS_DROP*100)}% 확률로 괴물 수집품.</li>
     <li>쓰러뜨리면 <b>${BOSS_REWARD_HITS}번 이상 때린 주민</b> 모두 🪙 ${BOSS_REWARD.toLocaleString()} + 📖 괴물 도감 + 수집품 하나.</li>
     <li>⭐ 쓰러뜨리면 더 강해진 같은 괴물(Lv.2, 3 …)이 바로 다시 나타나요. 레벨마다 체력이 늘어요. 금요일 0시에 새 괴물은 Lv.1부터.</li>
@@ -8851,7 +8851,7 @@ const TOUR = [
   {tab:'home', el:'#roomTabs .garden-tab', title:'🐠 어항 · 🌷 마당', text:'방 이름 옆 「어항」에는 어항이, 「마당」에는 화단이 있어요.\n씨앗을 심으면 작업실에 있는 동안 자라서 꽃이 피고, 호숫가에서 많이 잡은 물고기는 어항에 넣어 헤엄치게 할 수 있어요.'},
   {tab:'home', el:'.deco-open', title:'🎨 집 겉모습 꾸미기', text:'여기를 누르면 집이 커지는 단계를 미리 보고, 집 스타일을 골라 꾸밀 수 있어요. 지나온 집 모습으로 되돌려 둘 수도 있어요.'},
   {tab:'plaza', el:'.plaza-scene', title:'🏘️ 마을 광장', text:'주민들이 코인을 모아 건물을 하나씩 지어요.\n동물 보호소가 지어지면 펫을, 꽃집이 지어지면 씨앗을 살 수 있어요. 간식차가 오면 커피도 얻어 마실 수 있어요.'},
-  {tab:'isekai', el:'#tab-isekai .boss-scene', title:'🌀 이세계', text:'숲 너머 이세계에 매주 금요일마다 괴물이 나타나요. 작업실에 1시간 있을 때마다 🎫 공격권이 생기고, 여기 와서 무기를 골라 직접 때려요.\n같이 작업실에 있는 사람이 많을수록 공격권이 빨리 모이고, 쓰러뜨리면 때린 주민 모두 코인을 받고 괴물 도감이 채워져요. 공격권은 그 주에만 쓸 수 있어요.'},
+  {tab:'isekai', el:'#tab-isekai .boss-scene', title:'🌀 이세계', text:'숲 너머 이세계에 매주 금요일마다 괴물이 나타나요. 작업실에 30분 있을 때마다 🎫 공격권이 생기고, 여기 와서 무기를 골라 직접 때려요.\n같이 작업실에 있는 사람이 많을수록 공격권이 빨리 모이고, 쓰러뜨리면 때린 주민 모두 코인을 받고 괴물 도감이 채워져요. 공격권은 그 주에만 쓸 수 있어요.'},
   {tab:'lotto', el:'#lottoBox', title:'🎟️ 마감 복권', text:'한 장 🪙30, 하루 5장까지 긁을 수 있어요.\n같은 그림 3개가 나오면 당첨! 이번 주 전설 가구도 나와요.'},
   {tab:'tree', el:'#treeBox', title:'🌳 세계수', text:'작업실에 있으면 주머니에 물방울이 모이고, 세계수 둘레에 떠오르는 물방울도 주울 수 있어요.\n다 같이 물을 줘서 나무가 다 자라면, 물을 준 주민 모두 코인을 받아요.'},
   {tab:'lake', el:'#lakeBox', title:'🎣 호숫가', text:'어망을 던져 두고 1시간 뒤에 걷으면 물고기가 1~2마리 걸려요.\n처음 잡거나 내 기록보다 크면 코인을 더 받아요. 미끼를 달면 귀한 물고기가 더 잘 나와요.'},
@@ -8960,6 +8960,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㊼</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㊽</p>
 </body>
 </html>
