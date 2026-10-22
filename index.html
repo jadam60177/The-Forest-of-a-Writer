@@ -6897,7 +6897,7 @@ function walkDemo(){   // 미리보기: 가짜 이웃 셋이 돌아다녀요
   walkNow();
 }
 // --- ✨ 산책로 분실물 (10-22, walkloot.sql 과 같은 값) — 모두 같은 자리에 보이고, 먼저 주운 사람이 임자 ---
-const WLOOT_MAX = 6, WLOOT_DAY = 5;
+const WLOOT_MAX = 20, WLOOT_DAY = 7;   // 10-22 판 58: 10분마다 1개 · 지도 최대 20개 · 하루 7개 (walklootmore.sql 과 같아요)
 const wlootMany = () => 1 + Math.floor(Math.random()**2 * 20);   // 물방울·공격권 1~20 (적은 게 자주) — walkloot.sql 과 같아요
 const WLOOT_LOOKS = ['paper','keyboard','mouse','cup'];   // walk/loot/코드.webp
 const WLOOT_NAME = {paper:'구겨진 원고 더미', keyboard:'부서진 키보드', mouse:'고장 난 마우스', cup:'다 마신 커피컵'};
@@ -7010,7 +7010,7 @@ document.addEventListener('click', e=>{   // 🎁 숲지기 분실물 뿌리기
   const b = e.target.closest('[data-wlootdrop]'); if(!b || !ME || !ME.is_admin) return;
   const near = b.dataset.wlootdrop==='me';
   act(async()=>{
-    const t = await askText(near ? '🎁 내 캐릭터 둘레에 분실물을 몇 개 뿌릴까요? (1~30)\n뿌린 건 주민들 하루 5개 제한에 안 들어가요.' : '🌲 숲 곳곳에 분실물을 몇 개 뿌릴까요? (1~30)\n뿌린 건 주민들 하루 5개 제한에 안 들어가요.', '5');
+    const t = await askText(near ? '🎁 내 캐릭터 둘레에 분실물을 몇 개 뿌릴까요? (1~30)\n뿌린 건 주민들 하루 7개 제한에 안 들어가요.' : '🌲 숲 곳곳에 분실물을 몇 개 뿌릴까요? (1~30)\n뿌린 건 주민들 하루 7개 제한에 안 들어가요.', '5');
     if(t==null) return; const n = parseInt(t, 10); if(!(n>=1)) return toast('1 이상으로 적어 주세요');
     const k = await api.adminLootDrop(Math.min(30, n), near && WALK_ME ? WALK_ME.x : null, near && WALK_ME ? WALK_ME.y : null);
     walkSend('lootdrop', {n:k}); await refreshWalkLoot();
@@ -9117,6 +9117,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 57</p>
+<p class="site-ver">마감의 숲 · 10-22 판 58</p>
 </body>
 </html>
