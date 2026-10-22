@@ -2231,13 +2231,22 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .vsnack{flex-basis:100%;display:flex;gap:.5rem;align-items:center;justify-content:center;flex-wrap:wrap}
 .vsnack .on{font-size:.82rem;padding:.2rem .7rem;border-radius:999px;background:rgba(255,190,120,.22);border:1px solid rgba(255,190,120,.6)}
 .vfx.setfx{z-index:5}
-.vfx.set-base i{width:var(--sz);height:var(--sz);background:linear-gradient(135deg,#F1E6FF,#9E7BEA);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 8px #B892FF;top:105%;animation:vfbub calc(var(--d)*1.6) linear var(--dl) infinite;opacity:.8}
-.vfx.set-heaven i{width:5px;height:5px;border-radius:50%;background:#FFF6C8;box-shadow:0 0 10px 4px rgba(255,236,160,.8);top:-5%;animation:vfpet calc(var(--d)*1.8) linear var(--dl) infinite}
-.vfx.set-hell i{width:4px;height:4px;border-radius:50%;background:#FFB15A;box-shadow:0 0 8px 3px rgba(255,90,30,.85);top:105%;animation:vfbub var(--d) ease-out var(--dl) infinite}
-.vfx.set-magic i::before{content:"✦";display:block;font-size:var(--sz);color:#9FF3FF;text-shadow:0 0 8px #3FD9F0}
-.vfx.set-magic i{animation:vftw calc(var(--d)*.6) ease-in-out var(--dl) infinite alternate}
-@keyframes vftw{0%{opacity:0;transform:scale(.4) rotate(0)}100%{opacity:1;transform:scale(1.2) rotate(90deg)}}
-.vfx.set-fairy i{width:10px;height:6px;border-radius:0 80% 0 80%;background:linear-gradient(135deg,#D9FFB0,#7CC46A);top:-5%;animation:vfpet calc(var(--d)*1.5) linear var(--dl) infinite}
+/* 🖼️ 그림 파티클 (10-22 판 56) — 모양은 그림, 움직임은 아래 keyframes */
+.vfx.vimg i{width:var(--sz);height:var(--sz);background:var(--img) center/contain no-repeat;border:0;border-radius:0;box-shadow:none;clip-path:none}
+.vfx.vimg.firefly i{animation:vffly var(--d) ease-in-out var(--dl) infinite alternate;filter:drop-shadow(0 0 5px rgba(230,255,140,.7))}
+.vfx.vimg.meteor i{transform:none;height:calc(var(--sz)*.85);animation:vfmet var(--d) linear var(--dl) infinite}
+.vfx.vimg.soap i{animation:vfup var(--d) linear var(--dl) infinite}
+.vfx.vimg.petal i{animation:vfdown var(--d) linear var(--dl) infinite}
+.vfx.set-base i{animation:vfup var(--d) linear var(--dl) infinite}
+.vfx.set-heaven i{animation:vffeather var(--d) ease-in-out var(--dl) infinite}
+.vfx.set-hell i{animation:vfup var(--d) ease-out var(--dl) infinite;filter:drop-shadow(0 0 4px rgba(255,110,40,.7))}
+/* 아공간 칸 높이 기준으로 위아래 (top %) — 화면 높이(vh)로 움직이면 칸 안에서 금방 지나가 버려요 */
+@keyframes vfup{0%{top:104%;translate:0 0;opacity:0}8%{opacity:.95}85%{opacity:.85}100%{top:-12%;translate:var(--dx) 0;opacity:0}}
+@keyframes vfdown{0%{top:-12%;translate:0 0;rotate:0deg;opacity:0}8%{opacity:1}88%{opacity:.9}100%{top:104%;translate:var(--dx) 0;rotate:400deg;opacity:0}}
+@keyframes vffeather{0%{top:-12%;translate:0 0;rotate:-25deg;opacity:0}8%{opacity:1}25%{translate:calc(var(--dx)*.7) 0;rotate:20deg}50%{translate:calc(var(--dx)*-.5) 0;rotate:-20deg}75%{translate:calc(var(--dx)*.6) 0;rotate:15deg}92%{opacity:.9}100%{top:104%;translate:0 0;rotate:-10deg;opacity:0}}
+.vfx.set-magic i{animation:vftw calc(var(--d)*.9) ease-in-out var(--dl) infinite alternate;filter:drop-shadow(0 0 6px rgba(140,225,255,.85))}
+@keyframes vftw{0%{opacity:0;transform:scale(.55) translateY(4px)}100%{opacity:1;transform:scale(1.05) translateY(-4px)}}
+.vfx.set-fairy i{animation:vfdown var(--d) linear var(--dl) infinite}
 @media (prefers-reduced-motion: reduce){.vfx i{animation:none!important;opacity:.6}}
 /* ☀️ 낮 이세계 (10-21 ⑱) — bg/isekai_day.webp */
 :root[data-mode="day"] #tab-isekai{color:#2A2350;background:radial-gradient(ellipse 70% 50% at 85% 10%,rgba(170,120,255,.35),transparent 70%),linear-gradient(#BFE6FF,#DCEBFF 45%,#E9DEFF);box-shadow:0 0 0 1px rgba(150,120,230,.35),0 14px 34px rgba(80,60,150,.18)}
@@ -6059,19 +6068,34 @@ let VOID = null, VSEL = null, VROT = 0, VHOVER = null, vbagTab = 'void', vcraftT
 // ⭐ 별조각 연동 (void.sql 과 같아야 해요)
 const VOID_FX = {firefly:{name:'반딧불', emoji:'🪲'}, meteor:{name:'별똥별', emoji:'🌠'}, bubble:{name:'비눗방울', emoji:'🫧'}, petal:{name:'꽃잎', emoji:'🌸'}};
 const VOID_FX_PRICE = 300, STAR_PER_DROP = 2;   // 효과는 💠 파편 · 별조각은 알 정화에만 (10-22 라밀)
+/* 🖼️ 효과 그림 (10-22 판 56) — vfx/시트_번호.webp · 시트: bubble_flower · heaven · fairy · magic · hell · firefly_meteor · tiny (각 1~12, 윗줄 1~6)
+   img: 섞어 떨어뜨릴 그림 · n: 개수 · sz: 크기(px) · d: 한 바퀴 시간(초) */
+const VFX_V = 1;
+const VFX_ART = {
+  firefly:{img:['fairy_7','fairy_8'], n:10, sz:[18,28], d:[3,6]},
+  meteor: {img:['firefly_meteor_7','firefly_meteor_10','firefly_meteor_11'], n:5, sz:[60,100], d:[5,11]},
+  bubble: {img:['bubble_flower_1','bubble_flower_1','bubble_flower_2'], n:12, sz:[14,32], d:[8,15]},
+  petal:  {img:['fairy_1','bubble_flower_7'], n:13, sz:[14,24], d:[8,14]},
+  'set-base':  {img:['bubble_flower_6','heaven_9'], n:9, sz:[12,24], d:[9,16]},
+  'set-heaven':{img:['heaven_1','heaven_2','heaven_3','heaven_7'], n:11, sz:[16,28], d:[10,17]},
+  'set-hell':  {img:['hell_1','hell_1','hell_5'], n:11, sz:[12,24], d:[5,10]},
+  'set-magic': {img:['magic_7','magic_9','magic_12','heaven_10'], n:10, sz:[20,32], d:[3,6]},
+  'set-fairy': {img:['fairy_4','fairy_3','fairy_6'], n:11, sz:[14,22], d:[8,14]},
+};
+function vfxDots(key){
+  const A = VFX_ART[key], r = (a,b)=>(a + Math.random()*(b-a)).toFixed(1); let h = '';
+  for(let k=0;k<A.n;k++){ const img = A.img[k % A.img.length];
+    h += `<i style="--img:url(vfx/${img}.webp?v=${VFX_V});--x:${r(0,100)}%;--y:${key==='meteor'?r(-5,40):r(5,95)}%;--d:${r(A.d[0],A.d[1])}s;--dl:-${r(0,14)}s;--dx:${r(-45,45)}px;--dy:${r(-30,30)}px;--sz:${r(A.sz[0],A.sz[1])}px"></i>`; }
+  return h;
+}
 function voidFxHTML(fx){
   if(!VOID_FX[fx]) return '';
-  const n = fx==='meteor' ? 5 : fx==='firefly' ? 16 : 14; let h = '';
-  for(let k=0;k<n;k++){ const r = (a,b)=>(a + Math.random()*(b-a)).toFixed(1);
-    h += `<i style="--x:${r(0,100)}%;--y:${fx==='meteor'?r(-5,40):r(5,95)}%;--d:${fx==='meteor'?r(5,11):fx==='firefly'?r(2.5,5):r(7,14)}s;--dl:-${r(0,12)}s;--dx:${r(-40,40)}px;--dy:${r(-30,30)}px;--sz:${r(8,22)}px"></i>`; }
-  return `<div class="vfx ${fx==='bubble'?'soap':fx}" aria-hidden="true">${h}</div>`;   // 'bubble'은 담당자 말풍선 CSS(.bubble)와 이름이 겹쳐서 클래스만 soap으로 (10-22 판 55)
+  return `<div class="vfx vimg ${fx==='bubble'?'soap':fx}" aria-hidden="true">${vfxDots(fx)}</div>`;   // 'bubble'은 담당자 말풍선 CSS(.bubble)와 이름이 겹쳐서 클래스만 soap으로 (10-22 판 55)
 }
-// 🪞 세트 효과 (테마 가구 6개를 다 놓으면 저절로) — 그림 반짝이가 오면 바꿔 끼울 거예요
-const VOID_SET_FX = {base:{n:14, name:'떠도는 차원 조각'}, heaven:{n:18, name:'내려앉는 빛 알갱이'}, hell:{n:18, name:'피어오르는 불씨'}, magic:{n:14, name:'반짝이는 룬'}, fairy:{n:16, name:'흩날리는 잎사귀'}};
+// 🪞 세트 효과 (테마 가구 6개를 다 놓으면 저절로)
+const VOID_SET_FX = {base:{name:'떠도는 차원 조각'}, heaven:{name:'내려앉는 깃털'}, hell:{name:'피어오르는 불씨'}, magic:{name:'반짝이는 룬'}, fairy:{name:'흩날리는 잎사귀'}};
 function voidSetFxHTML(sets){
-  return (sets||[]).filter(t=>VOID_SET_FX[t]).map(t=>{ let h = ''; const r = (a,b)=>(a + Math.random()*(b-a)).toFixed(1);
-    for(let k=0;k<VOID_SET_FX[t].n;k++) h += `<i style="--x:${r(0,100)}%;--y:${r(5,95)}%;--d:${r(4,11)}s;--dl:-${r(0,12)}s;--dx:${r(-50,50)}px;--sz:${r(5,12)}px"></i>`;
-    return `<div class="vfx setfx set-${t}" aria-hidden="true">${h}</div>`; }).join('');
+  return (sets||[]).filter(t=>VOID_SET_FX[t] && VFX_ART['set-'+t]).map(t=>`<div class="vfx vimg setfx set-${t}" aria-hidden="true">${vfxDots('set-'+t)}</div>`).join('');
 }
 async function refreshVoid(){ try{ VOID = api.void ? await api.void() : null; if(VOID && VOID.catalog) setVCAT(VOID.catalog); }catch(e){ VOID = null; } }
 const isLegendFurn = c => LOTTO_FURN.some(x=>x.code===c);
@@ -9084,6 +9108,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 55</p>
+<p class="site-ver">마감의 숲 · 10-22 판 56</p>
 </body>
 </html>
