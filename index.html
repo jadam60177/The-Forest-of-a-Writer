@@ -4013,7 +4013,15 @@ const VFURN_DEF = [
   ['v_magic_lamp','magic','💎','마법 수정 램프',1,2,'furniture',100,1,0], ['v_magic_window','magic','🪐','천체 창문',2,2,'furniture',200,1,0], ['v_magic_shelf','magic','📕','떠다니는 마도서 책장',2,2,'furniture',250,1,0],
   ['v_fairy_rug','fairy','🌼','데이지 러그',2,2,'floor',150,1,0], ['v_fairy_desk','fairy','🍄','그루터기 책상',2,1,'furniture',200,1,0], ['v_fairy_bed','fairy','🌷','꽃봉오리 침대',2,2,'furniture',300,1,0],
   ['v_fairy_lamp','fairy','✨','반딧불이 병 램프',1,2,'furniture',100,1,0], ['v_fairy_window','fairy','🌿','덩굴 아치 창문',2,2,'furniture',200,1,0], ['v_fairy_shelf','fairy','🌳','나무 구멍 책장',2,2,'furniture',250,1,0],
+  // ✒️ 작가의 작업 도구 (10-22 판 57, voidcommon.sql) — 테마 없는 공용 가구 · 세트 효과 없음 · 도안은 다른 테마처럼 랜덤
+  ['v_common_typewriter','common','⌨️','혼자 치는 타자기',1,1,'furniture',80,0,0], ['v_common_inkbottle','common','🖋️','은하 잉크병',1,1,'furniture',80,0,0], ['v_common_papers','common','📄','날아오르는 원고 더미',1,1,'furniture',80,0,0],
+  ['v_common_hourglass','common','⏳','거꾸로 마감 모래시계',1,1,'furniture',80,0,0], ['v_common_mug','common','☕','별가루 커피 머그',1,1,'furniture',80,0,0], ['v_common_crystal','common','🔮','플롯 예언 수정구',1,1,'furniture',80,0,0],
+  ['v_common_bulbtree','common','💡','아이디어 전구 나무',1,1,'furniture',80,0,0], ['v_common_scroll','common','📜','끝없는 원고지 두루마리',1,2,'furniture',120,0,0], ['v_common_clock','common','🕰️','녹아내리는 마감 시계',1,2,'furniture',120,0,0],
+  ['v_common_sofa','common','🛋️','원고 쿠션 소파',2,1,'furniture',200,0,0], ['v_common_papermt','common','🏔️','구겨진 원고 산',2,2,'furniture',250,0,0],
 ];
+// 배경이 없는 가구 묶음의 이름표 (제작대 탭 · 도안 알림)
+const VOID_TAB_EXTRA = {common:{name:'작가의 작업 도구', emoji:'✒️'}};
+const vthemeInfo = t => VOID_BGS[t] || VOID_TAB_EXTRA[t] || {emoji:'🔮', name:t};
 const VFURN_ART = new Set(VFURN_DEF.map(r=>r[0]));
 const vfurnFix = f => ({...f, icon:f.code, category:'furniture', void:true});
 let VCAT = VFURN_DEF.map(([code,theme,emoji,name,w,h,layer,price,in_set,max_own])=>vfurnFix({code,theme,emoji,name,w,h,layer,price,in_set:!!in_set,max_own:max_own||null,active:true}));
@@ -6157,14 +6165,15 @@ function voidBagHTML(){
   return `<div class="vbag-tabs">${Object.entries(tabs).map(([k,l])=>`<button class="vbg ${k===vbagTab?'on':''}" type="button" data-vbtab="${k}">${l}</button>`).join('')}</div>
     <div class="vbag">${shown.length ? shown.map(([c,n])=>{ const it = itemOf(c), vf = isVoidFurn(c); return `<button class="item ${vf?'g-void':gradeCls(c)} ${VSEL===c?'sel':''}" type="button" data-vbag="${esc(c)}" title="${esc(it.name)}"><span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span>${vf?'<span class="vonly">🔮 아공간 전용</span>':'<span class="vonly lg">👑 전설</span>'}<span class="p">×${n}</span></button>`; }).join('') : `<p class="small" style="grid-column:1/-1">${empty}</p>`}</div>`;
 }
-const VTHEMES = () => [...new Set(VCAT.filter(f=>f.active!==false).map(f=>f.theme))].sort((a,b)=>Object.keys(VOID_BGS).indexOf(a)-Object.keys(VOID_BGS).indexOf(b));
+const VTHEMES = () => { const ord = t => { const i = Object.keys(VOID_BGS).indexOf(t); return i<0 ? 99 : i; };
+  return [...new Set(VCAT.filter(f=>f.active!==false).map(f=>f.theme))].sort((a,b)=>ord(a)-ord(b)); };
 function voidCraftHTML(V){
   const bps = new Set(V.bps||[]), themes = VTHEMES(), sets = new Set(V.sets||[]);
   if(!themes.includes(vcraftTab)) vcraftTab = themes.includes(V.bg) ? V.bg : themes[0];
   const all = VCAT.filter(f=>f.active!==false), total = all.length, have = all.filter(f=>bps.has(f.code)).length;
   const list = all.filter(f=>f.theme===vcraftTab), placed = new Set((V.items||[]).map(x=>x.item_code));
   const setN = list.filter(f=>f.in_set), setPlaced = setN.filter(f=>placed.has(f.code)).length, shards = (RIFT && RIFT.shards) ?? 0;
-  const tb = themes.map(t=>{ const b = VOID_BGS[t] || {emoji:'🔮', name:t}, ts = all.filter(f=>f.theme===t);
+  const tb = themes.map(t=>{ const b = vthemeInfo(t), ts = all.filter(f=>f.theme===t);
     return `<button class="vbg ${t===vcraftTab?'on':''}" type="button" data-vctab="${t}">${b.emoji} ${esc(b.name)} <span class="small">📜 ${ts.filter(f=>bps.has(f.code)).length}/${ts.length}${sets.has(t)?' · 🪞':''}</span></button>`; }).join('');
   const cards = list.map(f=>{ const own = bps.has(f.code), n = (V.vinv||{})[f.code]||0, onfloor = (V.items||[]).filter(x=>x.item_code===f.code).length;
     const maxed = f.max_own && (n + onfloor) >= f.max_own;
@@ -6174,10 +6183,10 @@ function voidCraftHTML(V){
       ${own || peek() ? `<div class="sz small">${f.w}×${f.h}칸${f.layer==='floor'?' · 바닥':''}${f.max_own?` · ${f.max_own}개만`:''}${n?` · 창고 ${n}`:''}</div>` : ''}
       ${own ? `<button class="mini ask-yes" type="button" data-vcraft="${f.code}" ${maxed||shards<f.price?'disabled':''}>${maxed?'다 만들었어요':`🔨 만들기 · 💠 ${f.price}`}</button>` : `<span class="small lockt">📜 도안이 아직 없어요</span>`}
     </div>`; }).join('');
-  const b = VOID_BGS[vcraftTab] || {emoji:'🔮', name:vcraftTab};
+  const b = vthemeInfo(vcraftTab);
   return `<h4>📜 제작대 <button class="mini" type="button" data-iskguide="craft">📖</button> <span class="small">도안 ${have}/${total} · 만든 가구는 🔮 아공간 창고로 가요 (아공간 밖으로는 못 가져가요)</span></h4>
     <div class="vbag-tabs">${tb}</div>
-    <p class="vset small">${sets.has(vcraftTab) ? `🪞 ${b.emoji} ${esc(b.name)} 세트 완성! 「${VOID_SET_FX[vcraftTab]?.name||'세트'}」 효과가 반짝이고 있어요` : `🪞 ${b.emoji} ${esc(b.name)} 가구 ${setN.length}개를 아공간에 모두 놓으면 「${VOID_SET_FX[vcraftTab]?.name||'세트'}」 효과가 켜져요 · 지금 ${setPlaced}/${setN.length}개`}</p>
+    <p class="vset small">${!setN.length ? `${b.emoji} ${esc(b.name)}는 세트 효과가 없는 공용 가구예요 · 어느 배경에나 어울려요` : sets.has(vcraftTab) ? `🪞 ${b.emoji} ${esc(b.name)} 세트 완성! 「${VOID_SET_FX[vcraftTab]?.name||'세트'}」 효과가 반짝이고 있어요` : `🪞 ${b.emoji} ${esc(b.name)} 가구 ${setN.length}개를 아공간에 모두 놓으면 「${VOID_SET_FX[vcraftTab]?.name||'세트'}」 효과가 켜져요 · 지금 ${setPlaced}/${setN.length}개`}</p>
     <div class="vcraft">${cards}</div>`;
 }
 function renderVoidRoom(){
@@ -6283,7 +6292,7 @@ document.addEventListener('click', e=>{
     await refreshVoid(); await refreshRift(); box_void_reset(); renderRift();
     const bps = (r.bps||[]);
     if(bps.length){ const fresh = bps.filter(b=>!b.dup), dup = bps.filter(b=>b.dup);
-      const line = b => { const f = vfurnOf(b.code) || {emoji:'📜', name:b.code}, t = VOID_BGS[b.theme]; return `${f.emoji} ${f.name}${t?` (${t.name})`:''}`; };
+      const line = b => { const f = vfurnOf(b.code) || {emoji:'📜', name:b.code}, t = (VOID_BGS[b.theme] || VOID_TAB_EXTRA[b.theme]); return `${f.emoji} ${f.name}${t?` (${t.name})`:''}`; };
       petParty('📜', `마물들이 💠 이세계 파편 ${r.gain.toLocaleString()}개와 함께\n가구 도안을 물어왔어요!${r.boosted?' 🍖':''}\n\n`
         + (fresh.length ? `✨ 새 도안\n${fresh.map(line).join('\n')}\n\n` : '')
         + (dup.length ? `이미 있는 도안 ${dup.length}장은 💠 ${r.dup_shards}개로 바꿨어요\n${dup.map(line).join('\n')}\n\n` : '')
@@ -9108,6 +9117,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 56</p>
+<p class="site-ver">마감의 숲 · 10-22 판 57</p>
 </body>
 </html>
