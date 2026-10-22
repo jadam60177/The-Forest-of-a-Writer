@@ -627,6 +627,7 @@ dialog.party{text-align:center;max-width:min(90vw,340px)}
 .event-banner{text-align:center;padding:.55rem 1rem;font-family:"Jua",sans-serif;font-size:1.02rem}
 .event-banner.on{background:#FFCE5C;color:#3A2A00}
 .event-banner.soon{background:#2E3A63;color:#F2EFFF}
+.event-banner.shard{background:linear-gradient(90deg,#8F6BE8,#5FB8F0);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3);cursor:pointer}
 .ev-item{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed var(--line)}
 .ev-item .mini{margin-left:auto}
 #noteDlg{max-width:min(92vw,440px)}
@@ -1962,6 +1963,7 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 
 /* ⚔️ 이번 주 괴물 토벌 (10-21) */
 .boss-panel{overflow:hidden;position:relative}
+.boss-ev{border-radius:12px;margin:0 0 .6rem;font-size:.95rem;cursor:default}
 .boss-q{position:absolute;top:.7rem;right:.7rem;z-index:3;width:1.9rem;height:1.9rem;border-radius:50%;border:1px solid rgba(190,160,255,.6);background:rgba(255,255,255,.1);color:inherit;font:700 1rem/1 inherit;cursor:pointer;display:grid;place-items:center}
 .boss-q:hover{background:rgba(190,160,255,.3)}
 .boss-head{padding-right:2.4rem}
@@ -2307,6 +2309,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
 </nav>
 
 <div class="event-banner" id="eventBanner" hidden></div>
+<div class="event-banner shard" id="riftEventBanner" hidden></div>
 <section class="village" id="tab-village" aria-label="마감의 숲">
   <svg class="stars" data-stars preserveAspectRatio="none"></svg>
   <div id="bannerBox" hidden></div>
@@ -5433,7 +5436,8 @@ function bossWeaponNow(){
 function bossBadge(){
   const tb = document.querySelector('.tabs [data-tab="isekai"]'); if(!tb) return;
   let bd = tb.querySelector('.tab-badge'); if(!bd){ bd = document.createElement('span'); bd.className = 'tab-badge'; tb.appendChild(bd); }
-  const n = BOSS && BOSS.hp>0 ? (BOSS.tickets||0) : 0; bd.textContent = n ? `⚔️${n}` : ''; bd.hidden = !n;
+  const n = BOSS && BOSS.hp>0 ? (BOSS.tickets||0) : 0, ev = (RIFT && RIFT.open) ? riftEventNow() : null;
+  bd.textContent = (ev ? `💠×${ev.mult}` : '') + (ev && n ? ' ' : '') + (n ? `⚔️${n}` : ''); bd.hidden = !n && !ev;
 }
 function renderBoss(force){
   const box = document.getElementById('bossBox'); if(!box) return;
@@ -5463,6 +5467,7 @@ function renderBoss(force){
     <div class="boss-head"><h3>⚔️ 이번 주 괴물 · ${lv>1?`<span class="boss-lv">⭐ Lv.${lv}</span> `:''}${esc(m.name)}</h3><span class="small">${(()=>{ const e = new Date(BOSS.ends_at ? Date.parse(BOSS.ends_at) : lottoWeekEnds()), k = new Date(e.getTime() + 9*36e5 - 1);
         const day = `${k.getUTCMonth()+1}월 ${k.getUTCDate()}일(${'일월화수목금토'[k.getUTCDay()]})`;
         return down ? `다음 괴물은 금요일 0시에 와요` : `⏳ ${day} 밤 12시에 새 괴물과 교대해요 · ${dd?`${dd}일 `:''}${hh}시간 남음 · 🎫 남은 공격권은 다음 괴물에게 이어서 써요`; })()}</span></div>
+    ${(ev=>ev ? `<p class="event-banner shard boss-ev">💠 ${esc(ev.name.replace(/^💠\s*/,''))} 진행 중! 때릴 때마다 파편 ${ev.mult}배 · ${when(ev.ends_at)}까지</p>` : '')((RIFT && RIFT.open) ? riftEventNow() : null)}
     <div class="boss-scene ${down?'down':''} ${riftLv?'rift-lv'+riftLv:''}">
       <div class="boss-hp"><div class="bar"><span style="width:${pct.toFixed(1)}%"></span>${riftWait?`<i class="rift-tick" style="left:${(RIFT_OPEN_HP/BOSS.max_hp*100).toFixed(1)}%" title="여기까지 깎으면… ？"></i>`:''}</div><span class="small">❤️ ${Math.max(0,BOSS.hp).toLocaleString()} / ${BOSS.max_hp.toLocaleString()}</span></div>
       <div class="boss-stage">
@@ -5586,7 +5591,7 @@ async function bossAttack(n){
         const prize = L>1 ? `이번 레벨에서 ${need}번 이상 때린 주민 모두에게\n🪙 ${(x.lv_coin||BOSS_LV_COIN).toLocaleString()} + 💠 ${x.lv_shards||BOSS_LV_SHARDS}가 가요!` : `이번 주 ${need}번 이상 때린 주민 모두에게 🪙 ${BOSS_REWARD.toLocaleString()}과\n수집품 하나씩이 가요!`;
         petParty(L>1 ? '⭐' : '⚔️', `${head}\n막타는 ${ME.display_name||'나'}님이에요 🎉\n\n${prize}` + (mine < need ? `\n\n(나는 이번 레벨에서 ${mine}번이라 토벌 보상은 아쉽게 못 받았어요)` : '')
           + `\n\n그런데… 더 강해진 ⭐ Lv.${N}${ga} 나타났어요!\n남은 공격권으로 계속 싸울 수 있어요.`); } }, 1350);
-    } else if(cnt>1) toast(`${w.emoji} ${x.used||cnt}번 때렸어요! 피해 ${(x.dealt||0).toLocaleString()} · 🪙 ${x.coins||0}${x.lucky?` (💰 대박 ${x.lucky}번!)`:''}${x.isekai && x.isekai.shards ? ` · 💠 ${x.isekai.shards}` : ''}`);
+    } else if(cnt>1) toast(`${w.emoji} ${x.used||cnt}번 때렸어요! 피해 ${(x.dealt||0).toLocaleString()} · 🪙 ${x.coins||0}${x.lucky?` (💰 대박 ${x.lucky}번!)`:''}${x.isekai && x.isekai.shards ? ` · 💠 ${x.isekai.shards}${x.isekai.mult>1?` (×${x.isekai.mult})`:''}` : ''}`);
     else if(x.lucky) toast(`💰 대박! 코인 ${x.coins}개가 쏟아졌어요`);
   }catch(err){ toast(err.message || '때리지 못했어요'); await refreshBoss(); renderBoss(true); }
   finally{ busy = false; }
@@ -5896,6 +5901,12 @@ async function refreshRift(){ try{ RIFT = api.rift ? await api.rift() : null; }c
   }
   if(ME && ME.is_admin) renderShardEvents();
 }
+function renderRiftEvent(){   // 💠 파편 배수 이벤트를 맨 위 띠 · 괴물 칸 · 이세계 탭 단추에 (10-22)
+  const b = document.getElementById('riftEventBanner'), ev = (RIFT && RIFT.open && ME) ? riftEventNow() : null;
+  if(b){ if(ev){ b.hidden = false; b.textContent = `💠 ${ev.name.replace(/^💠\s*/,'')} 진행 중! 이세계 괴물을 때리면 파편 ${ev.mult}배 · ${when(ev.ends_at)}까지 · 🌀 이세계로 가기`; } else b.hidden = true; }
+  return ev;
+}
+document.addEventListener('click', e=>{ if(e.target.closest('#riftEventBanner')) document.querySelector('.tabs [data-tab="isekai"]')?.click(); });
 function riftEventNow(){ const n = Date.now(); return ((RIFT && RIFT.events) || []).filter(e=>Date.parse(e.starts_at)<=n && Date.parse(e.ends_at)>n).sort((a,b)=>b.mult-a.mult)[0]; }
 function renderShardEvents(){
   const el = document.getElementById('shEvList'); if(!el) return;
@@ -5917,6 +5928,7 @@ function starFeedHTML(e, need){ const left = Math.max(0, need - e.fed), st = (ME
 function riftHave(){ const s = new Set((PETS && PETS.dex) || []); ((PETS && (PETS.all || PETS.pets)) || []).forEach(p=>s.add(p.code)); return s; }
 function renderRift(){
   try{ renderVoid(); }catch(e){ console.error('아공간 그리기 오류', e); }
+  try{ renderRiftEvent(); bossBadge(); }catch(e){}
   const box = document.getElementById('riftBox'), te = document.getElementById('treeEgg');
   if(!RIFT || !RIFT.open || !ME){ if(box){ box.hidden = true; box.innerHTML = ''; } if(te){ te.hidden = true; te.innerHTML = ''; } return; }
   riftSurprise();
@@ -8948,6 +8960,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㊻</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㊼</p>
 </body>
 </html>
