@@ -6721,9 +6721,9 @@ const VOID_BGS = {
   magic: {name:'마법진 연구실', emoji:'🔯', grad:'radial-gradient(circle at 50% 55%,#46D3E6 0%,#1C3A78 38%,#0D1530 100%)'},
   fairy: {name:'요정나라 숲', emoji:'🍄', grad:'radial-gradient(ellipse at 50% 30%,#E6FFD9 0%,#8FD3A6 45%,#2F6B55 100%)'},
 };
-const VOID_BG_VER = {base:'?v=2'};   // 같은 이름으로 그림을 바꾸면 숫자를 올려요 (옛 그림 캐시 피하기)
+const VOID_BG_VER = {base:'?v=3'};   // 같은 이름으로 그림을 바꾸면 숫자를 올려요 (옛 그림 캐시 피하기)
 const voidBgCSS = k => { const key = k in VOID_BGS ? k : 'base'; return `url(void/${key}.webp${VOID_BG_VER[key]||''}) center/cover no-repeat, ${VOID_BGS[key].grad}`; };
-const VOID_FARM_BG = 'url(void/farm.webp) center/cover no-repeat, url(bg/Pet_background.webp) center/cover no-repeat, linear-gradient(#24124F 0%,#5B3E9A 38%,#4F8A5E 39%,#2D5A3A 100%)';
+const VOID_FARM_BG = 'url(void/farm.webp?v=2) center/cover no-repeat, url(bg/Pet_background.webp) center/cover no-repeat, linear-gradient(#24124F 0%,#5B3E9A 38%,#4F8A5E 39%,#2D5A3A 100%)';
 let VOID = null, VSEL = null, VROT = 0, VHOVER = null, vbagTab = 'void', vcraftTab = '';
 // ⭐ 별조각 연동 (void.sql 과 같아야 해요)
 const VOID_FX = {firefly:{name:'반딧불', emoji:'🪲'}, meteor:{name:'별똥별', emoji:'🌠'}, bubble:{name:'비눗방울', emoji:'🫧'}, petal:{name:'꽃잎', emoji:'🌸'}};
@@ -9629,6 +9629,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㉝</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㉞</p>
 </body>
 </html>
