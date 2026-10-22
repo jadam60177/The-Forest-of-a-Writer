@@ -2034,6 +2034,35 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
   #tab-isekai .boss-fire{position:absolute;left:2px;bottom:4px;z-index:2} #tab-isekai .boss-fire .fl{font-size:1.5rem}
   #tab-isekai .boss-wolf{position:absolute;right:0;bottom:2px;z-index:2} #tab-isekai .boss-wolf img{width:58px} }
 
+/* 🌀 균열 너머 (10-22 isekai.sql) — 파편 · 알 · 이세계 마물 */
+.rift{margin-top:1rem;border-radius:16px;padding:.9rem 1rem 1rem;background:linear-gradient(160deg,rgba(60,30,120,.55),rgba(20,10,50,.78));border:1px solid rgba(190,160,255,.4);box-shadow:inset 0 0 26px rgba(150,110,255,.2)}
+.rift-head{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap;justify-content:space-between}.rift-head h3{margin:0}
+.rift .shards{font-family:"Jua",sans-serif;font-size:1.15rem;color:#BFE8FF;text-shadow:0 0 10px rgba(140,210,255,.6)}
+.rift h4{margin:.9rem 0 .4rem;font-family:"Jua",sans-serif;font-weight:400}
+.rift-eggs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem;margin:.5rem 0}
+.regg{border-radius:12px;border:1px solid rgba(190,160,255,.35);background:rgba(255,255,255,.05);padding:.5rem .4rem .6rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.25rem}
+.regg img{width:84px;height:84px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(200,140,255,.45))}
+.regg b{font-family:"Jua",sans-serif;font-weight:400;font-size:.9rem}
+.regg.set{border-color:#8FE3C0;box-shadow:0 0 12px rgba(143,227,192,.35)}
+.regg.ready img,.tree-egg.ready img{animation:eggwob .9s ease-in-out infinite}
+@keyframes eggwob{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.regg .ebar,.tree-egg .ebar{width:100%;height:7px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
+.regg .ebar span,.tree-egg .ebar span{display:block;height:100%;background:linear-gradient(90deg,#8FE3C0,#BFE8FF)}
+.rift-dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem}
+.rdx{text-align:center;font-size:.72rem;line-height:1.35;display:flex;flex-direction:column;align-items:center;gap:.15rem}
+.rdx img{width:76px;height:76px;object-fit:contain}
+.rdx.no img{filter:brightness(0) opacity(.5)}
+.rdx .eg{font-size:.66rem;opacity:.75}
+.rift-soon{opacity:.8;font-size:.85rem;margin:.8rem 0 0;text-align:center}
+.rb.isekai{background:linear-gradient(90deg,#3B1E6E,#7A3FB8,#C24F8F);color:#FFE9FF}
+.dmg-pop.shard{color:#BFE8FF;font-size:1.2rem;left:30%!important;top:10%!important;text-shadow:0 2px 0 #2A3E8A,0 0 10px rgba(120,200,255,.9)}
+.tree-egg{margin:.2rem auto .8rem;max-width:560px;display:flex;align-items:center;gap:.7rem;padding:.55rem .85rem;border-radius:14px;background:rgba(80,40,140,.28);border:1px solid rgba(190,160,255,.45)}
+.tree-egg img{width:56px;height:56px;object-fit:contain;flex:none}
+.tree-egg .te-txt{flex:1;display:flex;flex-direction:column;gap:.25rem;font-size:.88rem}
+:root[data-mode="day"] .rift{background:linear-gradient(160deg,rgba(240,232,255,.95),rgba(218,208,252,.95));color:#2A2350;box-shadow:inset 0 0 20px rgba(150,110,255,.15)}
+:root[data-mode="day"] .rift .shards{color:#2F6FB8;text-shadow:none}
+:root[data-mode="day"] .regg{background:rgba(255,255,255,.6)}
+:root[data-mode="day"] .tree-egg{background:rgba(220,205,255,.7);color:#2A2350}
 /* ☀️ 낮 이세계 (10-21 ⑱) — bg/isekai_day.webp */
 :root[data-mode="day"] #tab-isekai{color:#2A2350;background:radial-gradient(ellipse 70% 50% at 85% 10%,rgba(170,120,255,.35),transparent 70%),linear-gradient(#BFE6FF,#DCEBFF 45%,#E9DEFF);box-shadow:0 0 0 1px rgba(150,120,230,.35),0 14px 34px rgba(80,60,150,.18)}
 :root[data-mode="day"] #tab-isekai .isekai-sky{display:none}
@@ -2217,6 +2246,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <div class="portal-mini" aria-hidden="true"></div>
       <p>균열이 아직 조용해요.<br><span class="small">곧 이세계 괴물이 넘어올 거예요…</span></p>
     </div>
+    <div class="rift" id="riftBox" hidden></div>
   </section>
 
   <section id="tab-lotto" hidden>
@@ -2225,6 +2255,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
 
   <section id="tab-tree" hidden>
     <div id="floatDrops"></div>
+    <div class="tree-egg" id="treeEgg" hidden></div>
     <div id="treeBox"></div>
   </section>
 
@@ -3533,8 +3564,8 @@ const demoApi = (() => {
       {id:1, discord_id:'dl', category:'건의', body:'담당자 대사에 \'수정고 부탁드려요\'도 넣어 주세요 ㅋㅋㅋ', created_at:new Date(Date.now()-86400e3).toISOString(), read:true, members:{display_name:'마감요정'}},
     ],
   };
-  try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; st.coll=new Set(s.coll||[]); st.cabs=s.cabs||{}; st.garden=s.garden||[]; st.gdex=s.gdex||{}; st.fdex=s.fdex||{}; st.fpend=s.fpend||[]; st.fpid=s.fpid||1; st.net=s.net||null; st.fday=s.fday||''; st.fused=s.fused||0; st.pt=s.pt||null; st.looks=s.looks||null; st.lotto=s.lotto||null; } }catch(e){}
-  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId, coll:[...st.coll], cabs:st.cabs, garden:st.garden, gdex:st.gdex, fdex:st.fdex, fpend:st.fpend, fpid:st.fpid, net:st.net, fday:st.fday, fused:st.fused, pt:st.pt, looks:st.looks, lotto:st.lotto})); }catch(e){} };
+  try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; st.coll=new Set(s.coll||[]); st.cabs=s.cabs||{}; st.garden=s.garden||[]; st.gdex=s.gdex||{}; st.fdex=s.fdex||{}; st.fpend=s.fpend||[]; st.fpid=s.fpid||1; st.net=s.net||null; st.fday=s.fday||''; st.fused=s.fused||0; st.pt=s.pt||null; st.looks=s.looks||null; st.lotto=s.lotto||null; st.isk=s.isk||null; } }catch(e){}
+  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId, coll:[...st.coll], cabs:st.cabs, garden:st.garden, gdex:st.gdex, fdex:st.fdex, fpend:st.fpend, fpid:st.fpid, net:st.net, fday:st.fday, fused:st.fused, pt:st.pt, looks:st.looks, lotto:st.lotto, isk:st.isk})); }catch(e){} };
   DEFAULT_SHOP.forEach(it=>{ if(it.unlock_by && st.plaza.find(b=>b.code===it.unlock_by && b.built_at)) it.active=true; });
   const item = code => DEFAULT_SHOP.find(s=>s.code===code);
   const fail = msg => { throw new Error(msg); };
@@ -3752,6 +3783,7 @@ const demoApi = (() => {
     async pourDrops(n){ const t = this.tick2(), m = st.me;
       const amt = Math.min(n, m.drops, t.goal - t.poured); if(!(amt>=1)) fail('주머니에 물방울이 없어요');
       m.drops -= amt; t.poured += amt; t.mine += amt; t.givers.add('me'); let grown = false;
+      if(st.isk){ const e = st.isk.eggs.find(x=>x.set_at); if(e) e.fed = Math.min(RIFT_NEED, e.fed + amt); }   // 🌀 맡긴 알 정화
       if(t.poured>=t.goal){ grown = true; m.coins += t.reward; st.gifts.push({id:Date.now(), amount:t.reward, reason:'🌳 세계수가 다 자랐어요'});
         const cs = Object.keys(TREE_COLORS).filter(c=>c!==t.color);
         st.tree = {no:t.no+1, color:cs[Math.floor(Math.random()*cs.length)], goal:t.goal, reward:t.reward, poured:0, givers:new Set(), mine:0}; }
@@ -4116,8 +4148,33 @@ const demoApi = (() => {
       st.me.coins += coins; B.coins = (B.coins||0) + coins;
       const down = B.dmg>=B.max_hp; let kill_item = null; if(down) kill_item = give(true);
       if(down){ B.tickets = 0; B.fuel = 0; if(!B.dex.includes(m.code)) B.dex.push(m.code); st.me.coins += BOSS_REWARD; st.gifts.push({id:Date.now(), amount:BOSS_REWARD, reason:`⚔️ ${m.name} 토벌`}); persist(); }
-      persist(); return {each, used, dealt, hp:B.max_hp-B.dmg, down, drops, kill_item, coins, lucky};
+      const isekai = this.iskHit(used, B.max_hp-B.dmg);
+      persist(); return {each, used, dealt, hp:B.max_hp-B.dmg, down, drops, kill_item, coins, lucky, isekai};
     },
+    // 🌀 균열 너머 (미리보기) — isekai.sql 과 같은 규칙
+    iskState(){ if(!st.isk) st.isk = {open:false, shards:0, eggs:[], nid:1}; return st.isk; },
+    iskHit(used, hp){ const I = this.iskState(); let now = false;
+      if(!I.open){ if(hp > RIFT_OPEN_HP) return {open:false}; I.open = true; now = true; }
+      let sh = 0, big = 0; const eggs = [];
+      for(let k=0;k<used;k++){ if(Math.random()<RIFT_BIG_P){ sh += 100; big++; } else sh += 10 + Math.floor(Math.random()*31);
+        if(Math.random()<RIFT_EGG_P){ const kind = ['punk','reject','rest'][Math.floor(Math.random()*3)]; eggs.push(kind); I.eggs.push({id:I.nid++, kind, got_at:new Date().toISOString(), set_at:null, fed:0}); } }
+      I.shards += sh; persist(); return {open:true, opened_now:now, shards:sh, big, eggs}; },
+    async rift(){ const I = this.iskState();
+      if(!I.open){ const B = this.bossState(); if(B.max_hp - B.dmg <= RIFT_OPEN_HP){ I.open = true; persist(); } }
+      if(!I.open) return {open:false};
+      return {open:true, need:RIFT_NEED, dup_shards:RIFT_DUP, shards:I.shards, eggs:I.eggs.map(e=>({...e})).sort((a,b)=>(a.set_at?0:1)-(b.set_at?0:1) || a.id-b.id)}; },
+    async riftSetEgg(id){ const I = this.iskState(), e = I.eggs.find(x=>x.id===id); if(!e) fail('없는 알이에요');
+      if(e.set_at) fail('이미 세계수가 정화하고 있어요'); if(I.eggs.some(x=>x.set_at)) fail('세계수에는 알을 하나씩만 맡길 수 있어요');
+      e.set_at = new Date().toISOString(); e.fed = 0; persist(); return this.rift(); },
+    async riftHatch(id){ const I = this.iskState(), e = I.eggs.find(x=>x.id===id); if(!e) fail('없는 알이에요');
+      if(!e.set_at || e.fed < RIFT_NEED) fail('아직 정화가 덜 됐어요. 세계수에 물방울을 더 부어 주세요');
+      const pool = RIFT_EGGS[e.kind].pets, code = pool[Math.floor(Math.random()*pool.length)], s = petOf(code), P = this.pstate();
+      const dup = P.dex.includes(code) || P.pets.some(p=>p.code===code); let lodge = false;
+      if(dup) I.shards += RIFT_DUP;
+      else { P.dex.push(code); lodge = P.pets.filter(x=>!x.lodge).length >= P.slots;
+        P.pets.push({id:P.nid++, code, name:s.name.split(' ').pop().slice(0,10), affection:0, last_cared:new Date().toISOString(), fed:0, patted:0, played:0, day:this.fday(), event_at:new Date().toISOString(), lodge}); }
+      I.eggs = I.eggs.filter(x=>x.id!==id); persist();
+      return {pet:code, name:s.name, dup, gain:dup?RIFT_DUP:0, lodge, shards:I.shards}; },
     // 미리보기 전용
     tick(){
       { const B = this.bossState(); if(st.me.in_voice && B.tickets<BOSS_TICKET_MAX && B.dmg<B.max_hp){ const lit = 1 + st.others.filter(o=>o.in_voice && !o.removed).length; B.fuel += bossFire(lit);
@@ -4311,7 +4368,11 @@ const supaApi = (() => {
     async tankBuySkin(code){ return ok(await sb.rpc('buy_tank_skin', {p_skin:code})); },
     async tankSetSkin(code){ ok(await sb.rpc('set_tank_skin', {p_skin:code})); },
     async lotto(){ return ok(await sb.rpc('get_lotto')); },
-    async boss(){ const r = ok(await sb.rpc('get_boss')); return Array.isArray(r) ? r[0] : r; },              // ⚔️ 이번 주 괴물 (boss.sql)
+    async boss(){ const r = ok(await sb.rpc('get_boss')); return Array.isArray(r) ? r[0] : r; },
+    // 🌀 균열 너머 (isekai.sql) — 아직 안 돌렸으면 null 이라 화면에 안 보여요
+    async rift(){ const r = await sb.rpc('get_isekai'); if(r.error) return null; return Array.isArray(r.data) ? r.data[0] : r.data; },
+    async riftSetEgg(id){ return ok(await sb.rpc('isekai_set_egg', {p_egg:id})); },
+    async riftHatch(id){ return ok(await sb.rpc('isekai_hatch', {p_egg:id})); },              // ⚔️ 이번 주 괴물 (boss.sql)
     async bossHit(w, n){ const r = ok(await sb.rpc('boss_hit', {p_weapon:w, p_count:n})); return Array.isArray(r) ? r[0] : r; },
     async bossTrade(item, kind){ const r = ok(await sb.rpc('boss_trade_dup', {p_item:item||'', p_kind:kind})); return Array.isArray(r) ? r[0] : r; },   // 🔁 겹친 수집품 바꾸기
     async playLotto(){ return ok(await sb.rpc('play_lotto')); },
@@ -5367,7 +5428,7 @@ document.addEventListener('click', async e=>{
     document.querySelectorAll('[data-pour]').forEach(x=>x.disabled = true);
     try{
       const r = await api.pourDrops(n); const x = Array.isArray(r) ? r[0] : r;
-      await Promise.all([refreshTree(), refreshMine()]); renderTop(); box_reset(); renderTree();
+      await Promise.all([refreshTree(), refreshMine(), refreshRift()]); renderTop(); box_reset(); renderTree(); renderRift();
       if(x && x.grown){ showGifts().then(n=>{ if(n) openMail(); }); }
       else toast('💧 세계수에 물을 줬어요');
     }catch(err){ toast(err.message||'물을 주지 못했어요'); renderTree(); }
@@ -5815,7 +5876,7 @@ function monsterArt(m){
 
 let BOSS = null, BOSS_ANIM_UNTIL = 0, BOSS_LINE = 0;
 let BOSS_PICK = null; try{ BOSS_PICK = localStorage.getItem('majam-boss-weapon'); }catch(e){}
-async function refreshBoss(){ try{ const r = await api.boss(); BOSS = r && r.monster ? r : null; }catch(e){ BOSS = null; } }   // boss.sql 전이면 조용히 안 보여요
+async function refreshBoss(){ try{ const r = await api.boss(); BOSS = r && r.monster ? r : null; }catch(e){ BOSS = null; } await refreshRift(); }   // boss.sql 전이면 조용히 안 보여요
 const bossLit = () => VILLAGE.filter(p=>p.in_voice && !p.removed).length;
 function bossWeaponNow(){
   const m = monsterOf(BOSS.monster), mins = ME ? ME.total_minutes : 0, open = WEAPONS.filter(w=>weaponOpen(w, mins));
@@ -5829,7 +5890,7 @@ function bossBadge(){
 }
 function renderBoss(force){
   const box = document.getElementById('bossBox'); if(!box) return;
-  bossBadge();
+  bossBadge(); renderRift();
   { const em = document.getElementById('isekaiEmpty'); if(em) em.hidden = !!(BOSS && ME); }
   if(!BOSS || !ME){ box.hidden = true; box.innerHTML = ''; box._html = ''; return; }
   if(!force && Date.now() < BOSS_ANIM_UNTIL) return;
@@ -5943,6 +6004,13 @@ async function bossAttack(n){
       if(cnt > hits) bossPop(stage, `총 -${(x.dealt||0).toLocaleString()}`, 'sum', hits);
       if(weak) bossPop(stage, '효과 굉장!', 'eff', 0);
       if(x.coins) bossPop(stage, x.lucky ? `💰 +${x.coins}` : `🪙 +${x.coins}`, 'coin' + (x.lucky ? ' lucky' : ''), 0);
+      if(x.isekai && x.isekai.shards) bossPop(stage, `${x.isekai.big?'💎':'💠'} +${x.isekai.shards}`, 'shard', 1);
+    }
+    if(x.isekai && x.isekai.open){
+      const I = x.isekai;
+      if(I.opened_now) RIFT_SURPRISE_NOW = true;
+      if(I.eggs && I.eggs.length) setTimeout(()=>toast(`🥚 ${I.eggs.map(k=>RIFT_EGGS[k]?.name||'미지의 알').join(', ')}${I.eggs.length>1?`(${I.eggs.length}개)`:''}${jo(RIFT_EGGS[I.eggs[I.eggs.length-1]]?.name||'알','을','를')} 주웠어요! 「균열 너머」에서 세계수에 맡겨 보세요`, 7000), 1500);
+      else if(I.big && cnt===1) setTimeout(()=>toast(`💎 대박! 이세계 파편 ${I.shards}개가 쏟아졌어요`), 1400);
     }
     if(x.coins){ if(ME) ME.coins = (ME.coins||0) + x.coins; renderTop(); refreshMine().then(()=>renderTop()).catch(()=>{}); }
     const before = {...((BOSS && BOSS.items) || {})};
@@ -5954,7 +6022,7 @@ async function bossAttack(n){
     if(x && x.down){
       await refreshMine(); renderTop(); renderBag();
       setTimeout(()=>{ showGifts(); petParty('⚔️', `「${m.name}」${jo(m.name,'을','를')} 쓰러뜨렸어요!\n막타는 ${ME.display_name||'나'}님이에요 🎉\n\n함께 때린 주민 모두에게 🪙 ${BOSS_REWARD.toLocaleString()}와\n수집품 하나씩이 가요!`); }, 1350);
-    } else if(cnt>1) toast(`${w.emoji} ${x.used||cnt}번 때렸어요! 피해 ${(x.dealt||0).toLocaleString()} · 🪙 ${x.coins||0}${x.lucky?` (💰 대박 ${x.lucky}번!)`:''}`);
+    } else if(cnt>1) toast(`${w.emoji} ${x.used||cnt}번 때렸어요! 피해 ${(x.dealt||0).toLocaleString()} · 🪙 ${x.coins||0}${x.lucky?` (💰 대박 ${x.lucky}번!)`:''}${x.isekai && x.isekai.shards ? ` · 💠 ${x.isekai.shards}` : ''}`);
     else if(x.lucky) toast(`💰 대박! 코인 ${x.coins}개가 쏟아졌어요`);
   }catch(err){ toast(err.message || '때리지 못했어요'); await refreshBoss(); renderBoss(true); }
   finally{ busy = false; }
@@ -6095,7 +6163,7 @@ const petSvg = (code, mood='ok', cls='') => `<svg class="pet-svg ${cls} ${mood==
 
 /* ---------- 🐾 펫 ---------- */
 // 아래 숫자들은 pets.sql 과 같아야 해요
-const PET_TIER = {common:{label:'일반', open:300, adopt:200}, rare:{label:'희귀', open:500, adopt:500}, legend:{label:'전설', open:1000, adopt:1000}, fairy:{label:'요정', open:0, adopt:1000}, season:{label:'시즌 한정', open:0, adopt:0}};
+const PET_TIER = {common:{label:'일반', open:300, adopt:200}, rare:{label:'희귀', open:500, adopt:500}, legend:{label:'전설', open:1000, adopt:1000}, fairy:{label:'요정', open:0, adopt:1000}, season:{label:'시즌 한정', open:0, adopt:0}, isekai:{label:'🌀 이세계', open:0, adopt:0}};
 const PET_MAX = 5, PET_SLOT_PRICE = new Proxy({}, {get:()=>1500});   // (10-13) 칸 늘리기는 늘 1,500 · 최대 5마리 — petslot5.sql 과 같아야 해요
 const PET_CARE = {feed:{label:'🍖 밥 주기', max:3, gain:3, key:'fed'}, pat:{label:'🤲 쓰다듬기', max:5, gain:1, key:'patted'}, play:{label:'🧶 놀아 주기', max:2, gain:5, key:'played'}};
 const PET_LV = [0,20,50,100,170,260,370,500,650,820];
@@ -6103,7 +6171,8 @@ const PET_EVENT_HOURS = 4, PET_SAD_DAYS = 7;
 // 그림: pets 폴더의 그림(아기 = code.webp, 다 큰 모습 = code_2.webp)
 const PET_USE_IMG = true;
 // 🐾 원래 그림에 굵은 갈색 선이 있는 펫(㉟에 선 굵기 재서 고름) → 산책로에서 테두리를 1px만, 마을 집 앞에선 안 둘러요
-const PET_OL1 = new Set(['bichon','bichon_2','black','black_2','penguin','penguin_2','shiba_2','fox_2','hedgehog_2','chick_2','fairy_draft','fairy_draft_2','fairy_type','fairy_type_2','fairy_coffee','fairy_coffee_2']);
+const PET_OL1 = new Set(['bichon','bichon_2','black','black_2','penguin','penguin_2','shiba_2','fox_2','hedgehog_2','chick_2','fairy_draft','fairy_draft_2','fairy_type','fairy_type_2','fairy_coffee','fairy_coffee_2',
+  ...['isk_ink','isk_clock','isk_paper','isk_reject','isk_blank','isk_scrap','isk_sleep','isk_game','isk_vamp'].flatMap(c=>[c, c+'_2'])]);
 const PET_GROW_LV = 5;   // 친밀도 이 단계부터 다 큰 모습 (pets.sql 과 같아요)
 const PETS_DEFAULT = [
   ['shiba','시바견','common','꼬리를 말고 늘 웃고 있어요'], ['black','검은 고양이','common','방울 소리로 마감을 알려 줘요'], ['bunny','토끼','common','당근보다 원고지를 좋아해요'],
@@ -6121,6 +6190,16 @@ const PETS_DEFAULT = [
   ['fairy_cloud','구름의 요정','fairy','기분이 흐리면 비가 와요. 다 크면 무지개를 띄워 줘요'],
   ['fairy_type','타자기의 요정','fairy','엔터 키를 소중히 안고 다녀요. 다음 화는 엔터 한 번이면 시작돼요'],
   ['fairy_draft','원고지의 요정','fairy','연필 하나로 원고지를 가득 채워요. 지우개는 의자로 써요'],
+  // 🌀 이세계 마물 (isekai.sql) — 도감 열기·입양 없이 알에서만 태어나요
+  ['isk_ink','잉크와 펜의 타락 악마','isekai','잉크를 뒤집어쓴 아기 악마. 크면 잉크 뚝뚝 날개로 펜촉 창을 휘둘러요'],
+  ['isk_clock','마감 시간과 불꽃의 악마','isekai','폭탄 타이머를 안고 발을 동동. 크면 톱니바퀴 날개에 삼지창을 들어요'],
+  ['isk_paper','원고지와 낙서의 악마','isekai','낙서 종이 날개로 칭얼칭얼. 크면 X자 원고지 날개에 흑연 지팡이를 들어요'],
+  ['isk_reject','낙선과 반려의 유령','isekai','반려 편지를 안고 훌쩍여요. 크면 거절된 원고를 두른 후드 유령이 돼요'],
+  ['isk_blank','아이디어 고갈의 백지 유령','isekai','백지 한 장을 얹고 멍해요. 크면 끝없는 백지가 휘몰아치는 스펙터가 돼요'],
+  ['isk_scrap','쓰레기통의 파지 유령','isekai','버려진 종이 뭉치 속에서 울어요. 크면 파지가 소용돌이치는 수호령이 돼요'],
+  ['isk_sleep','꿀잠 유혹의 서큐버스','isekai','하트 베개를 꼭 쥐고 낮잠 버블. 크면 초승달 베개에서 졸음을 퍼뜨려요'],
+  ['isk_game','밤샘 오락의 인큐버스','isekai','꼬마 게임기를 쥐고 꾸벅. 크면 빈백에 널브러져 밤샘 게임을 권해요'],
+  ['isk_vamp','새벽 감성의 뱀파이어','isekai','관 모양 이불에서 팩 음료를 쪽쪽. 크면 소파에 기대 붉은 음료를 쥐고 졸아요'],
   // ❄️ 시즌 한정 (winter.sql) — 도감 열기·입양 없이 겨울 행사 선물로만
   ['icefairy26','얼음 요정','season','첫눈 오는 밤에만 나타나요. 다 크면 얼음 날개로 등불을 밝혀 줘요'],
 ].map(([code,name,tier,about],i)=>({code,name,tier,about,sort:i+1}));
@@ -6237,6 +6316,68 @@ function petRewardText(r){
   if(r.kind==='coins') return `🪙 ${r.amount}코인`;
   const it = itemOf(r.item); return `${it.emoji} ${it.name}`;
 }
+/* ---------- 🌀 균열 너머 (10-22 isekai.sql) — 이세계 파편 · 미지의 마물 알 · 세계수 정화 · 부화 ---------- */
+// 아래 숫자들은 isekai.sql 과 같아야 해요
+const RIFT_OPEN_HP = 10000, RIFT_NEED = 10, RIFT_DUP = 50, RIFT_EGG_P = .03, RIFT_BIG_P = .05;
+const RIFT_EGGS = {
+  punk:{name:'마감 펑크의 알', img:'pets/egg_punk.webp', about:'절망과 펑크의 징조 · 날개 달린 악마가 깨어나요', pets:['isk_ink','isk_clock','isk_paper']},
+  reject:{name:'투고 실패의 알', img:'pets/egg_reject.webp', about:'백지 상태의 영혼 · 유령이 깨어나요', pets:['isk_reject','isk_blank','isk_scrap']},
+  rest:{name:'휴식 유혹의 알', img:'pets/egg_rest.webp', about:'밤샘 작업의 다크서클 · 서큐버스·인큐버스·뱀파이어가 깨어나요', pets:['isk_sleep','isk_game','isk_vamp']},
+};
+let RIFT = null, RIFT_SURPRISE_NOW = false, RIFT_SURPRISED = false;
+async function refreshRift(){ try{ RIFT = api.rift ? await api.rift() : null; }catch(e){ RIFT = null; } }   // isekai.sql 전이면 조용히 안 보여요
+function riftSurprise(){
+  if(RIFT_SURPRISED) return;
+  let seen = null; try{ seen = localStorage.getItem('majam-rift-seen'); }catch(e){}
+  if(seen && !RIFT_SURPRISE_NOW) return;
+  RIFT_SURPRISED = true; RIFT_SURPRISE_NOW = false; try{ localStorage.setItem('majam-rift-seen', '1'); }catch(e){}
+  setTimeout(()=>petParty('🌀', '균열이 열렸어요!\n\n괴물을 때리던 틈으로 숲 너머 균열이 크게 벌어졌어요.\n이제껏 주머니가 없어서 흘리던 💠 이세계 파편을 담을 수 있고,\n아주 가끔 🥚 미지의 마물 알도 주울 수 있어요.\n\n🌀 이세계 탭 아래 「균열 너머」를 열어 보세요!'), 600);
+}
+function riftHave(){ const s = new Set((PETS && PETS.dex) || []); ((PETS && (PETS.all || PETS.pets)) || []).forEach(p=>s.add(p.code)); return s; }
+function renderRift(){
+  const box = document.getElementById('riftBox'), te = document.getElementById('treeEgg');
+  if(!RIFT || !RIFT.open || !ME){ if(box){ box.hidden = true; box.innerHTML = ''; } if(te){ te.hidden = true; te.innerHTML = ''; } return; }
+  riftSurprise();
+  const need = RIFT.need || RIFT_NEED, eggs = RIFT.eggs || [], setE = eggs.find(e=>e.set_at), have = riftHave();
+  const eggCard = e => { const E = RIFT_EGGS[e.kind] || {name:'미지의 알', img:''}, ready = e.set_at && e.fed >= need;
+    return `<div class="regg ${e.set_at?'set':''} ${ready?'ready':''}"><img src="${E.img}" alt="" loading="lazy"><b>${esc(E.name)}</b>`
+      + (ready ? `<span class="small">정화 끝! 알이 꿈틀거려요</span><button class="mini ask-yes" type="button" data-rifthatch="${e.id}">🐣 부화시키기</button>`
+        : e.set_at ? `<span class="ebar"><span style="width:${Math.min(100, e.fed/need*100).toFixed(0)}%"></span></span><span class="small">🌳 세계수에서 정화 중 · 💧 ${e.fed} / ${need}</span><button class="mini" type="button" data-riftgo>🌳 물 주러 가기</button>`
+        : `<button class="mini" type="button" title="${esc(E.about)}" data-riftset="${e.id}" ${setE?'disabled title="세계수에는 알을 하나씩만 맡길 수 있어요"':''}>🌳 세계수에 맡기기</button>`) + `</div>`; };
+  const nHave = Object.values(RIFT_EGGS).flatMap(E=>E.pets).filter(c=>have.has(c)).length;
+  const dex = Object.entries(RIFT_EGGS).map(([k,E])=>E.pets.map(c=>{ const s = petOf(c), on = have.has(c);
+    return `<div class="rdx ${on?'':'no'}"><img src="pets/${c}.webp" alt="" loading="lazy"><b>${on||peek()?esc(s.name):'???'}</b><span class="eg">${esc(E.name)}</span></div>`; }).join('')).join('');
+  const html = `<div class="rift-head"><h3>🌀 균열 너머</h3><span class="shards">💠 이세계 파편 ${(RIFT.shards||0).toLocaleString()}</span></div>
+    <p class="small" style="margin:.3rem 0 0">괴물을 때릴 때마다 💠 파편 10~40개, 가끔 💎 100개! 아주 가끔은 🥚 미지의 마물 알이 떨어져요.<br>알은 세계수에 맡기고 물방울 ${need}개를 부으면 정화돼서 깨어나요. 이미 있는 친구가 나오면 💠 파편 ${RIFT.dup_shards||RIFT_DUP}개로 바뀌어요.</p>
+    <h4>🥚 내 알 <span class="small">${eggs.length}개</span></h4>
+    ${eggs.length ? `<div class="rift-eggs">${eggs.map(eggCard).join('')}</div>` : `<p class="small" style="margin:.2rem 0">아직 주운 알이 없어요. 괴물을 때리다 보면 가끔 떨어져요!</p>`}
+    <h4>👾 이세계 마물 도감 <span class="small">${nHave} / 9 · 알에서만 태어나요</span></h4>
+    <div class="rift-dex">${dex}</div>
+    <p class="rift-soon">🔮 모은 파편은 곧 열릴 「아공간」에서 쓸 수 있대요. 차곡차곡 모아 두세요!</p>`;
+  if(box){ box.hidden = false; if(box._html !== html){ box._html = html; box.innerHTML = html; } }
+  if(te){
+    if(!setE){ te.hidden = true; te.innerHTML = ''; }
+    else { const E = RIFT_EGGS[setE.kind] || {name:'미지의 알', img:''}, ready = setE.fed >= need;
+      te.hidden = false; te.classList.toggle('ready', ready);
+      te.innerHTML = `<img src="${E.img}" alt=""><div class="te-txt"><b>🥚 ${esc(E.name)} ${ready?'· 정화 끝!':'정화 중'}</b><span class="ebar"><span style="width:${Math.min(100, setE.fed/need*100).toFixed(0)}%"></span></span><span class="small">${ready?'알이 꿈틀거려요. 깨워 볼까요?':`세계수에 물방울을 부으면 같이 정화돼요 · 💧 ${setE.fed} / ${need}`}</span></div>${ready?`<button class="mini ask-yes" type="button" data-rifthatch="${setE.id}">🐣 부화</button>`:''}`; }
+  }
+}
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-riftgo]')){ document.querySelector('.tabs [data-tab="tree"]')?.click(); return; }
+  const sb_ = e.target.closest('[data-riftset]');
+  if(sb_) return act(async()=>{
+    const r = await api.riftSetEgg(+sb_.dataset.riftset); RIFT = (Array.isArray(r) ? r[0] : r) || RIFT; if(!RIFT || !RIFT.eggs) await refreshRift();
+    renderRift(); toast('🌳 알을 세계수에 맡겼어요. 물방울을 부으면 정화돼요');
+  });
+  const hb = e.target.closest('[data-rifthatch]');
+  if(hb) return act(async()=>{
+    const r0 = await api.riftHatch(+hb.dataset.rifthatch), r = Array.isArray(r0) ? r0[0] : r0;
+    await Promise.all([refreshRift(), refreshPets()]); renderRift();
+    if(!document.getElementById('tab-pet').hidden) renderPets();
+    if(r.dup) petParty('💠', `알이 깨지고 「${r.name}」${jo(r.name,'이','가')} 나왔지만…\n이미 함께 지내는 친구라 균열 너머로 돌아갔어요.\n\n대신 💠 이세계 파편 ${r.gain}개를 두고 갔어요!`);
+    else petParty('🐣', `알이 깨졌어요!\n\n「${r.name}」${jo(r.name,'이','가')} 태어났어요!\n${r.lodge ? '마당이 꽉 차서 🏡 펫 숙소에서 기다리고 있어요.' : '🐾 펫 마당에서 만나 보세요.'}`);
+  });
+});
 function petParty(emoji, msg){
   const d = document.getElementById('party'), pe = d.querySelector('.party-emoji');
   pe.textContent = emoji; document.getElementById('partyMsg').textContent = msg;
@@ -8785,6 +8926,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑲</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ⑳</p>
 </body>
 </html>
