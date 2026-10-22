@@ -1897,6 +1897,10 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 .house.me .nm.plate-snow,.wnm.me.plate-snow{color:#1B5E9C}
 .plate-chip{display:inline-block;padding:.05rem .55rem;border-radius:7px;border:2px solid #4E321C;background:linear-gradient(#A0703F,#7A5230);color:#FFF3DC;font-family:"Jua",sans-serif;font-size:.85rem}
 .hs-btn.plate-btn{padding:.2rem .3rem}
+/* ✦ 겨울 100% 너머 (10-22) */
+.wb-slot .wq.wq-ic{font-size:2.2rem;background:none;border:0;box-shadow:none}
+.wb-bar2{margin-top:.4rem;height:8px;position:relative}
+.wb-bar2 span{background:linear-gradient(90deg,#BFE3FF,#E6CCFF,#FFD6F0)!important}
 /* 🏅 수집 명찰 (10-22 plates.sql) — 이름 앞 그림(.pe) */
 .house .nm .pe,.wnm .pe{margin-right:.25em;font-size:.95em}
 .plate-btn.plate-lock{display:inline-flex;flex-direction:column;align-items:center;gap:.1rem;opacity:.55;cursor:default}
@@ -4179,9 +4183,9 @@ const demoApi = (() => {
     lweek(){ const wk = Math.floor((Date.now() - Date.parse('2026-10-09T00:00:00+09:00'))/604800e3), cyc = Math.max(1, Math.ceil(LOTTO_FURN.length/LOTTO_WEEK_N)), c = Math.floor(wk/cyc), k = wk%cyc;
       const h = t => { let x = 2166136261; for(const ch of t){ x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619); } return x>>>0; };
       return LOTTO_FURN.map(x=>x.code).sort((a,b)=>h(a+':'+c)-h(b+':'+c)).slice(k*LOTTO_WEEK_N, (k+1)*LOTTO_WEEK_N); },
-    async lotto(){ const L = this.lstate(); return {plays_today:L.n, week:this.lweek(), dex:[...L.dex], free:st.lfree||0}; },
+    async lotto(){ const L = this.lstate(); return {plays_today:L.n, week:this.lweek(), dex:[...L.dex], free:st.lfree||0, limit:LOTTO_PER_DAY+(st.me.lotto_bonus||0)}; },
     async playLottoFree(){ const L = this.lstate(); if(!(st.lfree>0)) fail('공짜 복권이 없어요. 산책로에서 주워 보세요!');
-      st.lfree--; const n0 = L.n; if(L.n>=LOTTO_PER_DAY) L.n = LOTTO_PER_DAY-1; st.me.coins += LOTTO_PRICE;
+      st.lfree--; const n0 = L.n, lim = LOTTO_PER_DAY+(st.me.lotto_bonus||0); if(L.n>=lim) L.n = lim-1; st.me.coins += LOTTO_PRICE;
       const r = await this.playLotto(); L.n = n0; persist(); return {...r, plays_today:n0, free:st.lfree, is_free:true}; },
     // 🗺️ 산책로 분실물 (미리보기: 2분마다 1개)
     wlstate(){ const now = Date.now();
@@ -4209,7 +4213,7 @@ const demoApi = (() => {
       W.items = W.items.filter(i=>i.id!==id); if(!l.bonus) W.today++; persist();
       return {kind, amount, look:l.look, coins:st.me.coins, today:W.today}; },
     async playLotto(){ const L = this.lstate();
-      if(L.n>=LOTTO_PER_DAY) fail('오늘 복권은 다 긁었어요. 새벽 12시에 다시 채워져요');
+      if(L.n>=LOTTO_PER_DAY+(st.me.lotto_bonus||0)) fail('오늘 복권은 다 긁었어요. 새벽 12시에 다시 채워져요');
       if(st.me.coins<LOTTO_PRICE) fail('코인이 부족해요');
       L.n++; st.me.coins -= LOTTO_PRICE; const paid = st.me.coins;
       const r = Math.random()*100; let kind = 'miss', amount = 0, item = null, dup = false;
@@ -7459,7 +7463,8 @@ function lottoPrizeText(r){
 function renderLotto(){
   const box = document.getElementById('lottoBox'); if(!box) return;
   const L = LOTTO || {plays_today:0, week:[], dex:[]};
-  const left = Math.max(0, LOTTO_PER_DAY - (L.plays_today||0)), dex = new Set(L.dex||[]);
+  const LIM = L.limit || LOTTO_PER_DAY;   // 🎟️ 하루 장수 (겨울 행사 100% 너머 보상이면 8장)
+  const left = Math.max(0, LIM - (L.plays_today||0)), dex = new Set(L.dex||[]);
   const cur = LOTTO_CUR, scratching = cur && !cur.revealed;
   const days = Math.max(1, Math.ceil((lottoWeekEnds()-Date.now())/86400e3));
   const cells = cur ? cur.cells.map(s=>`<div class="t-cell ${cur.revealed && cur.res.kind!=='miss'?'hit':''}">${s}</div>`).join('')
@@ -7477,14 +7482,14 @@ function renderLotto(){
     <div class="panel">
       <div class="lotto-head">
         <div><h3>🎟️ 마감 스크래치 복권</h3><p class="small" style="margin:.15rem 0 0">글이 막힐 때 5초만 머리 식혀요. 같은 그림 3개가 나오면 당첨!</p></div>
-        <div class="lotto-left">오늘 남은 복권 <span class="dots">${'🎟️'.repeat(left)}${'·'.repeat(LOTTO_PER_DAY-left)}</span> ${left}/${LOTTO_PER_DAY}</div>
+        <div class="lotto-left">오늘 남은 복권 <span class="dots">${'🎟️'.repeat(left)}${'·'.repeat(LIM-left)}</span> ${left}/${LIM}</div>
       </div>
       <div class="lotto-wrap">
         <div>
           <div class="ticket tbg">
             <div class="t-top"><span class="t-title">마감 복권</span><span class="t-no">담당자 늑대 발행 · 한 장 🪙 ${LOTTO_PRICE}</span></div>
             <div class="t-play"><div class="t-cells">${cells}</div>${scratching?'<canvas class="t-foil" id="lottoFoil" aria-label="복권 은박"></canvas>':''}</div>
-            <p class="t-rule"><span>같은 그림 3개가 나오면 당첨!<br>하루 ${LOTTO_PER_DAY}장 · 새벽 12시에 다시 채워져요</span></p>
+            <p class="t-rule"><span>같은 그림 3개가 나오면 당첨!<br>하루 ${LIM}장 · 새벽 12시에 다시 채워져요</span></p>
           </div>
           <div class="t-btns">
             ${scratching
@@ -7492,7 +7497,7 @@ function renderLotto(){
               : `<button class="pull" id="lottoBuy" type="button" ${left<1||ME.coins<LOTTO_PRICE?'disabled':''}>${left<1?'오늘은 다 긁었어요':`🪙 ${LOTTO_PRICE} · 한 장 사기`}</button>`
                 + ((L.free||0)>0 ? `<button class="pull ten" id="lottoFree" type="button">🎁 공짜 복권 긁기 · ${L.free}장</button>` : '')}
           </div>
-          ${(L.free||0)>0 && !scratching ? `<p class="small lotto-free-note">🗺️ 산책로에서 주운 공짜 복권이에요. 하루 ${LOTTO_PER_DAY}장과 따로 긁을 수 있어요!</p>` : ''}
+          ${(L.free||0)>0 && !scratching ? `<p class="small lotto-free-note">🗺️ 산책로에서 주운 공짜 복권이에요. 하루 ${LIM}장과 따로 긁을 수 있어요!</p>` : ''}
           <div class="t-result">${result}</div>
         </div>
         <div>
@@ -7858,9 +7863,14 @@ function winterBoardHTML(){
   const slot = s => (W.tiers||0) >= s.t || peek()
     ? `<div class="wb-slot open"><img src="house/${s.src}.webp" alt="" loading="lazy"><b>${s.name}</b><span>${s.for}</span></div>`
     : `<div class="wb-slot"><div class="wq">？</div><b>？？？</b><span>🔒 ${WINTER_PCT[s.t]}%에서 공개</span></div>`;
-  const beyond = reveal
-    ? `<div class="wb-slot beyond open"><img src="pets/icefairy26.webp" alt="" loading="lazy"><b>❄️ 얼음 요정</b><span>시즌 한정 펫</span></div>`
-    : `<div class="wb-slot beyond"><div class="wq">✦</div><b>100% 너머에</b><span>무언가 더 있어요!</span></div>`;
+  // ✦ 100% 너머 3단계 (10-22) — 열린 단계는 보여 주고, 다음 단계 하나만 ？
+  const BY = peek() ? 3 : (W.beyond ?? (W.revealed ? 1 : 0));
+  const BEYOND = [
+    {pct:100, open:`<div class="wb-slot beyond open"><div class="wq wq-ic">🎟️</div><b>복권 하루 +3장</b><span>100% 너머 · 영구</span></div>`},
+    {pct:150, open:`<div class="wb-slot beyond open"><img src="pets/icefairy26.webp" alt="" loading="lazy"><b>❄️ 얼음 요정</b><span>150% 너머 · 시즌 한정 펫</span></div>`},
+    {pct:200, open:`<div class="wb-slot beyond open"><div class="wq wq-ic">⛄</div><b>26 겨울 눈사람</b><span>200% · 기념 광장 첫 기념물</span></div>`},
+  ];
+  const beyond = BEYOND.map((b,i)=> i < BY ? b.open : i === BY ? `<div class="wb-slot beyond"><div class="wq">✦</div><b>${b.pct}%${i?'에':' 너머에'}</b><span>무언가 더 있어요!</span></div>` : '').join('');
   const row = (icon, name, sub, have, max, ok) => `<div class="wb-mine-row ${ok?'ok':''}"><span class="wm-ic">${icon}</span><span class="wm-tx"><b>${name}</b><span class="small">${sub}</span></span>
       <span class="wm-st">${ok ? '✓ 받았어요' : `${Math.min(have,max).toLocaleString()} / ${max.toLocaleString()}`}</span><span class="mbar"><span style="width:${Math.min(100, have/max*100)}%"></span></span></div>`;
   const marks = [25,50,75].map(m=>`<i style="left:${m}%"></i>`).join('');
@@ -7869,14 +7879,17 @@ function winterBoardHTML(){
     : `<p class="small" style="margin:.2rem 0 .6rem">다 같이 코인을 보태면 마을 목표에 따라 <b>한정 겨울 집</b>이 하나씩 공개돼요. 12월 31일 밤 12시까지 · 못 연 집은 영원히 잠겨요!</p>`;
   return `<div class="wb-head"><h3>❄️ 26 겨울 행사 · 눈꽃 마을</h3><span class="wb-badge">${W.state==='open'?'진행 중':W.state==='soon'?'곧 시작':'끝'}</span></div>${head}
     <div class="wb-gauge"><div class="bar wb-bar"><span style="width:${pct}%"></span>${marks}</div>
-      <p class="small" style="margin:.25rem 0 0">🪙 ${total.toLocaleString()} / ${goal.toLocaleString()}${total>goal?` · 🎉 목표를 넘겼어요! +${(total-goal).toLocaleString()}`:` · 목표까지 ${(goal-total).toLocaleString()}`} · ${(W.givers||0)}명이 눈송이를 보탰어요</p></div>
+      <p class="small" style="margin:.25rem 0 0">🪙 ${total.toLocaleString()} / ${goal.toLocaleString()}${total>goal?` · 🎉 목표를 넘겼어요! 지금 ${Math.floor(total/goal*100)}%${BY<3?` · ${[100,150,200][BY]}%까지 ${Math.max(0, Math.ceil(goal*[1,1.5,2][BY]) - total).toLocaleString()}`:''}`:` · 목표까지 ${(goal-total).toLocaleString()}`} · ${(W.givers||0)}명이 눈송이를 보탰어요</p>
+      ${total>=goal ? `<div class="bar wb-bar wb-bar2" title="100% 너머"><span style="width:${Math.min(100, (total-goal)/goal*100)}%"></span><i style="left:50%"></i></div><p class="small" style="margin:.15rem 0 0">✦ 100% 너머 게이지 · 가운데가 150% · 끝이 200%</p>` : ''}</div>
     <div class="wb-slots">${WINTER_SLOTS.map(slot).join('')}${beyond}</div>
     <div class="wb-mine"><h4>🎁 내가 받을 것 <span class="small">내가 보탠 코인 🪙 ${(W.my_total||0).toLocaleString()}</span></h4>
       ${row('❄️','눈꽃 이름표', `내가 ${need.plate.toLocaleString()}코인 보태면 · 마을·산책로 이름표가 눈꽃으로`, W.my_total||0, need.plate, got.has('plate'))}
       ${row('⛄','26 겨울 집', `내가 ${need.style.toLocaleString()}코인 보태면 · 마을이 연 크기의 겨울 집만 입혀져요`, W.my_total||0, need.style, got.has('style'))}
       ${got.has('style') ? winterMyHouseNote() : ''}
-      ${reveal ? row('❄️','얼음 요정 (시즌 한정 펫)', `마을이 목표를 넘긴 뒤에 내가 ${need.after.toLocaleString()}코인 더 보태면`, W.my_after||0, need.after, got.has('pet'))
-               : `<div class="wb-mine-row secret"><span class="wm-ic">✦</span><span class="wm-tx"><b>？？？</b><span class="small">마을이 100%를 넘기면 정체가 밝혀져요</span></span></div>`}</div>
+      ${BY >= 1 ? row('🎟️', `복권 하루 +${need.lotto_bonus||3}장 (영구)`, `마을이 100%를 넘긴 뒤에 내가 ${(need.lotto||2000).toLocaleString()}코인 더 보태면`, W.my_after||0, need.lotto||2000, got.has('lotto')) : ''}
+      ${BY >= 2 ? row('❄️','얼음 요정 (시즌 한정 펫)', `마을이 150%를 넘긴 뒤에 내가 ${(need.pet||2000).toLocaleString()}코인 더 보태면`, W.my_after150||0, need.pet||2000, got.has('pet')) : ''}
+      ${BY >= 3 ? `<div class="wb-mine-row ok"><span class="wm-ic">⛄</span><span class="wm-tx"><b>26 겨울 눈사람 기념물</b><span class="small">마을 200% 달성! 마을 광장 기념 광장에 세워져요 · 함께한 모두의 것</span></span><span class="wm-st">✓ 달성</span></div>`
+        : `<div class="wb-mine-row secret"><span class="wm-ic">✦</span><span class="wm-tx"><b>？？？</b><span class="small">마을이 ${[100,150,200][BY]}%를 넘기면 정체가 밝혀져요</span></span></div>`}</div>
     ${open ? `<div class="give-row">
       ${[10,50,100,500].map(n=>`<button class="give" data-wgive="${n}" ${ME.coins<1?'disabled':''}>❄️ ${n}</button>`).join('')}
       <input type="number" min="1" inputmode="numeric" id="wgiveCustom" placeholder="직접 입력">
@@ -7908,7 +7921,13 @@ function winterMailCheck(){   // 📬 행사 시작·집 공개·100% 너머 소
   const from = seen ? seen.tiers : 0;
   for(let t = from+1; t <= now.tiers; t++){ const ns = WINTER_SLOTS.filter(s=>s.t===t).map(s=>s.name).join('·');
     items.push({icon:'⛄', title:`겨울 집 「${ns}」${jo(ns,'이','가')} 공개됐어요!`, body:`마을이 ${WINTER_PCT[t]}%를 넘겼어요. 겨울 집을 받은 주민은 ${WINTER_SLOTS.filter(s=>s.t===t).map(s=>s.for).join(' · ')} 크기에서 입을 수 있어요.`}); }
-  if(seen && !seen.rev && now.rev) items.push({icon:'✨', title:'100% 너머의 비밀이 풀렸어요!', body:'시즌 한정 펫 ❄️ 얼음 요정 — 마을이 목표를 넘긴 지금부터 500코인을 더 보태면 우리 집에 와요.'});
+  now.by = WINTER.beyond ?? (now.rev ? 1 : 0);
+  const sb = seen ? (seen.by ?? (seen.rev ? 1 : 0)) : 0, nd = WINTER.need || {};
+  const BYMAIL = [null,
+    {icon:'🎟️', title:'100% 너머 첫 번째 비밀이 풀렸어요!', body:`마을이 100%를 넘겼어요! 지금부터 ${(nd.lotto||2000).toLocaleString()}코인을 더 보태면 🎟️ 복권을 하루 ${nd.lotto_bonus||3}장 더 긁을 수 있어요 (영구).\n다음 비밀은 150%에서!`},
+    {icon:'❄️', title:'150% — 얼음 요정이 나타났어요!', body:`마을이 150%를 넘겼어요! 지금부터 ${(nd.pet||2000).toLocaleString()}코인을 더 보태면 시즌 한정 펫 ❄️ 얼음 요정이 우리 집에 와요.\n마지막 비밀은 200%에서!`},
+    {icon:'⛄', title:'200% 달성! 기념 광장에 눈사람이 세워져요', body:'다 같이 해낸 마을 200%! 마을 광장 기념 광장에 「26 겨울 눈사람」이 첫 기념물로 세워져요.'}];
+  if(seen) for(let t = sb+1; t <= now.by; t++) if(BYMAIL[t]) items.push(BYMAIL[t]);
   if(seen || now.state==='open') mailAdd(items);
 }
 document.getElementById('winterBox').addEventListener('click', e=>{
@@ -7923,8 +7942,9 @@ document.getElementById('winterBox').addEventListener('click', e=>{
     if(fresh.length) await refreshMine();
     renderTop(); renderWinter(); renderPets(); winterMailCheck();
     if(fresh.length){
-      const L = {plate:'❄️ 눈꽃 이름표를 받았어요! 집 겉모습 꾸미기에서 바꿔 끼울 수 있어요.', style:'⛄ 26 겨울 집을 받았어요! 집 겉모습 꾸미기에서 입을 수 있어요.\n(마을이 연 크기의 집부터 입혀져요)', pet:'❄️ 얼음 요정이 우리 집에 왔어요! 시즌 한정 친구예요.'};
-      petParty(fresh.includes('pet')?'❄️':'⛄', fresh.map(k=>L[k]).join('\n\n'));
+      const L = {lotto:`🎟️ 복권을 이제 하루 ${(WINTER.need||{}).lotto_bonus||3}장 더 긁을 수 있어요! (영구)`, plate:'❄️ 눈꽃 이름표를 받았어요! 집 겉모습 꾸미기에서 바꿔 끼울 수 있어요.', style:'⛄ 26 겨울 집을 받았어요! 집 겉모습 꾸미기에서 입을 수 있어요.\n(마을이 연 크기의 집부터 입혀져요)', pet:'❄️ 얼음 요정이 우리 집에 왔어요! 시즌 한정 친구예요.'};
+      if(fresh.includes('lotto') && typeof refreshLotto==='function') refreshLotto().then(()=>{ try{ renderLotto(); }catch(e){} });
+      petParty(fresh.includes('pet')?'❄️':fresh.includes('lotto')?'🎟️':'⛄', fresh.map(k=>L[k]).join('\n\n'));
     } else toast(`❄️ 눈송이 ${n.toLocaleString()}개를 보탰어요!`);
   });
 });
@@ -9370,6 +9390,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㉗</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㉘</p>
 </body>
 </html>
