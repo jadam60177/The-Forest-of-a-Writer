@@ -1897,6 +1897,26 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 .house.me .nm.plate-snow,.wnm.me.plate-snow{color:#1B5E9C}
 .plate-chip{display:inline-block;padding:.05rem .55rem;border-radius:7px;border:2px solid #4E321C;background:linear-gradient(#A0703F,#7A5230);color:#FFF3DC;font-family:"Jua",sans-serif;font-size:.85rem}
 .hs-btn.plate-btn{padding:.2rem .3rem}
+/* 🏅 수집 명찰 (10-22 plates.sql) — 이름 앞 그림(.pe) */
+.house .nm .pe,.wnm .pe{margin-right:.25em;font-size:.95em}
+.plate-btn.plate-lock{display:inline-flex;flex-direction:column;align-items:center;gap:.1rem;opacity:.55;cursor:default}
+.plate-btn.plate-lock .plate-chip{filter:grayscale(.6)}
+.plate-btn.plate-lock .small{font-size:.62rem}
+.house .nm.plate-ribbon,.wnm.plate-ribbon,.plate-chip.plate-ribbon{background:linear-gradient(#FFEAF2,#F7A8C4);color:#7A2448;border-color:#C25A85;text-shadow:none}
+.house .nm.plate-starlight,.wnm.plate-starlight,.plate-chip.plate-starlight{background:linear-gradient(#3B3A8E,#6B4FB8);color:#FFF3B0;border-color:#22205E;box-shadow:0 0 10px rgba(180,160,255,.6),0 3px 6px rgba(0,0,0,.3)}
+.house .nm.plate-jewel,.wnm.plate-jewel,.plate-chip.plate-jewel{background:linear-gradient(#E3FFFA,#6ED9C8);color:#0F5148;border-color:#2E9C8A;text-shadow:none}
+.house .nm.plate-rainbow,.wnm.plate-rainbow,.plate-chip.plate-rainbow{background:linear-gradient(90deg,#FFC9C9,#FFE5B0,#FFF7B0,#CFF5C6,#C6E4FF,#DCCBFF);color:#3A2350;border-color:#8A6BB8;text-shadow:none}
+.house .nm.plate-goldleaf,.wnm.plate-goldleaf,.plate-chip.plate-goldleaf{background:linear-gradient(110deg,#E9B949 0%,#FFF1B8 45%,#E9B949 60%,#C8901F 100%);background-size:220% 100%;color:#4A2F00;border-color:#8A6210;text-shadow:none;animation:plgold 3.5s linear infinite}
+@keyframes plgold{to{background-position:-220% 0}}
+.house .nm.plate-flower,.wnm.plate-flower,.plate-chip.plate-flower{background:linear-gradient(#FFF3F8,#FFC9DA);color:#8A3355;border-color:#6FA86A;text-shadow:none}
+.house .nm.plate-fish,.wnm.plate-fish,.plate-chip.plate-fish{background:linear-gradient(#E6F8FF,#8CCBEB);color:#1C4E6E;border-color:#3F86AE;text-shadow:none}
+.house .nm.plate-legend,.wnm.plate-legend,.plate-chip.plate-legend{background:linear-gradient(#FFEBB5,#F2B544);color:#4A2F00;border-color:#9C6B10;text-shadow:none;box-shadow:0 0 12px rgba(255,200,80,.7),0 3px 6px rgba(0,0,0,.3)}
+.house .nm.plate-isekai,.wnm.plate-isekai,.plate-chip.plate-isekai{background:linear-gradient(#5A2C9E,#A2449F);color:#FFE9FF;border-color:#2A1250;box-shadow:0 0 12px rgba(200,120,255,.65),0 3px 6px rgba(0,0,0,.3)}
+.house .nm.plate-ribbon::before,.house .nm.plate-ribbon::after{background:#C25A85}
+.house .nm.plate-jewel::before,.house .nm.plate-jewel::after,.house .nm.plate-fish::before,.house .nm.plate-fish::after{background:#2E7FA0}
+.house .nm.plate-legend::before,.house .nm.plate-legend::after,.house .nm.plate-goldleaf::before,.house .nm.plate-goldleaf::after{background:#8A6210}
+.house .nm.plate-flower::before,.house .nm.plate-flower::after{background:#6FA86A}
+@media (prefers-reduced-motion: reduce){.plate-goldleaf{animation:none!important}}
 /* ❄️ 시즌 한정 펫 */
 .rb.season{background:linear-gradient(90deg,#E6F4FF,#BFDDF7,#E6F4FF);color:#24476D}
 .season-dex .wq-pet{width:72px;font-size:2rem;margin:0 auto}
@@ -2102,6 +2122,22 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 :root[data-mode="day"] .void{background:linear-gradient(160deg,rgba(238,228,255,.95),rgba(214,202,250,.95));color:#2A2350}
 :root[data-mode="day"] .void .shards{color:#2F6FB8}
 #visitGarden .void-stage{margin-top:.3rem}
+/* ⭐ 별조각 연동 (10-22) — 아공간 효과 · 농장 강화 · 정화 촉진 */
+.void-fx{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin:-.2rem 0 .6rem}
+.void-fx .lbl{font-size:.8rem;opacity:.8}
+.vfarm-up{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin:.5rem 0 0}
+.star-feed{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center}
+.vfx{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:6;border-radius:inherit}
+.vfx i{position:absolute;left:var(--x);top:var(--y);display:block}
+.vfx.firefly i{width:6px;height:6px;border-radius:50%;background:#F4FF9E;box-shadow:0 0 8px 3px rgba(230,255,120,.75);animation:vffly var(--d) ease-in-out var(--dl) infinite alternate}
+@keyframes vffly{0%{transform:translate(0,0);opacity:.2}30%{opacity:1}60%{opacity:.4}100%{transform:translate(var(--dx),var(--dy));opacity:1}}
+.vfx.meteor i{width:120px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff 80%,#CFE8FF);transform:rotate(-30deg);opacity:0;animation:vfmet var(--d) linear var(--dl) infinite}
+@keyframes vfmet{0%{opacity:0;translate:0 0}3%{opacity:1}12%{opacity:0;translate:-260px 150px}100%{opacity:0;translate:-260px 150px}}
+.vfx.bubble i{width:var(--sz);height:var(--sz);border-radius:50%;border:1.5px solid rgba(220,240,255,.85);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.7),rgba(180,220,255,.12) 45%,transparent 70%);top:105%;animation:vfbub var(--d) ease-in var(--dl) infinite}
+@keyframes vfbub{0%{translate:0 0;opacity:0}10%{opacity:.9}100%{translate:var(--dx) -120vh;opacity:0}}
+.vfx.petal i{width:11px;height:8px;border-radius:80% 0 80% 0;background:linear-gradient(135deg,#FFD6E6,#FF9FC4);top:-5%;animation:vfpet var(--d) linear var(--dl) infinite}
+@keyframes vfpet{0%{translate:0 0;rotate:0deg;opacity:0}8%{opacity:1}100%{translate:var(--dx) 120vh;rotate:540deg;opacity:.2}}
+@media (prefers-reduced-motion: reduce){.vfx i{animation:none!important;opacity:.6}}
 /* ☀️ 낮 이세계 (10-21 ⑱) — bg/isekai_day.webp */
 :root[data-mode="day"] #tab-isekai{color:#2A2350;background:radial-gradient(ellipse 70% 50% at 85% 10%,rgba(170,120,255,.35),transparent 70%),linear-gradient(#BFE6FF,#DCEBFF 45%,#E9DEFF);box-shadow:0 0 0 1px rgba(150,120,230,.35),0 14px 34px rgba(80,60,150,.18)}
 :root[data-mode="day"] #tab-isekai .isekai-sky{display:none}
@@ -4229,8 +4265,20 @@ const demoApi = (() => {
     // 🔮 아공간 (미리보기)
     vdJson(){ const V = st.vd, P = this.pstate(), I = this.iskState(); if(!V) return {open:false, price:VOID_OPEN_PRICE, shards:I.shards};
       const farm_pets = [...new Set(P.pets.filter(p=>/^isk_/.test(p.code)).map(p=>p.code))].sort();
-      return {open:true, cols:V.cols, rows:V.rows, bg:V.bg, bgs:[...V.bgs], public:V.pub, items:V.items.map(x=>({...x})), farm_pets, farm_at:V.farm_at, farm_rate:VOID_FARM_RATE, farm_cap:VOID_FARM_CAP,
+      const cl = V.cap_lv||0, rl = V.rate_lv||0;
+      return {open:true, cols:V.cols, rows:V.rows, bg:V.bg, bgs:[...V.bgs], public:V.pub, items:V.items.map(x=>({...x})), farm_pets, farm_at:V.farm_at, farm_rate:VOID_FARM_RATE+rl, farm_cap:VOID_FARM_CAP+4*cl,
+        cap_lv:cl, rate_lv:rl, cap_price:[100,150,200][cl] ?? null, rate_price:[200,300][rl] ?? null, fx:V.fx||'', fxs:[...(V.fxs||[])], fx_price:VOID_FX_PRICE, stars:st.me.stars||0,
         max_cols:VOID_MAX_C, max_rows:VOID_MAX_R, grow_price:V.cols*V.rows*10, bg_price:VOID_BG_PRICE}; },
+    async checkPlates(){ const have = new Set(st.me.nameplates||['wood']), fresh = [], g = st.coll.size;
+      [[100,'ribbon'],[200,'starlight'],[300,'jewel'],[400,'rainbow'],[500,'goldleaf']].forEach(([n,k])=>{ if(g>=n && !have.has(k)) fresh.push(k); });
+      const P = this.pstate(); if(['isk_ink','isk_clock','isk_paper','isk_reject','isk_blank','isk_scrap','isk_sleep','isk_game','isk_vamp'].every(c=>P.dex.includes(c)) && !have.has('isekai')) fresh.push('isekai');
+      if(fresh.length){ st.me.nameplates = [...have, ...fresh]; persist(); } return {fresh}; },
+    vdStar(n){ if((st.me.stars||0) < n) fail(`⭐ 별조각이 모자라요 (⭐ ${n}개 필요)`); st.me.stars -= n; },
+    async voidFx(fx){ const V = st.vd; V.fxs = V.fxs||[]; if(fx && !V.fxs.includes(fx)){ this.vdStar(VOID_FX_PRICE); V.fxs.push(fx); } V.fx = fx||''; persist(); return this.vdJson(); },
+    async voidFarmUp(kind){ const V = st.vd; if(kind==='cap'){ const p = [100,150,200][V.cap_lv||0]; if(p==null) fail('바구니는 이미 제일 커요'); this.vdStar(p); V.cap_lv = (V.cap_lv||0)+1; }
+      else { const p = [200,300][V.rate_lv||0]; if(p==null) fail('간식 그릇은 이미 가득이에요'); this.vdStar(p); V.rate_lv = (V.rate_lv||0)+1; } persist(); return this.vdJson(); },
+    async riftStarFeed(id, n){ const I = this.iskState(), e = I.eggs.find(x=>x.id===id); if(!e || !e.set_at) fail('먼저 세계수에 맡겨 주세요');
+      n = Math.min(n, RIFT_NEED - e.fed); if(n<1) fail('이미 정화가 끝났어요'); this.vdStar(n*STAR_PER_DROP); e.fed += n; persist(); return this.rift(); },
     vdPay(n){ const I = this.iskState(); if(I.shards < n) fail(`💠 이세계 파편이 모자라요 (💠 ${n}개 필요)`); I.shards -= n; },
     async void(){ return this.vdJson(); },
     async voidOf(id){ return id==='me' && st.vd ? this.vdJson() : null; },
@@ -4485,6 +4533,10 @@ const supaApi = (() => {
     async voidPlace(code, r, c, rot, w, h, layer){ return ok(await sb.rpc('void_place', {p_code:code, p_r:r, p_c:c, p_rot:rot||0, p_w:w, p_h:h, p_layer:layer})); },
     async voidRemove(id){ return ok(await sb.rpc('void_remove', {p_id:id})); },
     async voidCollect(){ return ok(await sb.rpc('void_farm_collect')); },
+    async voidFx(fx){ return ok(await sb.rpc('void_set_fx', {p_fx:fx||''})); },
+    async checkPlates(){ const r = await sb.rpc('check_nameplates'); if(r.error) return null; return r.data; },   // 🏅 plates.sql
+    async voidFarmUp(kind){ return ok(await sb.rpc('void_farm_up', {p_kind:kind})); },
+    async riftStarFeed(id, n){ return ok(await sb.rpc('isekai_star_feed', {p_egg:id, p_drops:n})); },
     async adminShards(id, amount, reason){ return ok(await sb.rpc('admin_isekai_give', {p_discord_id:id, p_amount:amount, p_reason:reason})); },
     async shardEventAdd(name, mult, start, end){ return ok(await sb.rpc('admin_isekai_event_add', {p_name:name, p_mult:mult, p_start:start, p_end:end})); },
     async shardEventDel(id){ ok(await sb.rpc('admin_isekai_event_delete', {p_id:id})); },              // ⚔️ 이번 주 괴물 (boss.sql)
@@ -4687,7 +4739,7 @@ function renderVillage(){
     const status = p.in_voice ? `작업 중${today}` : dc ? decayLabel(dc, st) : `불 꺼짐${today}`;
     return `<button class="house ${p.in_voice?'lit':''} ${me?'me':''}" data-visit="${esc(p.discord_id)}" aria-label="${esc(me?'내 집':p.display_name)} 구경하기">
       <span class="hwrap">${houseSVG(lookStage(p.discord_id, st), p.in_voice, dc, p.house_color, lookStyle(p.discord_id, st, me ? ME.house_style : HOUSE_STYLE_OF[p.discord_id]))}${flowerYard(FLOWERS_ON[p.discord_id])}${PETS_ON[p.discord_id]?petArt(PETS_ON[p.discord_id].pet_code, PETS_ON[p.discord_id].sad?'sad':'ok', 'yardpet', petShowBig(PETS_ON[p.discord_id].level||1, babyOf(me ? meId() : p.discord_id, PETS_ON[p.discord_id].pet_code, PETS_ON[p.discord_id].name))):''}</span>
-      <span class="nm ${plateCls(p)}">${me?'내 집':esc(p.display_name)}</span>
+      <span class="nm ${plateCls(p)}">${plateEmo(p)}${me?'내 집':esc(p.display_name)}</span>
       <span class="st">${status}</span>
     </button>`;
   }).join('');
@@ -4832,6 +4884,7 @@ function renderDeco(){
               ${HOUSE_STYLES[pv.style] && HOUSE_STYLES[pv.style].limited && shown >= HOUSE_STYLE_FROM && !styleUnlocked(pv.style, shown) ? `<span class="small" style="display:block;width:100%">🔒 마을 겨울 행사가 ${WINTER_PCT[WINTER_TIER_OF_SIZE[styleSize(shown)]]}%가 되면 지금 집 크기의 겨울 집이 공개돼요. 그 전엔 기본 모습으로 보여요.</span>` : ''}</div>
       <div class="deco-row"><span class="paint-label">🏷️ 이름표</span>
         ${['wood', ...(ME.nameplates||[]).filter(k=>k!=='wood')].filter(k=>NAMEPLATE_DEF[k]).map(k=>`<button class="hs-btn plate-btn ${(ME.nameplate||'wood')===k?'on':''}" data-plate="${k}"><span class="plate-chip plate-${k}">${NAMEPLATE_DEF[k].emoji} ${NAMEPLATE_DEF[k].name}</span></button>`).join('')}
+        ${Object.entries(NAMEPLATE_DEF).filter(([k,d])=>d.how && !(ME.nameplates||[]).includes(k)).map(([k,d])=>`<span class="hs-btn plate-btn plate-lock" title="${esc(d.how)}을 모으면 받아요"><span class="plate-chip">🔒 ${d.emoji} ${d.name}</span><span class="small">${esc(d.how)}</span></span>`).join('')}
         <span class="small" style="display:block;width:100%">마을 집과 산책로에 보이는 내 이름표예요. 가진 것끼리 무료로 바꿔 끼워요.</span></div>
       <div class="deco-row"><span class="paint-label">🏚️ 모습</span>
         <span class="small">${pv.look==null ? `지금 집 (${STAGES[stg].name})` : `${STAGES[pv.look].name} 모습 · 방 크기와 화단은 지금 집 그대로`}</span>
@@ -6463,6 +6516,9 @@ function riftSurprise(){
   RIFT_SURPRISED = true; RIFT_SURPRISE_NOW = false; try{ localStorage.setItem('majam-rift-seen', '1'); }catch(e){}
   setTimeout(()=>petParty('🌀', '균열이 열렸어요!\n\n괴물을 때리던 틈으로 숲 너머 균열이 크게 벌어졌어요.\n이제껏 주머니가 없어서 흘리던 💠 이세계 파편을 담을 수 있고,\n아주 가끔 🥚 미지의 마물 알도 주울 수 있어요.\n\n🌀 이세계 탭 아래 「균열 너머」를 열어 보세요!'), 600);
 }
+function starFeedHTML(e, need){ const left = Math.max(0, need - e.fed), st = (ME && ME.stars) || 0; if(!left) return '';
+  const a = Math.min(5, left);
+  return `<span class="star-feed"><button class="mini" type="button" data-riftstar="${e.id}" data-n="${a}" ${st<a*STAR_PER_DROP?'disabled':''} title="⭐ 별조각 ${STAR_PER_DROP}개 = 💧 물방울 1개">⭐ +${a}방울 (⭐${a*STAR_PER_DROP})</button>${left>a?`<button class="mini" type="button" data-riftstar="${e.id}" data-n="${left}" ${st<left*STAR_PER_DROP?'disabled':''}>⭐ 다 채우기 (⭐${left*STAR_PER_DROP})</button>`:''}</span>`; }
 function riftHave(){ const s = new Set((PETS && PETS.dex) || []); ((PETS && (PETS.all || PETS.pets)) || []).forEach(p=>s.add(p.code)); return s; }
 function renderRift(){
   try{ renderVoid(); }catch(e){ console.error('아공간 그리기 오류', e); }
@@ -6473,7 +6529,7 @@ function renderRift(){
   const eggCard = e => { const E = RIFT_EGGS[e.kind] || {name:'미지의 알', img:''}, ready = e.set_at && e.fed >= need;
     return `<div class="regg ${e.set_at?'set':''} ${ready?'ready':''}"><img src="${E.img}" alt="" loading="lazy"><b>${esc(E.name)}</b>`
       + (ready ? `<span class="small">정화 끝! 알이 꿈틀거려요</span><button class="mini ask-yes" type="button" data-rifthatch="${e.id}">🐣 부화시키기</button>`
-        : e.set_at ? `<span class="ebar"><span style="width:${Math.min(100, e.fed/need*100).toFixed(0)}%"></span></span><span class="small">🌳 세계수에서 정화 중 · 💧 ${e.fed} / ${need}</span><button class="mini" type="button" data-riftgo>🌳 물 주러 가기</button>`
+        : e.set_at ? `<span class="ebar"><span style="width:${Math.min(100, e.fed/need*100).toFixed(0)}%"></span></span><span class="small">🌳 세계수에서 정화 중 · 💧 ${e.fed} / ${need}</span><button class="mini" type="button" data-riftgo>🌳 물 주러 가기</button>${starFeedHTML(e, need)}`
         : `<button class="mini" type="button" title="${esc(E.about)}" data-riftset="${e.id}" ${setE?'disabled title="세계수에는 알을 하나씩만 맡길 수 있어요"':''}>🌳 세계수에 맡기기</button>`) + `</div>`; };
   const nHave = Object.values(RIFT_EGGS).flatMap(E=>E.pets).filter(c=>have.has(c)).length;
   const dex = Object.entries(RIFT_EGGS).map(([k,E])=>E.pets.map(c=>{ const s = petOf(c), on = have.has(c);
@@ -6491,11 +6547,16 @@ function renderRift(){
     if(!setE){ te.hidden = true; te.innerHTML = ''; }
     else { const E = RIFT_EGGS[setE.kind] || {name:'미지의 알', img:''}, ready = setE.fed >= need;
       te.hidden = false; te.classList.toggle('ready', ready);
-      te.innerHTML = `<img src="${E.img}" alt=""><div class="te-txt"><b>🥚 ${esc(E.name)} ${ready?'· 정화 끝!':'정화 중'}</b><span class="ebar"><span style="width:${Math.min(100, setE.fed/need*100).toFixed(0)}%"></span></span><span class="small">${ready?'알이 꿈틀거려요. 깨워 볼까요?':`세계수에 물방울을 부으면 같이 정화돼요 · 💧 ${setE.fed} / ${need}`}</span></div>${ready?`<button class="mini ask-yes" type="button" data-rifthatch="${setE.id}">🐣 부화</button>`:''}`; }
+      te.innerHTML = `<img src="${E.img}" alt=""><div class="te-txt"><b>🥚 ${esc(E.name)} ${ready?'· 정화 끝!':'정화 중'}</b><span class="ebar"><span style="width:${Math.min(100, setE.fed/need*100).toFixed(0)}%"></span></span><span class="small">${ready?'알이 꿈틀거려요. 깨워 볼까요?':`세계수에 물방울을 부으면 같이 정화돼요 · 💧 ${setE.fed} / ${need}`}</span>${ready?'':starFeedHTML(setE, need)}</div>${ready?`<button class="mini ask-yes" type="button" data-rifthatch="${setE.id}">🐣 부화</button>`:''}`; }
   }
 }
 document.addEventListener('click', e=>{
   if(e.target.closest('[data-riftgo]')){ document.querySelector('.tabs [data-tab="tree"]')?.click(); return; }
+  const rs = e.target.closest('[data-riftstar]');
+  if(rs) return act(async()=>{ const n = +rs.dataset.n;
+    if(!(await ask(`⭐ 별조각 ${n*STAR_PER_DROP}개로 알을 💧 ${n}방울만큼 정화할까요?\n(⭐ 별조각 ${STAR_PER_DROP}개 = 💧 물방울 1개)`))) return;
+    const r = await api.riftStarFeed(+rs.dataset.riftstar, n); RIFT = (Array.isArray(r) ? r[0] : r) || RIFT;
+    await refreshMine(); renderTop(); await refreshRift(); renderRift(); toast(`⭐ 별빛이 알을 감싸며 정화했어요 (💧 +${n})`); });
   const sb_ = e.target.closest('[data-riftset]');
   if(sb_) return act(async()=>{
     const r = await api.riftSetEgg(+sb_.dataset.riftset); RIFT = (Array.isArray(r) ? r[0] : r) || RIFT; if(!RIFT || !RIFT.eggs) await refreshRift();
@@ -6523,6 +6584,16 @@ const VOID_BGS = {
 const voidBgCSS = k => `url(void/${k in VOID_BGS ? k : 'base'}.webp) center/cover no-repeat, ${(VOID_BGS[k]||VOID_BGS.base).grad}`;
 const VOID_FARM_BG = 'url(void/farm.webp) center/cover no-repeat, url(bg/Pet_background.webp) center/cover no-repeat, linear-gradient(#24124F 0%,#5B3E9A 38%,#4F8A5E 39%,#2D5A3A 100%)';
 let VOID = null, VSEL = null, VROT = 0, VHOVER = null, vbagTab = 'all';
+// ⭐ 별조각 연동 (void.sql 과 같아야 해요)
+const VOID_FX = {firefly:{name:'반딧불', emoji:'🪲'}, meteor:{name:'별똥별', emoji:'🌠'}, bubble:{name:'비눗방울', emoji:'🫧'}, petal:{name:'꽃잎', emoji:'🌸'}};
+const VOID_FX_PRICE = 150, STAR_PER_DROP = 2;
+function voidFxHTML(fx){
+  if(!VOID_FX[fx]) return '';
+  const n = fx==='meteor' ? 5 : fx==='firefly' ? 16 : 14; let h = '';
+  for(let k=0;k<n;k++){ const r = (a,b)=>(a + Math.random()*(b-a)).toFixed(1);
+    h += `<i style="--x:${r(0,100)}%;--y:${fx==='meteor'?r(-5,40):r(5,95)}%;--d:${fx==='meteor'?r(5,11):fx==='firefly'?r(2.5,5):r(7,14)}s;--dl:-${r(0,12)}s;--dx:${r(-40,40)}px;--dy:${r(-30,30)}px;--sz:${r(8,22)}px"></i>`; }
+  return `<div class="vfx ${fx}" aria-hidden="true">${h}</div>`;
+}
 async function refreshVoid(){ try{ VOID = api.void ? await api.void() : null; }catch(e){ VOID = null; } }
 const voidFoot = code => { const it = itemOf(code); return VROT%2 ? {w:it.h, h:it.w} : {w:it.w, h:it.h}; };
 function voidRoomHTML(V, editable){
@@ -6574,7 +6645,9 @@ function voidBagHTML(){
 }
 function renderVoidRoom(){
   const st = document.getElementById('voidStage'); if(!st || !VOID || !VOID.open) return;
-  st.style.setProperty('--vbg', voidBgCSS(VOID.bg)); st.innerHTML = voidRoomHTML(VOID, true);
+  st.style.setProperty('--vbg', voidBgCSS(VOID.bg));
+  if(st._fx !== VOID.fx){ st._fx = VOID.fx; st.querySelector('.vfx')?.remove(); if(VOID.fx) st.insertAdjacentHTML('afterbegin', voidFxHTML(VOID.fx)); }
+  st.querySelector('.room')?.remove(); st.insertAdjacentHTML('beforeend', voidRoomHTML(VOID, true));
   const h = document.getElementById('voidHint');
   if(h) h.innerHTML = VSEL ? `「${esc(itemOf(VSEL).name)}」${jo(itemOf(VSEL).name,'을','를')} 놓을 칸을 누르세요 <button class="mini" type="button" data-vrot>↻ 돌리기</button> <button class="mini" type="button" data-vcancel>그만 놓기</button>`
     : '아래 가방에서 가구를 고르고 칸을 누르면 놓여요 · 놓인 가구를 누르면 가방으로 돌아가요';
@@ -6598,13 +6671,15 @@ function renderVoid(){
     return;
   }
   const V = VOID, gp = V.grow_price ?? V.cols*V.rows*10, bgs = V.bgs || ['base'];
-  const k = JSON.stringify([shards, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).length, (V.farm_pets||[]).join(), VSEL, vbagTab, Object.entries(INV||{}).filter(([,n])=>n>0).length]);
+  const k = JSON.stringify([shards, V.fx, V.fxs, V.cap_lv, V.rate_lv, ME.stars, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).length, (V.farm_pets||[]).join(), VSEL, vbagTab, Object.entries(INV||{}).filter(([,n])=>n>0).length]);
   if(box._k === k){ renderVoidRoom(); renderVoidFarmBar(); return; }
   box._k = k;
   box.innerHTML = `<div class="void-head"><h3>🔮 아공간 <span class="small">${V.cols}×${V.rows}칸</span></h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
     <div class="void-bar">${Object.entries(VOID_BGS).map(([c,b])=>{ const own = bgs.includes(c);
       return `<button class="vbg ${V.bg===c?'on':''} ${own?'':'lock'}" type="button" data-vbgk="${c}">${b.emoji} ${esc(b.name)}${own?'':` · 💠 ${(V.bg_price||VOID_BG_PRICE).toLocaleString()}`}</button>`; }).join('')}
       <button class="vbg pub ${V.public?'on':''}" type="button" data-vpub>${V.public?'🔓 공개 중':'🔒 비공개'}</button></div>
+    <div class="void-fx"><span class="lbl">✨ 효과 <span class="small">⭐ ${(ME.stars||0).toLocaleString()}</span></span><button class="vbg ${V.fx?'':'on'}" type="button" data-vfx="">끄기</button>${Object.entries(VOID_FX).map(([c,f])=>{ const own = (V.fxs||[]).includes(c);
+      return `<button class="vbg ${V.fx===c?'on':''} ${own?'':'lock'}" type="button" data-vfx="${c}">${f.emoji} ${f.name}${own?'':` · ⭐ ${(V.fx_price||VOID_FX_PRICE)}`}</button>`; }).join('')}</div>
     <div class="void-stage" id="voidStage"></div>
     <p class="void-hint small" id="voidHint"></p>
     <div class="void-grow"><button class="mini" type="button" data-vgrow="col" ${V.cols>=(V.max_cols||VOID_MAX_C)||shards<gp?'disabled':''}>➕ 가로 한 줄 · 💠 ${gp.toLocaleString()}</button>
@@ -6614,7 +6689,10 @@ function renderVoid(){
     ${voidBagHTML()}
     <h4>🐾 마물 농장</h4>
     ${voidFarmHTML(V, true)}
-    <div class="vfarm-bar" id="voidFarmBar"></div>`;
+    <div class="vfarm-bar" id="voidFarmBar"></div>
+    <div class="vfarm-up"><button class="mini" type="button" data-vup="cap" ${V.cap_price==null||(ME.stars||0)<V.cap_price?'disabled':''}>🧺 바구니 Lv.${V.cap_lv||0} · ${V.farm_cap}시간치${V.cap_price!=null?` → ${V.farm_cap+4}시간 ⭐ ${V.cap_price}`:' (최대)'}</button>
+      <button class="mini" type="button" data-vup="rate" ${V.rate_price==null||(ME.stars||0)<V.rate_price?'disabled':''}>🦴 간식 그릇 Lv.${V.rate_lv||0} · 1시간 💠${V.farm_rate}${V.rate_price!=null?` → 💠${V.farm_rate+1} ⭐ ${V.rate_price}`:' (최대)'}</button>
+      <span class="small" style="width:100%;text-align:center">⭐ 별조각 ${(ME.stars||0).toLocaleString()}개 · 보따리에서 모은 별조각으로 농장을 키워요</span></div>`;
   renderVoidRoom(); renderVoidFarmBar(); startFarm(box.querySelector('.vfarm'));
 }
 async function voidAfter(r){ const x = Array.isArray(r) ? r[0] : r; if(x && x.open) VOID = x; else await refreshVoid(); await Promise.all([refreshRift(), refreshMine()]); renderTop(); renderBag(); renderRift(); }
@@ -6648,6 +6726,14 @@ document.addEventListener('click', e=>{
     if(VSEL){ toast('가구를 놓는 중이에요. 「그만 놓기」를 누른 뒤 치워 주세요'); return; }
     if(!(await ask(`「${itemOf(f.item_code).name}」${jo(itemOf(f.item_code).name,'을','를')} 가방에 넣을까요?`))) return;
     await voidAfter(await api.voidRemove(id)); box_void_reset(); renderVoid(); });
+  const fxb = e.target.closest('[data-vfx]');
+  if(fxb) return act(async()=>{ const c = fxb.dataset.vfx, own = !c || (VOID.fxs||[]).includes(c); if((VOID.fx||'')===c) return;
+    if(!own && !(await ask(`${VOID_FX[c].emoji} 「${VOID_FX[c].name}」 효과를 ⭐ 별조각 ${VOID.fx_price||VOID_FX_PRICE}개에 살까요?\n한 번 사면 언제든 바꿔 끼울 수 있어요.`))) return;
+    await voidAfter(await api.voidFx(c)); toast(c ? `${VOID_FX[c].emoji} ${VOID_FX[c].name} 효과를 켰어요` : '✨ 효과를 껐어요'); });
+  const up = e.target.closest('[data-vup]');
+  if(up) return act(async()=>{ const cap = up.dataset.vup==='cap', price = cap ? VOID.cap_price : VOID.rate_price; if(price==null) return;
+    if(!(await ask(cap ? `⭐ 별조각 ${price}개로 🧺 바구니를 키울까요?\n농장에 쌓이는 시간이 ${VOID.farm_cap}시간 → ${VOID.farm_cap+4}시간치가 돼요.` : `⭐ 별조각 ${price}개로 🦴 간식 그릇을 채울까요?\n마물 1종이 1시간에 물어오는 파편이 💠${VOID.farm_rate} → 💠${VOID.farm_rate+1}이 돼요.`))) return;
+    await voidAfter(await api.voidFarmUp(up.dataset.vup)); toast(cap ? '🧺 바구니가 커졌어요!' : '🦴 마물들이 신났어요! 더 많이 물어올 거예요'); });
   if(e.target.closest('[data-vfarm]')) return act(async()=>{ const r0 = await api.voidCollect(), r = Array.isArray(r0) ? r0[0] : r0;
     await refreshVoid(); await refreshRift(); renderRift(); toast(`🧺 마물들이 물어온 💠 이세계 파편 ${r.gain.toLocaleString()}개를 받았어요!`); });
 });
@@ -6912,7 +6998,7 @@ function renderWalk(){
     map.insertAdjacentHTML('beforeend', `<button class="whouse ${p.in_voice?'lit':''} ${me?'me':''}" data-whouse="${esc(p.discord_id)}" style="left:${x}%;top:${y}%;z-index:${Math.round(y*10)}" aria-label="${esc(me?'내 집':p.display_name)} 구경 가기">
       ${houseSVG(lookStage(p.discord_id, st), p.in_voice, dc, p.house_color, lookStyle(p.discord_id, st, me ? ME.house_style : HOUSE_STYLE_OF[p.discord_id]))}
       ${pet ? `<span class="wpet" data-side="${i%2}">${petArt(pet.pet_code, pet.sad?'sad':'ok', '', petShowBig(pet.level||1, babyOf(isMe(p) ? meId() : p.discord_id, pet.pet_code, pet.name)))}</span>` : ''}</button>
-      <span class="wnm ${me?'me':''} ${plateCls(p)}" style="left:${x}%;top:${(y+2.4).toFixed(1)}%">${me?'내 집':esc(p.display_name)}</span>`);   // 이름표는 따로 맨 위 층에 (옆집 펫·집에 안 묻히게)
+      <span class="wnm ${me?'me':''} ${plateCls(p)}" style="left:${x}%;top:${(y+2.4).toFixed(1)}%">${plateEmo(p)}${me?'내 집':esc(p.display_name)}</span>`);   // 이름표는 따로 맨 위 층에 (옆집 펫·집에 안 묻히게)
   });
   map.querySelectorAll('.whouse .wpet').forEach((el,i)=>walkPetWander(el, i));
   document.getElementById('wwho').innerHTML = VILLAGE.filter(p=>!p.removed && (isMe(p) || stageIdx(p.total_minutes) > 0)).map(p=>`<button class="mini ${p.in_voice?'on':''}" data-visit="${esc(p.discord_id)}">${p.in_voice?'🕯️ ':''}${isMe(p)?'내 집':esc(p.display_name)}</button>`).join('');
@@ -7720,7 +7806,24 @@ const WINTER_SLOTS = [
   {t:3, src:'winter262b', name:'이글루 저택',     for:'정원 딸린 저택'},
   {t:4, src:'winter263',  name:'눈의 성',         for:'작가의 성'},
 ];
-const NAMEPLATE_DEF = {wood:{emoji:'🪵', name:'나무'}, snow:{emoji:'❄️', name:'눈꽃'}};
+const NAMEPLATE_DEF = {wood:{emoji:'🪵', name:'나무'}, snow:{emoji:'❄️', name:'눈꽃'},
+  // 🏅 수집 명찰 (10-22 plates.sql) — 이름 앞에 그림 하나 (front). 한 번 받으면 계속 내 것
+  ribbon:{emoji:'🎀', name:'리본', front:true, how:'보따리 도감 100칸'}, starlight:{emoji:'✨', name:'별빛', front:true, how:'보따리 도감 200칸'},
+  jewel:{emoji:'💎', name:'보석', front:true, how:'보따리 도감 300칸'}, rainbow:{emoji:'🌈', name:'무지개', front:true, how:'보따리 도감 400칸'},
+  goldleaf:{emoji:'🏆', name:'금박', front:true, how:'보따리 도감 500칸'},
+  flower:{emoji:'🌸', name:'꽃 도감', front:true, how:'꽃 도감 전부'}, fish:{emoji:'🐟', name:'물고기 도감', front:true, how:'물고기 도감 전부'},
+  legend:{emoji:'👑', name:'전설 가구', front:true, how:'복권 전설 가구 전부'}, isekai:{emoji:'👾', name:'이세계 마물', front:true, how:'이세계 마물 9종 전부'},
+};
+// 이름 앞 그림 (내 집은 내 명찰, 이웃은 NAMEPLATE_OF)
+const plateEmo = p => { const k = isMe(p) ? ((ME && ME.nameplate) || 'wood') : (NAMEPLATE_OF[p.discord_id] || 'wood'), d = NAMEPLATE_DEF[k]; return d && d.front ? `<span class="pe">${d.emoji}</span>` : ''; };
+async function checkPlates(){
+  if(!api.checkPlates) return;
+  try{ const r0 = await api.checkPlates(), r = Array.isArray(r0) ? r0[0] : r0, fresh = (r && r.fresh) || [];
+    if(!fresh.length) return;
+    ME.nameplates = [...new Set([...(ME.nameplates||['wood']), ...fresh])];
+    mailAdd(fresh.filter(k=>NAMEPLATE_DEF[k]).map(k=>({icon:NAMEPLATE_DEF[k].emoji, title:`🏅 ${NAMEPLATE_DEF[k].emoji} ${NAMEPLATE_DEF[k].name} 명찰을 받았어요!`, body:`「${NAMEPLATE_DEF[k].how}」을 모아서 받은 명찰이에요. 🎨 집 겉모습 꾸미기 → 🏷️ 이름표에서 바꿔 끼울 수 있어요. 한 번 받은 명찰은 계속 내 거예요.`})));
+  }catch(e){}
+}
 let NAMEPLATE_OF = {};
 const plateCls = p => { const k = isMe(p) ? ((ME && ME.nameplate) || 'wood') : (NAMEPLATE_OF[p.discord_id] || 'wood'); return k==='wood' ? '' : 'plate-'+k; };
 async function refreshNameplates(){ try{ const r = (await api.nameplates()) || []; NAMEPLATE_OF = {}; r.forEach(x=>{ NAMEPLATE_OF[x.discord_id] = x.nameplate; }); }catch(e){ NAMEPLATE_OF = {}; } }
@@ -8186,6 +8289,7 @@ async function loadAll(){
   renderTop(); renderVillage(); renderMyHouse(); renderBag(); renderRoad(); setHint();
   document.getElementById('adminTabBtn').hidden = !ME.is_admin;
   renderAdmin();
+  checkPlates();   // 🏅 새로 받은 명찰 → 우편함
   showGifts(); showRaids(); showFlowerNotices(); showTreatNotices();
   logTabOnce('enter');
   { let t = 'village'; try{ t = sessionStorage.getItem('majam-tab') || 'village'; }catch(e){}   // 🌲 첫 화면은 마을, 산책은 그다음 (10-13 ㉜)
@@ -8722,7 +8826,7 @@ function renderVisit(){
   room.parentElement.hidden = outside; vg.hidden = !outside;
   if(VISIT.room==='v' && VISIT.void){
     const V = VISIT.void, b = VOID_BGS[V.bg] || VOID_BGS.base;
-    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸</span></h4><div class="void-stage" style="--vbg:${voidBgCSS(V.bg)}">${voidRoomHTML(V, false)}</div>`
+    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸</span></h4><div class="void-stage" style="--vbg:${voidBgCSS(V.bg)}">${voidFxHTML(V.fx)}${voidRoomHTML(V, false)}</div>`
       + `<h4 class="tank-title farm-title">🐾 마물 농장 <span class="small">${(V.farm_pets||[]).length}종</span></h4>${voidFarmHTML(V, false)}`;
     startFarm(vg.querySelector('.vfarm'));
   }
@@ -9246,6 +9350,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㉓</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㉕</p>
 </body>
 </html>
