@@ -2007,6 +2007,7 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .boss-fire{justify-self:end;text-align:center;color:#FFE29A;line-height:1.1}
 .boss-fire .fl{display:block;font-size:1.8rem;filter:drop-shadow(0 0 8px rgba(255,150,40,.7))}
 .boss-fire.lv1 .fl{font-size:2.3rem}.boss-fire.lv2 .fl{font-size:2.9rem}.boss-fire.lv3 .fl{font-size:3.6rem;filter:drop-shadow(0 0 16px rgba(255,150,40,.95))}
+.boss-fire.lv4 .fl{font-size:4.1rem;filter:drop-shadow(0 0 20px rgba(255,140,30,1))}.boss-fire.lv5 .fl{font-size:4.6rem;filter:drop-shadow(0 0 26px rgba(255,120,20,1)) drop-shadow(0 0 8px #FFE29A)}
 @media (prefers-reduced-motion:no-preference){ .boss-fire .fl{animation:fireFl 1.2s ease-in-out infinite alternate} @keyframes fireFl{to{transform:scale(1.08,.94) translateY(1px)}} }
 /* 🌀 균열 오픈 예고 (10-22) — 피 막대의 1만 지점 금 · 가까워질수록 보랏빛이 새어 나와요. 정체는 안 밝혀요 */
 .boss-hp .bar{position:relative;overflow:visible}
@@ -5411,8 +5412,8 @@ const numJo = (n, a, b) => '2459'.includes(String(n).slice(-1)) ? b : a;   // �
 const bossNeed = () => (BOSS && BOSS.reward_hits) || BOSS_REWARD_HITS, bossMyHits = () => (BOSS && BOSS.my_hits) || 0;
 // 🪙 때릴 때마다 코인 (10-22): 5~20개 랜덤, BOSS_LUCKY 확률로 💰 50개 대박 — boss.sql 의 boss_hit 과 같아야 해요
 const BOSS_HIT_COIN = [3, 10], BOSS_LUCKY = .05, BOSS_LUCKY_COIN = 50;
-const BOSS_FIRE = [[5,2],[3,1.5],[2,1.2],[0,1]];   // 작업실에 같이 있는 사람 수 → 공격권 모이는 속도
-const bossFire = n => (BOSS_FIRE.find(([k])=>n>=k) || [0,1])[1];
+// 🔥 모닥불 (10-22 판 61, 라밀 B안): 작업실에 같이 있는 사람 2명마다 +0.5, 끝없이 — 1명 ×1 · 2~3명 ×1.5 · 4~5명 ×2 · 6~7명 ×2.5 · 8~9명 ×3 · 10~11명 ×3.5 … (서버 boss_fire 와 같아요, fire61.sql)
+const bossFire = n => 1 + 0.5 * Math.floor(Math.max(1, n|0) / 2);
 const bossWeek = () => Date.now() < Date.parse('2026-10-30T00:00:00+09:00') ? 0 : Math.floor((Date.now() - Date.parse('2026-10-30T00:00:00+09:00'))/604800e3) + 1;   // 미리보기용 (진짜는 서버가 정해요)
 const MONSTERS = [
   {code:'slump',  name:'슬럼프 괴물',   color:'#A9AEC2', dark:'#7A8098', weak:'coffee',
@@ -5533,7 +5534,7 @@ function renderBoss(force){
   const riftLv = !riftWait ? 0 : riftGap <= 500 ? 4 : riftGap <= 1000 ? 3 : riftGap <= 2000 ? 2 : riftGap <= 3500 ? 1 : 0;
   const riftLine = ['', '괴물 뒤편 균열에서 가끔 보랏빛이 새어 나와요…', '균열이 미세하게 떨리고 있어요…', '균열 너머에서 무언가 두드리는 소리가 들려요…', '균열이 금방이라도 갈라질 것 같아요!!'][riftLv];
   const left = Math.max(0, (BOSS.ends_at ? Date.parse(BOSS.ends_at) : lottoWeekEnds()) - Date.now()), dd = Math.floor(left/864e5), hh = Math.floor(left%864e5/36e5);
-  const lit = bossLit(), mult = bossFire(lit), fireLv = lit>=5?3:lit>=3?2:lit>=2?1:0;
+  const lit = bossLit(), mult = bossFire(lit), fireLv = Math.min(5, Math.floor(Math.max(1, lit) / 2));   // 불꽃 크기 0~5단계 (2명마다 한 단계, 10명 이상은 가장 큰 불)
   const mine = ME.in_voice, t = BOSS.tickets||0, full = t >= BOSS_TICKET_MAX;
   const nextMin = Math.ceil((BOSS_TICKET_FUEL - (BOSS.fuel||0)) / mult);
   const w = bossWeaponNow(), mins = ME.total_minutes;
@@ -9121,6 +9122,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 60</p>
+<p class="site-ver">마감의 숲 · 10-22 판 61</p>
 </body>
 </html>
