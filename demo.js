@@ -585,6 +585,12 @@ function makeDemoApi(){
       if(!n) fail('바꿀 수 있는 겹친 수집품이 없어요');
       if(kind==='coin') st.me.coins += BOSS_TRADE_COIN*n; else B.tickets += n;
       persist(); return {kind, n, coins:st.me.coins, tickets:B.tickets}; },
+    async season(){ const m = st.seasonMode||'auto', mo = new Date().getMonth()+1; return {mode:m, season: m==='on' ? 'winter' : m==='off' ? '' : ([12,1,2].includes(mo) ? 'winter' : '')}; },
+    async adminSeason(m){ st.seasonMode = m; persist(); return this.season(); },
+    async myWeek(wk){ const B = this.bossState(), now = Date.now(), st0 = new Date(now - 3*864e5).toISOString(), en = new Date(now + 4*864e5).toISOString();   // 미리보기용 예시
+      if(wk!=null && wk<0) return {skip:true, from:'2026-10-30T00:00:00+09:00'};
+      return wk==null ? {week_no:2, starts_at:st0, ends_at:en, done:false, mins:742, prev_mins:610, hits:(B.hits||0)+38, damage:(B.my||0)+266, coins:(B.coins||0)+250, monster:B.monster, kills:(B.lv||1)-1, eggs:2, hatched:1, bps:1, drops:null}
+        : {week_no:1, starts_at:new Date(now - 10*864e5).toISOString(), ends_at:st0, done:true, mins:610, prev_mins:null, hits:52, damage:390, coins:410, monster:'slump', kills:3, eggs:1, hatched:1, bps:0, drops:null}; },
     async boss(){ const B = this.bossState(); return {ends_at:new Date(B.week===0 ? Date.parse('2026-10-30T00:00:00+09:00') : lottoWeekEnds()).toISOString(), monster:B.monster, max_hp:B.max_hp, hp:B.max_hp-B.dmg, attackers:B.att.size, my_damage:B.my, my_hits:B.lvHits||0, week_hits:B.hits||0, reward_hits:BOSS_REWARD_HITS, lv:B.lv||1, lv_coin:BOSS_LV_COIN, lv_shards:BOSS_LV_SHARDS, my_coins:B.coins||0, tickets:B.tickets, fuel:B.fuel, dex:[...B.dex], items:{...(st.bitems||{})}}; },
     async bossHit(code, n){
       const B = this.bossState(), w = weaponOf(code), m = monsterOf(B.monster);

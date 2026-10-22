@@ -2253,6 +2253,46 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 :root[data-mode="day"] #tab-isekai .boss-tix b{color:#C27A12}
 :root[data-mode="day"] #tab-isekai .wpn,:root[data-mode="day"] #tab-isekai .bi,:root[data-mode="day"] #tab-isekai .boss-dex,:root[data-mode="day"] #tab-isekai .bdx{background:rgba(255,255,255,.75);color:#2A2350;border-color:rgba(150,120,230,.35)}
 :root[data-mode="day"] #tab-isekai .bi .bi-img.shadow{filter:brightness(0);opacity:.18}
+
+/* ❄️ 겨울 풍경 (10-22 season.sql) — html[data-season="winter"] 일 때만 */
+:root[data-season="winter"] .village{background:
+  linear-gradient(#141C3A,#141C3A) top / 100% max(0px, calc(var(--bh,0px) - 98px)) no-repeat,
+  url(bg/w_forest5.webp) center calc(var(--bh,0px) - 100px) / max(100%,1500px) auto no-repeat,
+  #C3D9EC}
+@media (max-width:600px){ :root[data-season="winter"] .village{background:
+  linear-gradient(#141C3A,#141C3A) top / 100% calc(var(--bh,0px) + 2px) no-repeat,
+  url(bg/w_forest5.webp) center var(--bh,0px) / 1000px auto no-repeat,
+  #C3D9EC} }
+:root[data-season="winter"][data-mode="day"] .village{background:
+  linear-gradient(#B7CFEA,#B7CFEA) top / 100% max(0px, calc(var(--bh,0px) - 98px)) no-repeat,
+  url(bg/w_forest_day.webp) center calc(var(--bh,0px) - 100px) / max(100%,1500px) auto no-repeat,
+  #BCD4E8}
+@media (max-width:600px){ :root[data-season="winter"][data-mode="day"] .village{background:
+  linear-gradient(#B7CFEA,#B7CFEA) top / 100% calc(var(--bh,0px) + 2px) no-repeat,
+  url(bg/w_forest_day.webp) center var(--bh,0px) / 1000px auto no-repeat,
+  #BCD4E8} }
+:root[data-season="winter"] .tree-stage{background-image:url(bg/w_World_Tree.webp)}
+:root[data-season="winter"][data-mode="day"] .tree-stage{background-image:url(bg/w_World_Tree_day.webp)}
+:root[data-season="winter"] .pet-yard{position:relative;background:linear-gradient(rgba(15,20,48,.2),rgba(15,20,48,0) 40%),url(bg/w_Pet_background.webp) center bottom/cover no-repeat,#99AED0}
+:root[data-season="winter"][data-mode="day"] .pet-yard{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,0) 40%),url(bg/w_Pet_background_day.webp) center bottom/cover no-repeat,#9AB9CC}
+:root[data-season="winter"] .gacha-scene{background:linear-gradient(rgba(15,20,48,.55),rgba(15,20,48,.2) 45%,rgba(15,20,48,.55)),url(bg/w_package.webp) center bottom/cover no-repeat,#2A3560}
+:root[data-season="winter"][data-mode="day"] .gacha-scene{background:linear-gradient(rgba(255,255,255,.3),rgba(255,255,255,.05) 45%,rgba(255,255,255,.25)),url(bg/w_package_day.webp) center bottom/cover no-repeat,#AFC6D2}
+:root[data-season="winter"] .lake-svg{background:#1C2A52}
+/* 눈밭 위 집 아래 글씨가 잘 보이게 */
+:root[data-season="winter"] .village .house .st,:root[data-season="winter"] .village .house .st .t{color:#1F2D48;opacity:1;text-shadow:0 0 3px rgba(255,255,255,.95),0 1px 2px rgba(255,255,255,.85)}:root[data-season="winter"][data-mode="day"] .lake-svg{background:#B4CEDF}
+/* 눈 내리기 — 그림 위에 살짝 (누르기는 그대로 돼요) */
+:root[data-season="winter"] :is(.village,.tree-stage,.gacha-scene,.lake-scene,.pet-yard)::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;border-radius:inherit;opacity:.85;
+  background-image:
+    radial-gradient(2.6px 2.6px at 30px 40px,#fff 60%,transparent 70%),
+    radial-gradient(2px 2px at 140px 90px,#fff 60%,transparent 70%),
+    radial-gradient(3.2px 3.2px at 90px 170px,rgba(255,255,255,.95) 60%,transparent 70%),
+    radial-gradient(1.8px 1.8px at 200px 20px,rgba(255,255,255,.9) 60%,transparent 70%),
+    radial-gradient(2.4px 2.4px at 60px 230px,#fff 60%,transparent 70%),
+    radial-gradient(3.6px 3.6px at 250px 150px,rgba(255,255,255,.85) 60%,transparent 70%);
+  background-size:180px 180px,220px 220px,260px 260px,240px 240px,300px 300px,320px 320px;
+  animation:wsnow 22s linear infinite}
+@keyframes wsnow{to{background-position:30px 180px,-40px 220px,50px 260px,-20px 240px,60px 300px,-60px 320px}}
+@media (prefers-reduced-motion: reduce){:root[data-season="winter"] :is(.village,.tree-stage,.gacha-scene,.lake-scene,.pet-yard)::before{animation:none}}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -2491,6 +2531,10 @@ document.documentElement.setAttribute('data-mode', modeNow());
     <hr class="sep">
     <h3>✉️ 받은 쪽지 <span class="small" id="inboxCount"></span></h3>
     <div id="inbox" class="inbox"></div>
+    <hr class="sep">
+    <h3>❄️ 겨울 풍경</h3>
+    <p class="small" style="margin-top:0">12월 1일 ~ 2월 말엔 저절로 눈 덮인 숲이 돼요. 첫눈 오는 날 일찍 켜거나, 잠깐 끌 수 있어요. (season.sql)</p>
+    <div class="peek-row" id="seasonAdmin"></div>
     <hr class="sep">
     <h3>🔥 코인 이벤트</h3>
     <p class="small" style="margin-top:0">기간 동안 작업실 1분마다 쌓이는 코인이 배로 늘어요. 집 크기(누적 시간)는 그대로예요. 기간이 겹치면 더 높은 배수 하나만 적용돼요(더해지지 않아요).</p>
@@ -3876,7 +3920,9 @@ const supaApi = (() => {
     async flowerShowOf(id){ return ok(await sb.rpc('get_flower_show_of', {p_discord_id:id})); },
     async flowerShowAdd(code){ ok(await sb.rpc('flower_show_add', {p_code:code})); },
     async flowerShowRemove(code){ ok(await sb.rpc('flower_show_remove', {p_code:code})); },
-    async tankMine(){ return ok(await sb.rpc('get_my_tank')); },                       // 🐠 어항 (tank.sql)
+    async tankMine(){ return ok(await sb.rpc('get_my_tank')); },
+    async season(){ const r = await sb.rpc('get_season'); if(r.error) return {season:'', mode:'auto'}; return Array.isArray(r.data) ? r.data[0] : r.data; },   // ❄️ season.sql
+    async adminSeason(mode){ return ok(await sb.rpc('admin_set_season', {p_mode:mode})); },                       // 🐠 어항 (tank.sql)
     async tankOf(id){ return ok(await sb.rpc('get_tank_of', {p_discord_id:id})); },
     async tankAdd(code){ ok(await sb.rpc('tank_add_fish', {p_code:code})); },
     async tankRemove(code){ ok(await sb.rpc('tank_remove_fish', {p_code:code})); },
@@ -5178,7 +5224,7 @@ function lakeScene(state){
   // state: closed / empty / waiting / ready / done · 배경은 bg/lake.webp (1000×538 칸), 찌는 낚싯줄 끝(545, 515)에 떠요
   const buoy = state==='waiting'||state==='ready', day = isDay();   // 낮 그림은 낚싯줄 끝이 조금 위(545, 498)에 있어요
   return `<svg class="lake-svg" viewBox="0 0 1000 538" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <image href="bg/lake${day?'_day':''}.webp" x="0" y="0" width="1000" height="538"/>
+    <image href="bg/${isWinterScene()?'w_':''}lake${day?'_day':''}.webp" x="0" y="0" width="1000" height="538"/>
     <g transform="translate(0 ${day?-14:0})">${buoy?`<g class="${state==='ready'?'bob':''}"><circle cx="545" cy="512" r="6.5" fill="#E0583A" stroke="#7A2A1A" stroke-width="1"/><path d="M538.5 512 h13" stroke="#FFFFFF" stroke-width="2.2"/></g>
       <path d="M522 520 q23 9 46 0" stroke="#B9D3F0" stroke-width="1.4" fill="none" opacity=".7"/>`:''}
     ${state==='ready'?`<path d="M560 498 l6 -7 M567 506 l8 -3 M528 498 l-6 -7" stroke="#FFF3C4" stroke-width="2" stroke-linecap="round"/>`:''}</g>
@@ -6288,6 +6334,31 @@ document.addEventListener('click', e=>{
   if(e.target.closest('[data-iskguide-close]')){ document.getElementById('iskGuide').close(); return; }
   const t = e.target.closest('[data-igk]'); if(t){ openIskGuide(t.dataset.igk); return; }
 });
+/* ❄️ 겨울 풍경 (10-22 season.sql) — 12/1 ~ 2월 말 자동 · 숲지기 스위치
+   배경: bg/w_*.webp (지금 그림과 같은 구도로 맞춘 눈 그림) · 붕어빵·군고구마 수레 · 고운 모래 어항 → 겨울 어항 · 눈 내리기(CSS) */
+let SEASON = {season:'', mode:'auto'};
+const isWinterScene = () => SEASON.season === 'winter';
+let TRUCK_BASE = null;   // 처음 applySeason 때 평소 수레를 기억해 둬요
+const TRUCK_WINTER = {
+  coffee: {name:'붕어빵 수레', sign:'🐟 붕어빵', img:'bg/bungeo_truck.webp', verb:'붕어빵 먹기', icon:'🐟', menu:['팥 붕어빵','슈크림 붕어빵','피자 붕어빵','고구마 붕어빵','초코 붕어빵'],
+           say:['따끈한 붕어빵 하나 하고 가요~','손 녹이고 원고 써요!','갓 구운 붕어빵이에요~','머리부터? 꼬리부터?']},
+  dessert:{name:'군고구마 수레', sign:'🍠 군고구마', img:'bg/goguma_truck.webp', verb:'군고구마 먹기', icon:'🍠',
+           say:['호호 불어 먹어요~','오늘은 꿀고구마가 들었대요!','당 충전하고 한 화 더!','대박 고구마도 숨어 있어요!']},
+};
+function applySeason(){
+  const w = isWinterScene();
+  if(w) document.documentElement.setAttribute('data-season','winter'); else document.documentElement.removeAttribute('data-season');
+  if(!TRUCK_BASE) TRUCK_BASE = JSON.parse(JSON.stringify(TRUCK_KIND));
+  Object.keys(TRUCK_KIND).forEach(k=>{ Object.assign(TRUCK_KIND[k], TRUCK_BASE[k], w && TRUCK_WINTER[k] ? TRUCK_WINTER[k] : {icon: k==='coffee'?'☕':'🍰'}); });
+  const b = document.getElementById('seasonAdmin');
+  if(b) b.innerHTML = `<span class="small">지금: ${w ? '❄️ 겨울 풍경' : '🌿 평소 풍경'} · ${({auto:'자동 (12/1 ~ 2월 말)', on:'숲지기가 켬', off:'숲지기가 끔'})[SEASON.mode]||SEASON.mode}</span>
+    ${['auto','on','off'].map(m=>`<button class="mini ${SEASON.mode===m?'ask-yes':''}" type="button" data-season-set="${m}">${({auto:'🗓️ 자동',on:'❄️ 지금 켜기',off:'🌿 끄기'})[m]}</button>`).join('')}`;
+}
+async function refreshSeason(){ try{ if(api.season) SEASON = (await api.season()) || SEASON; }catch(e){} applySeason(); }
+document.addEventListener('click', e=>{ const b = e.target.closest('[data-season-set]'); if(!b) return;
+  act(async()=>{ SEASON = await api.adminSeason(b.dataset.seasonSet); applySeason(); renderVillage?.(); renderLake?.(); renderTank?.(); renderTrucks?.(); renderVillageTrucks?.();
+    toast(isWinterScene() ? '❄️ 숲에 겨울이 왔어요!' : '🌿 평소 풍경으로 바꿨어요'); }); });
+
 /* 📊 나의 한 주 (10-22 · bosslv.sql 의 get_my_week) — 첫 주는 10/22(목) 0시 ~ 10/30(금) 0시 */
 let MYWEEK_TAB = 'now', MYWEEK_AT = 0, MYWEEK = {}, MYWEEK_FOLD = false; try{ MYWEEK_FOLD = localStorage.getItem('majam-myweek-fold')==='1'; }catch(e){}
 const mwHM = m => m>=60 ? `${Math.floor(m/60)}시간${m%60?` ${m%60}분`:''}` : `${m}분`;
@@ -6432,7 +6503,7 @@ const tankSkinOf = code => TANK_SKINS.find(k=>k.code===code) || TANK_SKINS[0];
 const tankFishW = f => Math.max(8, Math.min(22, 9 + 4*Math.log10(Math.max(.5, +f.max_cm || 20))));   // 어항 너비의 % (작은 송사리 ~ 큰 고래)
 function tankHTML(t, owner){
   const sk = tankSkinOf(t && t.skin), list = (t && t.fish) || [];
-  return `<div class="tank" style="background-image:url(${sk.img})" data-owner="${esc(owner||'')}">
+  return `<div class="tank" style="background-image:url(${isWinterScene() && sk.code==='sand' ? 'tank/winter26.webp' : sk.img})" data-owner="${esc(owner||'')}">
     <div class="tank-bubbles" aria-hidden="true">${Array.from({length:9},(_,i)=>`<i style="left:${(6+i*11+(i*37)%7).toFixed(0)}%;--d:${(5+(i*13)%6).toFixed(1)}s;--dl:-${((i*29)%9).toFixed(1)}s;--s:${(4+(i*7)%7)}px"></i>`).join('')}</div>
     ${list.map((x,i)=>{ const f = fishOf(x.code); if(!f) return '';
       return `<button class="tf" type="button" data-tfish="${x.code}" data-caught="${+x.caught||0}" data-best="${x.best_cm==null?'':x.best_cm}" style="--w:${tankFishW(f).toFixed(1)}%;left:${(8+(i*29)%70)}%;top:${(14+(i*17)%52)}%" title="${esc(f.name)}"><span class="tf-body" style="--bd:${(2.6+(i%4)*.5).toFixed(1)}s;--bdl:-${(i*.7%3).toFixed(1)}s"><img src="fish/${x.code}.webp"${f.tier==='legend'?' class="lg"':''} alt="${esc(f.name)}" draggable="false"></span></button>`; }).join('')}
@@ -7210,14 +7281,14 @@ function renderVillageTrucks(){
 document.addEventListener('click', e=>{
   const c = e.target.closest('[data-call-truck]');
   if(c){ const kind = c.dataset.callTruck, K = TRUCK_KIND[kind];
-    if(!confirm(`🪙 ${K.price}코인을 결제하고 ${K.name}를 부를까요?\n오늘 자정까지 광장과 마을에 머물러요.`)) return;
+    if(!confirm(`🪙 ${K.price}코인을 결제하고 ${K.name}${jo(K.name,'을','를')} 부를까요?\n오늘 자정까지 광장과 마을에 머물러요.`)) return;
     return act(async()=>{ const r = await api.callTruck(kind); if(r && r.coins!=null) ME.coins = r.coins;
-      await refreshTrucks(); renderTop(); renderTrucks(); petParty(kind==='coffee'?'☕':'🍰', `${K.name}를 불렀어요!\n오늘 자정까지 광장에 있어요`); }); }
+      await refreshTrucks(); renderTop(); renderTrucks(); petParty(K.icon || (kind==='coffee'?'☕':'🍰'), `${K.name}${jo(K.name,'을','를')} 불렀어요!\n오늘 자정까지 광장에 있어요`); }); }
   const g = e.target.closest('[data-claim-truck]');
   if(g){ const id = +g.dataset.claimTruck, kind = g.dataset.kind;
     return act(async()=>{ const r = await api.claimTruck(id); if(r && r.coins!=null) ME.coins = r.coins;
       await refreshTrucks(); renderTop(); renderTrucks();
-      if(kind==='coffee') toast(`☕ ${TRUCK_KIND.coffee.menu[Math.floor(Math.random()*TRUCK_KIND.coffee.menu.length)]} 한 잔! 🪙 +${r.reward}`);
+      if(kind==='coffee') toast(`${TRUCK_KIND.coffee.icon||'☕'} ${TRUCK_KIND.coffee.menu[Math.floor(Math.random()*TRUCK_KIND.coffee.menu.length)]} ${isWinterScene()?'하나':'한 잔'}! 🪙 +${r.reward}`);
       else if(r.reward>=200) petParty('👑', `대박 디저트!\n${dessertName(r.reward)} · 🪙 +${r.reward}`);
       else toast(`${dessertName(r.reward)} 냠냠! 🪙 +${r.reward}`); }); }
 });
@@ -7936,6 +8007,7 @@ async function cabsFor(owner, list){
 }
 async function refreshVillage(){ VILLAGE = await api.village(); }
 async function loadAll(){
+  await refreshSeason();
   await Promise.all([refreshMine(), refreshVillage(), refreshPlaza(), refreshGacha(), refreshGarden(), refreshLake(), refreshTank(), refreshTree(), refreshBanners(), refreshBoard(), refreshBoss(), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPets(), refreshPetsOn(), refreshWinter(), refreshNameplates(), refreshPetBabies(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
   refreshStreak();
   MAIL_BOOT_UNTIL = Date.now() + 10000; renderMailBadge();   // 들어오자마자 온 소식은 우편함을 한 번만 열어 보여 줘요
@@ -9009,6 +9081,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 52</p>
+<p class="site-ver">마감의 숲 · 10-22 판 53</p>
 </body>
 </html>
