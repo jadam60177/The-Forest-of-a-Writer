@@ -2175,6 +2175,33 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 @keyframes vfbub{0%{translate:0 0;opacity:0}10%{opacity:.9}100%{translate:var(--dx) -120vh;opacity:0}}
 .vfx.petal i{width:11px;height:8px;border-radius:80% 0 80% 0;background:linear-gradient(135deg,#FFD6E6,#FF9FC4);top:-5%;animation:vfpet var(--d) linear var(--dl) infinite}
 @keyframes vfpet{0%{translate:0 0;rotate:0deg;opacity:0}8%{opacity:1}100%{translate:var(--dx) 120vh;rotate:540deg;opacity:.2}}
+/* 📜 도안 · 제작대 · 창고 · 세트 효과 · 간식 (10-22 voidcraft.sql) */
+.vbag .item.g-void{border-color:rgba(190,160,255,.75);background:linear-gradient(160deg,rgba(150,110,240,.28),rgba(60,30,120,.2))}
+.vbag .item .vonly{display:block;font-size:.56rem;color:#D9C6FF;line-height:1.2}.vbag .item .vonly.lg{color:#FFE08A}
+:root[data-mode="day"] .vbag .item .vonly{color:#6B45C0}:root[data-mode="day"] .vbag .item .vonly.lg{color:#9A6A00}
+.vbag .item .em img.fimg{max-width:100%;object-fit:contain}
+.vcraft{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:.5rem}
+.vcard{border-radius:14px;padding:.5rem .4rem .55rem;text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(190,160,255,.38);display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.vcard .vart{height:78px;width:100%;display:flex;align-items:center;justify-content:center}
+.vcard .vart img{max-height:78px;max-width:100%;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))}
+.vcard .vart .emo{font-size:2.4rem}
+.vcard.locked .vart img{filter:brightness(0) opacity(.35)}.vcard.locked .vart .emo{filter:grayscale(1) brightness(.2);opacity:.5}
+.vcard .nm{font-size:.78rem;line-height:1.25;font-weight:700}
+.vcard .lockt{opacity:.75}
+.vset{margin:.1rem 0 .5rem;text-align:center}
+.vgauge{position:relative;flex-basis:100%;max-width:520px;height:22px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(190,160,255,.5);overflow:hidden}
+.vgauge>span{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#8F6BE8,#E3CCFF);transition:width .6s}
+.vgauge>b{position:relative;display:block;text-align:center;font-size:.74rem;line-height:22px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.vsnack{flex-basis:100%;display:flex;gap:.5rem;align-items:center;justify-content:center;flex-wrap:wrap}
+.vsnack .on{font-size:.82rem;padding:.2rem .7rem;border-radius:999px;background:rgba(255,190,120,.22);border:1px solid rgba(255,190,120,.6)}
+.vfx.setfx{z-index:5}
+.vfx.set-base i{width:var(--sz);height:var(--sz);background:linear-gradient(135deg,#F1E6FF,#9E7BEA);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 8px #B892FF;top:105%;animation:vfbub calc(var(--d)*1.6) linear var(--dl) infinite;opacity:.8}
+.vfx.set-heaven i{width:5px;height:5px;border-radius:50%;background:#FFF6C8;box-shadow:0 0 10px 4px rgba(255,236,160,.8);top:-5%;animation:vfpet calc(var(--d)*1.8) linear var(--dl) infinite}
+.vfx.set-hell i{width:4px;height:4px;border-radius:50%;background:#FFB15A;box-shadow:0 0 8px 3px rgba(255,90,30,.85);top:105%;animation:vfbub var(--d) ease-out var(--dl) infinite}
+.vfx.set-magic i::before{content:"✦";display:block;font-size:var(--sz);color:#9FF3FF;text-shadow:0 0 8px #3FD9F0}
+.vfx.set-magic i{animation:vftw calc(var(--d)*.6) ease-in-out var(--dl) infinite alternate}
+@keyframes vftw{0%{opacity:0;transform:scale(.4) rotate(0)}100%{opacity:1;transform:scale(1.2) rotate(90deg)}}
+.vfx.set-fairy i{width:10px;height:6px;border-radius:0 80% 0 80%;background:linear-gradient(135deg,#D9FFB0,#7CC46A);top:-5%;animation:vfpet calc(var(--d)*1.5) linear var(--dl) infinite}
 @media (prefers-reduced-motion: reduce){.vfx i{animation:none!important;opacity:.6}}
 /* ☀️ 낮 이세계 (10-21 ⑱) — bg/isekai_day.webp */
 :root[data-mode="day"] #tab-isekai{color:#2A2350;background:radial-gradient(ellipse 70% 50% at 85% 10%,rgba(170,120,255,.35),transparent 70%),linear-gradient(#BFE6FF,#DCEBFF 45%,#E9DEFF);box-shadow:0 0 0 1px rgba(150,120,230,.35),0 14px 34px rgba(80,60,150,.18)}
@@ -4326,7 +4353,21 @@ const demoApi = (() => {
       const cl = V.cap_lv||0, rl = V.rate_lv||0;
       return {open:true, cols:V.cols, rows:V.rows, bg:V.bg, bgs:[...V.bgs], public:V.pub, items:V.items.map(x=>({...x})), farm_pets, farm_at:V.farm_at, farm_rate:VOID_FARM_RATE+rl, farm_cap:VOID_FARM_CAP+4*cl,
         cap_lv:cl, rate_lv:rl, cap_price:[300,500,800][cl] ?? null, rate_price:[500,800][rl] ?? null, fx:V.fx||'', fxs:[...(V.fxs||[])], fx_price:VOID_FX_PRICE, stars:st.me.stars||0,
-        max_cols:VOID_MAX_C, max_rows:VOID_MAX_R, grow_price:V.cols*V.rows*10, bg_price:VOID_BG_PRICE}; },
+        max_cols:VOID_MAX_C, max_rows:VOID_MAX_R, grow_price:V.cols*V.rows*10, bg_price:VOID_BG_PRICE,
+        catalog:VCAT.map(f=>({...f})), sets:this.vdSets(), bps:[...(V.bps||[])], vinv:{...(V.vinv||{})}, bp_saved:V.bp_gauge||0, bp_need:60, bp_dup:50,
+        snack_from:V.snack_from||null, snack_until:V.snack_until||null, snack_today:V.snack_day===new Date().toDateString(), snack_price:100, snack_hours:6, coins:st.me.coins}; },
+    vdSets(){ const V = st.vd; if(!V) return []; const placed = new Set(V.items.map(x=>x.item_code));
+      return [...new Set(VCAT.map(f=>f.theme))].filter(t=>{ const s = VCAT.filter(f=>f.theme===t && f.in_set && f.active!==false); return s.length && s.every(f=>placed.has(f.code)); }); },
+    vdRollBp(){ const V = st.vd, themes = [...new Set(VCAT.filter(f=>f.active!==false).map(f=>f.theme))];
+      let th = V.bg; if(!themes.includes(th) || Math.random() >= .5){ const o = themes.filter(t=>t!==V.bg); th = o[Math.floor(Math.random()*o.length)] || themes[0]; }
+      const pool = VCAT.filter(f=>f.theme===th && f.active!==false), f = pool[Math.floor(Math.random()*pool.length)];
+      V.bps = V.bps||[]; const dup = V.bps.includes(f.code); if(dup) this.iskState().shards += 50; else V.bps.push(f.code); return {code:f.code, theme:th, dup}; },
+    async voidCraft(code){ const V = st.vd, f = vfurnOf(code); if(!f) fail('없는 가구예요'); if(!(V.bps||[]).includes(code)) fail('📜 도안이 아직 없어요');
+      V.vinv = V.vinv||{}; if(f.max_own && (V.vinv[code]||0) + V.items.filter(x=>x.item_code===code).length >= f.max_own) fail(`「${f.name}」은(는) ${f.max_own}개까지만 가질 수 있어요`);
+      this.vdPay(f.price); V.vinv[code] = (V.vinv[code]||0)+1; persist(); return this.vdJson(); },
+    async voidSnack(){ const V = st.vd, today = new Date().toDateString(); if(V.snack_day===today) fail('오늘 간식은 벌써 줬어요. 새벽 12시에 다시 줄 수 있어요');
+      if((st.me.coins||0) < 100) fail('코인이 부족해요 (🪙 100개 필요)'); st.me.coins -= 100;
+      V.snack_from = new Date().toISOString(); V.snack_until = new Date(Date.now()+6*36e5).toISOString(); V.snack_day = today; persist(); return this.vdJson(); },
     async winterPick(k){ const W = st.winter || {}; W.pick = k; if(k==='lotto') st.me.lotto_bonus = (st.me.lotto_bonus||0)+3; else if(k==='room') st.me.room_coupon = (st.me.room_coupon||0)+1; else st.me.garden_bonus = (st.me.garden_bonus||0)+1; persist(); return null; },
     async checkPlates(){ const have = new Set(st.me.nameplates||['wood']), fresh = [], g = st.coll.size;
       [[100,'ribbon'],[200,'starlight'],[300,'jewel'],[400,'rainbow'],[500,'goldleaf']].forEach(([n,k])=>{ if(g>=n && !have.has(k)) fresh.push(k); });
@@ -4346,14 +4387,21 @@ const demoApi = (() => {
       if(dir==='col' ? V.cols>=VOID_MAX_C : V.rows>=VOID_MAX_R) fail('더 넓힐 수 없어요'); this.vdPay(V.cols*V.rows*10); if(dir==='col') V.cols++; else V.rows++; persist(); return this.vdJson(); },
     async voidBg(bg){ const V = st.vd; if(!(bg in VOID_BGS)) fail('없는 배경이에요'); if(!V.bgs.includes(bg)){ this.vdPay(VOID_BG_PRICE); V.bgs.push(bg); } V.bg = bg; persist(); return this.vdJson(); },
     async voidPublic(on){ st.vd.pub = !!on; persist(); return this.vdJson(); },
-    async voidPlace(code, r, c, rot, w, h, layer){ const V = st.vd; if(!(st.inv[code]>0)) fail('가방에 없는 가구예요');
+    async voidPlace(code, r, c, rot, w, h, layer){ const V = st.vd, vf = isVoidFurn(code); V.vinv = V.vinv||{};
+      if(!vf && !isLegendFurn(code)) fail('아공간에는 🔮 아공간 가구와 👑 전설 가구만 놓을 수 있어요');
+      if(vf ? !(V.vinv[code]>0) : !(st.inv[code]>0)) fail(vf ? '아공간 창고에 없는 가구예요' : '가방에 없는 가구예요');
       if(r<0||c<0||c+w>V.cols||r+h>V.rows) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
       const ly = layer==='floor' ? 'floor' : 'furniture';
       if(V.items.some(f=>f.layer===ly && r<f.r+f.h && f.r<r+h && c<f.c+f.w && f.c<c+w)) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
-      st.inv[code]--; V.items.push({id:V.nid++, item_code:code, r, c, w, h, rot:rot||0, layer:ly}); persist(); return this.vdJson(); },
-    async voidRemove(id){ const V = st.vd, f = V.items.find(x=>x.id===id); if(!f) fail('내 가구가 아니에요'); V.items = V.items.filter(x=>x!==f); st.inv[f.item_code] = (st.inv[f.item_code]||0)+1; persist(); return this.vdJson(); },
+      if(vf) V.vinv[code]--; else st.inv[code]--; V.items.push({id:V.nid++, item_code:code, r, c, w, h, rot:rot||0, layer:ly}); persist(); return this.vdJson(); },
+    async voidRemove(id){ const V = st.vd, f = V.items.find(x=>x.id===id); if(!f) fail('내 가구가 아니에요'); V.items = V.items.filter(x=>x!==f);
+      if(isVoidFurn(f.item_code)){ V.vinv = V.vinv||{}; V.vinv[f.item_code] = (V.vinv[f.item_code]||0)+1; } else st.inv[f.item_code] = (st.inv[f.item_code]||0)+1; persist(); return this.vdJson(); },
     async voidCollect(){ const j = this.vdJson(), n = j.farm_pets.length; if(!n) fail('농장에서 놀 이세계 마물이 아직 없어요. 알을 부화시켜 보세요');
-      const gain = voidFarmReady(j) || n*6;   /* 미리보기는 바로 받아 볼 수 있게 */ const I = this.iskState(); I.shards += gain; st.vd.farm_at = new Date().toISOString(); persist(); return {gain, shards:I.shards, pets:n}; },
+      const gain = voidFarmReady(j) || n*6;   /* 미리보기는 바로 받아 볼 수 있게 */ const I = this.iskState(); I.shards += gain;
+      const f = voidFarmHours(j); let g = (st.vd.bp_gauge||0) + (f.hrs + f.boost) * n + 60;   /* 미리보기는 받을 때마다 도안 1장 더 */
+      const bps = []; while(g >= 60 && bps.length < 20){ g -= 60; bps.push(this.vdRollBp()); }
+      st.vd.bp_gauge = g; st.vd.farm_at = new Date().toISOString(); persist();
+      return {gain, shards:I.shards, pets:n, bps, dup_shards:bps.filter(b=>b.dup).length*50, boosted:f.boost>0}; },
     iskMult(){ const n = Date.now(); return Math.max(1, ...this.iskState().ev.filter(e=>Date.parse(e.starts_at)<=n && Date.parse(e.ends_at)>n).map(e=>e.mult)); },
     async adminShards(id, amount, reason){ const I = this.iskState(); if(!(amount>=1)) fail('파편 개수를 적어 주세요');
       if(!id || id==='*' || id==='me'){ I.shards += amount; I.gifts.push({amount, reason, at:new Date().toISOString()}); }
@@ -4598,6 +4646,8 @@ const supaApi = (() => {
     async welcome(){ const r = await sb.rpc('claim_welcome'); return r.error ? null : r.data; },   // 🎁 골라 받기 (winter.sql)
     async checkPlates(){ const r = await sb.rpc('check_nameplates'); if(r.error) return null; return r.data; },   // 🏅 plates.sql
     async voidFarmUp(kind){ return ok(await sb.rpc('void_farm_up', {p_kind:kind})); },
+    async voidCraft(code){ return ok(await sb.rpc('void_craft', {p_code:code})); },
+    async voidSnack(){ return ok(await sb.rpc('void_snack')); },
     async riftStarFeed(id, n){ return ok(await sb.rpc('isekai_star_feed', {p_egg:id, p_drops:n})); },
     async adminShards(id, amount, reason){ return ok(await sb.rpc('admin_isekai_give', {p_discord_id:id, p_amount:amount, p_reason:reason})); },
     async shardEventAdd(name, mult, start, end){ return ok(await sb.rpc('admin_isekai_event_add', {p_name:name, p_mult:mult, p_start:start, p_end:end})); },
@@ -4632,7 +4682,29 @@ const nextRot = () => { const it = selected ? itemOf(selected) : null;
 let CABS = {}, curRoom = 0, cabOpen = null, VISIT = null;
 try{ curRoom = +(localStorage.getItem('majam-room')||0); }catch(e){}
 const myRooms = () => (ME && ME.room_names && ME.room_names.length) ? ME.room_names : ['거실'];
-const itemOf = code => SHOP.find(s=>s.code===code) || GACHA.find(s=>s.code===code) || DEFAULT_SHOP.find(s=>s.code===code) || {code, emoji:'❔', name:'', w:1, h:1};
+/* 🔮 아공간 전용 가구 (10-22 voidcraft.sql 의 void_furn 과 같아요 — 서버 목록이 오면 그걸로 바꿔요)
+   그림: furn/코드.webp · 새 테마 세트는 voidcraft.sql 에 넣고, 그림이 오면 여기에도 한 줄 (없으면 이모지로 보여요) */
+const VFURN_DEF = [
+  ['v_base_rug','base','🌀','차원 소용돌이 러그',2,2,'floor',150,1,0], ['v_base_desk','base','🔭','떠도는 지구본 책상',2,1,'furniture',200,1,0], ['v_base_bed','base','🌌','은하수 침대',2,2,'furniture',300,1,0],
+  ['v_base_lamp','base','💡','은하 갓 스탠드',1,2,'furniture',100,1,0], ['v_base_window','base','🪟','성운 아치 창문',2,2,'furniture',200,1,0], ['v_base_shelf','base','📚','책이 떠도는 책장',2,2,'furniture',250,1,0],
+  ['v_heaven_rug','heaven','☁️','구름 러그',2,2,'floor',150,1,0], ['v_heaven_desk','heaven','🪶','천사 깃펜 필기대',2,1,'furniture',200,1,0], ['v_heaven_bed','heaven','🛏️','구름 침대',2,2,'furniture',300,1,0],
+  ['v_heaven_lamp','heaven','🌟','빛기둥 등불 스탠드',1,2,'furniture',100,1,0], ['v_heaven_window','heaven','⛪','스테인드글라스 아치 창문',2,2,'furniture',200,1,0], ['v_heaven_shelf','heaven','📖','대리석 서가',2,2,'furniture',250,1,0],
+  ['v_hell_rug','hell','🔴','핏빛 소환진 러그',2,2,'floor',150,1,0], ['v_hell_desk','hell','💀','해골 촛대 원고 책상',2,1,'furniture',200,1,0], ['v_hell_bed','hell','🦇','박쥐 날개 침대',2,2,'furniture',300,1,0],
+  ['v_hell_lamp','hell','🕯️','붉은 불꽃 촛대',1,2,'furniture',100,1,0], ['v_hell_window','hell','🌕','붉은 달 고딕 창문',2,2,'furniture',200,1,0], ['v_hell_shelf','hell','⛓️','쇠사슬 금서 책장',2,2,'furniture',250,1,0],
+  ['v_hell_throne','hell','😈','마왕의 옥좌',2,2,'furniture',600,0,1],
+  ['v_magic_rug','magic','🔯','푸른 마법진 러그',2,2,'floor',150,1,0], ['v_magic_desk','magic','⚗️','연금술 작업대',2,1,'furniture',200,1,0], ['v_magic_bed','magic','🌙','별자리 캐노피 침대',2,2,'furniture',300,1,0],
+  ['v_magic_lamp','magic','💎','마법 수정 램프',1,2,'furniture',100,1,0], ['v_magic_window','magic','🪐','천체 창문',2,2,'furniture',200,1,0], ['v_magic_shelf','magic','📕','떠다니는 마도서 책장',2,2,'furniture',250,1,0],
+  ['v_fairy_rug','fairy','🌼','데이지 러그',2,2,'floor',150,1,0], ['v_fairy_desk','fairy','🍄','그루터기 책상',2,1,'furniture',200,1,0], ['v_fairy_bed','fairy','🌷','꽃봉오리 침대',2,2,'furniture',300,1,0],
+  ['v_fairy_lamp','fairy','✨','반딧불이 병 램프',1,2,'furniture',100,1,0], ['v_fairy_window','fairy','🌿','덩굴 아치 창문',2,2,'furniture',200,1,0], ['v_fairy_shelf','fairy','🌳','나무 구멍 책장',2,2,'furniture',250,1,0],
+];
+const VFURN_ART = new Set(VFURN_DEF.map(r=>r[0]));
+const vfurnFix = f => ({...f, icon:f.code, category:'furniture', void:true});
+let VCAT = VFURN_DEF.map(([code,theme,emoji,name,w,h,layer,price,in_set,max_own])=>vfurnFix({code,theme,emoji,name,w,h,layer,price,in_set:!!in_set,max_own:max_own||null,active:true}));
+VFURN_ART.forEach(c=>FURN_IMG.add(c));
+function setVCAT(list){ if(!Array.isArray(list) || !list.length) return; VCAT = list.map(vfurnFix); }
+const vfurnOf = code => VCAT.find(f=>f.code===code);
+const isVoidFurn = code => typeof code==='string' && code.startsWith('v_') && !!vfurnOf(code);
+const itemOf = code => SHOP.find(s=>s.code===code) || GACHA.find(s=>s.code===code) || DEFAULT_SHOP.find(s=>s.code===code) || vfurnOf(code) || {code, emoji:'❔', name:'', w:1, h:1};
 const sizeText = it => it.w===1&&it.h===1 ? '1칸' : `${it.w}×${it.h}칸`;
 const isMe = p => DEMO ? p.discord_id==='me' : p.discord_id===supaApi.myId();
 
@@ -6649,9 +6721,10 @@ const VOID_BGS = {
   magic: {name:'마법진 연구실', emoji:'🔯', grad:'radial-gradient(circle at 50% 55%,#46D3E6 0%,#1C3A78 38%,#0D1530 100%)'},
   fairy: {name:'요정나라 숲', emoji:'🍄', grad:'radial-gradient(ellipse at 50% 30%,#E6FFD9 0%,#8FD3A6 45%,#2F6B55 100%)'},
 };
-const voidBgCSS = k => `url(void/${k in VOID_BGS ? k : 'base'}.webp) center/cover no-repeat, ${(VOID_BGS[k]||VOID_BGS.base).grad}`;
+const VOID_BG_VER = {base:'?v=2'};   // 같은 이름으로 그림을 바꾸면 숫자를 올려요 (옛 그림 캐시 피하기)
+const voidBgCSS = k => { const key = k in VOID_BGS ? k : 'base'; return `url(void/${key}.webp${VOID_BG_VER[key]||''}) center/cover no-repeat, ${VOID_BGS[key].grad}`; };
 const VOID_FARM_BG = 'url(void/farm.webp) center/cover no-repeat, url(bg/Pet_background.webp) center/cover no-repeat, linear-gradient(#24124F 0%,#5B3E9A 38%,#4F8A5E 39%,#2D5A3A 100%)';
-let VOID = null, VSEL = null, VROT = 0, VHOVER = null, vbagTab = 'all';
+let VOID = null, VSEL = null, VROT = 0, VHOVER = null, vbagTab = 'void', vcraftTab = '';
 // ⭐ 별조각 연동 (void.sql 과 같아야 해요)
 const VOID_FX = {firefly:{name:'반딧불', emoji:'🪲'}, meteor:{name:'별똥별', emoji:'🌠'}, bubble:{name:'비눗방울', emoji:'🫧'}, petal:{name:'꽃잎', emoji:'🌸'}};
 const VOID_FX_PRICE = 300, STAR_PER_DROP = 2;   // 효과는 💠 파편 · 별조각은 알 정화에만 (10-22 라밀)
@@ -6662,7 +6735,23 @@ function voidFxHTML(fx){
     h += `<i style="--x:${r(0,100)}%;--y:${fx==='meteor'?r(-5,40):r(5,95)}%;--d:${fx==='meteor'?r(5,11):fx==='firefly'?r(2.5,5):r(7,14)}s;--dl:-${r(0,12)}s;--dx:${r(-40,40)}px;--dy:${r(-30,30)}px;--sz:${r(8,22)}px"></i>`; }
   return `<div class="vfx ${fx}" aria-hidden="true">${h}</div>`;
 }
-async function refreshVoid(){ try{ VOID = api.void ? await api.void() : null; }catch(e){ VOID = null; } }
+// 🪞 세트 효과 (테마 가구 6개를 다 놓으면 저절로) — 그림 반짝이가 오면 바꿔 끼울 거예요
+const VOID_SET_FX = {base:{n:14, name:'떠도는 차원 조각'}, heaven:{n:18, name:'내려앉는 빛 알갱이'}, hell:{n:18, name:'피어오르는 불씨'}, magic:{n:14, name:'반짝이는 룬'}, fairy:{n:16, name:'흩날리는 잎사귀'}};
+function voidSetFxHTML(sets){
+  return (sets||[]).filter(t=>VOID_SET_FX[t]).map(t=>{ let h = ''; const r = (a,b)=>(a + Math.random()*(b-a)).toFixed(1);
+    for(let k=0;k<VOID_SET_FX[t].n;k++) h += `<i style="--x:${r(0,100)}%;--y:${r(5,95)}%;--d:${r(4,11)}s;--dl:-${r(0,12)}s;--dx:${r(-50,50)}px;--sz:${r(5,12)}px"></i>`;
+    return `<div class="vfx setfx set-${t}" aria-hidden="true">${h}</div>`; }).join('');
+}
+async function refreshVoid(){ try{ VOID = api.void ? await api.void() : null; if(VOID && VOID.catalog) setVCAT(VOID.catalog); }catch(e){ VOID = null; } }
+const isLegendFurn = c => LOTTO_FURN.some(x=>x.code===c);
+const voidHave = code => isVoidFurn(code) ? ((VOID && VOID.vinv || {})[code]||0) : ((INV||{})[code]||0);
+function voidFarmHours(V){
+  if(!V || !V.farm_at) return {hrs:0, boost:0};
+  const fa = Date.parse(V.farm_at), end = Math.min(Date.now(), fa + (V.farm_cap||VOID_FARM_CAP)*36e5), hrs = Math.max(0, (end - fa)/36e5);
+  let boost = 0; if(V.snack_from && V.snack_until) boost = Math.max(0, (Math.min(end, Date.parse(V.snack_until)) - Math.max(fa, Date.parse(V.snack_from)))/36e5);
+  return {hrs, boost};
+}
+const voidGauge = V => { const n = (V.farm_pets||[]).length, f = voidFarmHours(V); return (+V.bp_saved||0) + (f.hrs + f.boost) * n; };
 const voidFoot = code => { const it = itemOf(code); return VROT%2 ? {w:it.h, h:it.w} : {w:it.w, h:it.h}; };
 function voidRoomHTML(V, editable){
   const cur = {cols:V.cols, rows:V.rows, extraW:0, name:'아공간'}, list = (V.items||[]).map(x=>({...x}));
@@ -6674,14 +6763,14 @@ function voidRoomHTML(V, editable){
 }
 function voidFarmReady(V){
   const n = (V.farm_pets||[]).length; if(!n || !V.farm_at) return 0;
-  const hrs = Math.min(V.farm_cap||VOID_FARM_CAP, (Date.now() - Date.parse(V.farm_at)) / 36e5);
-  return Math.max(0, Math.floor(hrs * (V.farm_rate||VOID_FARM_RATE) * n));
+  const f = voidFarmHours(V);
+  return Math.max(0, Math.floor((f.hrs + f.boost) * (V.farm_rate||VOID_FARM_RATE) * n));
 }
 function voidFarmHTML(V, owner){
   const pets = V.farm_pets || [], all = owner ? ((PETS && (PETS.all||PETS.pets)) || []) : [];
   const cells = pets.map((c,i)=>{ const mine = all.find(p=>p.code===c), big = mine ? petShowBig(petLevel(mine.affection), babyById(mine.id)) : false;
-    const x = 12 + ((i*37) % 76), y = 52 + ((i*23) % 34);
-    return `<span class="vfp" data-vfp="${i}" style="left:${x}%;top:${y}%;--s:${(.8 + (y-45)/40*.45).toFixed(2)};z-index:${Math.round(y)}"><img src="pets/${c}${big?'_2':''}.webp" alt="" draggable="false" loading="lazy"><span class="nm">${esc(mine ? mine.name : petOf(c).name)}</span></span>`; }).join('');
+    const x = 12 + ((i*37) % 76), y = 66 + ((i*23) % 26);   // 들판 그림(void/farm.webp)의 풀밭 쪽에서만 놀아요
+    return `<span class="vfp" data-vfp="${i}" style="left:${x}%;top:${y}%;--s:${(.72 + (y-62)/30*.35).toFixed(2)};z-index:${Math.round(y)}"><img src="pets/${c}${big?'_2':''}.webp" alt="" draggable="false" loading="lazy"><span class="nm">${esc(mine ? mine.name : petOf(c).name)}</span></span>`; }).join('');
   return `<div class="vfarm" style="--fbg:${VOID_FARM_BG}">${cells}${pets.length ? '' : `<p class="vfarm-empty">아직 농장이 조용해요.<br><span class="small">🥚 알에서 이세계 마물이 태어나면 여기서 뛰어놀며 💠 파편을 물어와요.</span></p>`}</div>`;
 }
 const FARM_RUN = new WeakSet();
@@ -6693,38 +6782,71 @@ function startFarm(el){
     const step = () => {
       if(!el.isConnected) return;
       if(document.hidden || calm || Math.random() < .3){ p.classList.remove('walk'); setTimeout(step, 1500 + Math.random()*3500); return; }
-      const nx = Math.max(8, Math.min(92, x + (Math.random()-.5)*44)), ny = Math.max(48, Math.min(90, y + (Math.random()-.5)*20));
+      const nx = Math.max(8, Math.min(92, x + (Math.random()-.5)*44)), ny = Math.max(66, Math.min(92, y + (Math.random()-.5)*20));
       const dur = Math.max(1.8, Math.hypot(nx-x, (ny-y)*1.8) / (5 + Math.random()*4));
       if(Math.abs(nx-x) > .5) p.classList.toggle('flip', nx > x);
       p.classList.add('walk'); p.style.transitionDuration = dur.toFixed(1)+'s';
       p.style.left = nx.toFixed(1)+'%'; p.style.top = ny.toFixed(1)+'%';
-      p.style.setProperty('--s', (.8 + (ny-45)/40*.45).toFixed(2)); p.style.zIndex = Math.round(ny);
+      p.style.setProperty('--s', (.72 + (ny-62)/30*.35).toFixed(2)); p.style.zIndex = Math.round(ny);
       x = nx; y = ny; setTimeout(()=>{ p.classList.remove('walk'); setTimeout(step, 800 + Math.random()*3000); }, dur*1000);
     };
     setTimeout(step, 500 + i*400 + Math.random()*1200);
   });
 }
 function voidBagHTML(){
-  const entries = Object.entries(INV||{}).filter(([c,n])=>n>0 && !CAPACITY[c]);
-  const kinds = {all:'전체', furniture:'🪑 가구', accessory:'✨ 소품', wall:'🧱 벽', window:'🪟 창문', rug:'🧶 러그'};
-  const shown = vbagTab==='all' ? entries : entries.filter(([c])=>bagKind(c)===vbagTab);
-  return `<div class="vbag-tabs">${Object.entries(kinds).map(([k,l])=>`<button class="vbg ${k===vbagTab?'on':''}" type="button" data-vbtab="${k}">${l}</button>`).join('')}</div>
-    <div class="vbag">${shown.length ? shown.map(([c,n])=>{ const it = itemOf(c); return `<button class="item ${gradeCls(c)} ${VSEL===c?'sel':''}" type="button" data-vbag="${esc(c)}" title="${esc(it.name)}"><span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span><span class="p">×${n}</span></button>`; }).join('') : `<p class="small" style="grid-column:1/-1">${entries.length ? '이 칸엔 가구가 없어요.' : '가방이 비어 있어요. 상점에서 가구를 사 오면 여기서도 쓸 수 있어요.'}</p>`}</div>`;
+  const vinv = Object.entries((VOID && VOID.vinv)||{}).filter(([c,n])=>n>0).sort((a,b)=>VCAT.findIndex(f=>f.code===a[0])-VCAT.findIndex(f=>f.code===b[0]));
+  const legend = Object.entries(INV||{}).filter(([c,n])=>n>0 && isLegendFurn(c));
+  const tabs = {void:`🔮 아공간 창고 ${vinv.reduce((a,[,n])=>a+n,0)}`, legend:`👑 전설 가구 ${legend.reduce((a,[,n])=>a+n,0)}`};
+  const shown = vbagTab==='legend' ? legend : vinv;
+  const empty = vbagTab==='legend' ? '👑 복권에서 뽑은 전설 가구가 여기 보여요. 전설 가구는 집과 아공간 양쪽에 다 놓을 수 있어요.' : '아직 창고가 비어 있어요. 아래 📜 제작대에서 도안으로 가구를 만들면 여기로 와요.';
+  return `<div class="vbag-tabs">${Object.entries(tabs).map(([k,l])=>`<button class="vbg ${k===vbagTab?'on':''}" type="button" data-vbtab="${k}">${l}</button>`).join('')}</div>
+    <div class="vbag">${shown.length ? shown.map(([c,n])=>{ const it = itemOf(c), vf = isVoidFurn(c); return `<button class="item ${vf?'g-void':gradeCls(c)} ${VSEL===c?'sel':''}" type="button" data-vbag="${esc(c)}" title="${esc(it.name)}"><span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span>${vf?'<span class="vonly">🔮 아공간 전용</span>':'<span class="vonly lg">👑 전설</span>'}<span class="p">×${n}</span></button>`; }).join('') : `<p class="small" style="grid-column:1/-1">${empty}</p>`}</div>`;
+}
+const VTHEMES = () => [...new Set(VCAT.filter(f=>f.active!==false).map(f=>f.theme))].sort((a,b)=>Object.keys(VOID_BGS).indexOf(a)-Object.keys(VOID_BGS).indexOf(b));
+function voidCraftHTML(V){
+  const bps = new Set(V.bps||[]), themes = VTHEMES(), sets = new Set(V.sets||[]);
+  if(!themes.includes(vcraftTab)) vcraftTab = themes.includes(V.bg) ? V.bg : themes[0];
+  const all = VCAT.filter(f=>f.active!==false), total = all.length, have = all.filter(f=>bps.has(f.code)).length;
+  const list = all.filter(f=>f.theme===vcraftTab), placed = new Set((V.items||[]).map(x=>x.item_code));
+  const setN = list.filter(f=>f.in_set), setPlaced = setN.filter(f=>placed.has(f.code)).length, shards = (RIFT && RIFT.shards) ?? 0;
+  const tb = themes.map(t=>{ const b = VOID_BGS[t] || {emoji:'🔮', name:t}, ts = all.filter(f=>f.theme===t);
+    return `<button class="vbg ${t===vcraftTab?'on':''}" type="button" data-vctab="${t}">${b.emoji} ${esc(b.name)} <span class="small">📜 ${ts.filter(f=>bps.has(f.code)).length}/${ts.length}${sets.has(t)?' · 🪞':''}</span></button>`; }).join('');
+  const cards = list.map(f=>{ const own = bps.has(f.code), n = (V.vinv||{})[f.code]||0, onfloor = (V.items||[]).filter(x=>x.item_code===f.code).length;
+    const maxed = f.max_own && (n + onfloor) >= f.max_own;
+    return `<div class="vcard ${own?'':'locked'}">
+      <div class="vart">${VFURN_ART.has(f.code) ? `<img src="furn/${f.code}.webp" alt="" loading="lazy" draggable="false">` : `<span class="emo">${f.emoji}</span>`}</div>
+      <div class="nm">${own ? esc(f.name) : '？？？'}</div>
+      <div class="sz small">${f.w}×${f.h}칸${f.layer==='floor'?' · 바닥':''}${f.max_own?` · ${f.max_own}개만`:''}${n?` · 창고 ${n}`:''}</div>
+      ${own ? `<button class="mini ask-yes" type="button" data-vcraft="${f.code}" ${maxed||shards<f.price?'disabled':''}>${maxed?'다 만들었어요':`🔨 만들기 · 💠 ${f.price}`}</button>` : `<span class="small lockt">📜 도안이 아직 없어요</span>`}
+    </div>`; }).join('');
+  const b = VOID_BGS[vcraftTab] || {emoji:'🔮', name:vcraftTab};
+  return `<h4>📜 제작대 <span class="small">도안 ${have}/${total} · 만든 가구는 🔮 아공간 창고로 가요 (아공간 밖으로는 못 가져가요)</span></h4>
+    <div class="vbag-tabs">${tb}</div>
+    <p class="vset small">${sets.has(vcraftTab) ? `🪞 ${b.emoji} ${esc(b.name)} 세트 완성! 「${VOID_SET_FX[vcraftTab]?.name||'세트 효과'}」가 반짝이고 있어요` : `🪞 ${b.emoji} ${esc(b.name)} 가구 ${setN.length}개를 아공간에 다 놓으면 「${VOID_SET_FX[vcraftTab]?.name||'세트 효과'}」가 저절로 켜져요 · 지금 ${setPlaced}/${setN.length}`}</p>
+    <div class="vcraft">${cards}</div>`;
 }
 function renderVoidRoom(){
   const st = document.getElementById('voidStage'); if(!st || !VOID || !VOID.open) return;
   st.style.setProperty('--vbg', voidBgCSS(VOID.bg));
-  if(st._fx !== VOID.fx){ st._fx = VOID.fx; st.querySelector('.vfx')?.remove(); if(VOID.fx) st.insertAdjacentHTML('afterbegin', voidFxHTML(VOID.fx)); }
+  if(st._fx !== VOID.fx){ st._fx = VOID.fx; st.querySelector('.vfx:not(.setfx)')?.remove(); if(VOID.fx) st.insertAdjacentHTML('afterbegin', voidFxHTML(VOID.fx)); }
+  const sk = (VOID.sets||[]).join(); if(st._sets !== sk){ st._sets = sk; st.querySelectorAll('.vfx.setfx').forEach(x=>x.remove()); st.insertAdjacentHTML('afterbegin', voidSetFxHTML(VOID.sets)); }
   st.querySelector('.room')?.remove(); st.insertAdjacentHTML('beforeend', voidRoomHTML(VOID, true));
   const h = document.getElementById('voidHint');
   if(h) h.innerHTML = VSEL ? `「${esc(itemOf(VSEL).name)}」${jo(itemOf(VSEL).name,'을','를')} 놓을 칸을 누르세요 <button class="mini" type="button" data-vrot>↻ 돌리기</button> <button class="mini" type="button" data-vcancel>그만 놓기</button>`
-    : '아래 가방에서 가구를 고르고 칸을 누르면 놓여요 · 놓인 가구를 누르면 가방으로 돌아가요';
+    : '아래 창고에서 가구를 고르고 칸을 누르면 놓여요 · 놓인 가구를 누르면 창고(전설 가구는 가방)로 돌아가요';
 }
 function renderVoidFarmBar(){
   const b = document.getElementById('voidFarmBar'); if(!b || !VOID || !VOID.open) return;
   const n = (VOID.farm_pets||[]).length, ready = voidFarmReady(VOID), max = n * (VOID.farm_rate||VOID_FARM_RATE) * (VOID.farm_cap||VOID_FARM_CAP);
-  b.innerHTML = n ? `<button class="mini ask-yes" type="button" data-vfarm ${ready<1?'disabled':''}>🧺 물어온 💠 ${ready.toLocaleString()}개 받기</button><span class="small">마물 ${n}종 · 1종당 1시간에 💠 ${VOID.farm_rate||VOID_FARM_RATE} · 최대 ${VOID.farm_cap||VOID_FARM_CAP}시간치(💠 ${max})까지 쌓여요${ready>=max?' · 꽉 찼어요!':''}</span>`
-    : `<span class="small">이세계 마물이 생기면 1종당 1시간에 💠 ${VOID.farm_rate||VOID_FARM_RATE}개씩 물어와요</span>`;
+  const need = VOID.bp_need || 60, g = voidGauge(VOID), waiting = Math.floor(g / need), pct = Math.min(100, Math.floor((g % need) / need * 100));
+  const snackOn = VOID.snack_until && Date.parse(VOID.snack_until) > Date.now(), left = snackOn ? Math.ceil((Date.parse(VOID.snack_until) - Date.now())/6e4) : 0;
+  const perHr = n ? Math.ceil((need - g % need) / n) : 0;
+  b.innerHTML = n ? `<button class="mini ask-yes" type="button" data-vfarm ${ready<1?'disabled':''}>🧺 물어온 💠 ${ready.toLocaleString()}개${waiting?` + 📜 도안 ${waiting}장`:''} 받기</button><span class="small">마물 ${n}종 · 1종당 1시간에 💠 ${VOID.farm_rate||VOID_FARM_RATE} · 최대 ${VOID.farm_cap||VOID_FARM_CAP}시간치(💠 ${max})까지 쌓여요${ready>=max*(snackOn?2:1)?' · 꽉 찼어요!':''}</span>
+      <div class="vgauge" title="마물 1종이 1시간 놀면 1칸 · ${need}칸이면 도안 1장"><span style="width:${pct}%"></span><b>📜 다음 도안 ${pct}%${waiting?` · 받을 도안 ${waiting}장`:''} <span class="small">(지금 마물로 약 ${perHr}시간)</span></b></div>
+      <div class="vsnack">${snackOn ? `<span class="on">🍖 냠냠! 앞으로 ${Math.floor(left/60)}시간 ${left%60}분 동안 💠 파편과 📜 도안을 2배로 물어와요</span>`
+        : VOID.snack_today ? `<span class="small">🍖 오늘 간식은 줬어요 · 새벽 12시에 다시 줄 수 있어요</span>`
+        : `<button class="mini" type="button" data-vsnack>🍖 간식 주기 · 🪙 ${VOID.snack_price||100}</button><span class="small">하루 한 번 · ${VOID.snack_hours||6}시간 동안 파편과 도안 2배</span>`}</div>`
+    : `<span class="small">이세계 마물이 생기면 1종당 1시간에 💠 ${VOID.farm_rate||VOID_FARM_RATE}개씩 물어오고, 📜 아공간 가구 도안도 가끔 물어와요</span>`;
 }
 function renderVoid(){
   const box = document.getElementById('voidBox'); if(!box) return;
@@ -6739,7 +6861,7 @@ function renderVoid(){
     return;
   }
   const V = VOID, gp = V.grow_price ?? V.cols*V.rows*10, bgs = V.bgs || ['base'];
-  const k = JSON.stringify([shards, V.fx, V.fxs, V.cap_lv, V.rate_lv, ME.stars, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).length, (V.farm_pets||[]).join(), VSEL, vbagTab, Object.entries(INV||{}).filter(([,n])=>n>0).length]);
+  const k = JSON.stringify([shards, V.fx, V.fxs, V.cap_lv, V.rate_lv, ME.stars, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).map(x=>x.item_code).join(), (V.farm_pets||[]).join(), VSEL, vbagTab, vcraftTab, V.vinv, V.bps, V.sets, Object.entries(INV||{}).filter(([c,n])=>n>0 && isLegendFurn(c)).length]);
   if(box._k === k){ renderVoidRoom(); renderVoidFarmBar(); return; }
   box._k = k;
   box.innerHTML = `<div class="void-head"><h3>🔮 아공간 <span class="small">${V.cols}×${V.rows}칸</span></h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
@@ -6753,8 +6875,9 @@ function renderVoid(){
     <div class="void-grow"><button class="mini" type="button" data-vgrow="col" ${V.cols>=(V.max_cols||VOID_MAX_C)||shards<gp?'disabled':''}>➕ 가로 한 줄 · 💠 ${gp.toLocaleString()}</button>
       <button class="mini" type="button" data-vgrow="row" ${V.rows>=(V.max_rows||VOID_MAX_R)||shards<gp?'disabled':''}>➕ 세로 한 줄 · 💠 ${gp.toLocaleString()}</button>
       <span class="small">최대 ${V.max_cols||VOID_MAX_C}×${V.max_rows||VOID_MAX_R}칸 · 값은 지금 칸 수 × 10</span></div>
-    <h4>🎒 가방 <span class="small">우리 집과 같은 가방이에요 · 진열장은 아직 못 놓아요</span></h4>
+    <h4>🎒 아공간에 놓을 것 <span class="small">🔮 아공간 가구와 👑 전설 가구만 놓을 수 있어요</span></h4>
     ${voidBagHTML()}
+    ${voidCraftHTML(V)}
     <h4>🐾 마물 농장</h4>
     ${voidFarmHTML(V, true)}
     <div class="vfarm-bar" id="voidFarmBar"></div>
@@ -6767,7 +6890,7 @@ document.addEventListener('click', e=>{
   if(!e.target.closest('#voidBox')) return;
   if(e.target.closest('[data-vopen]')) return act(async()=>{
     if(!(await ask(`💠 이세계 파편 ${(VOID.price||VOID_OPEN_PRICE).toLocaleString()}개로 아공간 문을 열까요?\n4×4칸 공간과 마물 농장이 생겨요.`))) return;
-    await voidAfter(await api.voidOpen()); petParty('🔮', '아공간 문이 열렸어요!\n\n균열 깊숙한 곳에 나만의 공간이 생겼어요.\n가방의 가구를 꺼내 꾸미고, 뒷배경도 바꿔 끼워 보세요.\n아래 🐾 마물 농장에선 이세계 마물들이 파편을 물어와요!');
+    await voidAfter(await api.voidOpen()); petParty('🔮', '아공간 문이 열렸어요!\n\n균열 깊숙한 곳에 나만의 공간이 생겼어요.\n🐾 마물 농장의 마물들이 💠 파편과 📜 가구 도안을 물어와요.\n도안으로 만든 아공간 가구와 👑 전설 가구로 꾸며 보세요!');
   });
   const bgk = e.target.closest('[data-vbgk]');
   if(bgk) return act(async()=>{ const c = bgk.dataset.vbgk, b = VOID_BGS[c], own = (VOID.bgs||[]).includes(c);
@@ -6787,11 +6910,11 @@ document.addEventListener('click', e=>{
   const tl = e.target.closest('.tile[data-vr]');
   if(tl && VSEL) return act(async()=>{ const code = VSEL, fp = voidFoot(code);
     await voidAfter(await api.voidPlace(code, +tl.dataset.vr, +tl.dataset.vc, VROT, fp.w, fp.h, layerOf(code)));
-    if(!(INV[code]>0)){ VSEL = null; VROT = 0; } VHOVER = null; box_void_reset(); renderVoid(); });
+    if(!(voidHave(code)>0)){ VSEL = null; VROT = 0; } VHOVER = null; box_void_reset(); renderVoid(); });
   const fu = e.target.closest('.furn[data-vpid]');
   if(fu) return act(async()=>{ const id = +fu.dataset.vpid, f = (VOID.items||[]).find(x=>x.id===id); if(!f) return;
     if(VSEL){ toast('가구를 놓는 중이에요. 「그만 놓기」를 누른 뒤 치워 주세요'); return; }
-    if(!(await ask(`「${itemOf(f.item_code).name}」${jo(itemOf(f.item_code).name,'을','를')} 가방에 넣을까요?`))) return;
+    if(!(await ask(`「${itemOf(f.item_code).name}」${jo(itemOf(f.item_code).name,'을','를')} ${isVoidFurn(f.item_code)?'🔮 아공간 창고':'가방'}에 넣을까요?`))) return;
     await voidAfter(await api.voidRemove(id)); box_void_reset(); renderVoid(); });
   const fxb = e.target.closest('[data-vfx]');
   if(fxb) return act(async()=>{ const c = fxb.dataset.vfx, own = !c || (VOID.fxs||[]).includes(c); if((VOID.fx||'')===c) return;
@@ -6802,7 +6925,23 @@ document.addEventListener('click', e=>{
     if(!(await ask(cap ? `💠 이세계 파편 ${price}개로 🧺 바구니를 키울까요?\n농장에 쌓이는 시간이 ${VOID.farm_cap}시간 → ${VOID.farm_cap+4}시간치가 돼요.` : `💠 이세계 파편 ${price}개로 🦴 간식 그릇을 채울까요?\n마물 1종이 1시간에 물어오는 파편이 💠${VOID.farm_rate} → 💠${VOID.farm_rate+1}이 돼요.`))) return;
     await voidAfter(await api.voidFarmUp(up.dataset.vup)); toast(cap ? '🧺 바구니가 커졌어요!' : '🦴 마물들이 신났어요! 더 많이 물어올 거예요'); });
   if(e.target.closest('[data-vfarm]')) return act(async()=>{ const r0 = await api.voidCollect(), r = Array.isArray(r0) ? r0[0] : r0;
-    await refreshVoid(); await refreshRift(); renderRift(); toast(`🧺 마물들이 물어온 💠 이세계 파편 ${r.gain.toLocaleString()}개를 받았어요!`); });
+    await refreshVoid(); await refreshRift(); box_void_reset(); renderRift();
+    const bps = (r.bps||[]);
+    if(bps.length){ const fresh = bps.filter(b=>!b.dup), dup = bps.filter(b=>b.dup);
+      const line = b => { const f = vfurnOf(b.code) || {emoji:'📜', name:b.code}, t = VOID_BGS[b.theme]; return `${f.emoji} ${f.name}${t?` (${t.name})`:''}`; };
+      petParty('📜', `마물들이 💠 이세계 파편 ${r.gain.toLocaleString()}개와 함께\n가구 도안을 물어왔어요!${r.boosted?' 🍖':''}\n\n`
+        + (fresh.length ? `✨ 새 도안\n${fresh.map(line).join('\n')}\n\n` : '')
+        + (dup.length ? `이미 있는 도안 ${dup.length}장은 💠 ${r.dup_shards}개로 바꿨어요\n${dup.map(line).join('\n')}\n\n` : '')
+        + (fresh.length ? '📜 제작대에서 만들 수 있어요!' : ''));
+    } else toast(`🧺 마물들이 물어온 💠 이세계 파편 ${r.gain.toLocaleString()}개를 받았어요!${r.boosted?' 🍖 간식 덕분에 두 배!':''}`); });
+  const vct = e.target.closest('[data-vctab]'); if(vct){ vcraftTab = vct.dataset.vctab; renderVoid(); return; }
+  const vcr = e.target.closest('[data-vcraft]');
+  if(vcr) return act(async()=>{ const f = vfurnOf(vcr.dataset.vcraft); if(!f) return;
+    if(!(await ask(`💠 이세계 파편 ${f.price}개로 「${f.name}」${jo(f.name,'을','를')} 만들까요?\n만든 가구는 🔮 아공간 창고로 가요. 아공간에서만 쓸 수 있어요.`))) return;
+    await voidAfter(await api.voidCraft(f.code)); box_void_reset(); vbagTab = 'void'; renderVoid(); toast(`🔨 「${f.name}」${jo(f.name,'이','가')} 아공간 창고에 들어왔어요!`); });
+  if(e.target.closest('[data-vsnack]')) return act(async()=>{ const p = VOID.snack_price||100, hr = VOID.snack_hours||6;
+    if(!(await ask(`🪙 ${p}코인으로 마물들에게 🍖 간식을 줄까요?\n앞으로 ${hr}시간 동안 💠 파편과 📜 도안 게이지를 2배로 물어와요. (하루 한 번)`))) return;
+    await voidAfter(await api.voidSnack()); box_void_reset(); renderVoid(); toast('🍖 마물들이 신나게 간식을 먹어요! 이제 두 배로 물어올 거예요'); });
 });
 function box_void_reset(){ const b = document.getElementById('voidBox'); if(b) b._k = ''; }
 document.addEventListener('mouseover', e=>{
@@ -8965,8 +9104,8 @@ function renderVisit(){
   const room = document.getElementById('visitRoom'), vg = document.getElementById('visitGarden'), outside = VISIT.room==='g' || VISIT.room==='k' || VISIT.room==='v';
   room.parentElement.hidden = outside; vg.hidden = !outside;
   if(VISIT.room==='v' && VISIT.void){
-    const V = VISIT.void, b = VOID_BGS[V.bg] || VOID_BGS.base;
-    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸</span></h4><div class="void-stage" style="--vbg:${voidBgCSS(V.bg)}">${voidFxHTML(V.fx)}${voidRoomHTML(V, false)}</div>`
+    const V = VISIT.void, b = VOID_BGS[V.bg] || VOID_BGS.base; if(V.catalog) setVCAT(V.catalog);
+    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸</span></h4><div class="void-stage" style="--vbg:${voidBgCSS(V.bg)}">${voidFxHTML(V.fx)}${voidSetFxHTML(V.sets)}${voidRoomHTML(V, false)}</div>`
       + `<h4 class="tank-title farm-title">🐾 마물 농장 <span class="small">${(V.farm_pets||[]).length}종</span></h4>${voidFarmHTML(V, false)}`;
     startFarm(vg.querySelector('.vfarm'));
   }
@@ -9490,6 +9629,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㉛</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㉝</p>
 </body>
 </html>
