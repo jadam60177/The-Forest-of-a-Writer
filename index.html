@@ -2332,6 +2332,39 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <div id="evList" class="small"></div>
     </div>
     <hr class="sep">
+    <h3>💠 이세계 파편</h3>
+    <p class="small" style="margin-top:0">받은 주민은 숲에 들어오면 📬 우편함으로 소식이 가요. 균열이 열리기 전에 보내도 파편은 쌓여 있어요. (isekai.sql)</p>
+    <div class="gift">
+      <div class="gift-row">
+        <label class="small">받는 분 <select id="shWho"></select></label>
+        <label class="small">파편 <input id="shAmount" type="number" min="1" max="100000" value="100"></label>
+      </div>
+      <div class="gift-reasons" id="shQuick"><button class="mini" data-shq="100">💠 100</button><button class="mini" data-shq="300">💠 300</button><button class="mini" data-shq="500">💠 500</button><button class="mini" data-shq="1000">💠 1,000</button></div>
+      <div class="gift-row">
+        <label class="small">이유 <input id="shReason" maxlength="30" placeholder="예: 균열 오픈 기념"></label>
+        <button class="mini ask-yes" id="shSend">💠 보내기</button>
+      </div>
+    </div>
+    <h4 style="margin:1rem 0 .2rem">💠 파편 배수 이벤트</h4>
+    <p class="small" style="margin-top:0">기간 동안 괴물을 때려서 얻는 💠 파편이 배로 늘어요 (💎 대박도 같이). 기간이 겹치면 더 높은 배수 하나만 적용돼요.</p>
+    <div class="gift">
+      <div class="gift-row">
+        <label class="small">이벤트 이름 <input id="shEvName" maxlength="30" placeholder="💠 파편 2배 이벤트"></label>
+        <label class="small">배수
+          <select id="shEvMult"><option value="2">2배</option><option value="3">3배</option><option value="4">4배</option><option value="5">5배</option></select>
+        </label>
+      </div>
+      <div class="gift-row">
+        <span class="gift-reasons" style="width:100%"><button class="mini" data-sheq="3h">⏱️ 지금부터 3시간</button><button class="mini" data-sheq="tonight">🌙 지금부터 오늘 자정까지</button><button class="mini" data-sheq="tomorrow">📅 지금부터 내일 자정까지</button></span>
+      </div>
+      <div class="gift-row">
+        <label class="small">시작 <input id="shEvStart" type="datetime-local"></label>
+        <label class="small">끝 <input id="shEvEnd" type="datetime-local"></label>
+        <button class="mini ask-yes" id="shEvAdd">💠 등록</button>
+      </div>
+      <div id="shEvList" class="small"></div>
+    </div>
+    <hr class="sep">
     <h3>🎉 축하 코인 보내기</h3>
     <p class="small" style="margin-top:0">받는 분이 숲에 들어오면 축하 메시지가 떠요. 기념일엔 "숲 주민 모두"를 골라 한 번에 보낼 수 있어요.</p>
     <div class="gift">
@@ -4152,17 +4185,25 @@ const demoApi = (() => {
       persist(); return {each, used, dealt, hp:B.max_hp-B.dmg, down, drops, kill_item, coins, lucky, isekai};
     },
     // 🌀 균열 너머 (미리보기) — isekai.sql 과 같은 규칙
-    iskState(){ if(!st.isk) st.isk = {open:false, shards:0, eggs:[], nid:1}; return st.isk; },
+    iskState(){ if(!st.isk) st.isk = {open:false, shards:0, eggs:[], nid:1}; if(!st.isk.ev) st.isk.ev = []; if(!st.isk.gifts) st.isk.gifts = []; return st.isk; },
+    iskMult(){ const n = Date.now(); return Math.max(1, ...this.iskState().ev.filter(e=>Date.parse(e.starts_at)<=n && Date.parse(e.ends_at)>n).map(e=>e.mult)); },
+    async adminShards(id, amount, reason){ const I = this.iskState(); if(!(amount>=1)) fail('파편 개수를 적어 주세요');
+      if(!id || id==='*' || id==='me'){ I.shards += amount; I.gifts.push({amount, reason, at:new Date().toISOString()}); }
+      persist(); return (!id || id==='*') ? 1 + st.others.filter(o=>!o.removed).length : 1; },
+    async shardEventAdd(name, mult, start, end){ const I = this.iskState(); I.ev.push({id:I.nid++, name:name||`💠 파편 ${mult}배 이벤트`, mult, starts_at:start, ends_at:end}); persist(); return I.nid; },
+    async shardEventDel(id){ const I = this.iskState(); I.ev = I.ev.filter(e=>e.id!==id); persist(); },
     iskHit(used, hp){ const I = this.iskState(); let now = false;
       if(!I.open){ if(hp > RIFT_OPEN_HP) return {open:false}; I.open = true; now = true; }
       let sh = 0, big = 0; const eggs = [];
-      for(let k=0;k<used;k++){ if(Math.random()<RIFT_BIG_P){ sh += 100; big++; } else sh += 10 + Math.floor(Math.random()*31);
+      const mult = this.iskMult();
+      for(let k=0;k<used;k++){ if(Math.random()<RIFT_BIG_P){ sh += 100*mult; big++; } else sh += (10 + Math.floor(Math.random()*31))*mult;
         if(Math.random()<RIFT_EGG_P){ const kind = ['punk','reject','rest'][Math.floor(Math.random()*3)]; eggs.push(kind); I.eggs.push({id:I.nid++, kind, got_at:new Date().toISOString(), set_at:null, fed:0}); } }
-      I.shards += sh; persist(); return {open:true, opened_now:now, shards:sh, big, eggs}; },
+      I.shards += sh; persist(); return {open:true, opened_now:now, shards:sh, big, eggs, mult}; },
     async rift(){ const I = this.iskState();
       if(!I.open){ const B = this.bossState(); if(B.max_hp - B.dmg <= RIFT_OPEN_HP){ I.open = true; persist(); } }
-      if(!I.open) return {open:false};
-      return {open:true, need:RIFT_NEED, dup_shards:RIFT_DUP, shards:I.shards, eggs:I.eggs.map(e=>({...e})).sort((a,b)=>(a.set_at?0:1)-(b.set_at?0:1) || a.id-b.id)}; },
+      const gifts = I.gifts.splice(0), events = I.ev.filter(e=>Date.parse(e.ends_at)>Date.now()).map(e=>({...e})); if(gifts.length) persist();
+      if(!I.open) return {open:false, gifts, events, mult:this.iskMult(), shards:I.shards};
+      return {open:true, need:RIFT_NEED, dup_shards:RIFT_DUP, shards:I.shards, gifts, events, mult:this.iskMult(), eggs:I.eggs.map(e=>({...e})).sort((a,b)=>(a.set_at?0:1)-(b.set_at?0:1) || a.id-b.id)}; },
     async riftSetEgg(id){ const I = this.iskState(), e = I.eggs.find(x=>x.id===id); if(!e) fail('없는 알이에요');
       if(e.set_at) fail('이미 세계수가 정화하고 있어요'); if(I.eggs.some(x=>x.set_at)) fail('세계수에는 알을 하나씩만 맡길 수 있어요');
       e.set_at = new Date().toISOString(); e.fed = 0; persist(); return this.rift(); },
@@ -4372,7 +4413,10 @@ const supaApi = (() => {
     // 🌀 균열 너머 (isekai.sql) — 아직 안 돌렸으면 null 이라 화면에 안 보여요
     async rift(){ const r = await sb.rpc('get_isekai'); if(r.error) return null; return Array.isArray(r.data) ? r.data[0] : r.data; },
     async riftSetEgg(id){ return ok(await sb.rpc('isekai_set_egg', {p_egg:id})); },
-    async riftHatch(id){ return ok(await sb.rpc('isekai_hatch', {p_egg:id})); },              // ⚔️ 이번 주 괴물 (boss.sql)
+    async riftHatch(id){ return ok(await sb.rpc('isekai_hatch', {p_egg:id})); },
+    async adminShards(id, amount, reason){ return ok(await sb.rpc('admin_isekai_give', {p_discord_id:id, p_amount:amount, p_reason:reason})); },
+    async shardEventAdd(name, mult, start, end){ return ok(await sb.rpc('admin_isekai_event_add', {p_name:name, p_mult:mult, p_start:start, p_end:end})); },
+    async shardEventDel(id){ ok(await sb.rpc('admin_isekai_event_delete', {p_id:id})); },              // ⚔️ 이번 주 괴물 (boss.sql)
     async bossHit(w, n){ const r = ok(await sb.rpc('boss_hit', {p_weapon:w, p_count:n})); return Array.isArray(r) ? r[0] : r; },
     async bossTrade(item, kind){ const r = ok(await sb.rpc('boss_trade_dup', {p_item:item||'', p_kind:kind})); return Array.isArray(r) ? r[0] : r; },   // 🔁 겹친 수집품 바꾸기
     async playLotto(){ return ok(await sb.rpc('play_lotto')); },
@@ -6004,7 +6048,7 @@ async function bossAttack(n){
       if(cnt > hits) bossPop(stage, `총 -${(x.dealt||0).toLocaleString()}`, 'sum', hits);
       if(weak) bossPop(stage, '효과 굉장!', 'eff', 0);
       if(x.coins) bossPop(stage, x.lucky ? `💰 +${x.coins}` : `🪙 +${x.coins}`, 'coin' + (x.lucky ? ' lucky' : ''), 0);
-      if(x.isekai && x.isekai.shards) bossPop(stage, `${x.isekai.big?'💎':'💠'} +${x.isekai.shards}`, 'shard', 1);
+      if(x.isekai && x.isekai.shards) bossPop(stage, `${x.isekai.big?'💎':'💠'} +${x.isekai.shards}${x.isekai.mult>1?` (×${x.isekai.mult})`:''}`, 'shard', 1);
     }
     if(x.isekai && x.isekai.open){
       const I = x.isekai;
@@ -6318,14 +6362,28 @@ function petRewardText(r){
 }
 /* ---------- 🌀 균열 너머 (10-22 isekai.sql) — 이세계 파편 · 미지의 마물 알 · 세계수 정화 · 부화 ---------- */
 // 아래 숫자들은 isekai.sql 과 같아야 해요
-const RIFT_OPEN_HP = 10000, RIFT_NEED = 10, RIFT_DUP = 50, RIFT_EGG_P = .03, RIFT_BIG_P = .05;
+const RIFT_OPEN_HP = 10000, RIFT_NEED = 35, RIFT_DUP = 50, RIFT_EGG_P = .03, RIFT_BIG_P = .05;
 const RIFT_EGGS = {
   punk:{name:'마감 펑크의 알', img:'pets/egg_punk.webp', about:'절망과 펑크의 징조 · 날개 달린 악마가 깨어나요', pets:['isk_ink','isk_clock','isk_paper']},
   reject:{name:'투고 실패의 알', img:'pets/egg_reject.webp', about:'백지 상태의 영혼 · 유령이 깨어나요', pets:['isk_reject','isk_blank','isk_scrap']},
   rest:{name:'휴식 유혹의 알', img:'pets/egg_rest.webp', about:'밤샘 작업의 다크서클 · 서큐버스·인큐버스·뱀파이어가 깨어나요', pets:['isk_sleep','isk_game','isk_vamp']},
 };
 let RIFT = null, RIFT_SURPRISE_NOW = false, RIFT_SURPRISED = false;
-async function refreshRift(){ try{ RIFT = api.rift ? await api.rift() : null; }catch(e){ RIFT = null; } }   // isekai.sql 전이면 조용히 안 보여요
+async function refreshRift(){ try{ RIFT = api.rift ? await api.rift() : null; }catch(e){ RIFT = null; }
+  if(RIFT && RIFT.gifts && RIFT.gifts.length && typeof mailAdd==='function'){   // 💠 숲지기가 보낸 파편 → 우편함
+    mailAdd(RIFT.gifts.map(g=>({icon:'💠', title:`이세계 파편 ${(+g.amount).toLocaleString()}개가 도착했어요!`, body:`${g.reason ? `「${g.reason}」 · ` : ''}숲지기가 이세계 파편을 보냈어요.${RIFT.open ? ' 🌀 이세계 탭 「균열 너머」에서 볼 수 있어요.' : ' 균열이 열리면 쓸 수 있어요.'}`})));
+    RIFT.gifts = [];
+  }
+  if(ME && ME.is_admin) renderShardEvents();
+}
+function riftEventNow(){ const n = Date.now(); return ((RIFT && RIFT.events) || []).filter(e=>Date.parse(e.starts_at)<=n && Date.parse(e.ends_at)>n).sort((a,b)=>b.mult-a.mult)[0]; }
+function renderShardEvents(){
+  const el = document.getElementById('shEvList'); if(!el) return;
+  const list = (RIFT && RIFT.events) || [], n = Date.now();
+  el.innerHTML = !RIFT ? 'isekai.sql 을 돌리면 여기에 보여요.' : list.length
+    ? list.map(e=>`<div class="ev-item">${Date.parse(e.starts_at)<=n?'💠 진행 중':'⏰ 예정'} · ${esc(e.name)} (${e.mult}배) · ${when(e.starts_at)} ~ ${when(e.ends_at)} <button class="mini" data-shevdel="${e.id}">취소</button></div>`).join('')
+    : '등록된 파편 이벤트가 없어요.';
+}   // isekai.sql 전이면 조용히 안 보여요
 function riftSurprise(){
   if(RIFT_SURPRISED) return;
   let seen = null; try{ seen = localStorage.getItem('majam-rift-seen'); }catch(e){}
@@ -6348,6 +6406,7 @@ function renderRift(){
   const dex = Object.entries(RIFT_EGGS).map(([k,E])=>E.pets.map(c=>{ const s = petOf(c), on = have.has(c);
     return `<div class="rdx ${on?'':'no'}"><img src="pets/${c}.webp" alt="" loading="lazy"><b>${on||peek()?esc(s.name):'???'}</b><span class="eg">${esc(E.name)}</span></div>`; }).join('')).join('');
   const html = `<div class="rift-head"><h3>🌀 균열 너머</h3><span class="shards">💠 이세계 파편 ${(RIFT.shards||0).toLocaleString()}</span></div>
+    ${(ev=>ev ? `<p class="event-banner on" style="margin:.5rem 0 0">${/^💠/.test(ev.name)?'':'💠 '}${esc(ev.name)} 진행 중! 괴물을 때리면 파편 ${ev.mult}배 · ${when(ev.ends_at)}까지</p>` : '')(riftEventNow())}
     <p class="small" style="margin:.3rem 0 0">괴물을 때릴 때마다 💠 파편 10~40개, 가끔 💎 100개! 아주 가끔은 🥚 미지의 마물 알이 떨어져요.<br>알은 세계수에 맡기고 물방울 ${need}개를 부으면 정화돼서 깨어나요. 이미 있는 친구가 나오면 💠 파편 ${RIFT.dup_shards||RIFT_DUP}개로 바뀌어요.</p>
     <h4>🥚 내 알 <span class="small">${eggs.length}개</span></h4>
     ${eggs.length ? `<div class="rift-eggs">${eggs.map(eggCard).join('')}</div>` : `<p class="small" style="margin:.2rem 0">아직 주운 알이 없어요. 괴물을 때리다 보면 가끔 떨어져요!</p>`}
@@ -7783,6 +7842,8 @@ function renderGiftForm(){
   const people = VILLAGE.filter(p=>!p.removed).slice().sort((a,b)=>a.display_name.localeCompare(b.display_name,'ko'));
   sel.innerHTML = `<option value="">— 골라 주세요 —</option><option value="*">🌲 숲 주민 모두 (${people.length}명)</option>` + people.map(p=>`<option value="${esc(p.discord_id)}">${esc(isMe(p)?p.display_name+' (나)':p.display_name)}</option>`).join('');
   if(keep) sel.value = keep;
+  { const sw = document.getElementById('shWho'); if(sw){ const k2 = sw.value; sw.innerHTML = sel.innerHTML; if(k2) sw.value = k2; } }
+  renderShardEvents();
   document.getElementById('giftReasons').innerHTML = GIFT_REASONS.map(([r,n])=>`<button class="mini" data-reason="${r}" data-amount="${n}">${r} · 🪙${n}</button>`).join('');
 }
 
@@ -8104,6 +8165,35 @@ document.addEventListener('click', e=>{
   });
   const nd = e.target.closest('[data-ndel]');
   if(nd) return act(async()=>{ if(!(await ask('이 쪽지를 지울까요?'))) return; await api.deleteNote(+nd.dataset.ndel); await refreshNotes(); });
+
+  // 💠 이세계 파편 (숲지기)
+  const shq = e.target.closest('[data-shq]'); if(shq){ document.getElementById('shAmount').value = shq.dataset.shq; return; }
+  if(e.target.closest('#shSend')) return act(async()=>{
+    const sel = document.getElementById('shWho'), who = sel.value, amt = Math.floor(+document.getElementById('shAmount').value), reason = document.getElementById('shReason').value.trim();
+    if(!who) return toast('받는 분을 골라 주세요');
+    if(!(amt>=1)) return toast('파편 개수를 적어 주세요');
+    const name = sel.options[sel.selectedIndex].text;
+    if(!(await ask(`${name}에게 💠 이세계 파편 ${amt.toLocaleString()}개를 보낼까요?${reason?`\n이유: ${reason}`:''}`))) return;
+    const n = await api.adminShards(who==='*' ? '*' : who, amt, reason);
+    toast(`💠 ${who==='*' ? `주민 ${n}명에게` : '보냈어요!'} 파편 ${amt.toLocaleString()}개${who==='*'?'씩 보냈어요':''}`);
+    document.getElementById('shReason').value = '';
+    await refreshRift(); renderRift();
+  });
+  const sheq = e.target.closest('[data-sheq]');
+  if(sheq){ const now = new Date(); now.setSeconds(0,0); const end = new Date(now);
+    if(sheq.dataset.sheq==='3h') end.setTime(now.getTime()+3*3600e3); else { end.setHours(24,0,0,0); if(sheq.dataset.sheq==='tomorrow') end.setDate(end.getDate()+1); }
+    document.getElementById('shEvStart').value = toLocalInput(now); document.getElementById('shEvEnd').value = toLocalInput(end); return; }
+  if(e.target.closest('#shEvAdd')) return act(async()=>{
+    const mult = +document.getElementById('shEvMult').value, name = document.getElementById('shEvName').value.trim() || `💠 파편 ${mult}배 이벤트`;
+    const sv = document.getElementById('shEvStart').value, ev = document.getElementById('shEvEnd').value;
+    if(!sv || !ev) return toast('시작과 끝을 정해 주세요');
+    const start = new Date(sv), end = new Date(ev); if(end<=start) return toast('끝이 시작보다 뒤여야 해요');
+    if(!(await ask(`${when(start)} ~ ${when(end)}\n「${name}」 파편 ${mult}배로 등록할까요?`))) return;
+    await api.shardEventAdd(name, mult, start.toISOString(), end.toISOString());
+    toast('💠 파편 이벤트를 등록했어요!'); await refreshRift(); renderRift(); renderShardEvents();
+  });
+  const shd = e.target.closest('[data-shevdel]');
+  if(shd) return act(async()=>{ if(!(await ask('이 파편 이벤트를 취소할까요?'))) return; await api.shardEventDel(+shd.dataset.shevdel); toast('파편 이벤트를 취소했어요'); await refreshRift(); renderRift(); renderShardEvents(); });
 
   if(e.target.closest('#evAdd')) return act(async()=>{
     const name=document.getElementById('evName').value.trim()||'코인 이벤트';
@@ -8926,6 +9016,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ⑳</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㉒</p>
 </body>
 </html>
