@@ -6929,9 +6929,13 @@ const WLOOT_WOLF = {
 };
 const wlootLine = look => { const L = [...(WLOOT_WOLF[look]||[]), ...WLOOT_WOLF.any]; return L[Math.floor(Math.random()*L.length)]; };
 const WLOOT_PTS = [[12,48],[30,48],[48,45],[66,46],[88,47],[66,22],[49,62],[48,90],[36,40]];   // 미리보기용 자리 (서버 walk_loot_spot 과 같은 길목)
-function wlootSpot(){ for(let t=0;t<80;t++){ const p = WLOOT_PTS[Math.floor(Math.random()*WLOOT_PTS.length)];
-    const x = Math.max(6, Math.min(94, +(p[0] + Math.random()*16 - 8).toFixed(1))), y = Math.max(18, Math.min(92, +(p[1] + Math.random()*12 - 6).toFixed(1)));
-    if(!WALK_PLOTS.some(([px,py])=>Math.abs(x-px)<10.5 && y>py-17 && y<py+7)) return [x,y]; } return [12,48]; }
+// 10-22 판 59: 길목 9군데 → 지도 전체에서 아무 데나 · 집은 피하고 · 떠 있는 분실물과 가로 6 · 세로 7 안쪽이면 다시 (서버 walklootspot.sql 과 같아요)
+function wlootSpot(items){ let back = null; const open = (items||[]).filter(i=>!i.picked);
+  for(let t=0;t<80;t++){ const x = +(6 + Math.random()*88).toFixed(1), y = +(18 + Math.random()*74).toFixed(1);
+    if(WALK_PLOTS.some(([px,py])=>Math.abs(x-px)<10.5 && y>py-17 && y<py+7)) continue;
+    if(!back) back = [x,y];
+    if(!open.some(i=>Math.abs(i.x-x)<6 && Math.abs(i.y-y)<7)) return [x,y]; }
+  return back || [12,48]; }
 let WLOOT = {items:[], today:0, max:WLOOT_DAY}, WLOOT_AT = 0, WLOOT_BUSY = false;
 async function refreshWalkLoot(){
   if(!api.walkLoot) return;
@@ -9117,6 +9121,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 58</p>
+<p class="site-ver">마감의 숲 · 10-22 판 59</p>
 </body>
 </html>

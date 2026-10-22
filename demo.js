@@ -518,10 +518,10 @@ function makeDemoApi(){
       st.wloot = st.wloot || {items:[], last: now - 3*120e3, n:1, day:'', today:0};
       const W = st.wloot; if(W.day!==this.fday()){ W.day = this.fday(); W.today = 0; }
       const k = Math.floor((now - W.last)/120e3);
-      if(k>0){ for(let i=0;i<Math.min(k, WLOOT_MAX - W.items.filter(x=>!x.bonus).length);i++){ const [x,y] = wlootSpot(); W.items.push({id:W.n++, x, y, look:WLOOT_LOOKS[Math.floor(Math.random()*WLOOT_LOOKS.length)]}); } W.last += k*120e3; }
+      if(k>0){ for(let i=0;i<Math.min(k, WLOOT_MAX - W.items.filter(x=>!x.bonus).length);i++){ const [x,y] = wlootSpot(W.items); W.items.push({id:W.n++, x, y, look:WLOOT_LOOKS[Math.floor(Math.random()*WLOOT_LOOKS.length)]}); } W.last += k*120e3; }
       return W; },
     async adminLootDrop(n, x, y){ const W = this.wlstate(); n = Math.max(1, Math.min(30, n|0));
-      for(let i=0;i<n;i++){ let p; if(x==null) p = wlootSpot(); else { for(let t=0;t<40;t++){ p = [Math.max(4,Math.min(96,+(x+Math.random()*20-10).toFixed(1))), Math.max(16,Math.min(94,+(y+Math.random()*16-8).toFixed(1)))]; if(!WALK_PLOTS.some(([px,py])=>Math.abs(p[0]-px)<10.5 && p[1]>py-17 && p[1]<py+7)) break; } }
+      for(let i=0;i<n;i++){ let p; if(x==null) p = wlootSpot(W.items); else { for(let t=0;t<40;t++){ p = [Math.max(4,Math.min(96,+(x+Math.random()*20-10).toFixed(1))), Math.max(16,Math.min(94,+(y+Math.random()*16-8).toFixed(1)))]; if(!WALK_PLOTS.some(([px,py])=>Math.abs(p[0]-px)<10.5 && p[1]>py-17 && p[1]<py+7)) break; } }
         W.items.push({id:W.n++, x:p[0], y:p[1], look:WLOOT_LOOKS[Math.floor(Math.random()*WLOOT_LOOKS.length)], bonus:true}); }
       persist(); return n; },
     async walkLoot(){ const W = this.wlstate(); return {items:W.items.map(x=>({...x})), today:W.today, max:WLOOT_DAY, next_at:new Date(W.last+120e3).toISOString()}; },
