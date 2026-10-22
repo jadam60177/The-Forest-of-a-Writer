@@ -2206,7 +2206,7 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 @keyframes vffly{0%{transform:translate(0,0);opacity:.2}30%{opacity:1}60%{opacity:.4}100%{transform:translate(var(--dx),var(--dy));opacity:1}}
 .vfx.meteor i{width:120px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff 80%,#CFE8FF);transform:rotate(-30deg);opacity:0;animation:vfmet var(--d) linear var(--dl) infinite}
 @keyframes vfmet{0%{opacity:0;translate:0 0}3%{opacity:1}12%{opacity:0;translate:-260px 150px}100%{opacity:0;translate:-260px 150px}}
-.vfx.bubble i{width:var(--sz);height:var(--sz);border-radius:50%;border:1.5px solid rgba(220,240,255,.85);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.7),rgba(180,220,255,.12) 45%,transparent 70%);top:105%;animation:vfbub var(--d) ease-in var(--dl) infinite}
+.vfx.soap i{width:var(--sz);height:var(--sz);border-radius:50%;border:1.5px solid rgba(220,240,255,.85);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.7),rgba(180,220,255,.12) 45%,transparent 70%);top:105%;animation:vfbub var(--d) ease-in var(--dl) infinite}
 @keyframes vfbub{0%{translate:0 0;opacity:0}10%{opacity:.9}100%{translate:var(--dx) -120vh;opacity:0}}
 .vfx.petal i{width:11px;height:8px;border-radius:80% 0 80% 0;background:linear-gradient(135deg,#FFD6E6,#FF9FC4);top:-5%;animation:vfpet var(--d) linear var(--dl) infinite}
 @keyframes vfpet{0%{translate:0 0;rotate:0deg;opacity:0}8%{opacity:1}100%{translate:var(--dx) 120vh;rotate:540deg;opacity:.2}}
@@ -6064,7 +6064,7 @@ function voidFxHTML(fx){
   const n = fx==='meteor' ? 5 : fx==='firefly' ? 16 : 14; let h = '';
   for(let k=0;k<n;k++){ const r = (a,b)=>(a + Math.random()*(b-a)).toFixed(1);
     h += `<i style="--x:${r(0,100)}%;--y:${fx==='meteor'?r(-5,40):r(5,95)}%;--d:${fx==='meteor'?r(5,11):fx==='firefly'?r(2.5,5):r(7,14)}s;--dl:-${r(0,12)}s;--dx:${r(-40,40)}px;--dy:${r(-30,30)}px;--sz:${r(8,22)}px"></i>`; }
-  return `<div class="vfx ${fx}" aria-hidden="true">${h}</div>`;
+  return `<div class="vfx ${fx==='bubble'?'soap':fx}" aria-hidden="true">${h}</div>`;   // 'bubble'은 담당자 말풍선 CSS(.bubble)와 이름이 겹쳐서 클래스만 soap으로 (10-22 판 55)
 }
 // 🪞 세트 효과 (테마 가구 6개를 다 놓으면 저절로) — 그림 반짝이가 오면 바꿔 끼울 거예요
 const VOID_SET_FX = {base:{n:14, name:'떠도는 차원 조각'}, heaven:{n:18, name:'내려앉는 빛 알갱이'}, hell:{n:18, name:'피어오르는 불씨'}, magic:{n:14, name:'반짝이는 룬'}, fairy:{n:16, name:'흩날리는 잎사귀'}};
@@ -9084,6 +9084,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 54</p>
+<p class="site-ver">마감의 숲 · 10-22 판 55</p>
 </body>
 </html>
