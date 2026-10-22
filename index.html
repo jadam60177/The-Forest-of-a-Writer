@@ -1954,6 +1954,21 @@ body.fdragging,body.fdragging *{cursor:grabbing!important}
 .boss-fire .fl{display:block;font-size:1.8rem;filter:drop-shadow(0 0 8px rgba(255,150,40,.7))}
 .boss-fire.lv1 .fl{font-size:2.3rem}.boss-fire.lv2 .fl{font-size:2.9rem}.boss-fire.lv3 .fl{font-size:3.6rem;filter:drop-shadow(0 0 16px rgba(255,150,40,.95))}
 @media (prefers-reduced-motion:no-preference){ .boss-fire .fl{animation:fireFl 1.2s ease-in-out infinite alternate} @keyframes fireFl{to{transform:scale(1.08,.94) translateY(1px)}} }
+/* 🌀 균열 오픈 예고 (10-22) — 피 막대의 1만 지점 금 · 가까워질수록 보랏빛이 새어 나와요. 정체는 안 밝혀요 */
+.boss-hp .bar{position:relative;overflow:visible}
+.boss-hp .bar .rift-tick{position:absolute;top:-5px;bottom:-5px;width:3px;margin-left:-1.5px;border-radius:2px;background:linear-gradient(#F0D6FF,#B57CFF);box-shadow:0 0 6px 2px rgba(190,120,255,.8);animation:rtick 1.6s ease-in-out infinite alternate;pointer-events:none}
+.boss-hp .bar .rift-tick::after{content:"？";position:absolute;top:-1.15rem;left:50%;transform:translateX(-50%);font-family:"Jua",sans-serif;font-size:.72rem;color:#E9D2FF;text-shadow:0 0 6px rgba(180,110,255,.95)}
+@keyframes rtick{from{opacity:.55}to{opacity:1}}
+.boss-scene.rift-lv1{box-shadow:inset 0 0 26px rgba(160,90,255,.25)}
+.boss-scene.rift-lv2{box-shadow:inset 0 0 40px rgba(170,95,255,.4);animation:rglow 3.2s ease-in-out infinite}
+.boss-scene.rift-lv3{box-shadow:inset 0 0 60px rgba(180,100,255,.55);animation:rglow 1.8s ease-in-out infinite}
+.boss-scene.rift-lv4{box-shadow:inset 0 0 80px rgba(195,110,255,.7);animation:rglow .9s ease-in-out infinite,rshake 2.4s ease-in-out infinite}
+@keyframes rglow{50%{box-shadow:inset 0 0 22px rgba(160,90,255,.18)}}
+@keyframes rshake{0%,92%,100%{translate:0 0}94%{translate:-2px 1px}96%{translate:2px -1px}98%{translate:-1px 0}}
+.rift-tease{text-align:center;margin:.35rem 0 0;font-family:"Jua",sans-serif;font-size:.95rem;color:#E3C9FF;text-shadow:0 0 8px rgba(170,100,255,.9),0 2px 4px rgba(10,6,30,.9);animation:rtick 2s ease-in-out infinite alternate}
+.rift-tease.lv4{font-size:1.05rem;color:#F3E2FF}
+:root[data-mode="day"] .rift-tease{color:#6A2FB8;text-shadow:0 0 8px rgba(200,150,255,.7)}
+@media (prefers-reduced-motion: reduce){.boss-scene[class*="rift-lv"],.rift-tease,.rift-tick{animation:none!important}}
 .boss-say{text-align:center;margin:.3rem 0 0;color:#F4F1FF;font-family:"Jua",sans-serif;font-size:1rem;min-height:1.4em}
 .dmg-pop{position:absolute;z-index:3;pointer-events:none;font-family:"Jua",sans-serif;font-size:1.5rem;color:#FFF;text-shadow:0 2px 0 #B4513E,0 0 6px rgba(0,0,0,.6);opacity:0;animation:dmgUp 1.2s ease-out forwards}
 .dmg-pop.weak{color:#FFE29A;font-size:1.8rem}
@@ -6065,6 +6080,11 @@ function renderBoss(force){
   if(!force && Date.now() < BOSS_ANIM_UNTIL) return;
   box.hidden = false;
   const m = monsterOf(BOSS.monster), down = BOSS.hp <= 0, pct = Math.max(0, BOSS.hp/BOSS.max_hp*100);
+  // 🌀 균열 오픈 예고 — 아직 안 열렸고(RIFT.open false) 피가 1만 위일 때만
+  const riftWait = !!(RIFT && RIFT.open===false) && !down && BOSS.max_hp > RIFT_OPEN_HP && BOSS.hp > RIFT_OPEN_HP;
+  const riftGap = BOSS.hp - RIFT_OPEN_HP;
+  const riftLv = !riftWait ? 0 : riftGap <= 500 ? 4 : riftGap <= 1000 ? 3 : riftGap <= 2000 ? 2 : riftGap <= 3500 ? 1 : 0;
+  const riftLine = ['', '괴물 뒤편 균열에서 가끔 보랏빛이 새어 나와요…', '균열이 미세하게 떨리고 있어요…', '균열 너머에서 무언가 두드리는 소리가 들려요…', '균열이 금방이라도 갈라질 것 같아요!!'][riftLv];
   const left = Math.max(0, (BOSS.ends_at ? Date.parse(BOSS.ends_at) : lottoWeekEnds()) - Date.now()), dd = Math.floor(left/864e5), hh = Math.floor(left%864e5/36e5);
   const lit = bossLit(), mult = bossFire(lit), fireLv = lit>=5?3:lit>=3?2:lit>=2?1:0;
   const mine = ME.in_voice, t = BOSS.tickets||0, full = t >= BOSS_TICKET_MAX;
@@ -6077,14 +6097,15 @@ function renderBoss(force){
   const dex = new Set(BOSS.dex||[]);
   const html = `
     <div class="boss-head"><h3>⚔️ 이번 주 괴물 · ${esc(m.name)}</h3><span class="small">${down ? '다음 괴물은 금요일 0시에 와요' : `${dd?`${dd}일 `:''}${hh}시간 뒤에 떠나요 · 공격권은 이번 주에만 쓸 수 있어요`}</span></div>
-    <div class="boss-scene ${down?'down':''}">
-      <div class="boss-hp"><div class="bar"><span style="width:${pct.toFixed(1)}%"></span></div><span class="small">❤️ ${Math.max(0,BOSS.hp).toLocaleString()} / ${BOSS.max_hp.toLocaleString()}</span></div>
+    <div class="boss-scene ${down?'down':''} ${riftLv?'rift-lv'+riftLv:''}">
+      <div class="boss-hp"><div class="bar"><span style="width:${pct.toFixed(1)}%"></span>${riftWait?`<i class="rift-tick" style="left:${(RIFT_OPEN_HP/BOSS.max_hp*100).toFixed(1)}%" title="여기까지 깎으면… ？"></i>`:''}</div><span class="small">❤️ ${Math.max(0,BOSS.hp).toLocaleString()} / ${BOSS.max_hp.toLocaleString()}</span></div>
       <div class="boss-stage">
         <div class="boss-fire lv${fireLv}" title="지금 작업실 ${lit}명 · 공격권이 ×${mult} 빠르게 모여요"><span class="fl">🔥</span><span class="small">모닥불 ×${mult}</span></div>
         <button type="button" class="boss-mon m-${m.code}" id="bossMon" ${down||!t?'disabled':''} aria-label="${esc(m.name)} 때리기">${monsterArt(m)}${down?'<span class="ko">KO</span>':''}</button>
         <div class="boss-wolf"><img src="bg/Wolf_Watcher.webp" alt="" draggable="false"><span class="small">담당자도 같이 싸워요</span></div>
       </div>
       <p class="boss-say">${down ? `「${esc(m.name)}」${jo(m.name,'을','를')} 쓰러뜨렸어요! 🎉` : `“${esc(m.lines[BOSS_LINE % m.lines.length])}”`}</p>
+      ${riftLine ? `<p class="rift-tease lv${riftLv}">🌀 ${riftLine}</p>` : ''}
     </div>
     ${down ? `<p class="boss-done">${BOSS.my_damage ? `이번 주 내가 준 피해 <b>${BOSS.my_damage.toLocaleString()}</b> · 때려서 받은 🪙 ${(BOSS.my_coins||0).toLocaleString()} · 토벌 보상 🪙 ${BOSS_REWARD.toLocaleString()}를 보내고 📖 괴물 도감에 올렸어요` : '이번 주엔 못 때렸지만, 다음 주 괴물은 같이 잡아요!'}</p>` : `
     <div class="boss-ctrl">
@@ -9349,6 +9370,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-22 판 ㉖</p>
+<p class="site-ver">마감의 숲 · 10-22 판 ㉗</p>
 </body>
 </html>
