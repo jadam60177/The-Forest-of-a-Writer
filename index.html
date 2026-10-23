@@ -4050,6 +4050,7 @@ const VFURN_DEF = [
 const VOID_TAB_EXTRA = {common:{name:'작가의 작업 도구', emoji:'✒️'}};
 const vthemeInfo = t => VOID_BGS[t] || VOID_TAB_EXTRA[t] || {emoji:'🔮', name:t};
 const VFURN_ART = new Set(VFURN_DEF.map(r=>r[0]));
+VFURN_DEF.forEach(r=>{ if(/^v_[a-z]+_w\d_\d$/.test(r[0])) STRETCH_IMG.add(r[0]); });   // 🧱 벽 조각은 칸에 꽉 맞춰 그려요 (10-23 판 67)
 const vfurnFix = f => ({...f, icon:f.code, category:'furniture', void:true, free: f.free ?? /^v_[a-z]+_w\d_\d$/.test(f.code)});   // free: 🧱 벽 조각처럼 도안 없이 바로 만드는 가구
 let VCAT = VFURN_DEF.map(([code,theme,emoji,name,w,h,layer,price,in_set,max_own])=>vfurnFix({code,theme,emoji,name,w,h,layer,price,in_set:!!in_set,max_own:max_own||null,active:true}));
 VFURN_ART.forEach(c=>FURN_IMG.add(c));
@@ -9212,6 +9213,6 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-23 판 66</p>
+<p class="site-ver">마감의 숲 · 10-23 판 67</p>
 </body>
 </html>
