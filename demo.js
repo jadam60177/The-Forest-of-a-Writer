@@ -733,7 +733,7 @@ function makeDemoApi(){
         sold.push({name:d.name, cup:d.cup, ings:d.ings, top:d.top, coin:d.price, star}); }
       return sold; },
     stJson(S, sold){ const I = this.iskState(), V = st.vd, done = S.vow ? Math.max(0, st.me.total_minutes - S.vow.min) : 0;
-      return {sold:sold||[], day:S.day, ame_sold:S.ame, sp_sold:S.sp, ame_cap:STALL_NUM.ameCap, sp_cap:STALL_NUM.spCap, ame_price:STALL_NUM.amePrice, stock:STALL_NUM.stock, unit:STALL_NUM.unit,
+      return {sold:sold||[], sign:S.sign||null, day:S.day, ame_sold:S.ame, sp_sold:S.sp, ame_cap:STALL_NUM.ameCap, sp_cap:STALL_NUM.spCap, ame_price:STALL_NUM.amePrice, stock:STALL_NUM.stock, unit:STALL_NUM.unit,
         box:{lines:S.box, coins:S.bc, stars:S.bs, since:S.since}, dex:S.dex, slots:S.slots.map(x=>({...x})), inv:Object.fromEntries(Object.entries(S.inv).filter(([,q])=>q>0)),
         bgs:(V && V.bgs) || ['base','hell','magic'], vow:{bg:S.vow?S.vow.bg:null, ready:Math.min(Math.floor(done/STALL_NUM.vowEvery), STALL_NUM.vowMax), mins:done%STALL_NUM.vowEvery, every:STALL_NUM.vowEvery, max:STALL_NUM.vowMax},
         coins:st.me.coins, stars:st.me.stars, shards:I.shards}; },
@@ -750,6 +750,7 @@ function makeDemoApi(){
       const price = STALL_CUPS[cup].price + Math.round(per*1.15);
       S.slots.push({slot, name:(name||'').trim().slice(0,20)||'특제 음료', cup, ings:[...ings], top:top||'', price, isekai:isk, stock:STALL_NUM.stock}); S.slots.sort((a,b)=>a.slot-b.slot);
       if(dex && !S.dex.includes(dex)) S.dex.push(dex); this.stSave(S); persist(); return {coin_cost:cost, shard_cost:shard, price, ...this.stJson(S)}; },
+    async stallSign(t){ const S = this.stState(); S.sign = (t||'').trim().slice(0,10) || null; this.stSave(S); return this.stJson(S); },
     async stallRemove(slot){ const S = this.stState(); this.stRun(S); S.slots = S.slots.filter(x=>x.slot!==slot); this.stSave(S); return this.stJson(S); },
     async stallVowStart(bg){ const S = this.stState(); S.vow = {bg, min:st.me.total_minutes}; this.stSave(S); return this.stJson(S); },
     async stallVowClaim(){ const S = this.stState(); if(!S.vow) fail('집필 서약을 먼저 시작해 주세요');

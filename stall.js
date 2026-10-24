@@ -16,8 +16,10 @@ const css = document.createElement('style'); css.textContent = `dialog.visit.sta
 #stallDlg .s-stage{position:relative;container-type:inline-size;width:100%;aspect-ratio:1600/1195;border-radius:16px;overflow:hidden;
   background:url(stall/bg_day.webp) center/cover no-repeat,#9CC46A;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 #stallDlg .s-stage.night{background-image:url(stall/bg_night.webp)}
-#stallDlg .s-sign{position:absolute;left:16.5%;width:24%;top:21.6%;height:7%;display:grid;place-items:center;text-align:center;font-family:"Jua",sans-serif;color:#3A1E0A;font-size:1.75cqw;line-height:1.15;text-shadow:0 1px 0 rgba(255,235,200,.6)}
-#stallDlg .s-sign small{display:block;font-size:1.05cqw;opacity:.8}
+#stallDlg .s-sign{position:absolute;left:16%;width:25%;top:20.8%;height:8.4%;display:grid;place-items:center;text-align:center;font-family:"Jua",sans-serif;font-weight:400;color:#3B1F0B;font-size:2.5cqw;line-height:1.12;letter-spacing:.02em;border:0;background:none;padding:0;cursor:pointer;z-index:3;text-shadow:0 0 .35cqw #F6DEAF,0 0 .35cqw #F6DEAF,0 0 .2cqw #F6DEAF}
+#stallDlg .s-sign:hover{color:#6A3510}
+#stallDlg .s-sign .pen{font-size:1.2cqw;opacity:.7;margin-left:.3cqw}
+#stallDlg .s-sign small{display:block;font-size:1.35cqw;color:#5A3416;margin-top:.2cqw}
 #stallDlg .s-hud{position:absolute;top:1.6cqw;left:1.6cqw;right:1.6cqw;display:flex;gap:.8cqw;flex-wrap:wrap;align-items:center;z-index:8}
 #stallDlg .s-pill{background:rgba(255,250,238,.92);color:#3A2A12;border-radius:999px;padding:.35cqw 1.2cqw;font-family:"Jua",sans-serif;font-size:max(12px,1.35cqw);box-shadow:0 2px 6px rgba(0,0,0,.18);border:0}
 #stallDlg button.s-pill:hover{background:#FFE7A8}
@@ -85,10 +87,10 @@ const css = document.createElement('style'); css.textContent = `dialog.visit.sta
 #stallDlg .s-cupbtn{border:2px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:12px;padding:6px 2px;display:grid;justify-items:center;gap:2px;cursor:pointer}
 #stallDlg .s-cupbtn img{height:52px;width:auto;object-fit:contain}
 #stallDlg .s-cupbtn b{font-weight:400;font-family:"Jua",sans-serif;font-size:.88rem}
-#stallDlg .s-cupbtn.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+#stallDlg .s-cupbtn.on{border-color:#F2B544;box-shadow:0 0 0 2px #F2B544}
 #stallDlg .s-itabs,#stallDlg .s-tops{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 #stallDlg .s-itab,#stallDlg .s-chip{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:999px;padding:.3rem .85rem;font-family:"Jua",sans-serif;cursor:pointer}
-#stallDlg .s-itab.on,#stallDlg .s-chip.on{background:var(--accent);border-color:var(--accent);color:#2A1A06}
+#stallDlg .s-itab.on,#stallDlg .s-chip.on{background:#F2B544;border-color:#F2B544;color:#3A2400}
 #stallDlg .s-chip:disabled{opacity:.45;cursor:not-allowed}
 #stallDlg .s-ings{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;max-height:320px;overflow-y:auto;padding:2px}
 #stallDlg .s-ghead{grid-column:1/-1;font-family:"Jua",sans-serif;margin:.3rem 0 0;display:flex;gap:.4rem;align-items:center}
@@ -104,7 +106,7 @@ const css = document.createElement('style'); css.textContent = `dialog.visit.sta
 #stallDlg .s-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 #stallDlg .s-slotb{height:64px;border:2px dashed var(--line);border-radius:12px;background:transparent;color:var(--ink);display:grid;place-items:center}
 #stallDlg .s-slotb img{width:38px;height:38px;object-fit:contain}
-#stallDlg .s-slotb.full{border-style:solid;border-color:var(--accent);background:rgba(255,255,255,.06);grid-template-rows:1fr auto;padding:4px 0;cursor:pointer}
+#stallDlg .s-slotb.full{border-style:solid;border-color:#F2B544;background:rgba(255,255,255,.06);grid-template-rows:1fr auto;padding:4px 0;cursor:pointer}
 #stallDlg .s-slotb.full span{font-size:.7rem;color:var(--muted)}
 #stallDlg .s-result{display:grid;gap:8px;padding:10px;border-radius:14px;background:rgba(255,255,255,.06)}
 #stallDlg .s-rtop{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
@@ -113,16 +115,17 @@ const css = document.createElement('style'); css.textContent = `dialog.visit.sta
 #stallDlg .s-preview .drink{--u:.26cqw}
 #stallDlg .s-autoname{font-family:"Jua",sans-serif;font-size:1.3rem;line-height:1.25}
 #stallDlg .s-found{display:inline-block;font-size:.8rem;background:#E8B54A;color:#3A2600;border-radius:999px;padding:0 .6rem;margin-left:.3rem;vertical-align:.2em}
-#stallDlg .s-price b{font-family:"Jua",sans-serif;font-weight:400;color:var(--accent);font-size:1.05rem}
+#stallDlg .s-price b{font-family:"Jua",sans-serif;font-weight:400;color:#D9822B;font-size:1.05rem}
 #stallDlg .s-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;width:100%}
 #stallDlg .s-row input{flex:1 1 11rem;min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:.45rem .9rem;font:inherit}
-#stallDlg .s-make{border:0;border-radius:999px;padding:.55rem 1.2rem;background:var(--accent);color:#2A1A06;font-family:"Jua",sans-serif;font-size:1.02rem;cursor:pointer}
+#stallDlg .s-make{border:0;border-radius:999px;padding:.55rem 1.2rem;background:#F2B544;color:#3A2400;font-family:"Jua",sans-serif;font-size:1.02rem;cursor:pointer;box-shadow:0 2px 0 #B07A1E}
+#stallDlg .s-make:hover:not(:disabled){background:#FFC85A}
 #stallDlg .s-make:disabled{opacity:.45;cursor:not-allowed}
 /* ✒️ 서약 · 도감 */
 #stallDlg .s-vow{display:grid;gap:8px}
 #stallDlg .s-vowon{display:grid;gap:6px;padding:8px;border-radius:12px;background:rgba(255,255,255,.06)}
 #stallDlg .s-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
-#stallDlg .s-bar i{display:block;height:100%;background:var(--accent)}
+#stallDlg .s-bar i{display:block;height:100%;background:#F2B544}
 #stallDlg .s-vowbg{display:flex;gap:6px;flex-wrap:wrap}
 #stallDlg .s-inv{display:flex;gap:6px;flex-wrap:wrap;font-size:.8rem}
 #stallDlg .s-inv span{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:999px;padding:0 .5rem 0 .2rem}
@@ -397,13 +400,15 @@ function renderDex(){
     ? `<div class="s-dx">${drinkHTML(s.cup, s.ings, s.top)}<b>${esc(s.name)}</b></div>`
     : `<div class="s-dx no"><span class="q">？</span><b>？？？</b><span class="small">${CUPS[s.cup].name} 잔</span></div>`).join('');
 }
-function renderAll(){ renderWallet(); renderStage(); renderMake(); renderVow(); renderDex(); }
+function signText(){ return (ST && ST.sign) || `${(typeof ME!=='undefined'&&ME&&ME.display_name)||'나'}의 가판대`; }
+function renderSign(){ const b = q('.s-sign'); if(b) b.innerHTML = `<div>${esc(signText())}<span class="pen">✏️</span><small>오늘의 특제 음료</small></div>`; }
+function renderAll(){ renderSign(); renderWallet(); renderStage(); renderMake(); renderVow(); renderDex(); }
 
 function shell(){
   const c = clerkImg();
   box().innerHTML = `<div class="s-head"><h3>☕ 내 음료 가판대</h3><span class="s-wallet"></span><button class="mini" type="button" data-sguide>📖 안내</button><button class="mini" type="button" data-sclose>닫기</button></div>
     <div class="s-stage">
-      <div class="s-sign"><div>${esc((typeof ME!=='undefined'&&ME&&ME.display_name)||'')}의 가판대<small>오늘의 특제 음료</small></div></div>
+      <button class="s-sign" type="button" data-ssign title="눌러서 가판대 이름 바꾸기"></button>
       <div class="s-hud"><button class="s-pill s-boxbtn" type="button" data-sbox></button><span class="s-pill s-today"></span></div>
       <div class="s-shelf"></div>
       <div class="s-clerk ${c.pet?'pet':''}"><img src="${c.src}" alt="점원 ${esc(c.name)}"><span class="tag">점원 · ${esc(c.name)}</span></div>
@@ -513,6 +518,8 @@ document.addEventListener('click', e=>{
   if(e.target.closest('#stallGo')){ openStall(); return; }
   const D = dlg(); if(!D || !D.open || !D.contains(e.target)) return;
   if(e.target.closest('[data-sclose]')){ closeStall(); return; }
+  if(e.target.closest('[data-ssign]')){ askText('가판대 이름을 지어 주세요 (10자까지)', signText()).then(v=>{ if(v==null) return; v = String(v).trim().slice(0,10);
+      act(async()=>{ take(await api.stallSign(v)); renderSign(); toast(v ? `🪧 「${v}」 간판을 걸었어요` : '🪧 간판을 처음 이름으로 돌렸어요'); }); }); return; }
   if(e.target.closest('[data-sguide]')){ const g = q('.s-guide'); g.hidden = !g.hidden; return; }
   if(e.target.closest('[data-sbox]')){ showReceipt(); return; }
   const c = e.target.closest('[data-scup]'); if(c){ S.cup = c.dataset.scup; renderMake(); return; }

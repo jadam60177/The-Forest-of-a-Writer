@@ -4016,6 +4016,7 @@ const supaApi = (() => {
     async stallRemove(slot){ return ok(await sb.rpc('stall_remove', {p_slot:slot})); },
     async stallVowStart(bg){ return ok(await sb.rpc('stall_vow_start', {p_bg:bg})); },
     async stallVowClaim(){ return ok(await sb.rpc('stall_vow_claim')); },
+    async stallSign(t){ return ok(await sb.rpc('stall_sign', {p_text:t||''})); },
     myId(){ return myId; },
   };
 })();
@@ -9224,7 +9225,7 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<script src="stall.js?v=1024a"></script>
+<script src="stall.js?v=1024b"></script>
 <p class="site-ver">마감의 숲 · 10-24 판 69</p>
 </body>
 </html>
