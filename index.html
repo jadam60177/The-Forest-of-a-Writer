@@ -6209,12 +6209,14 @@ const FARM_RUN = new WeakSet();
 function startFarm(el){
   if(!el || FARM_RUN.has(el)) return; FARM_RUN.add(el);
   const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const xMax = el.querySelector('.mguard.farm') ? 72 : 92;   // 🛡️ 파수꾼 자리(오른쪽)는 비워 둬요 (10-25)
   el.querySelectorAll('.vfp').forEach((p,i)=>{
-    let x = parseFloat(p.style.left), y = parseFloat(p.style.top);
+    let x = Math.min(parseFloat(p.style.left), xMax), y = parseFloat(p.style.top);
+    p.style.left = x.toFixed(1)+'%';
     const step = () => {
       if(!el.isConnected) return;
       if(document.hidden || calm || Math.random() < .3){ p.classList.remove('walk'); setTimeout(step, 1500 + Math.random()*3500); return; }
-      const nx = Math.max(8, Math.min(92, x + (Math.random()-.5)*44)), ny = Math.max(66, Math.min(92, y + (Math.random()-.5)*20));
+      const nx = Math.max(8, Math.min(xMax, x + (Math.random()-.5)*44)), ny = Math.max(66, Math.min(92, y + (Math.random()-.5)*20));
       const dur = Math.max(1.8, Math.hypot(nx-x, (ny-y)*1.8) / (5 + Math.random()*4));
       if(Math.abs(nx-x) > .5) p.classList.toggle('flip', nx > x);
       p.classList.add('walk'); p.style.transitionDuration = dur.toFixed(1)+'s';
@@ -9278,6 +9280,6 @@ start();
 </script>
 <script src="stall.js?v=1025a"></script>
 <script src="merchant.js?v=1025b"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 75</p>
+<p class="site-ver">마감의 숲 · 10-25 판 76</p>
 </body>
 </html>
