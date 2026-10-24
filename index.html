@@ -2497,6 +2497,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <h2>🌀 이세계</h2>
       <p>숲 너머 균열 저편, 원고를 막는 괴물들이 사는 곳이에요. 작업실 불빛을 모아 온 작가님만 이 문을 건널 수 있어요.</p>
     </div>
+    <div id="merchBox" hidden></div>
     <div class="boss-panel" id="bossBox" hidden></div>
     <div class="isekai-empty" id="isekaiEmpty">
       <div class="portal-mini" aria-hidden="true"></div>
@@ -2847,6 +2848,10 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <div class="shop-dlg-head"><h3>📜 아공간 가구 제작대</h3><span class="shop-coins" id="vcraftShards"></span><button class="mini" type="button" data-vcraftclose>닫기</button></div>
   <div class="vcraft-body" id="vcraftBody"></div>
 </dialog>
+<dialog class="visit merch-deco" id="merchDeco" aria-label="파수꾼 · 하늘 장식 꾸미기">
+  <div class="shop-dlg-head"><h3>🎀 파수꾼 · 하늘 장식 꾸미기</h3><button class="mini" type="button" data-mdecoclose>닫기</button></div>
+  <div class="md-wrap" id="merchDecoBody"></div>
+</dialog>
 <dialog class="visit stall-dlg" id="stallDlg" aria-label="음료 가판대"><div id="stallBox"></div></dialog>
 <dialog class="visit stall-rcpt" id="stallRcpt" aria-label="가판대 영수증"><div class="paper" id="stallPaper"></div></dialog>
 
@@ -2866,7 +2871,7 @@ const CONFIG = {
 };
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 </script>
-<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1024b"><\/script>');</script>
+<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1025a"><\/script>');</script>
 <script>
 
 /* ---------- 기준 데이터 (schema.sql 의 room_size 와 같아야 해요) ---------- */
@@ -4028,6 +4033,11 @@ const supaApi = (() => {
     async stallRemove(slot){ return ok(await sb.rpc('stall_remove', {p_slot:slot})); },
     async stallVowStart(bg){ return ok(await sb.rpc('stall_vow_start', {p_bg:bg})); },
     async stallVowClaim(){ return ok(await sb.rpc('stall_vow_claim')); },
+    async merchant(){ return ok(await sb.rpc('get_merchant')); },                                // 🌀 차원 상인 (merchant.sql)
+    async merchHaggle(c){ return ok(await sb.rpc('merch_haggle', {p_code:c})); },
+    async merchBuy(c){ return ok(await sb.rpc('merch_buy', {p_code:c})); },
+    async merchEquip(slot, c){ return ok(await sb.rpc('merch_equip', {p_slot:slot, p_code:c||''})); },
+    async merchOf(id){ try{ return ok(await sb.rpc('get_merch_of', {p_discord_id:String(id)})); }catch(e){ return null; } },
     async stallSign(t){ return ok(await sb.rpc('stall_sign', {p_text:t||''})); },
     myId(){ return myId; },
   };
@@ -6192,7 +6202,8 @@ function voidFarmHTML(V, owner){
   const cells = pets.map((c,i)=>{ const mine = all.find(p=>p.code===c), big = mine ? petShowBig(petLevel(mine.affection), babyById(mine.id)) : false;
     const x = 12 + ((i*37) % 76), y = 66 + ((i*23) % 26);   // 들판 그림(void/farm.webp)의 풀밭 쪽에서만 놀아요
     return `<span class="vfp" data-vfp="${i}" style="left:${x}%;top:${y}%;--s:${(.72 + (y-62)/30*.35).toFixed(2)};z-index:${Math.round(y)}"><img src="pets/${c}${big?'_2':''}.webp" alt="" draggable="false" loading="lazy"><span class="nm">${esc(mine ? mine.name : petOf(c).name)}</span></span>`; }).join('');
-  return `<div class="vfarm" style="--fbg:${VOID_FARM_BG}">${cells}${pets.length ? '' : `<p class="vfarm-empty">아직 농장이 조용해요.<br><span class="small">🥚 알에서 이세계 마물이 태어나면 여기서 뛰어놀며 💠 파편을 물어와요.</span></p>`}</div>`;
+  const guard = typeof merchGuardHTML==='function' ? merchGuardHTML(owner ? (window.MERCH && window.MERCH.state) : V.merch, 'farm') : '';   // 🛡️ 파수꾼 (10-25)
+  return `<div class="vfarm" style="--fbg:${VOID_FARM_BG}">${cells}${guard}${pets.length ? '' : `<p class="vfarm-empty">아직 농장이 조용해요.<br><span class="small">🥚 알에서 이세계 마물이 태어나면 여기서 뛰어놀며 💠 파편을 물어와요.</span></p>`}</div>`;
 }
 const FARM_RUN = new WeakSet();
 function startFarm(el){
@@ -6272,6 +6283,7 @@ function voidCraftHTML(V){
 function renderVoidRoom(){
   const st = document.getElementById('voidStage'); if(!st || !VOID || !VOID.open) return;
   st.style.setProperty('--vbg', voidBgCSS(VOID.bg)); st.dataset.vbg = VOID.bg || 'base';
+  { const ms = window.MERCH && window.MERCH.state, sk = ms && ms.sky || ''; if(st._msky !== sk){ st._msky = sk; st.querySelector('.msky')?.remove(); if(sk && typeof merchSkyHTML==='function') st.insertAdjacentHTML('afterbegin', merchSkyHTML(ms)); } }   // ✨ 차원 상인 하늘 장식 (10-25)
   if(st._fx !== VOID.fx){ st._fx = VOID.fx; st.querySelector('.vfx:not(.setfx)')?.remove(); if(VOID.fx) st.insertAdjacentHTML('afterbegin', voidFxHTML(VOID.fx)); }
   const sk = (VOID.sets||[]).join(); if(st._sets !== sk){ st._sets = sk; st.querySelectorAll('.vfx.setfx').forEach(x=>x.remove()); st.insertAdjacentHTML('afterbegin', voidSetFxHTML(VOID.sets)); }
   st.querySelector('.room')?.remove(); st.insertAdjacentHTML('beforeend', voidRoomHTML(VOID, true));
@@ -6325,7 +6337,7 @@ function renderVoid(){
     return;
   }
   const V = VOID, gp = V.grow_price ?? V.cols*V.rows*10, bgs = V.bgs || ['base'];
-  const k = JSON.stringify([shards, V.fx, V.fxs, V.cap_lv, V.rate_lv, ME.stars, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).map(x=>x.item_code).join(), (V.farm_pets||[]).join(), VSEL, vbagTab, vcraftTab, V.vinv, V.bps, V.sets, Object.entries(INV||{}).filter(([c,n])=>n>0 && isLegendFurn(c)).length]);
+  const k = JSON.stringify([JSON.stringify(window.MERCH && window.MERCH.state), shards, V.fx, V.fxs, V.cap_lv, V.rate_lv, ME.stars, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).map(x=>x.item_code).join(), (V.farm_pets||[]).join(), VSEL, vbagTab, vcraftTab, V.vinv, V.bps, V.sets, Object.entries(INV||{}).filter(([c,n])=>n>0 && isLegendFurn(c)).length]);
   if(box._k === k){ renderVoidRoom(); renderVoidFarmBar(); renderVoidSeal(); renderVcraftDlg(); return; }
   box._k = k;
   box.innerHTML = `<div class="void-head"><h3>🔮 아공간 <span class="small">${V.cols}×${V.rows}칸</span> <button class="mini" type="button" data-iskguide="void">📖 안내</button></h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
@@ -8708,6 +8720,7 @@ async function openVisit(id){
   dlg.showModal();
   try{
     const [list, info, garden, fishBest, vpets, vtank, vflora, vvoid] = await Promise.all([api.placements(id), api.house(id).catch(()=>null), api.garden(id).catch(()=>[]), api.fishBest(id).catch(()=>null), api.petsOf(id).catch(()=>[]), api.tankOf(id).catch(()=>null), api.flowerShowOf(id).catch(()=>[]), api.voidOf ? api.voidOf(id).catch(()=>null) : null]);
+    if(vvoid && vvoid.open && api.merchOf) vvoid.merch = await api.merchOf(id).catch(()=>null);   // 🌀 이웃 파수꾼 · 하늘 장식
     const h = info || {room_blocks:0, room_names:['거실']};
     VISIT = {p, list, info:h, garden:garden||[], fishBest, pets:vpets||[], tank:vtank, flora:vflora||[], void:(vvoid && vvoid.open) ? vvoid : null, cabs: await cabsFor(id, list), room:0, raid: await api.raidStatus().catch(()=>null)};
     renderVisit();
@@ -8734,7 +8747,7 @@ function renderVisit(){
   room.parentElement.hidden = outside; vg.hidden = !outside;
   if(VISIT.room==='v' && VISIT.void){
     const V = VISIT.void, b = VOID_BGS[V.bg] || VOID_BGS.base; if(V.catalog) setVCAT(V.catalog);
-    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸${isMe(p) && !V.public ? ' · 🔒 비공개라 나만 보여요' : ''}</span></h4><div class="void-stage" data-vbg="${esc(V.bg||'base')}" style="--vbg:${voidBgCSS(V.bg)}">${voidFxHTML(V.fx)}${voidSetFxHTML(V.sets)}${voidRoomHTML(V, false)}</div>`
+    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸${isMe(p) && !V.public ? ' · 🔒 비공개라 나만 보여요' : ''}</span></h4><div class="void-stage" data-vbg="${esc(V.bg||'base')}" style="--vbg:${voidBgCSS(V.bg)}">${typeof merchSkyHTML==='function' ? merchSkyHTML(V.merch) : ''}${voidFxHTML(V.fx)}${voidSetFxHTML(V.sets)}${voidRoomHTML(V, false)}</div>`
       + `<h4 class="tank-title farm-title">🐾 마물 농장 <span class="small">${(V.farm_pets||[]).length}종</span></h4>${voidFarmHTML(V, false)}`;
     startFarm(vg.querySelector('.vfarm'));
   }
@@ -9263,7 +9276,8 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<script src="stall.js?v=1024c"></script>
-<p class="site-ver">마감의 숲 · 10-24 판 74</p>
+<script src="stall.js?v=1025a"></script>
+<script src="merchant.js?v=1025a"></script>
+<p class="site-ver">마감의 숲 · 10-25 판 75</p>
 </body>
 </html>

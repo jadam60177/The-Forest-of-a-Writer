@@ -97,7 +97,7 @@ const css = document.createElement('style'); css.textContent = `dialog.visit.sta
 #stallDlg .s-ings{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;max-height:320px;overflow-y:auto;padding:2px}
 #stallDlg .s-ghead{grid-column:1/-1;font-family:"Jua",sans-serif;margin:.3rem 0 0;display:flex;gap:.4rem;align-items:center}
 #stallDlg .s-ghead i{width:10px;height:10px;border-radius:50%}
-#stallDlg .c-hell{background:#E0583A} #stallDlg .c-heaven{background:#E6D79A} #stallDlg .c-magic{background:#A88CF0} #stallDlg .c-fairy{background:#7FD69A}
+#stallDlg .c-rare{background:#E8B54A} #stallDlg .s-ing.t-rare{box-shadow:inset 0 -3px 0 #E8B54A} #stallDlg .c-hell{background:#E0583A} #stallDlg .c-heaven{background:#E6D79A} #stallDlg .c-magic{background:#A88CF0} #stallDlg .c-fairy{background:#7FD69A}
 #stallDlg .s-ing{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:12px;padding:6px 3px;display:grid;justify-items:center;cursor:pointer}
 #stallDlg .s-ing img{width:46px;height:46px;object-fit:contain}
 #stallDlg .s-ing b{font-weight:400;font-size:.76rem;line-height:1.25;text-align:center}
@@ -195,7 +195,15 @@ add('isekai', [
   ['f_dew','이슬방울 젤리','이슬','#8FD8F0','color',1.5,0,'fairy'], ['f_mint','숲의 민트 시럽','숲의 민트','#4FB85A','color',1.5,0,'fairy'],
   ['f_petal','요정 꽃잎','꽃잎','#F4A8D8','color',1.5,0,'fairy'], ['f_berry','영기 어린 열매','영기 열매','#6A5AC8','color',1.5,0,'fairy'],
 ]);
-const TAGS = {hell:{name:'지옥',e:'🔥'}, heaven:{name:'천국',e:'🪽'}, magic:{name:'마법',e:'🔮'}, fairy:{name:'요정',e:'🌿'}};
+// 🌀 차원 상인 희귀 재료 (10-25) — 상인에게서만 사요. 그림은 merchant/ 폴더
+add('isekai', [
+  ['r_dragontear','용의 눈물','용의 눈물','#E8402A','color',3,0,'rare'], ['r_timeice','시간이 멈춘 얼음','시간 얼음','#BFE6F5','color',1,0,'rare'],
+  ['r_starlight','병에 담긴 별빛','별빛','#2B2F6E','color',3.5,0,'rare'], ['r_phoenix','불사조 깃털','불사조','#F5762A','color',2.6,0,'rare'],
+  ['r_moondrop','달빛 한 방울','달빛','#E8E8F4','milk',0,0,'rare'], ['r_cloud','병 속의 구름','구름','#F4F7FB','milk',0,0,'rare'],
+  ['r_pearl','심해 진주','진주','#4FA8E8','color',2,0,'rare'], ['r_goldapple','황금 사과','황금 사과','#F2C230','color',1.5,0,'rare'],
+]);
+const TAGS = {hell:{name:'지옥',e:'🔥'}, heaven:{name:'천국',e:'🪽'}, magic:{name:'마법',e:'🔮'}, fairy:{name:'요정',e:'🌿'}, rare:{name:'차원 상인 희귀 재료',e:'✨'}};
+const icoSrc = k => ING[k] && ING[k].t==='rare' ? `merchant/${k}.webp` : `stall/ing_${k}.webp`;
 const MULT = ['', '', '더블', '트리플'];
 
 /* ---------- 특제 레시피 ---------- */
@@ -212,6 +220,10 @@ const SPECIALS = [
   ['마감 직전 뇌를 태우는 맛','isekai',['h_chili','h_flame','h_lava'],''], ['천사의 숨결','isekai',['v_feather','v_honey','v_milk'],''],
   ['이세계 은하 별빛','isekai',['m_mana','m_rune','m_starcandy'],''], ['요정의 아침이슬','isekai',['f_dew','f_mint','f_petal'],''],
   ['새벽 4시의 각성 포션','isekai',['bean','bean','magic'],''], ['천국과 지옥 라테','coffee',['bean','h_flame','v_milk'],''],
+  // 🌀 희귀 재료 숨은 레시피 (10-25, 순서 바꾸지 말고 뒤에만 추가)
+  ['용의 숨결 에이드','ade',['r_dragontear','soda'],''], ['시간이 멈춘 아이스 라테','coffee',['bean','milk','r_timeice'],''],
+  ['별을 삼킨 밤','isekai',['m_mana','r_starlight'],''], ['불사조의 마감 각성제','isekai',['bean','h_flame','r_phoenix'],''],
+  ['달빛 밀크티','tea',['blacktea','r_moondrop'],''], ['구름 위 황금 사과 스무디','smoothie',['r_cloud','r_goldapple'],''],
 ].map(([name,cup,ings,top],i)=>({code:'sp'+i,name,cup,ings:[...ings].sort(),top}));
 const keyOf = (cup,ings,top) => cup+'|'+[...ings].sort().join(',')+'|'+(top||'');
 const SPECIAL_BY = Object.fromEntries(SPECIALS.map(s=>[keyOf(s.cup,s.ings,s.top), s]));
@@ -300,7 +312,7 @@ function drinkHTML(cup, ings, top){
     else tp = place(top, w1, rimBottom).html;
   }
   let fx = '';
-  if(magic) fx += [[-14,20],[104,34],[-8,64],[100,78],[46,-6]].map(([x,y],i)=>`<span class="sfx spk" style="left:${x}%;top:${y}%;--dl:-${i*.45}s">✦</span>`).join('');
+  if(magic || L.tags.has('rare')) fx += [[-14,20],[104,34],[-8,64],[100,78],[46,-6]].map(([x,y],i)=>`<span class="sfx spk" style="left:${x}%;top:${y}%;--dl:-${i*.45}s">✦</span>`).join('');
   if(L.tags.has('hell')) fx += [10,30,55,75,90].map((x,i)=>`<span class="sfx ember" style="left:${x}%;top:${C.fill+10}%;--dl:-${i*.5}s"></span>`).join('');
   if(L.tags.has('heaven')) fx += [-10,30,80,105].map((x,i)=>`<span class="sfx feather" style="left:${x}%;top:${-10+i*8}%;--dl:-${i*.8}s"></span>`).join('');
   if(L.tags.has('fairy')) fx += [-12,20,70,102].map((x,i)=>`<span class="sfx petal" style="left:${x}%;top:${-5+i*10}%;--dl:-${i*.7}s"></span>`).join('');
@@ -314,9 +326,10 @@ const TOP_COST = {'':0, whip:3, ice:4, both:7};
 window.STALL_NUM = NUM; window.STALL_ING = ING; window.STALL_CUPS = CUPS; window.STALL_TOP_COST = TOP_COST;
 function costOf(cup, ings, top, inv){
   let per = 0, shard = 0; const use = {};
-  ings.forEach(k=>{ const g = ING[k]; per += g.p; if(g.t){ const have = ((inv||{})[k]||0) - (use[k]||0); if(have>0) use[k] = (use[k]||0)+1; else shard += NUM.unit; } });
+  let lack = false;
+  ings.forEach(k=>{ const g = ING[k]; per += g.p; if(g.t){ const have = ((inv||{})[k]||0) - (use[k]||0); if(have>0) use[k] = (use[k]||0)+1; else if(g.t==='rare') lack = true; else shard += NUM.unit; } });
   per += TOP_COST[top||''] || 0;
-  return {price: CUPS[cup].price + Math.round(per*1.15), coin: per*NUM.stock, shard, use};
+  return {price: CUPS[cup].price + Math.round(per*1.15), coin: per*NUM.stock, shard, use, lack};
 }
 
 /* ---------- 상태 ---------- */
@@ -324,7 +337,7 @@ let ST = null, S = {cup:'coffee', ings:['bean','milk'], top:''}, tab = 'basic', 
 const box = () => document.getElementById('stallBox');
 const dlg = () => document.getElementById('stallDlg');
 const q = sel => box().querySelector(sel);
-const ico = k => `<img src="stall/ing_${k}.webp" alt="" loading="lazy">`;
+const ico = k => `<img src="${icoSrc(k)}" alt="" loading="lazy">`;
 const isNight = () => document.documentElement.getAttribute('data-mode') !== 'day';
 function clerkImg(){
   try{ if(typeof PETS!=='undefined' && PETS && PETS.main){ const p = (PETS.all||PETS.pets||[]).find(x=>x.id===PETS.main);
@@ -366,7 +379,8 @@ function renderMake(){
   q('.s-slots').innerHTML = [0,1,2].map(i=>{ const k = S.ings[i]; return k ? `<button class="s-slotb full" type="button" data-sslot="${i}" aria-label="${ING[k].name} 빼기">${ico(k)}<span>${ING[k].name} · 빼기</span></button>` : `<span class="s-slotb" aria-hidden="true"></span>`; }).join('');
   q('.s-itabs').innerHTML = [['basic','🥛 기본 재료'],['cafe','🍯 카페 재료'],['isekai','🌀 이세계 재료']].map(([k,n])=>`<button class="s-itab ${tab===k?'on':''}" type="button" data-stab="${k}">${n}</button>`).join('');
   const full = S.ings.length >= 3, inv = ST.inv || {};
-  const btn = g => `<button class="s-ing ${g.t?'t-'+g.t:''}" type="button" data-sing="${g.code}" ${full?'disabled':''}>${ico(g.code)}<b>${g.name}</b><span class="pr">${g.t ? (inv[g.code] ? `📦 ${inv[g.code]}개` : `💠 ${NUM.unit}`) : `🪙 ${g.p}`}</span></button>`;
+  const btn = g => { const rare = g.t==='rare', left = (inv[g.code]||0) - S.ings.filter(k=>k===g.code).length;
+    return `<button class="s-ing ${g.t?'t-'+g.t:''}" type="button" data-sing="${g.code}" ${full || (rare && left<=0) ?'disabled':''}>${ico(g.code)}<b>${g.name}</b><span class="pr">${rare ? (inv[g.code] ? `📦 ${inv[g.code]}개` : '🌀 상인 전용') : g.t ? (inv[g.code] ? `📦 ${inv[g.code]}개` : `💠 ${NUM.unit}`) : `🪙 ${g.p}`}</span></button>`; };
   const list = Object.values(ING).filter(g=>g.grp===tab);
   q('.s-ings').innerHTML = tab==='isekai'
     ? `<p class="s-note">이세계 재료 한 개로 10잔을 만들어요. 집필 서약으로 모은 재료(📦)를 먼저 쓰고, 없으면 💠 ${NUM.unit}로 사요.</p>`
@@ -379,7 +393,7 @@ function renderMake(){
   const P = costOf(S.cup, S.ings, S.top, inv), free = Object.values(P.use).reduce((a,b)=>a+b,0);
   q('.s-price').innerHTML = nm ? `한 잔 🪙 <b>${P.price}</b> · ${NUM.stock}잔 재료비 🪙 ${P.coin}${P.shard?` + 💠 ${P.shard}`:''}${free?` · 📦 서약 재료 ${free}개 사용`:''}${S.ings.some(k=>ING[k].t)?' · 팔릴 때 가끔 ⭐':''}` : '';
   const empty = [1,2,3].find(n=>!ST.slots.some(x=>x.slot===n));
-  const b = q('.s-make'); b.disabled = !nm; b.textContent = empty ? `🍹 ${NUM.stock}잔 만들어 진열` : '진열대가 꽉 찼어요';
+  const b = q('.s-make'); b.disabled = !nm || P.lack; b.textContent = empty ? `🍹 ${NUM.stock}잔 만들어 진열` : '진열대가 꽉 찼어요';
   q('.s-preview').innerHTML = drinkHTML(S.cup, S.ings, S.top);
 }
 function renderVow(){
@@ -449,6 +463,7 @@ const TAG_LINES = {
   heaven:['마음이 정화되는 기분이에요.','오늘은 왠지 탈고할 수 있을 것 같아요.','구름 위를 걷는 맛!'],
   magic:['컵 안에서 은하수가 도는데요?!','마력이 넘쳐서 오타가 안 나요.','반짝반짝해요!'],
   fairy:['풀잎 이슬 맛이 나요.','요정이 손짓하는 것 같아요.','숲속 아침 같아요!'],
+  rare:['이건… 다른 차원의 맛이에요!','한 모금에 원고 세 화가 써질 것 같아요.','상인 고양이가 두고 간 그 재료죠?'],
   ame:['역시 마감의 기본은 아아지.','생명수 감사합니다.','오늘도 아아 한 잔.'],
   look:['뭐 마실까~ 고민되네요.','다음에 꼭 사러 올게요!','메뉴 구경만 할게요~','오, 여기 새로 생겼네?'],
 };

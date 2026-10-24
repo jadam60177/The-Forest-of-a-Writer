@@ -758,6 +758,38 @@ function makeDemoApi(){
       S.vow.min += n*STALL_NUM.vowEvery; n = Math.min(n, STALL_NUM.vowMax); const pool = Object.values(STALL_ING).filter(g=>g.t===S.vow.bg), got = {};
       while(n--){ const g = pool[Math.floor(Math.random()*pool.length)]; S.inv[g.code] = (S.inv[g.code]||0)+1; got[g.code] = (got[g.code]||0)+1; }
       this.stSave(S); return {got, ...this.stJson(S)}; },
+    // 🌀 차원 상인 (merchant.sql 흉내) — 미리보기는 늘 와 있어요
+    mState(){ let M; try{ M = JSON.parse(localStorage.getItem('majam-demo-merch')||'null'); }catch(e){}
+      const day = new Date(Date.now()+9*36e5).toISOString().slice(0,10);
+      M ||= {state:{}, owned:[], buys:{}, haggle:null, day};
+      if(M.day!==day){ M.day = day; M.buys = {}; M.haggle = null; } return M; },
+    mSave(M){ try{ localStorage.setItem('majam-demo-merch', JSON.stringify(M)); }catch(e){} },
+    mOffers(day){ const all = Object.entries(MERCH_ITEMS), h = c => { let x = 0; for(const ch of day+c) x = (x*31 + ch.charCodeAt(0)) >>> 0; return x; };
+      return ['guard','sky','acc','ing'].flatMap(k=>all.filter(([,v])=>v.kind===k).map(([c])=>c).sort((a,b)=>h(a)-h(b)).slice(0,2)); },
+    mJson(M){ const I = this.iskState(), H = M.haggle;
+      return {open:true, day:M.day, gone:false, haggled:!!H, ing_max:3, state:{...M.state}, owned:[...M.owned], has_void:!!st.vd, shards:I.shards,
+        offers:this.mOffers(M.day).map(c=>{ const it = MERCH_ITEMS[c]; return {code:c, kind:it.kind, price:it.price, slot:it.slot||null,
+          pct: H && H.code===c && !H.refused ? H.pct : 0, refused: !!(H && H.code===c && H.refused), bought: M.buys[c]||0}; })}; },
+    async merchant(){ const M = this.mState(); this.mSave(M); return this.mJson(M); },
+    async merchHaggle(c){ const M = this.mState(); if(M.haggle) fail('흥정은 하루에 한 번만 할 수 있어요');
+      const r = Math.random(); M.haggle = {code:c, pct: r<.6 ? 10+Math.floor(Math.random()*21) : 0, refused: r>.85}; this.mSave(M);
+      return {pct:M.haggle.refused?0:M.haggle.pct, refused:M.haggle.refused, ...this.mJson(M)}; },
+    async merchBuy(c){ const M = this.mState(), it = MERCH_ITEMS[c], I = this.iskState(), H = M.haggle;
+      if(!this.mOffers(M.day).includes(c)) fail('오늘 가져온 물건이 아니에요');
+      if(H && H.code===c && H.refused) fail('「흥, 안 팔아!」 상인이 오늘은 이 물건을 안 판대요');
+      const price = H && H.code===c ? Math.round(it.price*(100-H.pct)/100) : it.price;
+      if((it.kind==='guard'||it.kind==='sky') && !st.vd) fail('먼저 아공간 문을 열어 주세요');
+      if(it.kind==='guard' && M.state.guard===c) fail('이미 함께 있는 파수꾼이에요');
+      if((it.kind==='sky'||it.kind==='acc') && M.owned.includes(c)) fail('이미 가지고 있어요');
+      if(it.kind==='ing' && (M.buys[c]||0) >= 3) fail('희귀 재료는 한 번에 3개까지만 살 수 있어요');
+      if(I.shards < price) fail('이세계 파편이 모자라요'); I.shards -= price; M.buys[c] = (M.buys[c]||0)+1;
+      if(it.kind==='guard') M.state.guard = c;
+      else if(it.kind==='sky'){ M.owned.push(c); M.state.sky ||= c; }
+      else if(it.kind==='acc'){ M.owned.push(c); M.state[it.slot] ||= c; }
+      else { const S = this.stState(); S.inv[c] = (S.inv[c]||0)+1; this.stSave(S); }
+      this.mSave(M); persist(); return {paid:price, kind:it.kind, ...this.mJson(M)}; },
+    async merchEquip(slot, c){ const M = this.mState(); if(c && !M.owned.includes(c)) fail('아직 없는 물건이에요'); M.state[slot] = c || null; this.mSave(M); return this.mJson(M); },
+    async merchOf(id){ return null; },
     // 미리보기 전용
     tick(){
       { const B = this.bossState(); if(st.me.in_voice && B.tickets<BOSS_TICKET_MAX && B.dmg<B.max_hp){ const lit = 1 + st.others.filter(o=>o.in_voice && !o.removed).length; B.fuel += bossFire(lit);
