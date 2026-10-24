@@ -767,7 +767,7 @@ function makeDemoApi(){
     mOffers(day){ const all = Object.entries(MERCH_ITEMS), h = c => { let x = 0; for(const ch of day+c) x = (x*31 + ch.charCodeAt(0)) >>> 0; return x; };
       return ['guard','sky','acc','ing'].flatMap(k=>all.filter(([,v])=>v.kind===k).map(([c])=>c).sort((a,b)=>h(a)-h(b)).slice(0,2)); },
     mJson(M){ const I = this.iskState(), H = M.haggle;
-      return {open:true, day:M.day, gone:false, haggled:!!H, ing_max:3, state:{...M.state}, owned:[...M.owned], has_void:!!st.vd, shards:I.shards,
+      return {open:true, day:M.day, gone:false, haggled:!!H, ing_max:3, state:{...M.state, perk: M.state.guard ? (M.state.perk||'keep') : null, perk_today: M.perkDay===M.day}, owned:[...M.owned], has_void:!!st.vd, shards:I.shards,
         offers:this.mOffers(M.day).map(c=>{ const it = MERCH_ITEMS[c]; return {code:c, kind:it.kind, price:it.price, slot:it.slot||null,
           pct: H && H.code===c && !H.refused ? H.pct : 0, refused: !!(H && H.code===c && H.refused), bought: M.buys[c]||0}; })}; },
     async merchant(){ const M = this.mState(); this.mSave(M); return this.mJson(M); },
@@ -788,6 +788,9 @@ function makeDemoApi(){
       else if(it.kind==='acc'){ M.owned.push(c); M.state[it.slot] ||= c; }
       else { const S = this.stState(); S.inv[c] = (S.inv[c]||0)+1; this.stSave(S); }
       this.mSave(M); persist(); return {paid:price, kind:it.kind, ...this.mJson(M)}; },
+    async merchPerk(k){ const M = this.mState(); if(!M.state.guard) fail('파수꾼이 있어야 임무를 맡길 수 있어요');
+      if((M.state.perk||'keep')!==k){ if(M.perkDay===M.day) fail('임무는 하루에 한 번만 바꿀 수 있어요. 내일 다시 바꿔 주세요'); M.state.perk = k; M.perkDay = M.day; }
+      this.mSave(M); return this.mJson(M); },
     async merchEquip(slot, c){ const M = this.mState(); if(c && !M.owned.includes(c)) fail('아직 없는 물건이에요'); M.state[slot] = c || null; this.mSave(M); return this.mJson(M); },
     async merchOf(id){ return null; },
     // 미리보기 전용

@@ -39,6 +39,7 @@ const ANC = {
   g_robot:{hx:.5,ht:.12,hw:.75,ey:.44,ew:.55,ny:.63,nw:.42,by:.7,bw:.9,hdx:.14,hdy:.82},
   g_fish:{hx:.47,ht:.16,hw:.6,ey:.45,ew:.42,ny:.6,nw:.35,by:.62,bw:.9,hdx:.2,hdy:.75},
 };
+const PERKS = [['keep','🧺 바구니 지킴이','바구니가 1.5배 더 오래 쌓여요'],['scent','📜 도안 냄새','봉인을 풀 때 50% 확률로 아직 없는 도안부터'],['bonus','💠 감시 보너스','바구니를 받을 때 20% 확률로 💠 +30%']];
 const SLOTS = [['head','머리'],['face','얼굴'],['neck','목'],['back','등'],['hand','손']];
 const KINDS = [['guard','🛡️ 파수꾼','한 사람에 한 마리 · 아공간 농장을 지켜요 · 바꿀 때도 같은 값'],['sky','✨ 하늘 장식','아공간 배경 위를 천천히 떠다녀요'],['acc','🎩 파수꾼 꾸미기','머리 · 얼굴 · 목 · 등 · 손에 하나씩'],['ing','🧪 희귀 재료','가판대용 · 1개 = 10잔 · 한 번에 3개까지']];
 const SAY = ['냥… 오늘 하루만 머물다 갈 거다냥.','다른 차원에서 귀한 물건을 잔뜩 가져왔다냥.','흥정은 한 번만이다냥. 신중하게 고르라냥.','파편만 받는다냥. 코인은 이 차원 돈이라 안 받는다냥.'];
@@ -126,6 +127,8 @@ function renderDeco(){
     <div class="md-stage" style="--vbg:${typeof voidBgCSS==='function' && typeof VOID!=='undefined' && VOID ? voidBgCSS(VOID.bg) : '#2A1650'}">${skyHTML(st)}
       ${st.guard ? guardHTML(st, 'big') : `<p class="md-empty">아직 파수꾼이 없어요.<br><span class="small">차원 상인이 오면 💠 3,000으로 데려올 수 있어요.</span></p>`}</div>
     <div class="md-side">
+      ${st.guard ? `<h4>🛡️ 오늘의 임무 <span class="small">${st.perk_today ? '오늘은 이미 바꿨어요' : '하루에 한 번 바꿀 수 있어요'}</span></h4>
+      <div class="md-perks">${PERKS.map(([k,n,d])=>`<button class="mperk ${st.perk===k?'on':''}" type="button" data-mperk="${k}" ${st.perk!==k && st.perk_today?'disabled':''}><b>${n}</b><span>${d}</span></button>`).join('')}</div>` : ''}
       <h4>✨ 하늘 장식</h4><div class="md-row">${sky.length ? off('sky') + sky.map(c=>chip('sky',c)).join('') : '<span class="small">상인에게서 사면 여기 생겨요</span>'}</div>
       ${st.guard ? `<div class="md-tabs">${SLOTS.map(([s,n])=>`<button class="mchip ${deco===s?'on':''}" type="button" data-mdecotab="${s}">${n}${st[s]?' ✓':''}</button>`).join('')}</div>
       <div class="md-row">${slotItems(deco).length ? off(deco) + slotItems(deco).map(c=>chip(deco,c)).join('') : '<span class="small">이 자리에 쓸 소품이 아직 없어요</span>'}</div>` : ''}
@@ -138,6 +141,10 @@ document.addEventListener('click', e=>{
   if(e.target.closest('[data-mdeco]')){ const d = document.getElementById('merchDeco'); if(!d.open) d.showModal(); renderDeco(); return; }
   if(e.target.closest('[data-mdecoclose]')){ document.getElementById('merchDeco').close(); return; }
   const dt = e.target.closest('[data-mdecotab]'); if(dt){ deco = dt.dataset.mdecotab; renderDeco(); return; }
+  const pk = e.target.closest('[data-mperk]');
+  if(pk){ const k = pk.dataset.mperk, P = PERKS.find(x=>x[0]===k); if((window.MERCH.state||{}).perk===k) return;
+    return act(async()=>{ if(!(await ask(`🛡️ 파수꾼에게 「${P[1]}」 임무를 맡길까요?\n${P[2]}\n\n임무는 하루에 한 번만 바꿀 수 있어요.`))) return;
+      take(await api.merchPerk(k)); toast(`🛡️ 파수꾼이 「${P[1]}」 임무를 시작했어요!`); }); }
   const eq = e.target.closest('[data-mequip]');
   if(eq) return act(async()=>{ take(await api.merchEquip(eq.dataset.mequip, eq.dataset.code||'')); });
   const hg = e.target.closest('[data-mhaggle]');
@@ -210,6 +217,12 @@ dialog.merch-deco{width:min(94vw,820px);max-width:min(94vw,820px)}
 .md-stage .mguard.big{width:min(220px,60%);position:relative;z-index:2}
 .md-stage .msky img{animation:none;left:6%;top:5%;width:42%}
 .md-empty{color:#F3E8FF;text-align:center;align-self:center;z-index:2}
+.md-perks{display:grid;gap:.4rem;margin-bottom:.8rem}
+.mperk{display:grid;text-align:left;gap:.1rem;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:12px;padding:.45rem .7rem;cursor:pointer}
+.mperk span{font-size:.8rem;color:var(--muted)}
+.mperk.on{border-color:#E8B54A;box-shadow:0 0 0 2px #E8B54A}
+.mperk:disabled{opacity:.45;cursor:not-allowed}
+:root[data-mode="day"] .mperk{background:rgba(255,255,255,.8)}
 .md-side h4{margin:.2rem 0 .4rem}
 .md-row,.md-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.7rem}
 .mchip{display:inline-flex;gap:.3rem;align-items:center;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:12px;padding:.25rem .55rem;cursor:pointer;font-size:.85rem}

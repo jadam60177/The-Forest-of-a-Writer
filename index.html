@@ -2871,7 +2871,7 @@ const CONFIG = {
 };
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 </script>
-<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1025a"><\/script>');</script>
+<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1025b"><\/script>');</script>
 <script>
 
 /* ---------- 기준 데이터 (schema.sql 의 room_size 와 같아야 해요) ---------- */
@@ -4036,6 +4036,7 @@ const supaApi = (() => {
     async merchant(){ return ok(await sb.rpc('get_merchant')); },                                // 🌀 차원 상인 (merchant.sql)
     async merchHaggle(c){ return ok(await sb.rpc('merch_haggle', {p_code:c})); },
     async merchBuy(c){ return ok(await sb.rpc('merch_buy', {p_code:c})); },
+    async merchPerk(p){ return ok(await sb.rpc('merch_perk', {p_perk:p})); },
     async merchEquip(slot, c){ return ok(await sb.rpc('merch_equip', {p_slot:slot, p_code:c||''})); },
     async merchOf(id){ try{ return ok(await sb.rpc('get_merch_of', {p_discord_id:String(id)})); }catch(e){ return null; } },
     async stallSign(t){ return ok(await sb.rpc('stall_sign', {p_text:t||''})); },
@@ -6178,7 +6179,7 @@ const isLegendFurn = c => LOTTO_FURN.some(x=>x.code===c);
 const voidHave = code => isVoidFurn(code) ? ((VOID && VOID.vinv || {})[code]||0) : ((INV||{})[code]||0);
 function voidFarmHours(V){
   if(!V || !V.farm_at) return {hrs:0, boost:0};
-  const fa = Date.parse(V.farm_at), end = Math.min(Date.now(), fa + (V.farm_cap||VOID_FARM_CAP)*36e5), hrs = Math.max(0, (end - fa)/36e5);
+  const fa = Date.parse(V.farm_at), end = Math.min(Date.now(), fa + voidCapEff(V)*36e5), hrs = Math.max(0, (end - fa)/36e5);
   let boost = 0; if(V.snack_from && V.snack_until) boost = Math.max(0, (Math.min(end, Date.parse(V.snack_until)) - Math.max(fa, Date.parse(V.snack_from)))/36e5);
   return {hrs, boost};
 }
@@ -6205,6 +6206,8 @@ function voidFarmHTML(V, owner){
   const guard = typeof merchGuardHTML==='function' ? merchGuardHTML(owner ? (window.MERCH && window.MERCH.state) : V.merch, 'farm') : '';   // 🛡️ 파수꾼 (10-25)
   return `<div class="vfarm" style="--fbg:${VOID_FARM_BG}">${cells}${guard}${pets.length ? '' : `<p class="vfarm-empty">아직 농장이 조용해요.<br><span class="small">🥚 알에서 이세계 마물이 태어나면 여기서 뛰어놀며 💠 파편을 물어와요.</span></p>`}</div>`;
 }
+// 🧺 파수꾼 「바구니 지킴이」 임무면 바구니가 1.5배 (merchant.sql 의 void_farm_hours 와 같아요)
+const voidCapEff = V => (V.farm_cap||VOID_FARM_CAP) * ((window.MERCH && window.MERCH.state && window.MERCH.state.perk==='keep') ? 1.5 : 1);
 const FARM_RUN = new WeakSet();
 function startFarm(el){
   if(!el || FARM_RUN.has(el)) return; FARM_RUN.add(el);
@@ -6295,7 +6298,7 @@ function renderVoidRoom(){
 }
 function renderVoidFarmBar(){
   const b = document.getElementById('voidFarmBar'); if(!b || !VOID || !VOID.open) return;
-  const n = (VOID.farm_pets||[]).length, ready = voidFarmReady(VOID), max = n * (VOID.farm_rate||VOID_FARM_RATE) * (VOID.farm_cap||VOID_FARM_CAP);
+  const n = (VOID.farm_pets||[]).length, ready = voidFarmReady(VOID), max = n * (VOID.farm_rate||VOID_FARM_RATE) * voidCapEff(VOID);
   const need = VOID.bp_need || 30, g = voidGauge(VOID), waiting = Math.floor(g / need), pct = Math.min(100, Math.floor((g % need) / need * 100));
   const snackOn = VOID.snack_until && Date.parse(VOID.snack_until) > Date.now(), left = snackOn ? Math.ceil((Date.parse(VOID.snack_until) - Date.now())/6e4) : 0;
   const perHr = n ? Math.ceil((need - g % need) / n) : 0;
@@ -6413,7 +6416,8 @@ document.addEventListener('click', e=>{
         + (fresh.length ? `✨ 새 도안\n${fresh.map(line).join('\n')}\n\n` : '')
         + (dup.length ? `이미 있는 도안 ${dup.length}장은 💠 ${r.dup_shards}개로 바꿨어요\n${dup.map(line).join('\n')}\n\n` : '')
         + (fresh.length ? '📜 제작대에서 만들 수 있어요!' : ''));
-    } else toast(`🧺 마물들이 물어온 💠 이세계 파편 ${r.gain.toLocaleString()}개를 받았어요!${r.boosted?' 🍖 간식 덕분에 두 배!':''}`); });
+    } else toast(`🧺 마물들이 물어온 💠 이세계 파편 ${r.gain.toLocaleString()}개를 받았어요!${r.boosted?' 🍖 간식 덕분에 두 배!':''}`);
+    if(r.guard_bonus) setTimeout(()=>toast(`🛡️ 파수꾼이 「오늘도 잘 지켰다!」며 💠 ${r.guard_bonus}개를 더 얹어 줬어요`, 3500), 2800); });
   const vct = e.target.closest('[data-vctab]'); if(vct){ vcraftTab = vct.dataset.vctab; renderVoid(); return; }
   const vpk = e.target.closest('[data-vpick]');
   if(vpk) return act(async()=>{ const f = vfurnOf(vpk.dataset.vpick) || {name:'이 가구'};
@@ -9279,7 +9283,7 @@ start();
 
 </script>
 <script src="stall.js?v=1025a"></script>
-<script src="merchant.js?v=1025b"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 76</p>
+<script src="merchant.js?v=1025c"></script>
+<p class="site-ver">마감의 숲 · 10-25 판 77</p>
 </body>
 </html>
