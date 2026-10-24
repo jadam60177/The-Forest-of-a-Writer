@@ -7782,8 +7782,9 @@ const WINTER_PICKS = {lotto:{ic:'🎟️', name:'복권 하루 +3장', sub:'영�
 function winterPickHTML(W){
   const got = new Set(W.got||[]); if(!got.has('choice')) return '';
   if(W.pick) return `<p class="small wb-note ok">🎁 ${WINTER_PICKS[W.pick]?.ic||''} ${esc(WINTER_PICKS[W.pick]?.name||W.pick)}${jo(WINTER_PICKS[W.pick]?.name||'', '을','를')} 골랐어요!</p>`;
-  const full = (W.rooms||1) >= 4;
-  return `<div class="wb-pick">${Object.entries(WINTER_PICKS).map(([k,v])=>`<button class="mini ${k==='room'&&full?'':'ask-yes'}" type="button" data-wpick="${k}" ${k==='room'&&full?'disabled title="방을 이미 다 열었어요"':''}>${v.ic} ${v.name}<br><span class="small">${k==='room'&&full?'방을 다 열었어요':v.sub}</span></button>`).join('')}</div><p class="small wb-note">🎁 셋 중 <b>하나만</b> 고를 수 있어요. 고르면 바꿀 수 없어요!</p>`;
+  const full = (W.rooms||1) >= 4, hadLotto = got.has('lotto');   // (10-25) 예전 판에서 복권 +3장을 이미 받은 주민은 다른 걸로
+  const off = k => (k==='room' && full) ? '방을 이미 다 열었어요' : (k==='lotto' && hadLotto) ? '복권 +3장은 이미 받았어요' : '';
+  return `<div class="wb-pick">${Object.entries(WINTER_PICKS).map(([k,v])=>`<button class="mini ${off(k)?'':'ask-yes'}" type="button" data-wpick="${k}" ${off(k)?`disabled title="${off(k)}"`:''}>${v.ic} ${v.name}<br><span class="small">${k==='room'&&full?'방을 다 열었어요':v.sub}</span></button>`).join('')}</div><p class="small wb-note">🎁 셋 중 <b>하나만</b> 고를 수 있어요. 고르면 바꿀 수 없어요!</p>`;
 }
 function winterMyHouseNote(){   // (10-21) 받았는데 기본 집으로 보이는 주민에게 이유를 알려 줘요
   const stg = stageIdx(ME.total_minutes);
@@ -9311,6 +9312,6 @@ start();
 </script>
 <script src="stall.js?v=1025a"></script>
 <script src="merchant.js?v=1025c"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 78</p>
+<p class="site-ver">마감의 숲 · 10-25 판 79</p>
 </body>
 </html>
