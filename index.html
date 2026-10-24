@@ -2175,6 +2175,11 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .void-stage{position:relative;border-radius:16px;padding:1.4rem .6rem;background:var(--vbg);overflow-x:auto;box-shadow:inset 0 0 40px rgba(0,0,0,.35);transition:background .4s}
 .room.void-room{background:rgba(255,255,255,.07);border:2px solid rgba(228,210,255,.6);box-shadow:0 0 30px rgba(190,150,255,.4),inset 0 0 18px rgba(255,255,255,.14);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}
 .void-room .tile.a{background:rgba(255,255,255,.14)} .void-room .tile.b{background:rgba(255,255,255,.06)}
+/* ☁️ 밝은 천계 배경에서는 바닥 칸이 안 보여서 남보라로 또렷하게 (10-24 판 74) */
+.void-stage[data-vbg="heaven"] .room.void-room{background:rgba(70,72,140,.16);border-color:rgba(110,100,190,.75);box-shadow:0 0 24px rgba(120,110,200,.35),inset 0 0 14px rgba(255,255,255,.25)}
+.void-stage[data-vbg="heaven"] .void-room .tile{box-shadow:inset 0 0 0 1px rgba(90,90,170,.28)}
+.void-stage[data-vbg="heaven"] .void-room .tile.a{background:rgba(80,84,160,.2)} .void-stage[data-vbg="heaven"] .void-room .tile.b{background:rgba(80,84,160,.1)}
+.void-stage[data-vbg="heaven"] .void-room .furn{filter:drop-shadow(0 2px 3px rgba(40,40,100,.45))}
 .void-room .tile.pv-ok{outline:2px dashed #E3CCFF;background:rgba(227,204,255,.35)} .void-room .tile.pv-no{outline:2px dashed #FF8A7A;background:rgba(255,120,100,.3)}
 .void-room .furn.acc-small > .fsvg,.void-room .furn.acc-small > .emo,.void-room .furn.acc-small > img{transform:scale(var(--acc-s,.72));transform-origin:50% 92%}
 .void-room.view .furn{pointer-events:none}
@@ -6266,7 +6271,7 @@ function voidCraftHTML(V){
 }
 function renderVoidRoom(){
   const st = document.getElementById('voidStage'); if(!st || !VOID || !VOID.open) return;
-  st.style.setProperty('--vbg', voidBgCSS(VOID.bg));
+  st.style.setProperty('--vbg', voidBgCSS(VOID.bg)); st.dataset.vbg = VOID.bg || 'base';
   if(st._fx !== VOID.fx){ st._fx = VOID.fx; st.querySelector('.vfx:not(.setfx)')?.remove(); if(VOID.fx) st.insertAdjacentHTML('afterbegin', voidFxHTML(VOID.fx)); }
   const sk = (VOID.sets||[]).join(); if(st._sets !== sk){ st._sets = sk; st.querySelectorAll('.vfx.setfx').forEach(x=>x.remove()); st.insertAdjacentHTML('afterbegin', voidSetFxHTML(VOID.sets)); }
   st.querySelector('.room')?.remove(); st.insertAdjacentHTML('beforeend', voidRoomHTML(VOID, true));
@@ -8729,7 +8734,7 @@ function renderVisit(){
   room.parentElement.hidden = outside; vg.hidden = !outside;
   if(VISIT.room==='v' && VISIT.void){
     const V = VISIT.void, b = VOID_BGS[V.bg] || VOID_BGS.base; if(V.catalog) setVCAT(V.catalog);
-    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸${isMe(p) && !V.public ? ' · 🔒 비공개라 나만 보여요' : ''}</span></h4><div class="void-stage" style="--vbg:${voidBgCSS(V.bg)}">${voidFxHTML(V.fx)}${voidSetFxHTML(V.sets)}${voidRoomHTML(V, false)}</div>`
+    vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸${isMe(p) && !V.public ? ' · 🔒 비공개라 나만 보여요' : ''}</span></h4><div class="void-stage" data-vbg="${esc(V.bg||'base')}" style="--vbg:${voidBgCSS(V.bg)}">${voidFxHTML(V.fx)}${voidSetFxHTML(V.sets)}${voidRoomHTML(V, false)}</div>`
       + `<h4 class="tank-title farm-title">🐾 마물 농장 <span class="small">${(V.farm_pets||[]).length}종</span></h4>${voidFarmHTML(V, false)}`;
     startFarm(vg.querySelector('.vfarm'));
   }
@@ -9259,6 +9264,6 @@ start();
 
 </script>
 <script src="stall.js?v=1024c"></script>
-<p class="site-ver">마감의 숲 · 10-24 판 73</p>
+<p class="site-ver">마감의 숲 · 10-24 판 74</p>
 </body>
 </html>
