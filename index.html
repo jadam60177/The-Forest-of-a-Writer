@@ -7729,13 +7729,13 @@ function winterMailCheck(){   // 📬 행사 시작·집 공개·100% 너머 소
   if(!WINTER) return;
   const k = 'majam-winter-seen-' + WINTER.code, now = {state:WINTER.state, tiers:WINTER.tiers||0, rev:!!WINTER.revealed};
   let seen = null; try{ seen = JSON.parse(localStorage.getItem(k)||'null'); }catch(e){}
+  now.by = WINTER.beyond ?? (now.rev ? 1 : 0);   // (10-24) 100% 너머 단계도 같이 저장해요 — 안 하면 1분마다 같은 소식이 또 왔어요
   try{ localStorage.setItem(k, JSON.stringify(now)); }catch(e){}
   const items = [];
   if((!seen || seen.state!=='open') && now.state==='open') items.push({icon:'❄️', title:'겨울 행사가 열렸어요!', body:'마을 광장에서 다 같이 코인을 보태면 한정 겨울 집이 하나씩 공개돼요.\n100코인만 보태도 ❄️ 눈꽃 이름표를 받아요.'});
   const from = seen ? seen.tiers : 0;
   for(let t = from+1; t <= now.tiers; t++){ const ns = WINTER_SLOTS.filter(s=>s.t===t).map(s=>s.name).join('·');
     items.push({icon:'⛄', title:`겨울 집 「${ns}」${jo(ns,'이','가')} 공개됐어요!`, body:`마을이 ${WINTER_PCT[t]}%를 넘겼어요. 겨울 집을 받은 주민은 ${WINTER_SLOTS.filter(s=>s.t===t).map(s=>s.for).join(' · ')} 크기에서 입을 수 있어요.`}); }
-  now.by = WINTER.beyond ?? (now.rev ? 1 : 0);
   const sb = seen ? (seen.by ?? (seen.rev ? 1 : 0)) : 0, nd = WINTER.need || {};
   const BYMAIL = [null,
     {icon:'⛄', title:'100% 달성! 기념 광장에 눈사람이 세워졌어요', body:'다 같이 해낸 마을 100%! 마을 광장 🏛️ 기념 광장에 「26 겨울 눈사람」이 첫 기념물로 세워졌어요.\n그런데… 100% 너머에도 무언가 더 있대요. 다음 비밀은 150%에서!'},
@@ -8973,12 +8973,17 @@ const mailKey = () => 'majam-mail-' + (DEMO ? 'demo' : (supaApi.myId() || 'me'))
 function mailLoad(){
   if(!MAIL){ try{ MAIL = JSON.parse(localStorage.getItem(mailKey()) || '[]'); }catch(e){ MAIL = []; } if(!Array.isArray(MAIL)) MAIL = []; }
   const cut = Date.now() - MAIL_DAYS*864e5; MAIL = MAIL.filter(m=>m && m.t > cut);
+  // (10-24) 같은 날 똑같은 소식이 여러 통이면 가장 새것 하나만 남겨요 (겨울 150% 소식이 쌓이던 문제 정리)
+  const seenK = new Set(), n0 = MAIL.length;
+  MAIL = MAIL.filter(m=>{ const k = (m.title||'') + '|' + (m.body||'') + '|' + new Date(m.t).toDateString(); if(seenK.has(k)) return false; seenK.add(k); return true; });
+  if(MAIL.length !== n0) mailSave();
   return MAIL;
 }
 function mailSave(){ try{ localStorage.setItem(mailKey(), JSON.stringify(MAIL.slice(0, MAIL_MAX))); }catch(e){} }
 function mailAdd(items){
   items = (items||[]).filter(Boolean); if(!items.length) return;
   mailLoad(); const t = Date.now();
+  items = items.filter(x=>!MAIL.some(m=>m.title===x.title && m.body===x.body && t - m.t < 864e5)); if(!items.length) return;   // 하루 안에 똑같은 소식은 다시 안 넣어요
   items.slice().reverse().forEach((x,i)=>MAIL.unshift({id:`${t}-${i}-${Math.random().toString(36).slice(2,7)}`, t, read:false, ...x}));
   MAIL = MAIL.slice(0, MAIL_MAX); mailSave(); mailFresh += items.length; renderMailBadge();
   if(document.getElementById('mailDlg').open) renderMail();
@@ -9228,6 +9233,6 @@ start();
 
 </script>
 <script src="stall.js?v=1024c"></script>
-<p class="site-ver">마감의 숲 · 10-24 판 70</p>
+<p class="site-ver">마감의 숲 · 10-24 판 71</p>
 </body>
 </html>
