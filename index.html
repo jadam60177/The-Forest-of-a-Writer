@@ -1945,6 +1945,7 @@ dialog.isk-guide{max-width:min(94vw,620px);width:100%}
 /* ✦ 겨울 100% 너머 (10-22) */
 .wb-pick{display:flex;gap:.4rem;flex-wrap:wrap;margin:.3rem 0 0 2.1rem}
 .wb-pick .mini{line-height:1.3;padding:.35rem .7rem;text-align:center}
+.wb-pick .mini:disabled{opacity:.45;filter:grayscale(1);text-decoration:none}
 button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .wb-slot .wq.wq-ic{font-size:2.2rem;background:none;border:0;box-shadow:none}
 .wb-bar2{margin-top:.4rem;height:8px;position:relative}
@@ -7784,7 +7785,7 @@ function winterPickHTML(W){
   if(W.pick) return `<p class="small wb-note ok">🎁 ${WINTER_PICKS[W.pick]?.ic||''} ${esc(WINTER_PICKS[W.pick]?.name||W.pick)}${jo(WINTER_PICKS[W.pick]?.name||'', '을','를')} 골랐어요!</p>`;
   const full = (W.rooms||1) >= 4, hadLotto = got.has('lotto');   // (10-25) 예전 판에서 복권 +3장을 이미 받은 주민은 다른 걸로
   const off = k => (k==='room' && full) ? '방을 이미 다 열었어요' : (k==='lotto' && hadLotto) ? '복권 +3장은 이미 받았어요' : '';
-  return `<div class="wb-pick">${Object.entries(WINTER_PICKS).map(([k,v])=>`<button class="mini ${off(k)?'':'ask-yes'}" type="button" data-wpick="${k}" ${off(k)?`disabled title="${off(k)}"`:''}>${v.ic} ${v.name}<br><span class="small">${k==='room'&&full?'방을 다 열었어요':v.sub}</span></button>`).join('')}</div><p class="small wb-note">🎁 셋 중 <b>하나만</b> 고를 수 있어요. 고르면 바꿀 수 없어요!</p>`;
+  return `<p class="small wb-note" style="margin-left:2.1rem">👇 <b>아직 고르지 않았어요.</b> 아래에서 하나를 눌러 골라 주세요${hadLotto?' · 🎟️ 복권 +3장은 예전 보상으로 이미 받아서(하루 8장) 나머지 둘 중에서 골라요':''}</p><div class="wb-pick">${Object.entries(WINTER_PICKS).map(([k,v])=>`<button class="mini ${off(k)?'':'ask-yes'}" type="button" data-wpick="${k}" ${off(k)?`disabled title="${off(k)}"`:''}>${v.ic} ${v.name}<br><span class="small">${off(k) ? '✓ '+off(k) : v.sub}</span></button>`).join('')}</div><p class="small wb-note">🎁 셋 중 <b>하나만</b> 고를 수 있어요. 고르면 바꿀 수 없어요!</p>`;
 }
 function winterMyHouseNote(){   // (10-21) 받았는데 기본 집으로 보이는 주민에게 이유를 알려 줘요
   const stg = stageIdx(ME.total_minutes);
@@ -9312,6 +9313,6 @@ start();
 </script>
 <script src="stall.js?v=1025a"></script>
 <script src="merchant.js?v=1025c"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 79</p>
+<p class="site-ver">마감의 숲 · 10-25 판 80</p>
 </body>
 </html>
