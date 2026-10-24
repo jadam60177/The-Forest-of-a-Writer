@@ -946,6 +946,7 @@ img.fimg{object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2
 .furn.wide.winfit > img.fimg.fsvg{height:calc(100% - 4px);object-position:center}
 .furn.turn > img.fimg.fsvg{left:50%;top:50%;width:var(--rh);height:var(--rw);object-position:center;transform:translate(-50%,-50%) rotate(90deg)}
 .furn.turn.r3 > img.fimg.fsvg{transform:translate(-50%,-50%) rotate(-90deg)}
+.furn.turn.vwall > img.fimg.fsvg{object-fit:fill}   /* 🧱 세로로 놓은 2·3칸 벽 조각은 칸 길이에 꽉 (10-24) */
 /* ===== 광장 건물 그림 (10-12) ===== */
 .lot{min-height:150px}
 .lot .b img.pimg{display:block;height:96px;width:auto;max-width:100%;object-fit:contain;margin:0 auto}
@@ -4289,7 +4290,7 @@ function roomHTML(list, cur, {editable, cabs={}, maxR, maxC}){
     if(!rot && it.w!==it.h && f.w===it.h && f.h===it.w) rot = 1;
     // 칸막이처럼 가로 그림(_h)이 따로 있는 가구는 눕히지 않고 가로 그림으로 그려요
     const hKey = rot%2 && !fimg(it) && iconKey(it) && FURN_SVG[iconKey(it)+'_h'] ? iconKey(it)+'_h' : null;
-    const stretch = !!fimg(it) && STRETCH_IMG.has(f.item_code);   // 커튼처럼 칸에 맞춰 늘려 그리는 그림 (돌려도 그림은 안 눕혀요)
+    const stretch = !!fimg(it) && STRETCH_IMG.has(f.item_code) && !(rot%2 && /^v_[a-z]+_w\d_[23]$/.test(f.item_code));   // 커튼처럼 칸에 맞춰 늘려 그리는 그림 · 🧱 2·3칸 벽 조각은 세로로 놓으면 그림째 눕혀요 (10-24)
     const wallH = WALL_H.has(f.item_code) && !!fimg(it), tile = TILE_WALL.has(f.item_code) && !!fimg(it);
     if(rot%2 && TABLE_SURFACE.has(f.item_code) && it.w===it.h) rot = 0;   // (10-21) 정사각 테이블은 돌려도 똑같이 (그림이 옆으로 눕지 않게)
     const tableV = rot%2 && TABLE_V_IMG.has(f.item_code);                  // 세로로 놓은 긴 테이블: 세로 그림
@@ -4298,7 +4299,7 @@ function roomHTML(list, cur, {editable, cabs={}, maxR, maxC}){
     const rs = rot%2 ? `;--rw:calc(${f.w}*var(--tile) + ${f.w-1}*3px - 4px);--rh:calc(${f.h}*var(--tile) + ${f.h-1}*3px - 4px)` : '';
     // 세로로 긴 그림 가구(1×2 등)는 키를 칸에 꽉 맞추고, 그림이 통통하면 옆으로 조금 삐져나와요 (10-13 옷장 제보)
     const tallfit = !!fimg(it) && f.h>f.w && !stretch && !turn && !wallH && !tile && !floor && !TURN_IMG.has(f.item_code);
-    const cls = `furn ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${small?'acc-small':''} ${WIN2.has(f.item_code)?'winfit':''} ${rot?'rot r'+rot:''}`;
+    const cls = `furn ${turn && /^v_[a-z]+_w\d_[23]$/.test(f.item_code)?'vwall':''} ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${small?'acc-small':''} ${WIN2.has(f.item_code)?'winfit':''} ${rot?'rot r'+rot:''}`;
     const art = tableV ? `<img class="fsvg fimg" src="furn/${f.item_code}_v.webp${furnV(f.item_code)}" alt="" draggable="false" loading="lazy">` : wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
     const tf = isRug(f.item_code) ? tintCSS(f.tint) : '', tcls = tf ? ' tinted' : '', ts = tf ? `;--tf:${tf}` : '';   // 🎨 러그 색
