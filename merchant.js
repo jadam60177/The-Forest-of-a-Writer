@@ -69,6 +69,8 @@ window.merchSkyHTML = skyHTML;
 /* ---------- 상태 ---------- */
 window.MERCH = null;
 let deco = 'head';
+// 접기 (10-25) — 스크롤 길어지는 판은 접을 수 있게. 브라우저마다 기억해요
+const mFolded = () => { try{ return localStorage.getItem('majam-merch-fold')==='1'; }catch(e){ return false; } };
 async function refreshMerch(){ if(!api.merchant) return; try{ window.MERCH = await api.merchant(); }catch(e){ return; }
   syncShards(window.MERCH); renderMerch(); renderDeco(); try{ if(typeof renderVoid==='function' && VOID && VOID.open) renderVoid(); }catch(e){} }
 window.refreshMerch = refreshMerch;
@@ -105,10 +107,11 @@ function renderMerch(){
     return `<div class="m-row"><h4>${t} <span class="small">${sub}</span></h4><div class="m-cards">${os.map(cardHTML).join('')}</div></div>`; }).join('');
   const say = SAY[new Date().getDate() % SAY.length];
   box.innerHTML = `<div class="merch on"><div class="m-top"><img class="m-cat" src="${src('merchant')}" alt="차원 상인" draggable="false">
-      <div class="m-txt"><h3>🌀 차원 상인이 왔어요! <span class="small">오늘 하루만</span></h3><p class="m-say">“${esc(say)}”</p>
+      <div class="m-txt"><h3>🌀 차원 상인이 왔어요! <span class="small">오늘 하루만</span></h3>
+      <button class="mini m-fold" type="button" data-mfold aria-expanded="${!mFolded()}">${mFolded() ? '펼치기 ▾' : '접기 ▴'}</button><p class="m-say">“${esc(say)}”</p>
       <p class="small">💠 이세계 파편만 받아요 · 흥정은 오늘 한 번 ${M.haggled ? '(이미 했어요)' : '(물건 하나 골라서)'} · <b>💠 ${(M.shards||0).toLocaleString()}</b></p>${decoBtn}
       ${!M.has_void ? `<p class="small">🔮 파수꾼과 하늘 장식은 아공간 문을 연 뒤에 데려갈 수 있어요</p>` : ''}</div></div>
-    ${groups}</div>`;
+    ${mFolded() ? `<p class="small m-foldnote">물건 ${(M.offers||[]).length}가지를 접어 뒀어요 · 펼치기를 누르면 보여요</p>` : groups}</div>`;
 }
 
 /* ---------- 꾸미기 창 ---------- */
@@ -131,6 +134,7 @@ function renderDeco(){
 
 /* ---------- 누르기 ---------- */
 document.addEventListener('click', e=>{
+  if(e.target.closest('[data-mfold]')){ try{ localStorage.setItem('majam-merch-fold', mFolded() ? '0' : '1'); }catch(e){} renderMerch(); return; }
   if(e.target.closest('[data-mdeco]')){ const d = document.getElementById('merchDeco'); if(!d.open) d.showModal(); renderDeco(); return; }
   if(e.target.closest('[data-mdecoclose]')){ document.getElementById('merchDeco').close(); return; }
   const dt = e.target.closest('[data-mdecotab]'); if(dt){ deco = dt.dataset.mdecotab; renderDeco(); return; }
@@ -168,7 +172,9 @@ const css = document.createElement('style'); css.textContent = `
 .merch .m-top{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
 .merch.on .m-cat{width:min(150px,32vw);filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));animation:mbob 3s ease-in-out infinite}
 @keyframes mbob{50%{transform:translateY(-4px) rotate(-1deg)}}
-.merch .m-txt{flex:1 1 14rem;min-width:0;display:grid;gap:.35rem;justify-items:start}
+.merch .m-fold{position:absolute;top:0;right:0}
+.merch .m-foldnote{margin:.6rem 0 0}
+.merch .m-txt{position:relative;padding-right:5.5rem;flex:1 1 14rem;min-width:0;display:grid;gap:.35rem;justify-items:start}
 .merch h3{margin:0}.merch h4{margin:.9rem 0 .4rem}
 .merch .m-say{margin:0;font-family:"Jua",sans-serif;font-size:1.05rem}
 .m-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem}
