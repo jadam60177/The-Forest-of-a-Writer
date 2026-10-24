@@ -34,13 +34,15 @@ const css = document.createElement('style'); css.textContent = `dialog.visit.sta
 #stallDlg .s-stock.out{opacity:.55}
 #stallDlg .pop{animation:spop .5s ease}
 @keyframes spop{0%{transform:translateX(-50%) translateY(-30%) scale(.8);opacity:0}60%{transform:translateX(-50%) translateY(4%) scale(1.06);opacity:1}100%{transform:translateX(-50%) scale(1)}}
-#stallDlg .s-clerk{position:absolute;left:92.4%;bottom:29.4%;width:7.4cqw;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 .4cqw .3cqw rgba(0,0,0,.25))}
-#stallDlg .s-clerk.pet{width:9cqw;bottom:28.6%}
+#stallDlg .s-clerk{position:absolute;left:29.4%;bottom:39.2%;width:11cqw;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 .4cqw .3cqw rgba(0,0,0,.25))}
+#stallDlg .s-clerk.pet{width:16cqw;bottom:40.8%}
+#stallDlg .s-fg{position:absolute;left:14.375%;top:58.41%;width:25.625%;height:14.39%;background:url(stall/fg_day.webp) 0 0/100% 100% no-repeat;z-index:5;pointer-events:none}
+#stallDlg .s-stage.night .s-fg{background-image:url(stall/fg_night.webp)}
 #stallDlg .s-clerk img{width:100%;display:block}
 #stallDlg .s-clerk.jump{animation:sjump .55s ease-in-out}
 @keyframes sjump{40%{transform:translateX(-50%) translateY(-22%)}70%{transform:translateX(-50%) translateY(0)}85%{transform:translateX(-50%) translateY(-6%)}}
-#stallDlg .s-clerk .tag{position:absolute;right:0;top:100%;white-space:nowrap;font-family:"Jua",sans-serif;font-size:max(10px,.9cqw);background:rgba(58,42,18,.85);color:#FFE9C2;border-radius:999px;padding:0 .6cqw}
-#stallDlg .s-coinpop{position:absolute;left:90%;bottom:44%;z-index:9;font-family:"Jua",sans-serif;font-size:max(14px,1.8cqw);color:#FFE070;text-shadow:0 .15cqw 0 #7A4A12,0 0 .5cqw rgba(0,0,0,.4);transform:translateX(-50%);animation:scoin 1.4s ease-out forwards;pointer-events:none;white-space:nowrap}
+#stallDlg .s-clerk .tag{position:absolute;left:50%;transform:translateX(-50%);bottom:100%;white-space:nowrap;font-family:"Jua",sans-serif;font-size:max(10px,.9cqw);background:rgba(58,42,18,.85);color:#FFE9C2;border-radius:999px;padding:0 .6cqw}
+#stallDlg .s-coinpop{position:absolute;left:29.4%;bottom:58%;z-index:9;font-family:"Jua",sans-serif;font-size:max(14px,1.8cqw);color:#FFE070;text-shadow:0 .15cqw 0 #7A4A12,0 0 .5cqw rgba(0,0,0,.4);transform:translateX(-50%);animation:scoin 1.4s ease-out forwards;pointer-events:none;white-space:nowrap}
 @keyframes scoin{0%{opacity:0;margin-bottom:-2cqw}15%{opacity:1;margin-bottom:0}100%{opacity:0;margin-bottom:6cqw}}
 #stallDlg .s-guest{position:absolute;bottom:3%;height:16cqw;z-index:6;transform:translateX(-50%);transition-property:left;transition-timing-function:linear;pointer-events:none}
 #stallDlg .s-guest > img{height:100%;width:auto;display:block;filter:drop-shadow(0 .5cqw .4cqw rgba(0,0,0,.25))}
@@ -411,7 +413,7 @@ function shell(){
       <button class="s-sign" type="button" data-ssign title="눌러서 가판대 이름 바꾸기"></button>
       <div class="s-hud"><button class="s-pill s-boxbtn" type="button" data-sbox></button><span class="s-pill s-today"></span></div>
       <div class="s-shelf"></div>
-      <div class="s-clerk ${c.pet?'pet':''}"><img src="${c.src}" alt="점원 ${esc(c.name)}"><span class="tag">점원 · ${esc(c.name)}</span></div>
+      <div class="s-clerk ${c.pet?'pet':''}"><img src="${c.src}" alt="점원 ${esc(c.name)}"><span class="tag">점원 · ${esc(c.name)}</span></div><div class="s-fg" aria-hidden="true"></div>
       <div class="s-street"></div>
     </div>
     <div class="s-guide" hidden>
