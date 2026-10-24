@@ -646,7 +646,7 @@ function makeDemoApi(){
       bg = bg || V.bg; let th = bg; if(!themes.includes(th) || Math.random() >= .5){ const o = themes.filter(t=>t!==bg); th = o[Math.floor(Math.random()*o.length)] || themes[0]; }
       const pool = VCAT.filter(f=>f.theme===th && f.active!==false), f = pool[Math.floor(Math.random()*pool.length)];
       V.bps = V.bps||[]; const dup = V.bps.includes(f.code); if(dup) this.iskState().shards += 50; else V.bps.push(f.code); return {code:f.code, theme:th, dup}; },
-    async voidCraft(code){ const V = st.vd, f = vfurnOf(code); if(!f) fail('없는 가구예요'); if(!(V.bps||[]).includes(code)) fail('📜 도안이 아직 없어요');
+    async voidCraft(code){ const V = st.vd, f = vfurnOf(code); if(!f) fail('없는 가구예요'); if(!f.free && !(V.bps||[]).includes(code)) fail('📜 도안이 아직 없어요');
       V.vinv = V.vinv||{}; if(f.max_own && (V.vinv[code]||0) + V.items.filter(x=>x.item_code===code).length >= f.max_own) fail(`「${f.name}」은(는) ${f.max_own}개까지만 가질 수 있어요`);
       this.vdPay(f.price); V.vinv[code] = (V.vinv[code]||0)+1; persist(); return this.vdJson(); },
     async voidSnack(){ const V = st.vd, today = new Date().toDateString(); if(V.snack_day===today) fail('오늘 간식은 벌써 줬어요. 새벽 12시에 다시 줄 수 있어요');

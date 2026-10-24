@@ -2322,6 +2322,9 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
   animation:wsnow 22s linear infinite}
 @keyframes wsnow{to{background-position:30px 180px,-40px 220px,50px 260px,-20px 240px,60px 300px,-60px 320px}}
 @media (prefers-reduced-motion: reduce){:root[data-season="winter"] :is(.village,.tree-stage,.gacha-scene,.lake-scene,.pet-yard)::before{animation:none}}
+#vcraftDlg .vcraft-body{flex:1;overflow-y:auto;min-height:0;padding-right:.2rem}
+#vcraftDlg .vcraft-body > h4:first-child{margin-top:.2rem}
+.vcraft-open{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin:.8rem 0}
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -2835,6 +2838,10 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <button class="mini ask-yes" id="raidOk">알겠어요</button>
 </dialog>
 
+<dialog class="visit shop-dlg vcraft-dlg" id="vcraftDlg" aria-label="아공간 가구 제작대">
+  <div class="shop-dlg-head"><h3>📜 아공간 가구 제작대</h3><span class="shop-coins" id="vcraftShards"></span><button class="mini" type="button" data-vcraftclose>닫기</button></div>
+  <div class="vcraft-body" id="vcraftBody"></div>
+</dialog>
 <dialog class="visit stall-dlg" id="stallDlg" aria-label="음료 가판대"><div id="stallBox"></div></dialog>
 <dialog class="visit stall-rcpt" id="stallRcpt" aria-label="가판대 영수증"><div class="paper" id="stallPaper"></div></dialog>
 
@@ -2854,7 +2861,7 @@ const CONFIG = {
 };
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 </script>
-<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1024"><\/script>');</script>
+<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1024b"><\/script>');</script>
 <script>
 
 /* ---------- 기준 데이터 (schema.sql 의 room_size 와 같아야 해요) ---------- */
@@ -6213,6 +6220,23 @@ function voidBagHTML(){
 }
 const VTHEMES = () => { const ord = t => { const i = Object.keys(VOID_BGS).indexOf(t); return i<0 ? 99 : i; };
   return [...new Set(VCAT.filter(f=>f.active!==false).map(f=>f.theme))].sort((a,b)=>ord(a)-ord(b)); };
+// 📜 제작대는 따로 창으로 (10-24 판 73) — 아공간 화면이 너무 길어져서
+function voidCraftBtnHTML(V){
+  const bps = new Set(V.bps||[]), all = VCAT.filter(f=>f.active!==false && !f.free), have = all.filter(f=>bps.has(f.code)).length;
+  return `<div class="vcraft-open"><button class="mini ask-yes" type="button" data-vcraftopen>📜 가구 제작대 열기</button>
+    <span class="small">도안 ${have}/${all.length} · 🔮 별유리 가구 · 🧱 벽 조각도 여기서 만들어요</span></div>`;
+}
+function renderVcraftDlg(){
+  const d = document.getElementById('vcraftDlg'); if(!d || !d.open) return;
+  if(!VOID || !VOID.open){ d.close(); return; }
+  const sh = (RIFT && RIFT.shards) ?? VOID.shards ?? 0, body = document.getElementById('vcraftBody'), top = body.scrollTop;
+  document.getElementById('vcraftShards').textContent = `💠 ${sh.toLocaleString()}`;
+  body.innerHTML = voidCraftHTML(VOID); body.scrollTop = top;
+}
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-vcraftopen]')){ const d = document.getElementById('vcraftDlg'); d.showModal(); renderVcraftDlg(); return; }
+  if(e.target.closest('[data-vcraftclose]')) document.getElementById('vcraftDlg').close();
+});
 function voidCraftHTML(V){
   const bps = new Set(V.bps||[]), themes = VTHEMES(), sets = new Set(V.sets||[]);
   if(!themes.includes(vcraftTab)) vcraftTab = themes.includes(V.bg) ? V.bg : themes[0];
@@ -6221,7 +6245,7 @@ function voidCraftHTML(V){
   const PK = (V.picks && V.picks.themes || {})[vcraftTab] || {dups:0, used:0, left:0}, pneed = (V.picks && V.picks.need) || 3, pickable = PK.left > 0 && list.some(f=>!bps.has(f.code));
   const setN = list.filter(f=>f.in_set), setPlaced = setN.filter(f=>placed.has(f.code)).length, shards = (RIFT && RIFT.shards) ?? 0;
   const tb = themes.map(t=>{ const b = vthemeInfo(t), ts = all.filter(f=>f.theme===t);
-    return `<button class="vbg ${t===vcraftTab?'on':''}" type="button" data-vctab="${t}">${b.emoji} ${esc(b.name)} <span class="small">📜 ${ts.filter(f=>bps.has(f.code)).length}/${ts.length}${sets.has(t)?' · 🪞':''}</span></button>`; }).join('');
+    return `<button class="vbg ${t===vcraftTab?'on':''}" type="button" data-vctab="${t}">${b.emoji} ${esc(b.name)} <span class="small">${ts.length ? `📜 ${ts.filter(f=>bps.has(f.code)).length}/${ts.length}` : '바로 제작'}${sets.has(t)?' · 🪞':''}</span></button>`; }).join('');
   const walls = VCAT.filter(f=>f.active!==false && f.free && f.theme===vcraftTab);
   const card = f=>{ const own = bps.has(f.code) || f.free, n = (V.vinv||{})[f.code]||0, onfloor = (V.items||[]).filter(x=>x.item_code===f.code).length;
     const maxed = f.max_own && (n + onfloor) >= f.max_own;
@@ -6297,7 +6321,7 @@ function renderVoid(){
   }
   const V = VOID, gp = V.grow_price ?? V.cols*V.rows*10, bgs = V.bgs || ['base'];
   const k = JSON.stringify([shards, V.fx, V.fxs, V.cap_lv, V.rate_lv, ME.stars, V.cols, V.rows, V.bg, bgs, V.public, (V.items||[]).map(x=>x.item_code).join(), (V.farm_pets||[]).join(), VSEL, vbagTab, vcraftTab, V.vinv, V.bps, V.sets, Object.entries(INV||{}).filter(([c,n])=>n>0 && isLegendFurn(c)).length]);
-  if(box._k === k){ renderVoidRoom(); renderVoidFarmBar(); renderVoidSeal(); return; }
+  if(box._k === k){ renderVoidRoom(); renderVoidFarmBar(); renderVoidSeal(); renderVcraftDlg(); return; }
   box._k = k;
   box.innerHTML = `<div class="void-head"><h3>🔮 아공간 <span class="small">${V.cols}×${V.rows}칸</span> <button class="mini" type="button" data-iskguide="void">📖 안내</button></h3><span class="shards">💠 ${shards.toLocaleString()}</span></div>
     <div class="void-bar">${Object.entries(VOID_BGS).map(([c,b])=>{ const own = bgs.includes(c);
@@ -6312,18 +6336,18 @@ function renderVoid(){
       <span class="small">최대 ${V.max_cols||VOID_MAX_C}×${V.max_rows||VOID_MAX_R}칸</span></div>
     <h4>🎒 아공간에 놓을 것 <span class="small">🔮 아공간 가구와 👑 전설 가구만 놓을 수 있어요</span></h4>
     ${voidBagHTML()}
-    ${voidCraftHTML(V)}
+    ${voidCraftBtnHTML(V)}
     <h4>🐾 마물 농장</h4>
     ${voidFarmHTML(V, true)}
     <div class="vfarm-bar" id="voidFarmBar"></div>
     <div class="vseal-box" id="voidSealBox"></div>
     <div class="vfarm-up"><button class="mini" type="button" data-vup="cap" ${V.cap_price==null||shards<V.cap_price?'disabled':''}>🧺 바구니 Lv.${V.cap_lv||0} · ${V.farm_cap}시간치${V.cap_price!=null?` → ${V.farm_cap+4}시간 💠 ${V.cap_price}`:' (최대)'}</button>
       <button class="mini" type="button" data-vup="rate" ${V.rate_price==null||shards<V.rate_price?'disabled':''}>🦴 간식 그릇 Lv.${V.rate_lv||0} · 1시간 💠${V.farm_rate}${V.rate_price!=null?` → 💠${V.farm_rate+1} · 💠 ${V.rate_price}`:' (최대)'}</button></div>`;
-  renderVoidRoom(); renderVoidFarmBar(); renderVoidSeal(); startFarm(box.querySelector('.vfarm'));
+  renderVoidRoom(); renderVoidFarmBar(); renderVoidSeal(); renderVcraftDlg(); startFarm(box.querySelector('.vfarm'));
 }
 async function voidAfter(r){ const x = Array.isArray(r) ? r[0] : r; if(x && x.open){ if(VOID){ x.seal = x.seal ?? VOID.seal; x.picks = x.picks ?? VOID.picks; } VOID = x; } else await refreshVoid(); await Promise.all([refreshRift(), refreshMine()]); renderTop(); renderBag(); renderRift(); }
 document.addEventListener('click', e=>{
-  if(!e.target.closest('#voidBox')) return;
+  if(!e.target.closest('#voidBox, #vcraftDlg')) return;
   if(e.target.closest('[data-vopen]')) return act(async()=>{
     if(!(await ask(`💠 이세계 파편 ${(VOID.price||VOID_OPEN_PRICE).toLocaleString()}개로 아공간 문을 열까요?\n4×4칸 공간과 마물 농장이 생겨요.`))) return;
     await voidAfter(await api.voidOpen()); petParty('🔮', '아공간 문이 열렸어요!\n\n균열 깊숙한 곳에 나만의 공간이 생겼어요.\n🐾 마물 농장의 마물들이 💠 파편과 📜 가구 도안을 물어와요.\n도안으로 만든 아공간 가구와 👑 전설 가구로 꾸며 보세요!');
@@ -9235,6 +9259,6 @@ start();
 
 </script>
 <script src="stall.js?v=1024c"></script>
-<p class="site-ver">마감의 숲 · 10-24 판 72</p>
+<p class="site-ver">마감의 숲 · 10-24 판 73</p>
 </body>
 </html>
