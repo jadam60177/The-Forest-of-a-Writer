@@ -2396,6 +2396,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <div class="village-head">
     <p>불 켜진 집은 지금 작업 채널에 있는 사람이에요. 오래 비운 집에는 담당자가 찾아가요. 집을 누르면 구경할 수 있어요.</p>
     <span class="lit-count" id="litCount"></span>
+    <button class="mini stall-go" id="stallGo" type="button">☕ 내 음료 가판대</button>
     <button class="mini fold-btn" id="villageFold" type="button" aria-expanded="true">접기 ▴</button>
   </div>
   <div class="ground"></div>
@@ -2833,6 +2834,9 @@ document.documentElement.setAttribute('data-mode', modeNow());
   <button class="mini ask-yes" id="raidOk">알겠어요</button>
 </dialog>
 
+<dialog class="visit stall-dlg" id="stallDlg" aria-label="음료 가판대"><div id="stallBox"></div></dialog>
+<dialog class="visit stall-rcpt" id="stallRcpt" aria-label="가판대 영수증"><div class="paper" id="stallPaper"></div></dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -2849,7 +2853,7 @@ const CONFIG = {
 };
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 </script>
-<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1022b"><\/script>');</script>
+<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1024"><\/script>');</script>
 <script>
 
 /* ---------- 기준 데이터 (schema.sql 의 room_size 와 같아야 해요) ---------- */
@@ -4005,6 +4009,12 @@ const supaApi = (() => {
     async callTruck(kind){ const r = ok(await sb.rpc('call_truck', {p_kind:kind})); return Array.isArray(r) ? r[0] : r; },
     async claimTruck(id){ const r = ok(await sb.rpc('claim_truck', {p_id:id})); return Array.isArray(r) ? r[0] : r; },
     async truckReport(){ try{ return ok(await sb.rpc('truck_report')) || []; }catch(e){ return []; } },
+    async stall(){ return ok(await sb.rpc('get_stall')); },                                   // ☕ 음료 가판대 (stall.sql)
+    async stallClaim(){ return ok(await sb.rpc('stall_claim')); },
+    async stallCraft(slot, cup, ings, top, name, dex){ return ok(await sb.rpc('stall_craft', {p_slot:slot, p_cup:cup, p_ings:ings, p_top:top||'', p_name:name, p_dex:dex||null})); },
+    async stallRemove(slot){ return ok(await sb.rpc('stall_remove', {p_slot:slot})); },
+    async stallVowStart(bg){ return ok(await sb.rpc('stall_vow_start', {p_bg:bg})); },
+    async stallVowClaim(){ return ok(await sb.rpc('stall_vow_claim')); },
     myId(){ return myId; },
   };
 })();
@@ -9213,6 +9223,7 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
-<p class="site-ver">마감의 숲 · 10-23 판 68</p>
+<script src="stall.js?v=1024a"></script>
+<p class="site-ver">마감의 숲 · 10-24 판 69</p>
 </body>
 </html>

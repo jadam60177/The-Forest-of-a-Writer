@@ -716,6 +716,47 @@ function makeDemoApi(){
         P.pets.push({id:P.nid++, code, name:s.name.split(' ').pop().slice(0,10), affection:0, last_cared:new Date().toISOString(), fed:0, patted:0, played:0, day:this.fday(), event_at:new Date().toISOString(), lodge}); }
       I.eggs = I.eggs.filter(x=>x.id!==id); persist();
       return {pet:code, name:s.name, dup, gain:dup?RIFT_DUP:0, lodge, shards:I.shards}; },
+    // ☕ 음료 가판대 (stall.sql 흉내) — 미리보기는 1초가 1분이라 금방 팔려요
+    stState(){ const k = new Date(Date.now()+9*36e5).toISOString().slice(0,10);
+      let S; try{ S = JSON.parse(localStorage.getItem('majam-demo-stall')||'null'); }catch(e){}
+      S ||= {day:k, ame:0, sp:0, last:Date.now(), box:{}, bc:0, bs:0, since:null, dex:[], slots:[], inv:{}, vow:null};
+      if(S.day!==k){ S.day = k; S.ame = 0; S.sp = 0; } return S; },
+    stSave(S){ try{ localStorage.setItem('majam-demo-stall', JSON.stringify(S)); }catch(e){} },
+    stRun(S){ const el = Math.min((Date.now()-S.last)/1000, 1440); S.last = Date.now(); const sold = [];   // 1초 = 1분
+      const e = el/STALL_NUM.saleMin*(.6+Math.random()*.4); let n = Math.floor(e) + (Math.random() < e-Math.floor(e) ? 1 : 0);
+      while(n-- > 0){ let d = null, star = false;
+        if(S.sp < STALL_NUM.spCap && (Math.random()<.7 || S.ame >= STALL_NUM.ameCap)){ const av = S.slots.filter(x=>x.stock>0); d = av[Math.floor(Math.random()*av.length)] || null; }
+        if(d){ d.stock--; S.sp++; if(d.isekai && Math.random()<STALL_NUM.starP){ star = true; S.bs++; } S.slots = S.slots.filter(x=>x.stock>0); }
+        else if(S.ame < STALL_NUM.ameCap){ S.ame++; d = {name:'아메리카노', cup:'coffee', ings:['bean'], top:'', price:STALL_NUM.amePrice}; }
+        else break;
+        const L = S.box[d.name] ||= {n:0, coin:0}; L.n++; L.coin += d.price; S.bc += d.price; S.since ||= new Date(Date.now()-el*60e3).toISOString();
+        sold.push({name:d.name, cup:d.cup, ings:d.ings, top:d.top, coin:d.price, star}); }
+      return sold; },
+    stJson(S, sold){ const I = this.iskState(), V = st.vd, done = S.vow ? Math.max(0, st.me.total_minutes - S.vow.min) : 0;
+      return {sold:sold||[], day:S.day, ame_sold:S.ame, sp_sold:S.sp, ame_cap:STALL_NUM.ameCap, sp_cap:STALL_NUM.spCap, ame_price:STALL_NUM.amePrice, stock:STALL_NUM.stock, unit:STALL_NUM.unit,
+        box:{lines:S.box, coins:S.bc, stars:S.bs, since:S.since}, dex:S.dex, slots:S.slots.map(x=>({...x})), inv:Object.fromEntries(Object.entries(S.inv).filter(([,q])=>q>0)),
+        bgs:(V && V.bgs) || ['base','hell','magic'], vow:{bg:S.vow?S.vow.bg:null, ready:Math.min(Math.floor(done/STALL_NUM.vowEvery), STALL_NUM.vowMax), mins:done%STALL_NUM.vowEvery, every:STALL_NUM.vowEvery, max:STALL_NUM.vowMax},
+        coins:st.me.coins, stars:st.me.stars, shards:I.shards}; },
+    async stall(){ const S = this.stState(), sold = this.stRun(S); this.stSave(S); return this.stJson(S, sold); },
+    async stallClaim(){ const S = this.stState(); this.stRun(S); if(!S.bc && !S.bs) fail('아직 돈통이 비어 있어요');
+      const c = S.bc, t = S.bs; st.me.coins += c; st.me.stars += t; S.box = {}; S.bc = 0; S.bs = 0; S.since = null; this.stSave(S); persist(); return {coins:c, stars:t, ...this.stJson(S)}; },
+    async stallCraft(slot, cup, ings, top, name, dex){ const S = this.stState(), I = this.iskState(); this.stRun(S);
+      if(S.slots.some(x=>x.slot===slot)) fail('그 칸에 아직 음료가 있어요. 먼저 내려 주세요');
+      let per = 0, isk = false, shard = 0; const use = {};
+      for(const k of ings){ const g = STALL_ING[k]; if(!g) fail('없는 재료예요'); per += g.p; if(g.t){ isk = true; const have = (S.inv[k]||0) - (use[k]||0); if(have>0) use[k] = (use[k]||0)+1; else shard += STALL_NUM.unit; } }
+      per += STALL_TOP_COST[top||''] || 0; const cost = per*STALL_NUM.stock;
+      if(st.me.coins < cost) fail(`코인이 모자라요 (재료비 🪙 ${cost})`); if(I.shards < shard) fail(`이세계 파편이 모자라요 (💠 ${shard})`);
+      st.me.coins -= cost; I.shards -= shard; Object.entries(use).forEach(([k,n])=>S.inv[k]-=n);
+      const price = STALL_CUPS[cup].price + Math.round(per*1.15);
+      S.slots.push({slot, name:(name||'').trim().slice(0,20)||'특제 음료', cup, ings:[...ings], top:top||'', price, isekai:isk, stock:STALL_NUM.stock}); S.slots.sort((a,b)=>a.slot-b.slot);
+      if(dex && !S.dex.includes(dex)) S.dex.push(dex); this.stSave(S); persist(); return {coin_cost:cost, shard_cost:shard, price, ...this.stJson(S)}; },
+    async stallRemove(slot){ const S = this.stState(); this.stRun(S); S.slots = S.slots.filter(x=>x.slot!==slot); this.stSave(S); return this.stJson(S); },
+    async stallVowStart(bg){ const S = this.stState(); S.vow = {bg, min:st.me.total_minutes}; this.stSave(S); return this.stJson(S); },
+    async stallVowClaim(){ const S = this.stState(); if(!S.vow) fail('집필 서약을 먼저 시작해 주세요');
+      let n = Math.floor((st.me.total_minutes - S.vow.min)/STALL_NUM.vowEvery); if(n<=0) fail(`아직 받을 재료가 없어요. 작업실에서 ${STALL_NUM.vowEvery}분을 채워 주세요`);
+      S.vow.min += n*STALL_NUM.vowEvery; n = Math.min(n, STALL_NUM.vowMax); const pool = Object.values(STALL_ING).filter(g=>g.t===S.vow.bg), got = {};
+      while(n--){ const g = pool[Math.floor(Math.random()*pool.length)]; S.inv[g.code] = (S.inv[g.code]||0)+1; got[g.code] = (got[g.code]||0)+1; }
+      this.stSave(S); return {got, ...this.stJson(S)}; },
     // 미리보기 전용
     tick(){
       { const B = this.bossState(); if(st.me.in_voice && B.tickets<BOSS_TICKET_MAX && B.dmg<B.max_hp){ const lit = 1 + st.others.filter(o=>o.in_voice && !o.removed).length; B.fuel += bossFire(lit);
