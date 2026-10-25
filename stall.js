@@ -14,9 +14,9 @@ const css = document.createElement('style'); css.textContent = `dialog.visit.sta
 #stallDlg .s-note{font-size:.82rem;color:var(--muted);margin:.2rem 0;grid-column:1/-1}
 /* 🎪 무대 */
 #stallDlg .s-stage{position:relative;container-type:inline-size;width:100%;aspect-ratio:1600/1195;border-radius:16px;overflow:hidden;
-  background:url(stall/bg_day.webp) center/cover no-repeat,#9CC46A;box-shadow:0 8px 24px rgba(0,0,0,.25)}
-#stallDlg .s-stage.night{background-image:url(stall/bg_night.webp)}
-#stallDlg .s-sign{position:absolute;left:16%;width:25%;top:20.8%;height:8.4%;display:grid;place-items:center;text-align:center;font-family:"Jua",sans-serif;font-weight:400;color:#3B1F0B;font-size:2.5cqw;line-height:1.12;letter-spacing:.02em;border:0;background:none;padding:0;cursor:pointer;z-index:3;text-shadow:0 0 .35cqw #F6DEAF,0 0 .35cqw #F6DEAF,0 0 .2cqw #F6DEAF}
+  background:url(stall/bg_day.webp?v=3) center/cover no-repeat,#9CC46A;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+#stallDlg .s-stage.night{background-image:url(stall/bg_night.webp?v=3)}
+#stallDlg .s-sign{display:none!important;position:absolute;left:16%;width:25%;top:20.8%;height:8.4%;display:grid;place-items:center;text-align:center;font-family:"Jua",sans-serif;font-weight:400;color:#3B1F0B;font-size:2.5cqw;line-height:1.12;letter-spacing:.02em;border:0;background:none;padding:0;cursor:pointer;z-index:3;text-shadow:0 0 .35cqw #F6DEAF,0 0 .35cqw #F6DEAF,0 0 .2cqw #F6DEAF}
 #stallDlg .s-sign:hover{color:#6A3510}
 #stallDlg .s-sign .pen{font-size:1.2cqw;opacity:.7;margin-left:.3cqw}
 #stallDlg .s-sign small{display:block;font-size:1.35cqw;color:#5A3416;margin-top:.2cqw}
@@ -25,19 +25,19 @@ const css = document.createElement('style'); css.textContent = `dialog.visit.sta
 #stallDlg button.s-pill:hover{background:#FFE7A8}
 #stallDlg .s-boxbtn.full{background:#FFD866;animation:sboxwob 2.4s ease-in-out infinite}
 @keyframes sboxwob{0%,80%,100%{transform:rotate(0)}86%{transform:rotate(-4deg)}93%{transform:rotate(3deg)}}
-#stallDlg .s-slot{position:absolute;bottom:39.9%;transform:translateX(-50%);z-index:2;border:0;background:none;padding:0;cursor:pointer}
-#stallDlg .s-slot .drink{--u:.0152cqw}
+#stallDlg .s-slot{position:absolute;bottom:33%;transform:translateX(-50%);z-index:2;border:0;background:none;padding:0;cursor:pointer}
+#stallDlg .s-slot .drink{--u:.0124cqw}
 #stallDlg .s-slot:hover .drink{filter:drop-shadow(0 0 .5cqw #FFE7A8)}
-#stallDlg .s-empty{position:absolute;bottom:40.5%;transform:translateX(-50%);font-size:max(9px,.85cqw);color:rgba(255,240,210,.75);font-family:"Jua",sans-serif;z-index:2}
-#stallDlg .s-stock{position:absolute;bottom:36.6%;transform:translateX(-50%);z-index:3;background:#FFF6E2;color:#4A3420;border:1.5px solid #8A6142;border-radius:999px;font-family:"Jua",sans-serif;font-size:max(10px,.95cqw);padding:0 .6cqw;white-space:nowrap;line-height:1.5}
+#stallDlg .s-empty{position:absolute;bottom:33.8%;transform:translateX(-50%);font-size:max(9px,.85cqw);color:rgba(255,240,210,.75);font-family:"Jua",sans-serif;z-index:2}
+#stallDlg .s-stock{position:absolute;bottom:29.6%;transform:translateX(-50%);z-index:3;background:#FFF6E2;color:#4A3420;border:1.5px solid #8A6142;border-radius:999px;font-family:"Jua",sans-serif;font-size:max(10px,.95cqw);padding:0 .6cqw;white-space:nowrap;line-height:1.5}
 #stallDlg .s-stock.ame{background:#3B2416;color:#FFE9C2;border-color:#3B2416}
 #stallDlg .s-stock.out{opacity:.55}
 #stallDlg .pop{animation:spop .5s ease}
 @keyframes spop{0%{transform:translateX(-50%) translateY(-30%) scale(.8);opacity:0}60%{transform:translateX(-50%) translateY(4%) scale(1.06);opacity:1}100%{transform:translateX(-50%) scale(1)}}
-#stallDlg .s-clerk{position:absolute;left:29.4%;bottom:39.2%;width:11cqw;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 .4cqw .3cqw rgba(0,0,0,.25))}
-#stallDlg .s-clerk.pet{width:16cqw;bottom:40.8%}
-#stallDlg .s-fg{position:absolute;left:14.375%;top:58.41%;width:25.625%;height:14.39%;background:url(stall/fg_day.webp) 0 0/100% 100% no-repeat;z-index:5;pointer-events:none}
-#stallDlg .s-stage.night .s-fg{background-image:url(stall/fg_night.webp)}
+#stallDlg .s-clerk{position:absolute;left:35%;bottom:30%;width:11cqw;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 .4cqw .3cqw rgba(0,0,0,.25))}
+#stallDlg .s-clerk.pet{width:15cqw;bottom:31%}
+#stallDlg .s-fg{position:absolute;left:25%;top:65%;width:20%;height:7.5%;background:url(stall/fg_day.webp?v=3) 0 0/100% 100% no-repeat;z-index:5;pointer-events:none}
+#stallDlg .s-stage.night .s-fg{background-image:url(stall/fg_night.webp?v=3)}
 #stallDlg .s-clerk img{width:100%;display:block}
 #stallDlg .s-clerk.jump{animation:sjump .55s ease-in-out}
 @keyframes sjump{40%{transform:translateX(-50%) translateY(-22%)}70%{transform:translateX(-50%) translateY(0)}85%{transform:translateX(-50%) translateY(-6%)}}
@@ -354,7 +354,7 @@ function syncWallet(r){
 function take(r){ ST = r; syncWallet(r); }
 
 /* ---------- 그리기 ---------- */
-const SHELF_X = [64.2, 72.1, 79.3, 86.6];
+const SHELF_X = [70.0, 75.4, 81.0, 86.6];   // 🍹 새 배경(10-25) 오른쪽 수레 받침 자리
 const AME = {name:'아메리카노', cup:'coffee', ings:['bean'], top:''};
 function renderStage(pop){
   const st = q('.s-stage'); if(!st) return;
