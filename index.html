@@ -1968,6 +1968,8 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .house .nm.plate-fish,.wnm.plate-fish,.plate-chip.plate-fish{background:linear-gradient(#E6F8FF,#8CCBEB);color:#1C4E6E;border-color:#3F86AE;text-shadow:none}
 .house .nm.plate-legend,.wnm.plate-legend,.plate-chip.plate-legend{background:linear-gradient(#FFEBB5,#F2B544);color:#4A2F00;border-color:#9C6B10;text-shadow:none;box-shadow:0 0 12px rgba(255,200,80,.7),0 3px 6px rgba(0,0,0,.3)}
 .house .nm.plate-isekai,.wnm.plate-isekai,.plate-chip.plate-isekai{background:linear-gradient(#5A2C9E,#A2449F);color:#FFE9FF;border-color:#2A1250;box-shadow:0 0 12px rgba(200,120,255,.65),0 3px 6px rgba(0,0,0,.3)}
+.house .nm.plate-pets,.wnm.plate-pets,.plate-chip.plate-pets{background:linear-gradient(#FFE3C4,#F2B47E);color:#5A3215;border-color:#9A5A2A;box-shadow:0 0 10px rgba(255,190,120,.6),0 3px 6px rgba(0,0,0,.25)}
+.house .nm.plate-fairy,.wnm.plate-fairy,.plate-chip.plate-fairy{background:linear-gradient(#E6FFF6,#B9E7FF 55%,#E8C9FF);color:#2E3D6B;border-color:#7B8FD6;box-shadow:0 0 12px rgba(170,220,255,.75),0 3px 6px rgba(0,0,0,.25)}
 .house .nm.plate-ribbon::before,.house .nm.plate-ribbon::after{background:#C25A85}
 .house .nm.plate-jewel::before,.house .nm.plate-jewel::after,.house .nm.plate-fish::before,.house .nm.plate-fish::after{background:#2E7FA0}
 .house .nm.plate-legend::before,.house .nm.plate-legend::after,.house .nm.plate-goldleaf::before,.house .nm.plate-goldleaf::after{background:#8A6210}
@@ -3106,7 +3108,7 @@ const NEW_WINS2 = [["win_lace2", "🪟", "넓은 레이스 커튼 창문", 200, 
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='win_potion')+1 || DEFAULT_SHOP.length; DEFAULT_SHOP.splice(at, 0, ...NEW_WINS2.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); NEW_WINS2.forEach(r=>FURN_IMG.add(r[0])); }
 const WIN2 = new Set(NEW_WINS2.map(r=>r[0]));   // 넓은 창문은 칸 안에 딱 맞게 (위로 크게 안 그려요)
 // 🛋️ 새 가구 66종 (10-13, newfurn66.sql 과 같아요) — code, emoji, 이름, 가격, 가로, 세로, 분류
-// 🌙 별밤 서재 세트 (10-25 판 78) — 가구 10(전부 2×2) · 소품 12, 코인으로 사요. 그림 furn/st_*.webp
+// 🌙 별밤 서재 세트 (10-25 판 87) — 가구 10(전부 2×2) · 소품 12, 코인으로 사요. 그림 furn/st_*.webp
 const NEW_STUDY = [
   ["st_moonchair","🌙","초승달 안락의자",280,2,2,"furniture"],
   ["st_moonshelf","📚","초승달 책장",360,2,2,"furniture"],
@@ -6317,7 +6319,7 @@ function voidCraftHTML(V){
     <div class="vcraft">${cards}</div>
     ${walls.length ? `<h4 style="margin-top:.8rem">${vcraftTab==='glass' ? `🔮 별유리 가구 <span class="small">도안 없이 💠로 바로 만들어요 · 어느 배경에나 어울리는 아공간 기본 가구예요</span>` : `🧱 ${esc(b.name)} 벽 <span class="small">도안 없이 💠로 바로 만들어요 · 세트에는 안 들어가요 · 가로로 놓을 때 제일 예뻐요</span>`}</h4><div class="vcraft">${walls.map(card).join('')}</div>` : ''}`;
 }
-/* 🔕 확인 창 끄기 (10-25 판 86, 주민 건의) — 켜면 가구 사기·아공간 가구 만들기·치우기 때 묻는 창과 알림을 건너뛰어요. 브라우저마다 기억 */
+/* 🔕 확인 창 끄기 (10-25 판 87, 주민 건의) — 켜면 가구 사기·아공간 가구 만들기·치우기 때 묻는 창과 알림을 건너뛰어요. 브라우저마다 기억 */
 const QUIET = () => { try{ return localStorage.getItem('majam-quiet')==='1'; }catch(e){ return false; } };
 function quietLabel(){ document.querySelectorAll('[data-quiet]').forEach(b=>{ const q = QUIET(); b.textContent = q ? '🔕 확인 창 꺼짐' : '🔔 확인 창 켜짐'; b.classList.toggle('on', q);
   b.title = q ? '가구를 살 땐 1개씩 바로 사고, 묻는 창·알림 없이 바로 해요. 누르면 다시 켜져요' : '누르면 가구 사기·만들기·치우기 때 묻는 창과 알림을 건너뛰어요'; }); }
@@ -7735,6 +7737,7 @@ const NAMEPLATE_DEF = {wood:{emoji:'🪵', name:'나무'}, snow:{emoji:'❄️',
   goldleaf:{emoji:'🏆', name:'금박', front:true, how:'보따리 도감 500칸'},
   flower:{emoji:'🌸', name:'꽃 도감', front:true, how:'꽃 도감 전부'}, fish:{emoji:'🐟', name:'물고기 도감', front:true, how:'물고기 도감 전부'},
   legend:{emoji:'👑', name:'전설 가구', front:true, how:'복권 전설 가구 전부'}, isekai:{emoji:'👾', name:'이세계 마물', front:true, how:'이세계 마물 9종 전부'},
+  pets:{emoji:'🐾', name:'펫 도감', front:true, how:'펫 도감 일반·희귀·전설 전부'}, fairy:{emoji:'🧚', name:'요정 도감', front:true, how:'요정 도감 전부'},
 };
 // 이름 앞 그림 (내 집은 내 명찰, 이웃은 NAMEPLATE_OF)
 const plateEmo = p => { const k = isMe(p) ? ((ME && ME.nameplate) || 'wood') : (NAMEPLATE_OF[p.discord_id] || 'wood'), d = NAMEPLATE_DEF[k]; return d && d.front ? `<span class="pe">${d.emoji}</span>` : ''; };
@@ -8593,7 +8596,7 @@ roomEl.addEventListener('mouseover', e=>{
   if(JSON.stringify(h)!==JSON.stringify(hover)){ hover=h; if(selected) renderMyHouse(); }
 });
 roomEl.addEventListener('mouseleave', ()=>{ hover=null; if(selected) renderMyHouse(); });
-// 🖐️ 아공간 가구도 끌어서 옮기기 (10-25 판 86, 주민 건의) — 마우스는 바로, 폰은 꾹 눌렀다가(0.3초)
+// 🖐️ 아공간 가구도 끌어서 옮기기 (10-25 판 87, 주민 건의) — 마우스는 바로, 폰은 꾹 눌렀다가(0.3초)
 var VDRAG = null, VDRAG_AT = 0;
 function vdragClear(){ document.querySelectorAll('#voidStage .tile.pv-ok,#voidStage .tile.pv-no').forEach(t=>t.classList.remove('pv-ok','pv-no')); }
 function vdragStart(){
@@ -9386,6 +9389,6 @@ start();
 </script>
 <script src="stall.js?v=1025a"></script>
 <script src="merchant.js?v=1025f"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 86</p>
+<p class="site-ver">마감의 숲 · 10-25 판 87</p>
 </body>
 </html>
