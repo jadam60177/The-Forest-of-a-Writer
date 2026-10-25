@@ -3200,7 +3200,7 @@ const NEW_FURN66 = [
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'); DEFAULT_SHOP.splice(at<0?DEFAULT_SHOP.length:at, 0, ...NEW_STUDY.map(([code,emoji,name,price,w,h,category])=>({code,emoji,name,price,w,h,active:true,category,icon:code,layer:'furniture'}))); NEW_STUDY.forEach(r=>FURN_IMG.add(r[0])); }
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
 // 🧽 누끼를 다시 딴 그림 (같은 이름으로 덮어쓰니까 ?v= 를 붙여 옛 그림 캐시를 피해요) — 또 고치면 숫자만 올리기
-const FURN_VER = {candlestick:2, tbl_side:3, tbl_two:3, tbl_long:3, tbl_wide:3, lantern:2, tr_medal:2, tr_scarf:2, oldkey:2, gears:2, globe:2, wall_trellis:2, eggchair:2, hammock:2, hammock2:2, diningtable:2, rocking:2, rocking2:2, clip:2, glasses:2};
+const FURN_VER = {candlestick:2, tbl_side:3, tbl_two:3, tbl_long:3, tbl_wide:3, lantern:2, tr_medal:2, tr_scarf:2, oldkey:2, gears:2, globe:2, wall_trellis:2, eggchair:2, hammock:2, hammock2:2, diningtable:2, rocking:2, rocking2:2, clip:2, glasses:2, v_magic_w3_2:2, v_magic_w3_3:2};
 const furnV = k => FURN_VER[k] ? `?v=${FURN_VER[k]}` : '';
 const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp${furnV(fimgKey(it))}` : null;
 const icoSrc = it => it && WALL_H.has(it.code) && fimg(it) ? `furn/${it.code}_h.webp` : fimg(it);   // 예전 벽 4종은 상점·가방에서 앞모습으로
@@ -6218,7 +6218,7 @@ function voidRoomHTML(V, editable){
   if(editable){ selected = VSEL; hover = VHOVER; rotated = VROT; } else { selected = null; hover = null; }
   let h; try{ h = roomHTML(list, cur, {editable, maxR:V.rows, maxC:V.cols}); } finally { [selected, hover, rotated] = sv; }
   if(editable) h = h.replace(/data-pid=/g,'data-vpid=').replace(/data-r=/g,'data-vr=').replace(/data-c=/g,'data-vc=');
-  return `<div class="room void-room ${editable?'':'view'}" style="grid-template-columns:repeat(${V.cols},var(--tile));grid-template-rows:repeat(${V.rows},var(--tile))">${h}</div>`;
+  return `<div class="room void-room ${editable?'':'view'} ${editable && VSEL?'placing':''}" style="grid-template-columns:repeat(${V.cols},var(--tile));grid-template-rows:repeat(${V.rows},var(--tile))">${h}</div>`;
 }
 function voidFarmReady(V){
   const n = (V.farm_pets||[]).length; if(!n || !V.farm_at) return 0;
@@ -9313,6 +9313,6 @@ start();
 </script>
 <script src="stall.js?v=1025a"></script>
 <script src="merchant.js?v=1025c"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 81</p>
+<p class="site-ver">마감의 숲 · 10-25 판 82</p>
 </body>
 </html>
