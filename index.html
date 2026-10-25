@@ -1980,6 +1980,26 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 .house .nm.plate-pets,.wnm.plate-pets,.plate-chip.plate-pets{background:linear-gradient(#FFE3C4,#F2B47E);color:#5A3215;border-color:#9A5A2A;box-shadow:0 0 10px rgba(255,190,120,.6),0 3px 6px rgba(0,0,0,.25)}
 .house .nm.plate-fairy,.wnm.plate-fairy,.plate-chip.plate-fairy{background:linear-gradient(#E6FFF6,#B9E7FF 55%,#E8C9FF);color:#2E3D6B;border-color:#7B8FD6;box-shadow:0 0 12px rgba(170,220,255,.75),0 3px 6px rgba(0,0,0,.25)}
 .house .nm.plate-ribbon::before,.house .nm.plate-ribbon::after{background:#C25A85}
+/* 🏷️ 그림 이름표 (10-25 판 93) — plates/키.webp = 왼쪽 장식 | 늘어나는 가운데 | 오른쪽 장식. 가운데만 이름 길이만큼 늘어나요 */
+.house .nm[class*="plate-"],.wnm[class*="plate-"],.plate-chip[class*="plate-"]{background:none!important;box-shadow:none!important;animation:none!important;border-radius:0; border-style:solid;border-color:transparent;border-image-repeat:stretch;line-height:1.25;text-shadow:none;white-space:nowrap; border-width:0 var(--pr) 0 var(--pl);border-image-width:0 var(--pr) 0 var(--pl);padding:var(--pt) .1em var(--pb)}
+.house .nm[class*="plate-"]::before,.house .nm[class*="plate-"]::after{display:none}
+.house.lit .nm[class*="plate-"]{filter:drop-shadow(0 0 6px rgba(255,200,90,.9))}
+.house.vacant .nm[class*="plate-"]{filter:grayscale(.7) brightness(.9)}
+.plate-chip[class*="plate-"]{font-size:.85rem}
+@media (max-width:600px){.house .nm[class*="plate-"]{font-size:.78rem}.wnm[class*="plate-"]{font-size:.8rem}}
+.house .nm.plate-wood,.wnm.plate-wood,.plate-chip.plate-wood{border-image-source:url(plates/wood.webp);border-image-slice:0 116 0 112 fill;--pl:2.567em;--pr:2.658em;--pt:0.521em;--pb:0.429em;color:#4A2E14!important}
+.house .nm.plate-snow,.wnm.plate-snow,.plate-chip.plate-snow{border-image-source:url(plates/snow.webp);border-image-slice:0 154 0 140 fill;--pl:3.208em;--pr:3.529em;--pt:0.555em;--pb:0.395em;color:#24476D!important}
+.house .nm.plate-ribbon,.wnm.plate-ribbon,.plate-chip.plate-ribbon{border-image-source:url(plates/ribbon.webp);border-image-slice:0 157 0 158 fill;--pl:3.621em;--pr:3.598em;--pt:0.452em;--pb:0.498em;color:#7A2448!important}
+.house .nm.plate-starlight,.wnm.plate-starlight,.plate-chip.plate-starlight{border-image-source:url(plates/starlight.webp);border-image-slice:0 138 0 137 fill;--pl:3.140em;--pr:3.163em;--pt:0.441em;--pb:0.509em;color:#2A2560!important}
+.house .nm.plate-jewel,.wnm.plate-jewel,.plate-chip.plate-jewel{border-image-source:url(plates/jewel.webp);border-image-slice:0 115 0 116 fill;--pl:2.658em;--pr:2.635em;--pt:0.613em;--pb:0.338em;color:#3D2C78!important}
+.house .nm.plate-rainbow,.wnm.plate-rainbow,.plate-chip.plate-rainbow{border-image-source:url(plates/rainbow.webp);border-image-slice:0 134 0 132 fill;--pl:3.025em;--pr:3.071em;--pt:0.555em;--pb:0.395em;color:#5A3A22!important}
+.house .nm.plate-goldleaf,.wnm.plate-goldleaf,.plate-chip.plate-goldleaf{border-image-source:url(plates/goldleaf.webp);border-image-slice:0 109 0 87 fill;--pl:1.994em;--pr:2.498em;--pt:0.578em;--pb:0.372em;color:#6A4300!important}
+.house .nm.plate-flower,.wnm.plate-flower,.plate-chip.plate-flower{border-image-source:url(plates/flower.webp);border-image-slice:0 157 0 158 fill;--pl:3.621em;--pr:3.598em;--pt:0.521em;--pb:0.429em;color:#8A3355!important}
+.house .nm.plate-fish,.wnm.plate-fish,.plate-chip.plate-fish{border-image-source:url(plates/fish.webp);border-image-slice:0 135 0 136 fill;--pl:3.117em;--pr:3.094em;--pt:0.498em;--pb:0.452em;color:#123E5C!important}
+.house .nm.plate-legend,.wnm.plate-legend,.plate-chip.plate-legend{border-image-source:url(plates/legend.webp);border-image-slice:0 140 0 140 fill;--pl:3.208em;--pr:3.208em;--pt:0.590em;--pb:0.360em;color:#7A3B00!important}
+.house .nm.plate-isekai,.wnm.plate-isekai,.plate-chip.plate-isekai{border-image-source:url(plates/isekai.webp);border-image-slice:0 118 0 121 fill;--pl:2.773em;--pr:2.704em;--pt:0.452em;--pb:0.498em;color:#FFE9FF!important}
+.house .nm.plate-pets,.wnm.plate-pets,.plate-chip.plate-pets{border-image-source:url(plates/pets.webp);border-image-slice:0 111 0 109 fill;--pl:2.498em;--pr:2.544em;--pt:0.498em;--pb:0.452em;color:#5A3215!important}
+.house .nm.plate-fairy,.wnm.plate-fairy,.plate-chip.plate-fairy{border-image-source:url(plates/fairy.webp);border-image-slice:0 123 0 112 fill;--pl:2.567em;--pr:2.819em;--pt:0.486em;--pb:0.464em;color:#2E5A4A!important}
 .house .nm.plate-jewel::before,.house .nm.plate-jewel::after,.house .nm.plate-fish::before,.house .nm.plate-fish::after{background:#2E7FA0}
 .house .nm.plate-legend::before,.house .nm.plate-legend::after,.house .nm.plate-goldleaf::before,.house .nm.plate-goldleaf::after{background:#8A6210}
 .house .nm.plate-flower::before,.house .nm.plate-flower::after{background:#6FA86A}
@@ -3118,7 +3138,7 @@ const NEW_WINS2 = [["win_lace2", "🪟", "넓은 레이스 커튼 창문", 200, 
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='win_potion')+1 || DEFAULT_SHOP.length; DEFAULT_SHOP.splice(at, 0, ...NEW_WINS2.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); NEW_WINS2.forEach(r=>FURN_IMG.add(r[0])); }
 const WIN2 = new Set(NEW_WINS2.map(r=>r[0]));   // 넓은 창문은 칸 안에 딱 맞게 (위로 크게 안 그려요)
 // 🛋️ 새 가구 66종 (10-13, newfurn66.sql 과 같아요) — code, emoji, 이름, 가격, 가로, 세로, 분류
-// 🌙 별밤 서재 세트 (10-25 판 92) — 가구 10(전부 2×2) · 소품 12, 코인으로 사요. 그림 furn/st_*.webp
+// 🌙 별밤 서재 세트 (10-25 판 93) — 가구 10(전부 2×2) · 소품 12, 코인으로 사요. 그림 furn/st_*.webp
 const NEW_STUDY = [
   ["st_moonchair","🌙","초승달 안락의자",280,2,2,"furniture"],
   ["st_moonshelf","📚","초승달 책장",360,2,2,"furniture"],
@@ -6197,7 +6217,7 @@ const VOID_BG_VER = {base:'?v=3'};   // 같은 이름으로 그림을 바꾸면 
 const voidBgCSS = k => { const key = k in VOID_BGS ? k : 'base'; return `url(void/${key}.webp${VOID_BG_VER[key]||''}) center/cover no-repeat, ${VOID_BGS[key].grad}`; };
 const VOID_FARM_BG = 'url(void/farm.webp?v=2) center/cover no-repeat, url(bg/Pet_background.webp) center/cover no-repeat, linear-gradient(#24124F 0%,#5B3E9A 38%,#4F8A5E 39%,#2D5A3A 100%)';
 let VOID = null, VSEL = null, VROT = 0, VHOVER = null, vbagTab = 'void', vcraftTab = '';
-/* 🚪 아공간 방 (10-25 판 92 · voidrooms.sql) — 서버는 가구 전체 + 방 목록을 줘요.
+/* 🚪 아공간 방 (10-25 판 93 · voidrooms.sql) — 서버는 가구 전체 + 방 목록을 줘요.
    화면은 지금 고른 방(VROOM)만 보이게 items·bg·fx 를 그 방 것으로 바꿔 끼워요 (_all 에 전체가 있어요) */
 let VROOM = 0; try{ VROOM = +(localStorage.getItem('majam-vroom')||0) || 0; }catch(e){}
 const VROOM_NAMES = ['첫 번째 방', '전시실', '보물 창고', '비밀 방'];
@@ -6354,7 +6374,7 @@ function voidCraftHTML(V){
     <div class="vcraft">${cards}</div>
     ${walls.length ? `<h4 style="margin-top:.8rem">${vcraftTab==='glass' ? `🔮 별유리 가구 <span class="small">도안 없이 💠로 바로 만들어요 · 어느 배경에나 어울리는 아공간 기본 가구예요</span>` : `🧱 ${esc(b.name)} 벽 <span class="small">도안 없이 💠로 바로 만들어요 · 세트에는 안 들어가요 · 가로로 놓을 때 제일 예뻐요</span>`}</h4><div class="vcraft">${walls.map(card).join('')}</div>` : ''}`;
 }
-/* 🔕 확인 창 끄기 (10-25 판 92, 주민 건의) — 켜면 가구 사기·아공간 가구 만들기·치우기 때 묻는 창과 알림을 건너뛰어요. 브라우저마다 기억 */
+/* 🔕 확인 창 끄기 (10-25 판 93, 주민 건의) — 켜면 가구 사기·아공간 가구 만들기·치우기 때 묻는 창과 알림을 건너뛰어요. 브라우저마다 기억 */
 const QUIET = () => { try{ return localStorage.getItem('majam-quiet')==='1'; }catch(e){ return false; } };
 function quietLabel(){ document.querySelectorAll('[data-quiet]').forEach(b=>{ const q = QUIET(); b.textContent = q ? '🔕 확인 창 꺼짐' : '🔔 확인 창 켜짐'; b.classList.toggle('on', q);
   b.title = q ? '가구를 살 땐 1개씩 바로 사고, 묻는 창·알림 없이 바로 해요. 누르면 다시 켜져요' : '누르면 가구 사기·만들기·치우기 때 묻는 창과 알림을 건너뛰어요'; }); }
@@ -7553,7 +7573,7 @@ async function showTruckReport(){   // 📬 우편함으로 모아요
 // 마을(숲 그림의 나무 아래)에도 와 있는 간식차를 세워 둬요 — 누르면 바로 마시기·먹기
 function renderVillageTrucks(){
   const el = document.getElementById('vtrucks'); if(!el) return;
-  const cafe = `<div class="vcafe" title="내 카페 (음료 가판대)"><img class="vshop" src="bg/cafe_shop.webp" alt="숲속 카페" draggable="false" data-cafe-go><button class="vpill" type="button" data-cafe-go>☕ 내 카페 열기</button></div>`;   // ☕ 카페 건물 (10-25 판 92) — 누르면 음료 가판대
+  const cafe = `<div class="vcafe" title="내 카페 (음료 가판대)"><img class="vshop" src="bg/cafe_shop.webp" alt="숲속 카페" draggable="false" data-cafe-go><button class="vpill" type="button" data-cafe-go>☕ 내 카페 열기</button></div>`;   // ☕ 카페 건물 (10-25 판 93) — 누르면 음료 가판대
   el.innerHTML = cafe + ['coffee','dessert'].map(kind=>{
     const t = TRUCKS.find(x=>x.kind===kind); if(!t) return '';
     const K = TRUCK_KIND[kind], done = t.my_reward!=null;
@@ -7799,7 +7819,7 @@ async function checkPlates(){
   }catch(e){}
 }
 let NAMEPLATE_OF = {};
-const plateCls = p => { const k = isMe(p) ? ((ME && ME.nameplate) || 'wood') : (NAMEPLATE_OF[p.discord_id] || 'wood'); return k==='wood' ? '' : 'plate-'+k; };
+const plateCls = p => { const k = isMe(p) ? ((ME && ME.nameplate) || 'wood') : (NAMEPLATE_OF[p.discord_id] || 'wood'); return 'plate-'+k; };   // 🪵 나무도 그림 이름표 (10-25)
 async function refreshNameplates(){ try{ const r = (await api.nameplates()) || []; NAMEPLATE_OF = {}; r.forEach(x=>{ NAMEPLATE_OF[x.discord_id] = x.nameplate; }); }catch(e){ NAMEPLATE_OF = {}; } }
 let WINTER_FAILS = 0;
 async function refreshWinter(){   // (10-21) 서버가 잠깐 대답을 못 해도 마지막으로 받은 행사판을 그대로 보여 줘요
@@ -8646,7 +8666,7 @@ roomEl.addEventListener('mouseover', e=>{
   if(JSON.stringify(h)!==JSON.stringify(hover)){ hover=h; if(selected) renderMyHouse(); }
 });
 roomEl.addEventListener('mouseleave', ()=>{ hover=null; if(selected) renderMyHouse(); });
-// 🖐️ 아공간 가구도 끌어서 옮기기 (10-25 판 92, 주민 건의) — 마우스는 바로, 폰은 꾹 눌렀다가(0.3초)
+// 🖐️ 아공간 가구도 끌어서 옮기기 (10-25 판 93, 주민 건의) — 마우스는 바로, 폰은 꾹 눌렀다가(0.3초)
 var VDRAG = null, VDRAG_AT = 0;
 function vdragClear(){ document.querySelectorAll('#voidStage .tile.pv-ok,#voidStage .tile.pv-no').forEach(t=>t.classList.remove('pv-ok','pv-no')); }
 function vdragStart(){
@@ -9444,6 +9464,6 @@ start();
 <script src="stall.js?v=1025b"></script>
 <script src="greenhouse.js?v=1025b"></script>
 <script src="merchant.js?v=1025f"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 92</p>
+<p class="site-ver">마감의 숲 · 10-25 판 93</p>
 </body>
 </html>
