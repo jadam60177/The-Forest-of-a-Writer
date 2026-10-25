@@ -120,7 +120,7 @@ function render(){
       <div class="a-mid"><div class="a-mat">${materialIcon(B)}<span>${materialKnown(B)?B.emoji:""} ${materialName(B)} <b>${B.qty}</b>개 · 1개 + 💠 ${A.cost}</span></div>
         <button class="a-brew" type="button" data-abrew ${why?'disabled':''}>🔥 연성하기</button>${why ? `<div class="a-why">${e(why)}</div>` : ''}</div></div>
     <div class="a-bosses">${A.bosses.map(x=>`<button class="a-boss ${x.code===PICK?'on':''}" type="button" data-apick="${x.code}">${materialIcon(x)}<b>${materialName(x)}</b><span class="n">${x.qty}개</span></button>`).join('')}</div>
-    <p class="small" style="margin:0">괴물을 공격하면 일정 확률로 그 괴물의 재료를 얻을 수 있어요. 연성 기회는 ${A.every}분마다 1번 충전되고 ${A.max}번까지 쌓여요. 하루에 ${A.max}번까지 연성할 수 있어요. 꽝은 없어요!</p>
+    <p class="small" style="margin:0">괴물을 공격해 전용 재료를 모을 수 있어요. 연성 기회는 ${A.every}분마다 1번 충전되고 ${A.max}번까지 쌓여요. 하루에 ${A.max}번까지 연성할 수 있어요. 꽝은 없어요!</p>
     <details class="a-fold" ${typeof localStorage!=='undefined' && (()=>{ try{ return localStorage.getItem('majam-alcdex')==='1'; }catch(_){ return false; } })() ? 'open' : ''} data-adexfold><summary>📖 극복 도감 <span class="small">${found} / ${A.items.length}종 · 최고 수량을 겨뤄요</span></summary>
       <div class="a-tabs">${A.bosses.map(x=>{ const n = A.items.filter(i=>i.boss===x.code && i.best!=null).length; return `<button type="button" class="${x.code===BOSS_TAB?'on':''}" data-atab="${x.code}">${materialKnown(x)?e(x.name):'???'} ${n}/10</button>`; }).join('')}</div>
       <div class="a-dex">${A.items.filter(i=>i.boss===BOSS_TAB).map((i,n)=>i.best!=null
