@@ -741,6 +741,21 @@ function makeDemoApi(){
         box:{lines:S.box, coins:S.bc, stars:S.bs, since:S.since}, dex:S.dex, slots:S.slots.map(x=>({...x})), inv:Object.fromEntries(Object.entries(S.inv).filter(([,q])=>q>0)),
         bgs:(V && V.bgs) || ['base','hell','magic'], vow:{bg:S.vow?S.vow.bg:null, ready:Math.min(Math.floor(done/STALL_NUM.vowEvery), STALL_NUM.vowMax), mins:done%STALL_NUM.vowEvery, every:STALL_NUM.vowEvery, max:STALL_NUM.vowMax},
         coins:st.me.coins, stars:st.me.stars, shards:I.shards}; },
+    // 🪴 온실 (greenhouse.sql 흉내)
+    ghPrices(){ return {monstera:120,rubber:120,succulent:150,geranium:60,terrarium:90,p_cherry:120,p_monstera2:110,p_hydrangea:90,p_urn:100,p_bamboo:80,p_lotus:120,p_tangerine:110,p_bellflower:130,p_lily:80,p_olive:100,p_areca:100,p_clematis:150,p_pine:150,p_hydrangea2:90,p_whitelily:80,p_wisteria2:160,p_monstera3:110,p_orange:110,p_olive2:100,p_bamboo2:100,p_lavender:80,p_lemon:110,p_bird:110,p_hydrangea3:120,p_cherry2:150,p_calla:80,p_lampwist:180,p_lotus2:120,fern:100,ivy:80,h_wisteria:120,h_pothos:90,longtable:200,stool:80,glasstable:150,bench:220,potbench:220,planterbox:180,openshelf:180,ironstand:150,watering:60,rocker:200}; },
+    ghJson(){ const G = st.gh; if(!G) return {open:false, price:500, bg_price:300, prices:this.ghPrices()};
+      return {open:true, bg:G.bg, bgs:[...G.bgs], items:G.items.map(x=>({...x})), inv:{...G.inv}, prices:this.ghPrices(), bg_price:300, max_items:80, coins:st.me.coins}; },
+    ghPay(n){ if(st.me.coins < n) fail(`코인이 부족해요 (🪙 ${n}개 필요)`); st.me.coins -= n; },
+    async gh(){ return this.ghJson(); },
+    async ghOf(id){ return id==='me' ? (st.gh ? this.ghJson() : null) : null; },
+    async ghOpen(){ if(st.gh) fail('이미 온실이 있어요'); this.ghPay(500); st.gh = {bg:'bg_sun', bgs:['bg_sun'], items:[], inv:{}, nid:1}; persist(); return this.ghJson(); },
+    async ghBg(bg){ const G = st.gh; if(!G.bgs.includes(bg)){ this.ghPay(300); G.bgs.push(bg); } G.bg = bg; persist(); return this.ghJson(); },
+    async ghBuy(code, n){ const p = this.ghPrices()[code]; if(p==null) fail('없는 온실 가구예요'); n = n||1; this.ghPay(p*n); st.gh.inv[code] = (st.gh.inv[code]||0)+n; persist(); return this.ghJson(); },
+    async ghPlace(code, x, y, f, s, on, ox, lv){ const G = st.gh; if(!(G.inv[code]>0)) fail('온실 창고에 없는 가구예요'); G.inv[code]--;
+      G.items.push({id:G.nid++, code, x, y, f:f?1:0, s, on:on||null, ox:ox||0, lv:lv||0}); persist(); return this.ghJson(); },
+    async ghMove(id, x, y, f, s, on, ox, lv){ const it = st.gh.items.find(i=>i.id===id); if(!it) fail('내 온실 가구가 아니에요'); Object.assign(it, {x, y, f:f?1:0, s, on:on||null, ox:ox||0, lv:lv||0}); persist(); return this.ghJson(); },
+    async ghRemove(id){ const G = st.gh, it = G.items.find(i=>i.id===id); if(!it) fail('내 온실 가구가 아니에요');
+      G.items.forEach(c=>{ if(c.on===id){ c.on = null; c.x = it.x + (c.ox||0)*.2; c.y = Math.min(1, it.y+.02); } }); G.items = G.items.filter(i=>i!==it); G.inv[it.code] = (G.inv[it.code]||0)+1; persist(); return this.ghJson(); },
     async stall(){ const S = this.stState(), sold = this.stRun(S); this.stSave(S); return this.stJson(S, sold); },
     async stallClaim(){ const S = this.stState(); this.stRun(S); if(!S.bc && !S.bs) fail('아직 돈통이 비어 있어요');
       const c = S.bc, t = S.bs; st.me.coins += c; st.me.stars += t; S.box = {}; S.bc = 0; S.bs = 0; S.since = null; this.stSave(S); persist(); return {coins:c, stars:t, ...this.stJson(S)}; },

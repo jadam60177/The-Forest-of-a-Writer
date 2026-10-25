@@ -2461,6 +2461,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <div class="room-wrap"><div class="room" id="room"></div></div>
       <div class="garden" id="gardenBox" hidden></div>
       <div class="tank-box" id="tankBox" hidden></div>
+      <div id="ghBox" hidden></div>
       <p class="hint small" id="hint"></p>
     </div>
     <div class="panel home-side">
@@ -2886,7 +2887,7 @@ const CONFIG = {
 };
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 </script>
-<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1025d"><\/script>');</script>
+<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1025e"><\/script>');</script>
 <script>
 
 /* ---------- 기준 데이터 (schema.sql 의 room_size 와 같아야 해요) ---------- */
@@ -3117,7 +3118,7 @@ const NEW_WINS2 = [["win_lace2", "🪟", "넓은 레이스 커튼 창문", 200, 
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='win_potion')+1 || DEFAULT_SHOP.length; DEFAULT_SHOP.splice(at, 0, ...NEW_WINS2.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); NEW_WINS2.forEach(r=>FURN_IMG.add(r[0])); }
 const WIN2 = new Set(NEW_WINS2.map(r=>r[0]));   // 넓은 창문은 칸 안에 딱 맞게 (위로 크게 안 그려요)
 // 🛋️ 새 가구 66종 (10-13, newfurn66.sql 과 같아요) — code, emoji, 이름, 가격, 가로, 세로, 분류
-// 🌙 별밤 서재 세트 (10-25 판 90) — 가구 10(전부 2×2) · 소품 12, 코인으로 사요. 그림 furn/st_*.webp
+// 🌙 별밤 서재 세트 (10-25 판 91) — 가구 10(전부 2×2) · 소품 12, 코인으로 사요. 그림 furn/st_*.webp
 const NEW_STUDY = [
   ["st_moonchair","🌙","초승달 안락의자",280,2,2,"furniture"],
   ["st_moonshelf","📚","초승달 책장",360,2,2,"furniture"],
@@ -4030,6 +4031,14 @@ const supaApi = (() => {
     async riftHatch(id){ return ok(await sb.rpc('isekai_hatch', {p_egg:id})); },
     // 🔮 아공간 (void.sql) — 아직 안 돌렸으면 null 이라 화면에 안 보여요
     async void(){ const r = await sb.rpc('get_void'); if(r.error) return null; return Array.isArray(r.data) ? r.data[0] : r.data; },
+    async gh(){ return ok(await sb.rpc('get_gh')); },   // 🪴 온실 (greenhouse.sql)
+    async ghOf(id){ const r = await sb.rpc('get_gh_of', {p_discord_id:id}); if(r.error) return null; return Array.isArray(r.data) ? r.data[0] : r.data; },
+    async ghOpen(){ return ok(await sb.rpc('gh_open')); },
+    async ghBg(bg){ return ok(await sb.rpc('gh_bg', {p_bg:bg})); },
+    async ghBuy(code, n){ return ok(await sb.rpc('gh_buy', {p_code:code, p_n:n||1})); },
+    async ghPlace(code, x, y, f, s, on, ox, lv){ return ok(await sb.rpc('gh_place', {p_code:code, p_x:x, p_y:y, p_f:f, p_s:s, p_on:on, p_ox:ox, p_lv:lv})); },
+    async ghMove(id, x, y, f, s, on, ox, lv){ return ok(await sb.rpc('gh_move', {p_id:id, p_x:x, p_y:y, p_f:f, p_s:s, p_on:on, p_ox:ox, p_lv:lv})); },
+    async ghRemove(id){ return ok(await sb.rpc('gh_remove', {p_id:id})); },
     async voidOf(id){ const r = await sb.rpc('get_void_of', {p_discord_id:id}); if(r.error) return null; return Array.isArray(r.data) ? r.data[0] : r.data; },
     async voidOpen(){ return ok(await sb.rpc('void_open')); },
     async voidGrow(dir){ return ok(await sb.rpc('void_grow', {p_dir:dir})); },
@@ -4401,17 +4410,20 @@ function renderMyHouse(){
   room.classList.toggle('placing', !!selected);
   room.innerHTML = roomHTML(here, cur, {editable:true, cabs:CABS});
   renderRoomTabs();
-  document.querySelector('#tab-home .room-wrap').hidden = inGarden || inTank;
-  document.getElementById('hint').hidden = inGarden || inTank;
+  document.querySelector('#tab-home .room-wrap').hidden = inGarden || inTank || inGh;
+  document.getElementById('hint').hidden = inGarden || inTank || inGh;
   document.getElementById('gardenBox').hidden = !inGarden;
   document.getElementById('tankBox').hidden = !inTank;
+  document.getElementById('ghBox').hidden = !inGh;
   if(inGarden) renderGarden();
   if(inTank) renderTank();
+  if(inGh && window.GH_render) GH_render();   // 🪴 온실 (greenhouse.js)
 }
 function renderRoomTabs(){
   const names = myRooms(), el = document.getElementById('roomTabs'); if(!el) return;
-  el.innerHTML = names.map((n,k)=>{ const on = k===curRoom && !inGarden && !inTank; return `<button class="rtab ${on?'on':''}" data-room="${k}">${esc(n)}${on?` <span class="ren" data-rename="${k}" title="이름 바꾸기">✏️</span>`:''}</button>`; }).join('') +
+  el.innerHTML = names.map((n,k)=>{ const on = k===curRoom && !inGarden && !inTank && !inGh; return `<button class="rtab ${on?'on':''}" data-room="${k}">${esc(n)}${on?` <span class="ren" data-rename="${k}" title="이름 바꾸기">✏️</span>`:''}</button>`; }).join('') +
     `<button class="rtab garden-tab ${inTank?'on':''}" data-tankview>🐠 어항</button>` +
+    `<button class="rtab garden-tab ${inGh?'on':''}" data-ghview>🪴 온실</button>` +
     `<button class="rtab garden-tab ${inGarden?'on':''}" data-garden>🌷 마당</button>` +
     (names.length < MAX_ROOMS ? `<button class="rtab add" data-addroom ${ME.coins<roomPriceMe(names.length)?'disabled':''}>＋ 방 늘리기 🪙 ${roomPriceMe(names.length).toLocaleString()}${ME.room_coupon>0?' 🎟️반값':''}</button>` : '');
 }
@@ -4617,9 +4629,9 @@ FLOWERS_DEFAULT.push(...[
 const gGeneric = hint => G_SOIL + gStem(40) + gL() + gR(8,(i,a)=>gPetal(48,34,16,7,a,hint||'#F0A8BC')) + `<circle cx="48" cy="34" r="5" fill="#EED77A"/>`;
 const gSvg = (inner, vb='0 0 96 96') => `<svg viewBox="${vb}" aria-hidden="true">${inner}</svg>`;
 
-let GARDEN = [], GDEX = [], inGarden = false, inTank = false;   // (㉜) 우리 집 칸: 방 / 🌷 마당 / 🐠 어항
-try{ const g = localStorage.getItem('majam-garden'); inGarden = g === '1'; inTank = g === 't'; }catch(e){}
-const saveGardenTab = () => { try{ localStorage.setItem('majam-garden', inTank?'t':inGarden?'1':'0'); }catch(e){} };
+let GARDEN = [], GDEX = [], inGarden = false, inTank = false, inGh = false;   // (㉜) 우리 집 칸: 방 / 🌷 마당 / 🐠 어항
+try{ const g = localStorage.getItem('majam-garden'); inGarden = g === '1'; inTank = g === 't'; inGh = g === 'h'; }catch(e){}
+const saveGardenTab = () => { try{ localStorage.setItem('majam-garden', inTank?'t':inGh?'h':inGarden?'1':'0'); }catch(e){} };
 let FSHOW = null;   // 🌸 전시 중인 꽃 [{code, harvested}] — 서버 함수가 아직 없으면 null
 const FSHOW_NEED = {wild:25, garden:15, secret:3}, FSHOW_MAX = 12;   // flowershow.sql 과 같아야 해요
 let GARDEN_AT = null;
@@ -6185,7 +6197,7 @@ const VOID_BG_VER = {base:'?v=3'};   // 같은 이름으로 그림을 바꾸면 
 const voidBgCSS = k => { const key = k in VOID_BGS ? k : 'base'; return `url(void/${key}.webp${VOID_BG_VER[key]||''}) center/cover no-repeat, ${VOID_BGS[key].grad}`; };
 const VOID_FARM_BG = 'url(void/farm.webp?v=2) center/cover no-repeat, url(bg/Pet_background.webp) center/cover no-repeat, linear-gradient(#24124F 0%,#5B3E9A 38%,#4F8A5E 39%,#2D5A3A 100%)';
 let VOID = null, VSEL = null, VROT = 0, VHOVER = null, vbagTab = 'void', vcraftTab = '';
-/* 🚪 아공간 방 (10-25 판 90 · voidrooms.sql) — 서버는 가구 전체 + 방 목록을 줘요.
+/* 🚪 아공간 방 (10-25 판 91 · voidrooms.sql) — 서버는 가구 전체 + 방 목록을 줘요.
    화면은 지금 고른 방(VROOM)만 보이게 items·bg·fx 를 그 방 것으로 바꿔 끼워요 (_all 에 전체가 있어요) */
 let VROOM = 0; try{ VROOM = +(localStorage.getItem('majam-vroom')||0) || 0; }catch(e){}
 const VROOM_NAMES = ['첫 번째 방', '전시실', '보물 창고', '비밀 방'];
@@ -6342,7 +6354,7 @@ function voidCraftHTML(V){
     <div class="vcraft">${cards}</div>
     ${walls.length ? `<h4 style="margin-top:.8rem">${vcraftTab==='glass' ? `🔮 별유리 가구 <span class="small">도안 없이 💠로 바로 만들어요 · 어느 배경에나 어울리는 아공간 기본 가구예요</span>` : `🧱 ${esc(b.name)} 벽 <span class="small">도안 없이 💠로 바로 만들어요 · 세트에는 안 들어가요 · 가로로 놓을 때 제일 예뻐요</span>`}</h4><div class="vcraft">${walls.map(card).join('')}</div>` : ''}`;
 }
-/* 🔕 확인 창 끄기 (10-25 판 90, 주민 건의) — 켜면 가구 사기·아공간 가구 만들기·치우기 때 묻는 창과 알림을 건너뛰어요. 브라우저마다 기억 */
+/* 🔕 확인 창 끄기 (10-25 판 91, 주민 건의) — 켜면 가구 사기·아공간 가구 만들기·치우기 때 묻는 창과 알림을 건너뛰어요. 브라우저마다 기억 */
 const QUIET = () => { try{ return localStorage.getItem('majam-quiet')==='1'; }catch(e){ return false; } };
 function quietLabel(){ document.querySelectorAll('[data-quiet]').forEach(b=>{ const q = QUIET(); b.textContent = q ? '🔕 확인 창 꺼짐' : '🔔 확인 창 켜짐'; b.classList.toggle('on', q);
   b.title = q ? '가구를 살 땐 1개씩 바로 사고, 묻는 창·알림 없이 바로 해요. 누르면 다시 켜져요' : '누르면 가구 사기·만들기·치우기 때 묻는 창과 알림을 건너뛰어요'; }); }
@@ -7541,7 +7553,7 @@ async function showTruckReport(){   // 📬 우편함으로 모아요
 // 마을(숲 그림의 나무 아래)에도 와 있는 간식차를 세워 둬요 — 누르면 바로 마시기·먹기
 function renderVillageTrucks(){
   const el = document.getElementById('vtrucks'); if(!el) return;
-  const cafe = `<div class="vcafe" title="내 카페 (음료 가판대)"><img class="vshop" src="bg/cafe_shop.webp" alt="숲속 카페" draggable="false" data-cafe-go><button class="vpill" type="button" data-cafe-go>☕ 내 카페 열기</button></div>`;   // ☕ 카페 건물 (10-25 판 90) — 누르면 음료 가판대
+  const cafe = `<div class="vcafe" title="내 카페 (음료 가판대)"><img class="vshop" src="bg/cafe_shop.webp" alt="숲속 카페" draggable="false" data-cafe-go><button class="vpill" type="button" data-cafe-go>☕ 내 카페 열기</button></div>`;   // ☕ 카페 건물 (10-25 판 91) — 누르면 음료 가판대
   el.innerHTML = cafe + ['coffee','dessert'].map(kind=>{
     const t = TRUCKS.find(x=>x.kind===kind); if(!t) return '';
     const K = TRUCK_KIND[kind], done = t.my_reward!=null;
@@ -7958,12 +7970,12 @@ document.getElementById('tintSave').addEventListener('click', ()=>act(async()=>{
 }));
 function setHint(){
   const el = document.getElementById('hint');
-  if(selected || inGarden || inTank) TINT_MODE = false;
+  if(selected || inGarden || inTank || inGh) TINT_MODE = false;
   { const rm = document.getElementById('room'); if(rm) rm.classList.toggle('tint-mode', TINT_MODE); }
   if(TINT_MODE){ el.innerHTML = `🎨 색을 바꿀 러그를 눌러 주세요 <button class="mini" id="tintDone">다 했어요</button>`; return; }
   const rugHere = PLACED.some(p=>(p.room||0)===curRoom && isRug(p.item_code));
   if(!selected){ el.innerHTML = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구는 끌어서 옮기고(폰은 꾹 눌렀다가 끌기), 그냥 누르면 가방으로 돌아가요.'
-    + (rugHere && !inGarden && !inTank ? ` <button class="mini" id="tintBtn">🎨 러그 색 바꾸기</button>` : ''); return; }
+    + (rugHere && !inGarden && !inTank && !inGh ? ` <button class="mini" id="tintBtn">🎨 러그 색 바꾸기</button>` : ''); return; }
   const it = itemOf(selected), fp = footprint(selected);
   const canRot = true;   // 진열장도 돌릴 수 있어요 (칸 배치만 세로로 바뀌어요)
   el.innerHTML = `<span class="hint-ico r${rotated}">${ico(it)}</span> ${esc(it.name)}(${fp.w}×${fp.h}칸)${rotated?` · ${ROT_NAME[rotated]}`:''} · 놓을 자리의 왼쪽 위 칸을 눌러 주세요.` + (TABLE_FOOD.has(selected) ? ' 🍰 식탁·테이블 위에도 올릴 수 있어요!' : '') +
@@ -8323,7 +8335,7 @@ document.addEventListener('click', e=>{
   if(e.target.closest('#tintDone')){ TINT_MODE = false; setHint(); renderMyHouse(); return; }
 
   const bg = e.target.closest('[data-bag]');
-  if(bg){ if(inGarden || inTank){ inGarden=false; inTank=false; saveGardenTab(); } selected = selected===bg.dataset.bag ? null : bg.dataset.bag; rotated=0; setHint(); renderMyHouse(); renderBag();
+  if(bg){ if(inGarden || inTank || inGh){ inGarden=false; inTank=false; inGh=false; saveGardenTab(); } selected = selected===bg.dataset.bag ? null : bg.dataset.bag; rotated=0; setHint(); renderMyHouse(); renderBag();
     if(selected && matchMedia('(max-width:820px)').matches) document.querySelector('#tab-home .room-wrap').scrollIntoView({behavior:'smooth', block:'center'});   // 고른 가구를 바로 놓을 수 있게
     return; }
 
@@ -8380,8 +8392,9 @@ document.addEventListener('click', e=>{
   });
 
   const gt = e.target.closest('[data-garden]');
-  if(gt){ inGarden=true; inTank=false; saveGardenTab(); selected=null; rotated=0; hover=null; setHint(); renderMyHouse(); renderBag(); refreshGarden().then(renderMyHouse); return; }
-  if(e.target.closest('[data-tankview]')){ inTank=true; inGarden=false; saveGardenTab(); selected=null; rotated=0; hover=null; setHint(); renderMyHouse(); renderBag(); Promise.all([refreshLake(), refreshTank()]).then(()=>{ const b = document.getElementById('tankBox'); if(b) b._key = null; renderMyHouse(); }); return; }
+  if(gt){ inGarden=true; inTank=false; inGh=false; saveGardenTab(); selected=null; rotated=0; hover=null; setHint(); renderMyHouse(); renderBag(); refreshGarden().then(renderMyHouse); return; }
+  if(e.target.closest('[data-ghview]')){ inGh=true; inTank=false; inGarden=false; saveGardenTab(); selected=null; rotated=0; hover=null; setHint(); renderMyHouse(); renderBag(); if(window.GH_refresh) GH_refresh().then(()=>renderMyHouse()); return; }
+  if(e.target.closest('[data-tankview]')){ inTank=true; inGarden=false; inGh=false; saveGardenTab(); selected=null; rotated=0; hover=null; setHint(); renderMyHouse(); renderBag(); Promise.all([refreshLake(), refreshTank()]).then(()=>{ const b = document.getElementById('tankBox'); if(b) b._key = null; renderMyHouse(); }); return; }
 
   const sd = e.target.closest('[data-seeds]');
   if(sd) return act(async()=>{
@@ -8411,7 +8424,7 @@ document.addEventListener('click', e=>{
   });
 
   const rt = e.target.closest('[data-room]');
-  if(rt){ inGarden=false; inTank=false; saveGardenTab(); curRoom = +rt.dataset.room; try{ localStorage.setItem('majam-room', curRoom); }catch(e){} selected=null; rotated=0; hover=null; setHint(); renderMyHouse(); renderBag(); return; }
+  if(rt){ inGarden=false; inTank=false; inGh=false; saveGardenTab(); curRoom = +rt.dataset.room; try{ localStorage.setItem('majam-room', curRoom); }catch(e){} selected=null; rotated=0; hover=null; setHint(); renderMyHouse(); renderBag(); return; }
 
   const ar = e.target.closest('[data-addroom]');
   if(ar) return act(async()=>{
@@ -8633,7 +8646,7 @@ roomEl.addEventListener('mouseover', e=>{
   if(JSON.stringify(h)!==JSON.stringify(hover)){ hover=h; if(selected) renderMyHouse(); }
 });
 roomEl.addEventListener('mouseleave', ()=>{ hover=null; if(selected) renderMyHouse(); });
-// 🖐️ 아공간 가구도 끌어서 옮기기 (10-25 판 90, 주민 건의) — 마우스는 바로, 폰은 꾹 눌렀다가(0.3초)
+// 🖐️ 아공간 가구도 끌어서 옮기기 (10-25 판 91, 주민 건의) — 마우스는 바로, 폰은 꾹 눌렀다가(0.3초)
 var VDRAG = null, VDRAG_AT = 0;
 function vdragClear(){ document.querySelectorAll('#voidStage .tile.pv-ok,#voidStage .tile.pv-no').forEach(t=>t.classList.remove('pv-ok','pv-no')); }
 function vdragStart(){
@@ -8867,10 +8880,10 @@ async function openVisit(id){
   room.innerHTML = '<span class="small">불러오는 중…</span>';
   dlg.showModal();
   try{
-    const [list, info, garden, fishBest, vpets, vtank, vflora, vvoid] = await Promise.all([api.placements(id), api.house(id).catch(()=>null), api.garden(id).catch(()=>[]), api.fishBest(id).catch(()=>null), api.petsOf(id).catch(()=>[]), api.tankOf(id).catch(()=>null), api.flowerShowOf(id).catch(()=>[]), api.voidOf ? api.voidOf(id).catch(()=>null) : null]);
+    const [list, info, garden, fishBest, vpets, vtank, vflora, vvoid, vgh] = await Promise.all([api.placements(id), api.house(id).catch(()=>null), api.garden(id).catch(()=>[]), api.fishBest(id).catch(()=>null), api.petsOf(id).catch(()=>[]), api.tankOf(id).catch(()=>null), api.flowerShowOf(id).catch(()=>[]), api.voidOf ? api.voidOf(id).catch(()=>null) : null, api.ghOf ? api.ghOf(id).catch(()=>null) : null]);
     if(vvoid && vvoid.open && api.merchOf) vvoid.merch = await api.merchOf(id).catch(()=>null);   // 🌀 이웃 파수꾼 · 하늘 장식
     const h = info || {room_blocks:0, room_names:['거실']};
-    VISIT = {p, list, info:h, garden:garden||[], fishBest, pets:vpets||[], tank:vtank, flora:vflora||[], void:(vvoid && vvoid.open) ? vvoid : null, cabs: await cabsFor(id, list), room:0, raid: await api.raidStatus().catch(()=>null)};
+    VISIT = {p, list, info:h, garden:garden||[], fishBest, pets:vpets||[], tank:vtank, flora:vflora||[], void:(vvoid && vvoid.open) ? vvoid : null, gh:(vgh && vgh.open && (vgh.items||[]).length) ? vgh : null, cabs: await cabsFor(id, list), room:0, raid: await api.raidStatus().catch(()=>null)};
     renderVisit();
   }catch(e){
     console.error('집 구경 오류', e);
@@ -8884,15 +8897,17 @@ function renderVisit(){
   const {p, list, info, cabs} = VISIT, names = (info.room_names && info.room_names.length) ? info.room_names : ['거실'];
   const cur = roomOf(p.total_minutes, info.room_blocks||0);
   const hasGarden = gardenSlots(p.total_minutes) > 0 || (VISIT.flora||[]).length > 0, hasTank = !!(VISIT.tank && VISIT.tank.fish && VISIT.tank.fish.length);
-  const hasVoid = !!VISIT.void;
-  document.getElementById('visitTabs').innerHTML = (names.length>1 || hasGarden || hasTank || hasVoid)
+  const hasVoid = !!VISIT.void, hasGh = !!VISIT.gh;
+  document.getElementById('visitTabs').innerHTML = (names.length>1 || hasGarden || hasTank || hasVoid || hasGh)
     ? names.map((n,k)=>`<button class="rtab ${k===VISIT.room?'on':''}" data-vroom="${k}">${esc(n)}</button>`).join('')
       + (hasTank ? `<button class="rtab garden-tab ${VISIT.room==='k'?'on':''}" data-vroom="k">🐠 어항</button>` : '')
+      + (hasGh ? `<button class="rtab garden-tab ${VISIT.room==='h'?'on':''}" data-vroom="h">🪴 온실</button>` : '')
       + (hasGarden ? `<button class="rtab garden-tab ${VISIT.room==='g'?'on':''}" data-vroom="g">🌷 마당</button>` : '')
       + (hasVoid ? `<button class="rtab garden-tab ${VISIT.room==='v'?'on':''}" data-vroom="v">🔮 아공간</button>` : '')
     : '';
-  const room = document.getElementById('visitRoom'), vg = document.getElementById('visitGarden'), outside = VISIT.room==='g' || VISIT.room==='k' || VISIT.room==='v';
+  const room = document.getElementById('visitRoom'), vg = document.getElementById('visitGarden'), outside = VISIT.room==='g' || VISIT.room==='k' || VISIT.room==='v' || VISIT.room==='h';
   room.parentElement.hidden = outside; vg.hidden = !outside;
+  if(VISIT.room==='h' && VISIT.gh && window.GH_viewHTML){ vg.innerHTML = `<h4 class="tank-title">🪴 ${esc(p.display_name)}님의 온실 <span class="small">가구 ${VISIT.gh.items.length}개</span></h4>` + GH_viewHTML(VISIT.gh); }
   if(VISIT.room==='v' && VISIT.void){
     const vrs = vroomsOf(VISIT.void), V = voidPick(VISIT.void, VISIT.vroom||0), b = VOID_BGS[V.bg] || VOID_BGS.base; if(V.catalog) setVCAT(V.catalog);
     vg.innerHTML = `<h4 class="tank-title">🔮 ${esc(p.display_name)}님의 아공간 <span class="small">${b.emoji} ${esc(b.name)} · ${V.cols}×${V.rows}칸${isMe(p) && !V.public ? ' · 🔒 비공개라 나만 보여요' : ''}</span></h4>${vrs.length>1 ? `<div class="room-tabs void-rtabs">${vrs.map((r,i)=>`<button class="rtab ${i===V.vroom?'on':''}" type="button" data-vvroom="${i}">${esc(r.name)}</button>`).join('')}</div>` : ''}<div class="void-stage" data-vbg="${esc(V.bg||'base')}" style="--vbg:${voidBgCSS(V.bg)}">${typeof merchSkyHTML==='function' ? merchSkyHTML(V.merch) : ''}${voidFxHTML(V.fx)}${voidSetFxHTML(V.sets)}${voidRoomHTML(V, false)}</div>`
@@ -8962,7 +8977,7 @@ document.getElementById('visitGarden').addEventListener('click', e=>{   // 🚪 
   const b = e.target.closest('[data-vvroom]'); if(!b || !VISIT) return; VISIT.vroom = +b.dataset.vvroom; renderVisit(); });
 document.getElementById('visitTabs').addEventListener('click', e=>{
   const b = e.target.closest('[data-vroom]'); if(!b || !VISIT) return;
-  const v = b.dataset.vroom; VISIT.room = (v==='g' || v==='k' || v==='v') ? v : +v; renderVisit();
+  const v = b.dataset.vroom; VISIT.room = (v==='g' || v==='k' || v==='v' || v==='h') ? v : +v; renderVisit();
 });
 document.getElementById('visitGift').addEventListener('click', e=>{ if(!e.target.closest('[data-gohome]')) return; document.getElementById('visit').close(); const b = document.querySelector('.tabs [data-tab="home"]') || [...document.querySelectorAll('.tabs button')].find(x=>x.textContent.includes('우리 집')); if(b) b.click(); });
 document.addEventListener('click', e=>{   // 🏷️ 이름표 바꿔 끼우기
@@ -9427,7 +9442,8 @@ start();
 
 </script>
 <script src="stall.js?v=1025b"></script>
+<script src="greenhouse.js?v=1025a"></script>
 <script src="merchant.js?v=1025f"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 90</p>
+<p class="site-ver">마감의 숲 · 10-25 판 91</p>
 </body>
 </html>
