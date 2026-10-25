@@ -619,7 +619,8 @@ function makeDemoApi(){
     vdJson(){ const V = st.vd, P = this.pstate(), I = this.iskState(); if(!V) return {open:false, price:VOID_OPEN_PRICE, shards:I.shards};
       const farm_pets = [...new Set(P.pets.filter(p=>/^isk_/.test(p.code)).map(p=>p.code))].sort();
       const cl = V.cap_lv||0, rl = V.rate_lv||0;
-      return {open:true, cols:V.cols, rows:V.rows, bg:V.bg, bgs:[...V.bgs], public:V.pub, items:V.items.map(x=>({...x})), farm_pets, farm_at:V.farm_at, farm_rate:VOID_FARM_RATE+rl, farm_cap:VOID_FARM_CAP+4*cl,
+      V.rooms = V.rooms || [{name:'첫 번째 방'}]; const rooms = V.rooms.map((r,k)=>({name:r.name, bg:k ? (r.bg||'base') : V.bg, fx:k ? (r.fx||'') : (V.fx||'')}));
+      return {open:true, cols:V.cols, rows:V.rows, bg:V.bg, bgs:[...V.bgs], public:V.pub, items:V.items.map(x=>({room:0, ...x})), rooms, max_rooms:4, room_price:rooms.length<4 ? rooms.length*500 : null, farm_pets, farm_at:V.farm_at, farm_rate:VOID_FARM_RATE+rl, farm_cap:VOID_FARM_CAP+4*cl,
         cap_lv:cl, rate_lv:rl, cap_price:[300,500,800][cl] ?? null, rate_price:[500,800][rl] ?? null, fx:V.fx||'', fxs:[...(V.fxs||[])], fx_price:VOID_FX_PRICE, stars:st.me.stars||0,
         max_cols:VOID_MAX_C, max_rows:VOID_MAX_R, grow_price:V.cols*V.rows*10, bg_price:VOID_BG_PRICE,
         catalog:VCAT.map(f=>({...f})), sets:this.vdSets(), bps:[...(V.bps||[])], vinv:{...(V.vinv||{})}, bp_saved:V.bp_gauge||0, bp_need:30, bp_dup:50,
@@ -658,7 +659,10 @@ function makeDemoApi(){
       const P = this.pstate(); if(['isk_ink','isk_clock','isk_paper','isk_reject','isk_blank','isk_scrap','isk_sleep','isk_game','isk_vamp'].every(c=>P.dex.includes(c)) && !have.has('isekai')) fresh.push('isekai');
       if(fresh.length){ st.me.nameplates = [...have, ...fresh]; persist(); } return {fresh}; },
     vdStar(n){ if((st.me.stars||0) < n) fail(`⭐ 별조각이 모자라요 (⭐ ${n}개 필요)`); st.me.stars -= n; },
-    async voidFx(fx){ const V = st.vd; V.fxs = V.fxs||[]; if(fx && !V.fxs.includes(fx)){ this.vdPay(VOID_FX_PRICE); V.fxs.push(fx); } V.fx = fx||''; persist(); return this.vdJson(); },
+    async voidFx(fx){ const V = st.vd, k = VROOM||0; V.fxs = V.fxs||[]; if(fx && !V.fxs.includes(fx)){ this.vdPay(VOID_FX_PRICE); V.fxs.push(fx); } if(k){ V.rooms[k].fx = fx||''; } else V.fx = fx||''; persist(); return this.vdJson(); },
+    async voidRoomAdd(name){ const V = st.vd; V.rooms = V.rooms || [{name:'첫 번째 방'}]; const n = V.rooms.length; if(n>=4) fail('아공간 방은 4개까지 만들 수 있어요');
+      name = (name||'').trim() || `방 ${n+1}`; if(name.length>10) fail('방 이름은 10자까지예요'); this.vdPay(n*500); V.rooms.push({name, bg:'base', fx:''}); persist(); return this.vdJson(); },
+    async voidRoomRename(k, name){ const V = st.vd; V.rooms = V.rooms || [{name:'첫 번째 방'}]; name = (name||'').trim(); if(!name) fail('방 이름을 적어 주세요'); if(name.length>10) fail('방 이름은 10자까지예요'); V.rooms[k].name = name; persist(); return this.vdJson(); },
     async voidFarmUp(kind){ const V = st.vd; if(kind==='cap'){ const p = [300,500,800][V.cap_lv||0]; if(p==null) fail('바구니는 이미 제일 커요'); this.vdPay(p); V.cap_lv = (V.cap_lv||0)+1; }
       else { const p = [500,800][V.rate_lv||0]; if(p==null) fail('간식 그릇은 이미 가득이에요'); this.vdPay(p); V.rate_lv = (V.rate_lv||0)+1; } persist(); return this.vdJson(); },
     async riftStarFeed(id, n){ const I = this.iskState(), e = I.eggs.find(x=>x.id===id); if(!e || !e.set_at) fail('먼저 세계수에 맡겨 주세요');
@@ -669,15 +673,15 @@ function makeDemoApi(){
     async voidOpen(){ if(st.vd) fail('이미 아공간이 있어요'); this.vdPay(VOID_OPEN_PRICE); st.vd = {cols:4, rows:4, bg:'base', bgs:['base'], pub:false, items:[], nid:1, farm_at:new Date().toISOString()}; persist(); return this.vdJson(); },
     async voidGrow(dir){ const V = st.vd; if(!V) fail('먼저 아공간 문을 열어 주세요');
       if(dir==='col' ? V.cols>=VOID_MAX_C : V.rows>=VOID_MAX_R) fail('더 넓힐 수 없어요'); this.vdPay(V.cols*V.rows*10); if(dir==='col') V.cols++; else V.rows++; persist(); return this.vdJson(); },
-    async voidBg(bg){ const V = st.vd; if(!(bg in VOID_BGS)) fail('없는 배경이에요'); if(!V.bgs.includes(bg)){ this.vdPay(VOID_BG_PRICE); V.bgs.push(bg); } V.bg = bg; persist(); return this.vdJson(); },
+    async voidBg(bg){ const V = st.vd; if(!(bg in VOID_BGS)) fail('없는 배경이에요'); if(!V.bgs.includes(bg)){ this.vdPay(VOID_BG_PRICE); V.bgs.push(bg); } const k = VROOM||0; if(k){ V.rooms[k].bg = bg; } else V.bg = bg; persist(); return this.vdJson(); },
     async voidPublic(on){ st.vd.pub = !!on; persist(); return this.vdJson(); },
-    async voidPlace(code, r, c, rot, w, h, layer){ const V = st.vd, vf = isVoidFurn(code); V.vinv = V.vinv||{};
+    async voidPlace(code, r, c, rot, w, h, layer, room){ const V = st.vd, vf = isVoidFurn(code), rm = room ?? VROOM ?? 0; V.vinv = V.vinv||{};
       if(!vf && !isLegendFurn(code)) fail('아공간에는 🔮 아공간 가구와 👑 전설 가구만 놓을 수 있어요');
       if(vf ? !(V.vinv[code]>0) : !(st.inv[code]>0)) fail(vf ? '아공간 창고에 없는 가구예요' : '가방에 없는 가구예요');
       if(r<0||c<0||c+w>V.cols||r+h>V.rows) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
       const ly = layer==='floor' ? 'floor' : 'furniture';
-      if(V.items.some(f=>f.layer===ly && r<f.r+f.h && f.r<r+h && c<f.c+f.w && f.c<c+w)) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
-      if(vf) V.vinv[code]--; else st.inv[code]--; V.items.push({id:V.nid++, item_code:code, r, c, w, h, rot:rot||0, layer:ly}); persist(); return this.vdJson(); },
+      if(V.items.some(f=>(f.room||0)===rm && f.layer===ly && r<f.r+f.h && f.r<r+h && c<f.c+f.w && f.c<c+w)) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
+      if(vf) V.vinv[code]--; else st.inv[code]--; V.items.push({id:V.nid++, item_code:code, r, c, w, h, rot:rot||0, layer:ly, room:rm}); persist(); return this.vdJson(); },
     async voidRemove(id){ const V = st.vd, f = V.items.find(x=>x.id===id); if(!f) fail('내 가구가 아니에요'); V.items = V.items.filter(x=>x!==f);
       if(isVoidFurn(f.item_code)){ V.vinv = V.vinv||{}; V.vinv[f.item_code] = (V.vinv[f.item_code]||0)+1; } else st.inv[f.item_code] = (st.inv[f.item_code]||0)+1; persist(); return this.vdJson(); },
     async voidCollect(){ const j = this.vdJson(), n = j.farm_pets.length; if(!n) fail('농장에서 놀 이세계 마물이 아직 없어요. 알을 부화시켜 보세요');
