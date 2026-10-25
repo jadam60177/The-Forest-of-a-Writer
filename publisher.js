@@ -106,11 +106,13 @@ dialog.visit.pub-dlg{width:min(96vw,1120px);max-width:min(96vw,1120px);max-heigh
 #pubRcpt .stampimg{position:absolute;right:.6rem;bottom:2.6rem;width:118px;transform:rotate(-14deg);opacity:.92;pointer-events:none}
 #pubRcpt .take{display:block;margin:1rem auto 0;font-family:"Jua",sans-serif;border:0;background:#2E2018;color:#FFF3DC;border-radius:999px;padding:.45rem 1.4rem;cursor:pointer}
 /* 🏛️ 광장 입구 */
-.pub-door{display:flex;align-items:center;gap:1rem;margin:0 0 1rem;padding:.7rem 1rem;border-radius:16px;border:1px solid rgba(255,206,92,.45);background:rgba(60,46,14,.35);cursor:pointer;color:inherit;font:inherit;text-align:left;width:100%}
-.pub-door:hover{background:rgba(90,66,20,.45)}
-.pub-door img{width:150px;max-width:34%;height:auto;flex:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
-.pub-door b{font-family:"Jua",sans-serif;font-weight:400;font-size:1.25rem;display:block}
-.pub-door span{font-size:.88rem;opacity:.85}
+.pub-door{display:flex;align-items:center;gap:1rem;margin:0 0 1rem;padding:.8rem 1.1rem;border-radius:18px;border:2px solid #C9A46A;
+  background:linear-gradient(135deg,#FFF6E2,#F3E0BC);color:#4A2E14;cursor:pointer;font:inherit;text-align:left;width:100%;box-shadow:0 6px 16px rgba(60,40,10,.25);transition:transform .15s,box-shadow .15s}
+.pub-door:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(60,40,10,.3)}
+.pub-door img{width:150px;max-width:32%;height:auto;flex:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))}
+.pub-door b{font-family:"Jua",sans-serif;font-weight:400;font-size:1.3rem;display:block;color:#3B2410;margin-bottom:.2rem}
+.pub-door span{font-size:.9rem;color:#6A4A2A;line-height:1.5}
+.pub-door .go{display:inline-block;margin-top:.45rem;font-family:"Jua",sans-serif;font-size:.92rem;background:#2E2018;color:#FFF3DC;border-radius:999px;padding:.25rem .9rem}
 `; document.head.appendChild(css);
 
 const KW = [['world','🌍 세계관'],['top','🗡️ 공'],['bottom','🌸 수'],['rel','💞 관계'],['event','⚡ 사건'],['mood','🌙 분위기']];
