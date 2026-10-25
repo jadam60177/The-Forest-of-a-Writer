@@ -7432,7 +7432,7 @@ document.addEventListener('click', e=>{
     WALK_PIXEL_BUSY=true;renderWalkLook();
     try{
       if(!walkPixelOwned(it)){
-        if(!(await ask('「'+it.name+'」을(를) 🪙 '+it.price+'코인으로 구매할까요?'))return;
+        if(!(await ask('「'+it.name+'」을(를) 🪙 '+it.price+'코인으로 구매할까요?')))return;
         if(DEMO){
           if(demoApi.st.me.coins<it.price)throw new Error('코인이 부족해요');
           demoApi.st.me.coins-=it.price;
