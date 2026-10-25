@@ -6,16 +6,16 @@
 (function(){
   'use strict';
   const skins=[['light','밝은 피부'],['tan','살구 피부'],['brown','갈색 피부'],['deep','짙은 피부']];
-  const outfits=[['tunic','기본 튜닉',0],['robe','마법 로브',3],['armor','기사 갑옷',5],['dress','드레스',3]];
+  const outfits=[['tunic','기본 튜닉',0],['robe','마법 로브',15],['armor','기사 갑옷',20],['dress','드레스',15]];
   const styles=[['short','숏컷'],['long','긴 머리'],['ponytail','포니테일'],['bob','단발'],['spiky','뾰족머리'],['buns','양갈래 번']];
   const colors=[['brown','갈색'],['black','검정'],['blonde','금발'],['ginger','주황'],['pink','분홍'],['mint','민트']];
-  const hats=[['wizard_hat','마법사 모자',4],['crown','왕관',5],['beanie','비니',2]];
+  const hats=[['wizard_hat','마법사 모자',17],['crown','왕관',20],['beanie','비니',12]];
   const catalog=[];
   skins.forEach(function(v){catalog.push({kind:'body',code:'body_'+v[0],name:v[1],price:0});});
   outfits.forEach(function(v){catalog.push({kind:'outfit',code:'outfit_'+v[0],name:v[1],price:v[2]});});
   styles.forEach(function(s){colors.forEach(function(c){
     const code='hair_'+s[0]+'_'+c[0];
-    catalog.push({kind:'hair',code:code,name:s[1]+' · '+c[1],price:code==='hair_short_brown'?0:1});
+    catalog.push({kind:'hair',code:code,name:s[1]+' · '+c[1],price:code==='hair_short_brown'?0:10});
   });});
   hats.forEach(function(v){catalog.push({kind:'hat',code:'hat_'+v[0],name:v[1],price:v[2]});});
   // hat_none 은 이미지가 없는 기본 선택지입니다.
