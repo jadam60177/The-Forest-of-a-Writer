@@ -7371,8 +7371,34 @@ document.addEventListener('click', e=>{   // 🎁 숲지기 분실물 뿌리기
 
 // --- 꾸미기 ---
 let WALK_LOOK_TAB = 'char';
+function walkPixelOwned(it){
+  return it.price===0 || WALK_PIXEL.owned.includes(it.code);
+}
+function renderWalkPixelLook(el){
+  const p=PIXEL_AVATAR, look=p.normalize(WALK_PIXEL.look), tabs=[
+    ['body','🧑 피부'],['hair','💇 머리'],['outfit','👕 의상'],['hat','🎩 모자']
+  ];
+  const head = '<div class="wl-avatar-head">'+p.html(look)+
+    '<div><b>내 도트 아바타</b><p class="small">🪙 '+Number(ME&&ME.coins||0).toLocaleString()+'코인 · 기본 의상 무료</p>'+
+    '<p class="small">구매한 의상은 언제든 다시 입을 수 있어요.</p></div></div>';
+  const nav = '<div class="wl-tabs pixel-tabs">'+tabs.map(([id,title])=>
+    '<button type="button" class="rtab '+(WALK_PIXEL_TAB===id?'on':'')+
+      '" data-pixel-tab="'+id+'">'+title+'</button>').join('')+'</div>';
+  const grid = '<div class="wl-grid pixel-grid">'+p.catalog.filter(it=>it.kind===WALK_PIXEL_TAB).map(it=>{
+    const preview=p.html({...look,[it.kind]:it.code}), owned=walkPixelOwned(it), worn=look[it.kind]===it.code;
+    const status=worn?'✓ 착용 중':owned?'보유 중':'🪙 '+it.price;
+    return '<button type="button" class="wl-opt pixel-opt '+(worn?'on':'')+
+      '" data-pixel-choice="'+it.code+'" '+(WALK_PIXEL_BUSY?'disabled':'')+'>'+
+      preview+'<b>'+it.name+'</b><span class="pixel-cost">'+status+'</span></button>';
+  }).join('')+'</div>';
+  el.innerHTML=head+nav+grid;
+  const mini=document.getElementById('wlkMini'); if(mini) mini.innerHTML=p.html(look);
+  const desc=document.querySelector('#wlookTop .wlk-tx .small');
+  if(desc) desc.textContent='머리 · 옷 · 모자를 코인 1~5개로 꾸며요';
+}
 function renderWalkLook(){
   const el = document.getElementById('wlook'); if(!el || !WALK) return;
+  if(WALK_PIXEL && window.PIXEL_AVATAR){renderWalkPixelLook(el);return;}
   const L = WALK.look;
   const tabs = `<div class="wl-tabs">${[['char','🧑 캐릭터'], ...WALK_PARTS.map(([k,l])=>[k,l])].map(([k,l])=>`<button type="button" class="rtab ${k===WALK_LOOK_TAB?'on':''}" data-wltab="${k}">${l}</button>`).join('')}</div>`;
   let body = '';
@@ -7392,6 +7418,41 @@ document.addEventListener('click', e=>{
   const t = e.target.closest('[data-wltab]'); if(t){ WALK_LOOK_TAB = t.dataset.wltab; renderWalkLook(); return; }
   const c = e.target.closest('[data-wchar]'); if(c && WALK){ WALK.look.char = c.dataset.wchar; walkSaveLook(); return; }
   const k = e.target.closest('[data-wcol]'); if(k && WALK){ WALK.look[k.dataset.wcol] = k.dataset.c; walkSaveLook(); return; }
+});
+// 도트 옷입히기: 결제·구매내역·착용은 서버 RPC에서 확인합니다.
+document.addEventListener('click', e=>{
+  const tab=e.target.closest('[data-pixel-tab]');
+  if(tab && WALK_PIXEL){WALK_PIXEL_TAB=tab.dataset.pixelTab;renderWalkLook();return;}
+  const btn=e.target.closest('[data-pixel-choice]');
+  if(!btn || !WALK_PIXEL || WALK_PIXEL_BUSY) return;
+  const it=PIXEL_AVATAR.byCode[btn.dataset.pixelChoice];if(!it)return;
+  const current=PIXEL_AVATAR.normalize(WALK_PIXEL.look);
+  if(current[it.kind]===it.code)return;
+  act(async()=>{
+    WALK_PIXEL_BUSY=true;renderWalkLook();
+    try{
+      if(!walkPixelOwned(it)){
+        if(!(await ask('「'+it.name+'」을(를) 🪙 '+it.price+'코인으로 구매할까요?'))return;
+        if(DEMO){
+          if(demoApi.st.me.coins<it.price)throw new Error('코인이 부족해요');
+          demoApi.st.me.coins-=it.price;
+        }else{
+          await api.pixelBuy(it.code);
+          await refreshMine(); renderTop();
+        }
+        WALK_PIXEL.owned.push(it.code);
+      }
+      const next=PIXEL_AVATAR.normalize({...current,[it.kind]:it.code});
+      if(!DEMO) await api.pixelWear(next);
+      WALK_PIXEL.look=next; WALK.look.pixel=next;
+      if(DEMO){
+        try{localStorage.setItem('majam-demo-pixel-avatar',JSON.stringify({look:next,owned:WALK_PIXEL.owned}));}catch(e){}
+        ME.coins=demoApi.st.me.coins;renderTop();
+      }
+      if(WALK_ME)walkSetLook(WALK_ME,WALK.look);
+      walkTrack();walkPollNow();
+    }finally{WALK_PIXEL_BUSY=false;renderWalkLook();}
+  });
 });
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) walkLeave(); else if(!document.getElementById('tab-walk').hidden){ renderWalk(); walkJoin(); } });
 
