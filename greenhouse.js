@@ -75,7 +75,7 @@ const CEIL = [.02, .2];
 const CATS = [['pot','🪴 화분'],['hang','🪝 걸이 화분'],['table','🪵 테이블·선반'],['misc','🧺 소품']];
 const IMGV = 1, img = k => `gh/${k}.webp?v=${IMGV}`;
 // 🌙 밤 배경 (숲이 밤 모드일 때) — 나무 유리 온실은 낮 그림만 있어요
-const NIGHT_BG = new Set(['bg_sun','bg_sakura','bg_city','bg_magic','bg_med']);
+const NIGHT_BG = new Set(['bg_sun','bg_glass','bg_sakura','bg_city','bg_magic','bg_med']);
 const isNight = () => document.documentElement.getAttribute('data-mode') !== 'day';
 const bgImg = k => img(isNight() && NIGHT_BG.has(k) ? k+'_n' : k);
 const nightCls = k => isNight() && NIGHT_BG.has(k) ? ' night' : '';
