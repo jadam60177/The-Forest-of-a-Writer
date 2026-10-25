@@ -13,6 +13,7 @@ const css = document.createElement('style'); css.textContent = `
 .gh-it{position:absolute;transform-origin:50% 100%}
 .gh-stage.edit .gh-it{cursor:grab;touch-action:none}
 .gh-it img{display:block;width:100%;height:auto;pointer-events:none;filter:drop-shadow(0 .5cqw .45cqw rgba(50,30,10,.28))}
+.gh-stage.night .gh-it:not(.sel):not(.host) img{filter:brightness(.8) saturate(.85) drop-shadow(0 .5cqw .45cqw rgba(10,10,40,.35))}   /* 🌙 밤엔 가구도 살짝 어둡게 */
 .gh-it.flip img{transform:scaleX(-1)}
 .gh-it.sel img{filter:drop-shadow(0 0 .25cqw #fff) drop-shadow(0 0 .5cqw #F2B544) drop-shadow(0 .5cqw .45cqw rgba(50,30,10,.28))}
 .gh-it.host img{filter:drop-shadow(0 0 .3cqw #FFF6C8) drop-shadow(0 0 .8cqw #F2B544)}
@@ -73,6 +74,11 @@ const bgOf = k => BGS.find(b=>b.k===k) || BGS[0];
 const CEIL = [.02, .2];
 const CATS = [['pot','🪴 화분'],['hang','🪝 걸이 화분'],['table','🪵 테이블·선반'],['misc','🧺 소품']];
 const IMGV = 1, img = k => `gh/${k}.webp?v=${IMGV}`;
+// 🌙 밤 배경 (숲이 밤 모드일 때) — 나무 유리 온실은 낮 그림만 있어요
+const NIGHT_BG = new Set(['bg_sun','bg_sakura','bg_city','bg_magic','bg_med']);
+const isNight = () => document.documentElement.getAttribute('data-mode') !== 'day';
+const bgImg = k => img(isNight() && NIGHT_BG.has(k) ? k+'_n' : k);
+const nightCls = k => isNight() && NIGHT_BG.has(k) ? ' night' : '';
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 const esc2 = s => (typeof esc==='function' ? esc(s) : String(s));
 
@@ -98,7 +104,7 @@ function itemsHTML(items, bg, sel){
     return `<div class="gh-it ${it.f?'flip':''} ${sel===it.id?'sel':''}" data-ghid="${it.id}" style="width:${(p.w*100).toFixed(2)}%;left:${((p.x-p.w/2)*100).toFixed(2)}%;${pos};z-index:${p.z}" aria-label="${esc2(d.n)}"><img src="${img(it.code)}" alt="" draggable="false" loading="lazy"></div>`; }).join('');
 }
 // 이웃 집 구경 (보기만)
-window.GH_viewHTML = G => `<div class="gh-stage" style="background-image:url(${img(G.bg||'bg_sun')})">${itemsHTML(G.items||[], G.bg)}</div>`;
+window.GH_viewHTML = G => `<div class="gh-stage${nightCls(G.bg||'bg_sun')}" style="background-image:url(${bgImg(G.bg||'bg_sun')})">${itemsHTML(G.items||[], G.bg)}</div>`;
 
 /* ---------- 내 온실 ---------- */
 let GH = null, CAT = 'pot', SEL = null, busy2 = false, FOLD = true;
@@ -113,7 +119,7 @@ window.GH_render = render;
 function render(force){
   const b = box(); if(!b) return;
   if(D || C) return;   // 끄는 중엔 다시 그리지 않아요
-  const key = JSON.stringify([GH, CAT, SEL, FOLD, typeof ME!=='undefined' && ME ? ME.coins : 0]);
+  const key = JSON.stringify([GH, CAT, SEL, FOLD, isNight(), typeof ME!=='undefined' && ME ? ME.coins : 0]);
   if(!force && b._k === key && b.firstChild) return; b._k = key;
   if(!GH){ b.innerHTML = `<p class="small">🪴 온실을 불러오는 중이에요…</p>`; refresh().then(()=>{ if(GH) render(); else b.innerHTML = `<p class="small">🪴 온실을 아직 열 수 없어요. 숲지기가 준비 중이에요.</p>`; }); return; }
   if(!GH.open){
@@ -126,7 +132,7 @@ function render(force){
   const inv = GH.inv || {}, prices = GH.prices || {}, bgs = GH.bgs || ['bg_sun'], n = (GH.items||[]).length;
   b.innerHTML = `<div class="gh-box">
     <div class="gh-head"><h3>🪴 우리 집 온실 <span class="small">가구 ${n} / ${GH.max_items||80}</span></h3><span class="small">🪙 ${ME.coins.toLocaleString()}</span></div>
-    <div class="gh-stage edit" id="ghStage" style="background-image:url(${img(GH.bg)})">${itemsHTML(GH.items||[], GH.bg, SEL)}</div>
+    <div class="gh-stage edit${nightCls(GH.bg)}" id="ghStage" style="background-image:url(${bgImg(GH.bg)})">${itemsHTML(GH.items||[], GH.bg, SEL)}</div>
     <div class="gh-chips" aria-label="온실 배경">${BGS.map(x=>{ const own = bgs.includes(x.k);
       return `<button class="gh-chip ${GH.bg===x.k?'on':''} ${own?'':'lock'}" type="button" data-ghbg="${x.k}">${x.n}${own?'':` <small>🪙 ${(GH.bg_price||300).toLocaleString()}</small>`}</button>`; }).join('')}</div>
     <p class="small" style="margin:0">가구를 끌어서 옮기고, 누르면 뒤집기·크기·창고로 넣기를 할 수 있어요. 아래(앞)에 둘수록 크게 보여요. 작은 화분을 테이블·선반 위로 끌면 반짝이고, 놓으면 그 위에 올라가요.</p>
