@@ -29,7 +29,8 @@ dialog.visit.alc-dlg{width:min(96vw,980px);max-width:min(96vw,980px);max-height:
 #alcDlg .a-res .card{display:inline-flex;flex-direction:column;align-items:center;gap:.4cqw;background:rgba(255,250,240,.94);color:#3A2560;border-radius:2cqw;padding:1.4cqw 3cqw;box-shadow:0 0 3cqw rgba(255,230,160,.6);animation:aPop .5s ease}
 #alcDlg .a-res .card.rare{box-shadow:0 0 3.6cqw rgba(140,200,255,.9)}
 #alcDlg .a-res .card.legend{box-shadow:0 0 5cqw rgba(255,210,90,1),0 0 9cqw rgba(255,150,220,.6);background:linear-gradient(#FFF9E3,#FFE9B8)}
-#alcDlg .a-res .em{font-size:max(30px,6cqw);line-height:1}
+#alcDlg .a-res .em{display:inline-flex;align-items:center;justify-content:center;font-size:max(30px,6cqw);line-height:1}
+#alcDlg .a-res .em img{width:max(42px,7.5cqw);height:max(42px,7.5cqw);object-fit:contain}
 #alcDlg .a-res .nm{font-family:"Jua",sans-serif;font-size:max(15px,2.5cqw)}
 #alcDlg .a-res .q{font-family:"Jua",sans-serif;font-size:max(14px,2.2cqw);color:#8A3FBF}
 #alcDlg .a-res .tag{font-size:max(11px,1.5cqw);font-family:"Jua",sans-serif}
@@ -54,7 +55,8 @@ dialog.visit.alc-dlg{width:min(96vw,980px);max-width:min(96vw,980px);max-height:
 #alcDlg .a-tabs button.on{background:#A27BE0;border-color:#A27BE0;color:#fff}
 #alcDlg .a-dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.45rem}
 #alcDlg .a-dx{display:flex;gap:.5rem;align-items:center;border:1px solid var(--line);border-radius:12px;padding:.45rem .55rem;background:rgba(255,255,255,.04)}
-#alcDlg .a-dx .em{font-size:1.6rem;width:2rem;text-align:center}
+#alcDlg .a-dx .em{display:inline-flex;align-items:center;justify-content:center;font-size:1.6rem;width:2.9rem;height:2.9rem;min-width:2.9rem;text-align:center}
+#alcDlg .a-dx .em img{width:100%;height:100%;object-fit:contain}
 #alcDlg .a-dx b{font-family:"Jua",sans-serif;font-weight:400;font-size:.88rem;display:block;line-height:1.25;word-break:keep-all}
 #alcDlg .a-dx .bst{font-size:.78rem;color:var(--muted)}
 #alcDlg .a-dx.rare{border-color:#7FB2E6}
@@ -62,6 +64,7 @@ dialog.visit.alc-dlg{width:min(96vw,980px);max-width:min(96vw,980px);max-height:
 #alcDlg .a-dx.no{opacity:.55}
 #alcDlg .a-dx.no .em{color:#A27BE0}
 #alcDlg .a-recent{display:flex;flex-direction:column;gap:.25rem;margin-top:.5rem;font-size:.86rem}
+#alcDlg .a-recent img{width:27px;height:27px;object-fit:contain;vertical-align:middle;margin-right:.3rem}
 .isk-duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;margin:0 0 1rem;align-items:stretch}
 @media (max-width:700px){ .isk-duo{grid-template-columns:1fr} }
 .isk-duo > #merchBox[hidden] + .alc-door{grid-column:1/-1}
@@ -84,6 +87,13 @@ const box = () => document.getElementById('alcBox');
 const fmtQ = (b, q, unit) => b==='short' ? `${(q*100).toLocaleString()}${unit}` : `${q}${unit}`;   // 분량 부족은 100자 단위
 const left = iso => { if(!iso) return ''; const s = Math.max(0, Math.round((Date.parse(iso)-Date.now())/1000)); return `${Math.floor(s/60)}분 ${String(s%60).padStart(2,'0')}초`; };
 function take(r){ const x = Array.isArray(r) ? r[0] : r; if(x && x.bosses) A = x; if(A && typeof RIFT!=='undefined' && RIFT){ RIFT.shards = A.shards; } }
+// 그림은 별도 alchemy_art.js에 저장합니다. 미발견 그림과 이름은 노출하지 않습니다.
+const itemNo = i => Number(i?.no) || Number(String(i?.code||i?.item||'').split('_').pop()) || 0;
+const alchemyIcon = (boss, no, emoji) => {
+  const key = boss + '_' + (no===0 ? 'mat' : String(no).padStart(2,'0'));
+  const img = window.ALC_ART && window.ALC_ART[key];
+  return img ? '<img src="'+img+'" alt="">' : e(emoji||'❔');
+};
 
 function render(){
   const b = box(); if(!b) return;
@@ -93,13 +103,13 @@ function render(){
   const B = A.bosses.find(x=>x.code===PICK), canFull = A.today < A.max;
   const why = A.today >= A.max ? '오늘은 다 연성했어요. 0시에 다시 열려요'
     : A.charges <= 0 ? `연성 기회 충전 중 · ${left(A.next_at)} 뒤에 1번`
-    : B.qty <= 0 ? `${B.name} 재료가 없어요. 이세계에서 ${B.name} 괴물을 때리면 모여요`
+    : B.qty <= 0 ? `선택한 괴물의 재료가 없어요. 이세계에서 괴물을 때리면 얻을 수 있어요`
     : A.shards < A.cost ? `💠 파편이 모자라요 (💠 ${A.cost} 필요)` : '';
   const found = A.items.filter(i=>i.best!=null).length;
   // 재료를 현재 보유 중이거나, 해당 보스로 연성한 도감 기록이 있으면 발견 상태로 유지해요.
   // 재료를 연성에 전부 써서 0개가 되어도, 도감 기록을 통해 다시 ???로 돌아가지 않아요.
   const materialKnown = x => Number(x.qty)>0 || A.items.some(i=>i.boss===x.code && i.best!=null);
-  const materialIcon = x => materialKnown(x) ? `<img src="monster/${e(x.code)}.webp?v=2" alt="">` : `<span class="a-unknown" aria-label="미발견">?</span>`;
+  const materialIcon = x => materialKnown(x) ? alchemyIcon(x.code, 0, x.emoji) : `<span class="a-unknown" aria-label="미발견">?</span>`;
   const materialName = x => materialKnown(x) ? e(x.mat) : "???";
   b.innerHTML = `<div class="a-head"><h3>🧪 마감 극복 연금술</h3>
       <span class="a-pill">💠 ${(A.shards||0).toLocaleString()}</span><span class="a-pill">오늘 ${A.today}/${A.max}</span>
@@ -110,17 +120,17 @@ function render(){
       <div class="a-mid"><div class="a-mat">${materialIcon(B)}<span>${materialKnown(B)?B.emoji:""} ${materialName(B)} <b>${B.qty}</b>개 · 1개 + 💠 ${A.cost}</span></div>
         <button class="a-brew" type="button" data-abrew ${why?'disabled':''}>🔥 연성하기</button>${why ? `<div class="a-why">${e(why)}</div>` : ''}</div></div>
     <div class="a-bosses">${A.bosses.map(x=>`<button class="a-boss ${x.code===PICK?'on':''}" type="button" data-apick="${x.code}">${materialIcon(x)}<b>${materialName(x)}</b><span class="n">${x.qty}개</span></button>`).join('')}</div>
-    <p class="small" style="margin:0">괴물을 한 대 때릴 때마다 그 괴물의 재료가 1개 모여요. 연성 기회는 ${A.every}분마다 1번 충전되고 ${A.max}번까지 쌓여요. 하루에 ${A.max}번까지 연성할 수 있어요. 꽝은 없어요!</p>
+    <p class="small" style="margin:0">괴물을 공격하면 일정 확률로 그 괴물의 재료를 얻을 수 있어요. 연성 기회는 ${A.every}분마다 1번 충전되고 ${A.max}번까지 쌓여요. 하루에 ${A.max}번까지 연성할 수 있어요. 꽝은 없어요!</p>
     <details class="a-fold" ${typeof localStorage!=='undefined' && (()=>{ try{ return localStorage.getItem('majam-alcdex')==='1'; }catch(_){ return false; } })() ? 'open' : ''} data-adexfold><summary>📖 극복 도감 <span class="small">${found} / ${A.items.length}종 · 최고 수량을 겨뤄요</span></summary>
-      <div class="a-tabs">${A.bosses.map(x=>{ const n = A.items.filter(i=>i.boss===x.code && i.best!=null).length; return `<button type="button" class="${x.code===BOSS_TAB?'on':''}" data-atab="${x.code}">${e(x.name)} ${n}/10</button>`; }).join('')}</div>
-      <div class="a-dex">${A.items.filter(i=>i.boss===BOSS_TAB).map(i=>i.best!=null
-        ? `<div class="a-dx ${i.tier}"><span class="em">${i.emoji}</span><span><b>${e(i.name)}</b><span class="bst">${TIER[i.tier]} · 최고 ${fmtQ(i.boss, i.best, i.unit)} · ${i.times}번</span></span></div>`
+      <div class="a-tabs">${A.bosses.map(x=>{ const n = A.items.filter(i=>i.boss===x.code && i.best!=null).length; return `<button type="button" class="${x.code===BOSS_TAB?'on':''}" data-atab="${x.code}">${materialKnown(x)?e(x.name):'???'} ${n}/10</button>`; }).join('')}</div>
+      <div class="a-dex">${A.items.filter(i=>i.boss===BOSS_TAB).map((i,n)=>i.best!=null
+        ? `<div class="a-dx ${i.tier}"><span class="em">${alchemyIcon(i.boss,itemNo(i)||n+1,i.emoji)}</span><span><b>${e(i.name)}</b><span class="bst">${TIER[i.tier]} · 최고 ${fmtQ(i.boss, i.best, i.unit)} · ${i.times}번</span></span></div>`
         : `<div class="a-dx no ${i.tier==='legend'?'legend':''}"><span class="em">？</span><span><b>???</b><span class="bst">${i.tier==='common'?'아직 못 찾았어요':TIER[i.tier]}</span></span></div>`).join('')}</div></details>
-    ${A.recent.length ? `<details class="a-fold"><summary>🕘 최근 연성 <span class="small">${A.recent.length}번</span></summary><div class="a-recent">${A.recent.map(r=>`<span>${r.emoji} ${e(r.name)} ${fmtQ(r.item.split('_')[0], r.qty, r.unit)} <span class="small">${TIER[r.tier]}</span></span>`).join('')}</div></details>` : ''}`;
+    ${A.recent.length ? `<details class="a-fold"><summary>🕘 최근 연성 <span class="small">${A.recent.length}번</span></summary><div class="a-recent">${A.recent.map(r=>`<span>${alchemyIcon(String(r.item||"").split("_")[0], itemNo(r), r.emoji)} ${e(r.name)} ${fmtQ(r.item.split('_')[0], r.qty, r.unit)} <span class="small">${TIER[r.tier]}</span></span>`).join('')}</div></details>` : ''}`;
 }
 function resHTML(r){
   const tag = r.first ? '✨ 새로운 극복 아이템 발견!' : r.record ? `🏆 새로운 최고 기록! (전 기록 ${fmtQ(r.boss, r.old_best, r.unit)})` : `최고 기록은 ${fmtQ(r.boss, Math.max(r.old_best||0, r.qty), r.unit)}이에요`;
-  return `<div class="card ${r.tier}"><span class="em">${r.emoji}</span><span class="nm">${e(r.name)}</span><span class="q">${fmtQ(r.boss, r.qty, r.unit)} 획득!</span><span class="tag">${TIER[r.tier]} · ${tag}</span></div>`;
+  return `<div class="card ${r.tier}"><span class="em">${alchemyIcon(r.boss, itemNo(r), r.emoji)}</span><span class="nm">${e(r.name)}</span><span class="q">${fmtQ(r.boss, r.qty, r.unit)} 획득!</span><span class="tag">${TIER[r.tier]} · ${tag}</span></div>`;
 }
 async function open(){
   const d = document.getElementById('alcDlg'); if(!d) return;
