@@ -3110,7 +3110,7 @@ const NEW_WINS2 = [["win_lace2", "🪟", "넓은 레이스 커튼 창문", 200, 
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='win_potion')+1 || DEFAULT_SHOP.length; DEFAULT_SHOP.splice(at, 0, ...NEW_WINS2.map(([code,emoji,name,price,w,h])=>({code,emoji,name,price,w,h,active:true,category:'furniture',icon:code,layer:'furniture'}))); NEW_WINS2.forEach(r=>FURN_IMG.add(r[0])); }
 const WIN2 = new Set(NEW_WINS2.map(r=>r[0]));   // 넓은 창문은 칸 안에 딱 맞게 (위로 크게 안 그려요)
 // 🛋️ 새 가구 66종 (10-13, newfurn66.sql 과 같아요) — code, emoji, 이름, 가격, 가로, 세로, 분류
-// 🌙 별밤 서재 세트 (10-25 판 88) — 가구 10(전부 2×2) · 소품 12, 코인으로 사요. 그림 furn/st_*.webp
+// 🌙 별밤 서재 세트 (10-25 판 89) — 가구 10(전부 2×2) · 소품 12, 코인으로 사요. 그림 furn/st_*.webp
 const NEW_STUDY = [
   ["st_moonchair","🌙","초승달 안락의자",280,2,2,"furniture"],
   ["st_moonshelf","📚","초승달 책장",360,2,2,"furniture"],
@@ -6178,7 +6178,7 @@ const VOID_BG_VER = {base:'?v=3'};   // 같은 이름으로 그림을 바꾸면 
 const voidBgCSS = k => { const key = k in VOID_BGS ? k : 'base'; return `url(void/${key}.webp${VOID_BG_VER[key]||''}) center/cover no-repeat, ${VOID_BGS[key].grad}`; };
 const VOID_FARM_BG = 'url(void/farm.webp?v=2) center/cover no-repeat, url(bg/Pet_background.webp) center/cover no-repeat, linear-gradient(#24124F 0%,#5B3E9A 38%,#4F8A5E 39%,#2D5A3A 100%)';
 let VOID = null, VSEL = null, VROT = 0, VHOVER = null, vbagTab = 'void', vcraftTab = '';
-/* 🚪 아공간 방 (10-25 판 88 · voidrooms.sql) — 서버는 가구 전체 + 방 목록을 줘요.
+/* 🚪 아공간 방 (10-25 판 89 · voidrooms.sql) — 서버는 가구 전체 + 방 목록을 줘요.
    화면은 지금 고른 방(VROOM)만 보이게 items·bg·fx 를 그 방 것으로 바꿔 끼워요 (_all 에 전체가 있어요) */
 let VROOM = 0; try{ VROOM = +(localStorage.getItem('majam-vroom')||0) || 0; }catch(e){}
 const VROOM_NAMES = ['첫 번째 방', '전시실', '보물 창고', '비밀 방'];
@@ -6321,7 +6321,7 @@ function voidCraftHTML(V){
   const card = f=>{ const own = bps.has(f.code) || f.free, n = (V.vinv||{})[f.code]||0, onfloor = (V.items||[]).filter(x=>x.item_code===f.code).length;
     const maxed = f.max_own && (n + onfloor) >= f.max_own;
     return `<div class="vcard ${own?'':'locked'}">
-      <div class="vart">${!own && !peek() ? `<span class="rq">？</span>` : VFURN_ART.has(f.code) ? `<img src="furn/${f.code}.webp" alt="" loading="lazy" draggable="false">` : `<span class="emo">${f.emoji}</span>`}</div>
+      <div class="vart">${!own && !peek() ? `<span class="rq">？</span>` : VFURN_ART.has(f.code) ? `<img src="furn/${f.code}.webp${furnV(f.code)}" alt="" loading="lazy" draggable="false">` : `<span class="emo">${f.emoji}</span>`}</div>
       <div class="nm">${own ? esc(f.name) : peek() ? '👁️ '+esc(f.name) : '？？？'}</div>
       ${own || peek() ? `<div class="sz small">${f.w}×${f.h}칸${f.layer==='floor'?' · 바닥':''}${f.max_own?` · ${f.max_own}개만`:''}${n?` · 창고 ${n}`:''}</div>` : ''}
       ${own ? `<button class="mini ask-yes" type="button" data-vcraft="${f.code}" ${maxed||shards<f.price?'disabled':''}>${maxed?'다 만들었어요':`🔨 만들기 · 💠 ${f.price}`}</button>` : pickable ? `<button class="mini ask-yes" type="button" data-vpick="${f.code}">🎯 이 도안 고르기</button>` : `<span class="small lockt">📜 도안이 아직 없어요</span>`}
@@ -6335,7 +6335,7 @@ function voidCraftHTML(V){
     <div class="vcraft">${cards}</div>
     ${walls.length ? `<h4 style="margin-top:.8rem">${vcraftTab==='glass' ? `🔮 별유리 가구 <span class="small">도안 없이 💠로 바로 만들어요 · 어느 배경에나 어울리는 아공간 기본 가구예요</span>` : `🧱 ${esc(b.name)} 벽 <span class="small">도안 없이 💠로 바로 만들어요 · 세트에는 안 들어가요 · 가로로 놓을 때 제일 예뻐요</span>`}</h4><div class="vcraft">${walls.map(card).join('')}</div>` : ''}`;
 }
-/* 🔕 확인 창 끄기 (10-25 판 88, 주민 건의) — 켜면 가구 사기·아공간 가구 만들기·치우기 때 묻는 창과 알림을 건너뛰어요. 브라우저마다 기억 */
+/* 🔕 확인 창 끄기 (10-25 판 89, 주민 건의) — 켜면 가구 사기·아공간 가구 만들기·치우기 때 묻는 창과 알림을 건너뛰어요. 브라우저마다 기억 */
 const QUIET = () => { try{ return localStorage.getItem('majam-quiet')==='1'; }catch(e){ return false; } };
 function quietLabel(){ document.querySelectorAll('[data-quiet]').forEach(b=>{ const q = QUIET(); b.textContent = q ? '🔕 확인 창 꺼짐' : '🔔 확인 창 켜짐'; b.classList.toggle('on', q);
   b.title = q ? '가구를 살 땐 1개씩 바로 사고, 묻는 창·알림 없이 바로 해요. 누르면 다시 켜져요' : '누르면 가구 사기·만들기·치우기 때 묻는 창과 알림을 건너뛰어요'; }); }
@@ -7371,7 +7371,7 @@ function renderLotto(){
   const week = (L.week||[]).map(lottoOf).filter(Boolean);
   const card = (it, tag) => { const have = dex.has(it.code), pk = !have && peek();
     return `<div class="lw ${have?'have':'lock'} ${pk?'peek':''}" ${have||pk?`title="${esc(it.about)}"`:''}>${tag?`<span class="wk">이번 주</span>`:''}${have?'<span class="ok">✓</span>':''}
-      <img src="furn/${it.code}.webp" alt="" draggable="false" loading="lazy"><div class="nm">${have?esc(it.name):pk?'👁️ '+esc(it.name):'？？？'}</div><div class="sz">${it.w}×${it.h}칸${it.layer==='floor'?' · 바닥':''}</div></div>`; };
+      <img src="furn/${it.code}.webp${furnV(it.code)}" alt="" draggable="false" loading="lazy"><div class="nm">${have?esc(it.name):pk?'👁️ '+esc(it.name):'？？？'}</div><div class="sz">${it.w}×${it.h}칸${it.layer==='floor'?' · 바닥':''}</div></div>`; };
   let result = '';
   if(cur && cur.revealed){
     if(cur.res.kind==='miss') result = `<div class="wolf-note"><img src="bg/Wolf_Watcher.webp" alt=""><div><b>담당자의 쪽지</b><span>${esc(cur.nag)}</span></div></div>`;
@@ -7455,7 +7455,7 @@ async function revealLotto(){
   if(r.kind==='furn' && !r.dup){
     const it = lottoOf(r.item);
     const d = document.getElementById('lottoWinDlg');
-    document.getElementById('lottoWinArt').innerHTML = `<img src="furn/${it.code}.webp" alt="">`;
+    document.getElementById('lottoWinArt').innerHTML = `<img src="furn/${it.code}.webp${furnV(it.code)}" alt="">`;
     document.getElementById('lottoWinName').textContent = it.name;
     document.getElementById('lottoWinMsg').textContent = `👑 전설 가구 당첨! (${it.w}×${it.h}칸)\n${it.about}\n\n가방에 넣어 뒀어요. 우리 집에 놓아 보세요!`;
     d.showModal();
@@ -8624,7 +8624,7 @@ roomEl.addEventListener('mouseover', e=>{
   if(JSON.stringify(h)!==JSON.stringify(hover)){ hover=h; if(selected) renderMyHouse(); }
 });
 roomEl.addEventListener('mouseleave', ()=>{ hover=null; if(selected) renderMyHouse(); });
-// 🖐️ 아공간 가구도 끌어서 옮기기 (10-25 판 88, 주민 건의) — 마우스는 바로, 폰은 꾹 눌렀다가(0.3초)
+// 🖐️ 아공간 가구도 끌어서 옮기기 (10-25 판 89, 주민 건의) — 마우스는 바로, 폰은 꾹 눌렀다가(0.3초)
 var VDRAG = null, VDRAG_AT = 0;
 function vdragClear(){ document.querySelectorAll('#voidStage .tile.pv-ok,#voidStage .tile.pv-no').forEach(t=>t.classList.remove('pv-ok','pv-no')); }
 function vdragStart(){
@@ -9419,6 +9419,6 @@ start();
 </script>
 <script src="stall.js?v=1025a"></script>
 <script src="merchant.js?v=1025f"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 88</p>
+<p class="site-ver">마감의 숲 · 10-25 판 89</p>
 </body>
 </html>
