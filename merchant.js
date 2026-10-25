@@ -17,10 +17,10 @@ const ITEMS = {
   acc_bow:{kind:'acc',slot:'head',name:'리본',price:300,s:.42,o:.55,dx:.3}, acc_sprout:{kind:'acc',slot:'head',name:'새싹 핀',price:300,s:.34,o:.12},
   acc_glasses:{kind:'acc',slot:'face',name:'동그란 안경',price:300,s:1.4}, acc_heart:{kind:'acc',slot:'face',name:'하트 선글라스',price:350,s:1.4},
   acc_scarf:{kind:'acc',slot:'neck',name:'줄무늬 목도리',price:350,s:1.5,o:.22}, acc_collar:{kind:'acc',slot:'neck',name:'방울 목걸이',price:300,s:1.1,o:.35},
-  acc_angel:{kind:'acc',slot:'back',name:'천사 날개',price:500,s:1.3}, acc_bat:{kind:'acc',slot:'back',name:'박쥐 날개',price:500,s:1.25},
-  acc_fairy:{kind:'acc',slot:'back',name:'요정 날개',price:500,s:1.05}, acc_cape:{kind:'acc',slot:'back',name:'빨간 망토',price:450,s:.85,cape:true},
-  acc_backpack:{kind:'acc',slot:'back',name:'모험가 배낭',price:450,s:.5,dx:.34},
-  acc_broom:{kind:'acc',slot:'hand',name:'마녀 빗자루',price:400,s:1},
+  acc_angel:{kind:'acc',slot:'back',name:'천사 날개',price:500,s:1.6}, acc_bat:{kind:'acc',slot:'back',name:'박쥐 날개',price:500,s:1.7},
+  acc_fairy:{kind:'acc',slot:'back',name:'요정 날개',price:500,s:1.45}, acc_cape:{kind:'acc',slot:'back',name:'빨간 망토',price:450,s:1.12,cape:true},
+  acc_backpack:{kind:'acc',slot:'back',name:'모험가 배낭',price:450,s:.58,dx:.44},
+  acc_broom:{kind:'acc',slot:'hand',name:'마녀 빗자루',price:400,s:1.18},
   r_dragontear:{kind:'ing',name:'용의 눈물',price:150}, r_timeice:{kind:'ing',name:'시간이 멈춘 얼음',price:150}, r_starlight:{kind:'ing',name:'병에 담긴 별빛',price:150},
   r_phoenix:{kind:'ing',name:'불사조 깃털',price:150}, r_moondrop:{kind:'ing',name:'달빛 한 방울',price:150}, r_cloud:{kind:'ing',name:'병 속의 구름',price:150},
   r_pearl:{kind:'ing',name:'심해 진주',price:150}, r_goldapple:{kind:'ing',name:'황금 사과',price:150},
@@ -56,7 +56,7 @@ function guardHTML(st, cls=''){
     if(slot==='head'){ w = A.hw*it.s; l = A.hx - w/2 + (it.dx||0)*A.hw; t = A.ht - hf(w)*(1-it.o); }
     else if(slot==='face'){ w = A.ew*it.s; l = A.hx - w/2; t = A.ey - hf(w)/2; }
     else if(slot==='neck'){ w = A.nw*it.s; l = A.hx - w/2; t = A.ny - hf(w)*it.o; }
-    else if(slot==='back'){ w = A.bw*it.s; l = A.hx - w/2 + (it.dx||0); t = it.cape ? A.ny - hf(w)*.12 : A.by - hf(w)/2 - (it.dx ? 0 : .06); z = 'back'; }
+    else if(slot==='back'){ w = A.bw*it.s; l = A.hx - w/2 + (it.dx||0); t = it.cape ? A.ny - hf(w)*.08 : A.by - hf(w)/2 - (it.dx ? 0 : .1); z = 'back'; }
     else { w = .46*it.s; l = A.hdx - w*.72; t = A.hdy - hf(w)*.4; }
     (z==='back' ? back : front).push(`<img class="mg-acc ${slot}" src="${src(c)}" alt="" draggable="false" style="left:${pct(l)};top:${pct(t)};width:${pct(w)}">`);
   });
