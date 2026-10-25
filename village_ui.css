@@ -1,8 +1,9 @@
 /* 마감의 숲 — 마을 UI 1차 시범: 작가의 수첩 (2026-10-25)
    디자인만 수정합니다. 집 배치·이름표 스킨·게임 기능은 유지합니다.
-   마을 탭에서만 적용하며, 해제는 index.html의 stylesheet link 제거로 가능합니다. */
+   상단 탭은 화면 전환 후에도 유지하고, 마을 내부 요소만 #tab-village로 제한합니다.
+   해제는 index.html의 stylesheet link 제거로 가능합니다. */
 
-body:has(#tab-village:not([hidden])) {
+body {
   --vui-paper: rgba(251,247,235,.95);
   --vui-border: #c9b99a;
   --vui-text: #4b4439;
@@ -12,7 +13,7 @@ body:has(#tab-village:not([hidden])) {
   --vui-soft: rgba(255,252,244,.92);
   --vui-shadow: rgba(61,50,36,.16);
 }
-:root:not([data-mode="day"]) body:has(#tab-village:not([hidden])) {
+:root:not([data-mode="day"]) body {
   --vui-paper: rgba(38,47,57,.94);
   --vui-border: rgba(188,181,151,.6);
   --vui-text: #f1ebdd;
@@ -105,15 +106,15 @@ body:has(#tab-village:not([hidden])) {
   border-color: var(--vui-sage-border);
 }
 
-/* 데스크톱: 알약 탭 대신 수첩 책갈피. 다른 화면에선 기존 탭 유지 */
+/* 데스크톱: 알약 탭 대신 수첩 책갈피. 탭 복원 후에도 디자인 유지 */
 @media (min-width: 601px) {
-  body:has(#tab-village:not([hidden])) nav.tabs {
+  body nav.tabs {
     gap: .35rem;
     background: var(--vui-paper);
     border-bottom: 1px solid var(--vui-border);
     box-shadow: 0 4px 12px var(--vui-shadow);
   }
-  body:has(#tab-village:not([hidden])) nav.tabs button {
+  body nav.tabs button {
     border-radius: 8px 8px 3px 3px;
     border: 1px solid var(--vui-border);
     background: var(--vui-soft);
@@ -121,10 +122,10 @@ body:has(#tab-village:not([hidden])) {
     box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 2px 0 var(--vui-shadow);
     transition: background .15s ease, transform .15s ease;
   }
-  body:has(#tab-village:not([hidden])) nav.tabs button:hover {
+  body nav.tabs button:hover {
     background: var(--vui-sage);
   }
-  body:has(#tab-village:not([hidden])) nav.tabs button[aria-selected="true"] {
+  body nav.tabs button[aria-selected="true"] {
     background: var(--vui-sage);
     color: var(--vui-text);
     border-color: var(--vui-sage-border);
@@ -134,23 +135,23 @@ body:has(#tab-village:not([hidden])) {
 
 /* 모바일: 기존 하단 메뉴의 폭/스크롤/위치는 유지하고 표면만 수첩으로 */
 @media (max-width: 600px) {
-  body:has(#tab-village:not([hidden])) nav.tabs {
+  body nav.tabs {
     background: var(--vui-paper);
     border-top: 1px solid var(--vui-border);
     box-shadow: 0 -5px 17px var(--vui-shadow);
   }
-  body:has(#tab-village:not([hidden])) nav.tabs button {
+  body nav.tabs button {
     color: var(--vui-muted);
     background: transparent;
     border-radius: 5px;
   }
-  body:has(#tab-village:not([hidden])) nav.tabs button[aria-selected="true"] {
+  body nav.tabs button[aria-selected="true"] {
     color: var(--vui-text);
     background: var(--vui-sage);
     border: 0;
     box-shadow: inset 0 -2px 0 rgba(92,122,84,.18);
   }
-  body:has(#tab-village:not([hidden])) nav.tabs button[aria-selected="true"]::after {
+  body nav.tabs button[aria-selected="true"]::after {
     background: var(--vui-sage-border);
     box-shadow: none;
     border-radius: 1px;
@@ -182,7 +183,7 @@ body:has(#tab-village:not([hidden])) {
 
 /* 기존 버튼 포커스 표시는 반드시 유지 */
 #tab-village .village-head .mini:focus-visible,
-body:has(#tab-village:not([hidden])) nav.tabs button:focus-visible {
+body nav.tabs button:focus-visible {
   outline: 3px solid #e9ba6e;
   outline-offset: 2px;
 }
