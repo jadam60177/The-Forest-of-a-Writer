@@ -458,11 +458,11 @@ const GUESTS = [
   {img:'wolf', lines:['마감 전에 한 잔이면 충분하죠.','원고는요? …아, 음료 먼저.','작가님 가판대라니, 감동입니다.']},
   {img:'demon', lines:['고향의 맛이군…','이쪽 세계 음료도 나쁘지 않아.','흠, 다음에 또 오지.']},
   // 10-25 새 손님
-  {img:'cat', lines:['테이크아웃 되죠? 냥.','산책길엔 역시 한 잔!','오늘 원고 술술 풀릴 것 같아요.']},
-  {img:'deer', lines:['빵이랑 같이 먹으면 딱이겠어요.','숲 끝까지 들고 갈게요!','향이 너무 좋아요~']},
-  {img:'frog', lines:['개굴, 우리 가게 메뉴로 넣고 싶어요!','쟁반에 하나 더 올려 주세요.','비 오는 날 생각나는 맛이에요.']},
-  {img:'girl', lines:['책 읽으면서 마실게요.','여기 단골 될 것 같아요!','오늘 마감 끝나면 또 올게요.']},
-  {img:'dragon', lines:['쿠키랑 먹으면 최고예요!','불 안 뿜고 마실게요. 약속!','배낭에 하나 더 넣어 가도 돼요?']},
+  {img:'cat', s:0.79, lines:['테이크아웃 되죠? 냥.','산책길엔 역시 한 잔!','오늘 원고 술술 풀릴 것 같아요.']},
+  {img:'deer', s:1.14, lines:['빵이랑 같이 먹으면 딱이겠어요.','숲 끝까지 들고 갈게요!','향이 너무 좋아요~']},
+  {img:'frog', s:0.81, lines:['개굴, 우리 가게 메뉴로 넣고 싶어요!','쟁반에 하나 더 올려 주세요.','비 오는 날 생각나는 맛이에요.']},
+  {img:'girl', s:0.95, lines:['책 읽으면서 마실게요.','여기 단골 될 것 같아요!','오늘 마감 끝나면 또 올게요.']},
+  {img:'dragon', s:0.85, lines:['쿠키랑 먹으면 최고예요!','불 안 뿜고 마실게요. 약속!','배낭에 하나 더 넣어 가도 돼요?']},
 ];
 const TAG_LINES = {
   hell:['음료가 왜 이렇게 매워요?!','잠이 0.1초 만에 깼습니다.','마감 직전 뇌를 태우는 맛!'],
@@ -486,7 +486,8 @@ function spawnGuest(){
   const d = queue.shift() || null; if(!d && Math.random()<.35) return;
   const g = pick(GUESTS), el = document.createElement('div'), from = Math.random()<.5;
   el.className = 's-guest walk' + (from ? '' : ' left');
-  el.innerHTML = `<img src="stall/guest_${g.img}.webp" alt="">`;
+  if(g.s) el.style.height = (16*g.s).toFixed(1)+'cqw';   // 🐾 손님마다 키 (10-25 새 그림)
+  el.innerHTML = `<img src="stall/guest_${g.img}.webp?v=2" alt="">`;
   el.style.left = from ? '-10%' : '110%'; street.appendChild(el); walking++;
   const stopX = 62 + Math.random()*16, dur = s => { el.style.transitionDuration = s+'s'; };
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ dur(3.6); el.style.left = stopX+'%'; }));
