@@ -3,7 +3,7 @@
    그림은 merchant/ 폴더. 일주일에 한 번 랜덤한 날 와서 종류별로 2가지씩 팔아요(경쟁 없음). 흥정은 그날 한 번. */
 (()=>{
 /* ---------- 물건 (merchant.sql merch_item 과 값이 같아야 해요) ---------- */
-const SZ = {"acc_angel":[240,128],"acc_backpack":[236,240],"acc_bat":[240,94],"acc_bow":[240,214],"acc_broom":[185,240],"acc_cape":[240,209],"acc_chef":[240,217],"acc_collar":[240,203],"acc_crown":[240,171],"acc_earmuff":[240,213],"acc_fairy":[240,191],"acc_flower":[240,144],"acc_glasses":[240,102],"acc_heart":[240,98],"acc_pirate":[240,139],"acc_scarf":[239,240],"acc_sprout":[240,165],"acc_wizhat":[240,175],
+const SZ = {"acc_angel":[240,128],"acc_backpack":[236,240],"acc_bat":[240,94],"acc_bow":[240,214],"acc_broom":[185,240],"acc_cape":[240,209],"acc_chef":[240,217],"acc_collar":[240,153],"acc_crown":[240,171],"acc_earmuff":[240,213],"acc_fairy":[240,191],"acc_flower":[240,144],"acc_glasses":[240,102],"acc_heart":[240,98],"acc_pirate":[240,139],"acc_scarf":[239,240],"acc_sprout":[240,165],"acc_wizhat":[240,175],
   "g_cloud":[208,250],"g_crystal":[248,340],"g_fish":[205,253],"g_fox":[257,340],"g_gargoyle":[290,340],"g_ink":[251,340],"g_lava":[174,294],"g_owl":[306,340],"g_robot":[173,268],"g_tree":[221,288]};
 const ITEMS = {
   g_gargoyle:{kind:'guard',name:'꼬마 가고일',price:3000}, g_fox:{kind:'guard',name:'그림자 여우',price:3000}, g_crystal:{kind:'guard',name:'수정 골렘',price:3000},
@@ -16,7 +16,7 @@ const ITEMS = {
   acc_flower:{kind:'acc',slot:'head',name:'꽃관',price:350,s:.95,o:.55}, acc_earmuff:{kind:'acc',slot:'head',name:'귀마개',price:350,s:1.15,o:.42},
   acc_bow:{kind:'acc',slot:'head',name:'리본',price:300,s:.42,o:.55,dx:.3}, acc_sprout:{kind:'acc',slot:'head',name:'새싹 핀',price:300,s:.34,o:.12},
   acc_glasses:{kind:'acc',slot:'face',name:'동그란 안경',price:300,s:1.4}, acc_heart:{kind:'acc',slot:'face',name:'하트 선글라스',price:350,s:1.4},
-  acc_scarf:{kind:'acc',slot:'neck',name:'줄무늬 목도리',price:350,s:1.5,o:.22}, acc_collar:{kind:'acc',slot:'neck',name:'방울 목걸이',price:300,s:1.1,o:.35},
+  acc_scarf:{kind:'acc',slot:'neck',name:'줄무늬 목도리',price:350,s:1.5,o:.1}, acc_collar:{kind:'acc',slot:'neck',name:'방울 목걸이',price:300,s:1.05,o:.06},
   acc_angel:{kind:'acc',slot:'back',name:'천사 날개',price:500,s:1.6}, acc_bat:{kind:'acc',slot:'back',name:'박쥐 날개',price:500,s:1.7},
   acc_fairy:{kind:'acc',slot:'back',name:'요정 날개',price:500,s:1.45}, acc_cape:{kind:'acc',slot:'back',name:'빨간 망토',price:450,s:1.12,cape:true},
   acc_backpack:{kind:'acc',slot:'back',name:'모험가 배낭',price:450,s:.58,dx:.44},
@@ -28,22 +28,23 @@ const ITEMS = {
 window.MERCH_ITEMS = ITEMS;
 // 파수꾼마다 소품 자리 (그림 가로·세로에 대한 비율): 머리 위(hx,ht,hw) · 눈(ey,ew) · 목(ny,nw) · 등(by,bw) · 손(hdx,hdy)
 const ANC = {
-  g_gargoyle:{hx:.5,ht:.12,hw:.62,ey:.40,ew:.40,ny:.55,nw:.40,by:.62,bw:.95,hdx:.22,hdy:.78},
-  g_fox:{hx:.47,ht:.16,hw:.6,ey:.47,ew:.42,ny:.64,nw:.38,by:.66,bw:.85,hdx:.25,hdy:.83},
-  g_crystal:{hx:.5,ht:.05,hw:.82,ey:.42,ew:.55,ny:.70,nw:.38,by:.74,bw:.8,hdx:.18,hdy:.78},
-  g_ink:{hx:.5,ht:.2,hw:.6,ey:.52,ew:.55,ny:.72,nw:.5,by:.6,bw:.95,hdx:.1,hdy:.73},
-  g_owl:{hx:.5,ht:.09,hw:.7,ey:.43,ew:.58,ny:.57,nw:.45,by:.6,bw:1,hdx:.12,hdy:.65},
-  g_tree:{hx:.5,ht:.12,hw:.62,ey:.48,ew:.4,ny:.63,nw:.35,by:.62,bw:.9,hdx:.18,hdy:.63},
-  g_lava:{hx:.5,ht:.2,hw:.72,ey:.52,ew:.5,ny:.70,nw:.45,by:.7,bw:.95,hdx:.12,hdy:.75},
-  g_cloud:{hx:.5,ht:.12,hw:.72,ey:.45,ew:.38,ny:.62,nw:.45,by:.65,bw:.95,hdx:.12,hdy:.70},
-  g_robot:{hx:.5,ht:.12,hw:.75,ey:.44,ew:.55,ny:.63,nw:.42,by:.7,bw:.9,hdx:.14,hdy:.82},
-  g_fish:{hx:.47,ht:.16,hw:.6,ey:.45,ew:.42,ny:.6,nw:.35,by:.62,bw:.9,hdx:.2,hdy:.75},
+  g_gargoyle:{hx:.5,ht:.12,hw:.62,ey:.40,ew:.40,ny:0.58,nw:.40,by:.62,bw:.95,hdx:.22,hdy:.78},
+  g_fox:{hx:.47,ht:.16,hw:.6,ey:.47,ew:.42,ny:0.62,nw:.38,by:.66,bw:.85,hdx:.25,hdy:.83},
+  g_crystal:{hx:.5,ht:.05,hw:.82,ey:.42,ew:.55,ny:0.66,nw:.38,by:.74,bw:.8,hdx:.18,hdy:.78},
+  g_ink:{hx:.5,ht:.2,hw:.6,ey:.52,ew:.55,ny:0.64,nw:.5,by:.6,bw:.95,hdx:.1,hdy:.73},
+  g_owl:{hx:.5,ht:.09,hw:.7,ey:.43,ew:.58,ny:0.62,nw:.45,by:.6,bw:1,hdx:.12,hdy:.65},
+  g_tree:{hx:.5,ht:.12,hw:.62,ey:.48,ew:.4,ny:0.61,nw:.35,by:.62,bw:.9,hdx:.18,hdy:.63},
+  g_lava:{hx:.5,ht:.2,hw:.72,ey:.52,ew:.5,ny:0.67,nw:.45,by:.7,bw:.95,hdx:.12,hdy:.75},
+  g_cloud:{hx:.5,ht:.12,hw:.72,ey:.45,ew:.38,ny:0.64,nw:.45,by:.65,bw:.95,hdx:.12,hdy:.70},
+  g_robot:{hx:.5,ht:.12,hw:.75,ey:.44,ew:.55,ny:0.64,nw:.42,by:.7,bw:.9,hdx:.14,hdy:.82},
+  g_fish:{hx:.47,ht:.16,hw:.6,ey:.45,ew:.42,ny:0.63,nw:.35,by:.62,bw:.9,hdx:.2,hdy:.75},
 };
 const PERKS = [['keep','🧺 바구니 지킴이','바구니가 1.5배 더 오래 쌓여요'],['scent','📜 도안 냄새','봉인을 풀 때 50% 확률로 아직 없는 도안부터'],['bonus','💠 감시 보너스','바구니를 받을 때 20% 확률로 💠 +30%']];
 const SLOTS = [['head','머리'],['face','얼굴'],['neck','목'],['back','등'],['hand','손']];
 const KINDS = [['guard','🛡️ 파수꾼','한 사람에 한 마리 · 아공간 농장을 지켜요 · 바꿀 때도 같은 값'],['sky','✨ 하늘 장식','아공간 배경 위를 천천히 떠다녀요'],['acc','🎩 파수꾼 꾸미기','머리 · 얼굴 · 목 · 등 · 손에 하나씩'],['ing','🧪 희귀 재료','가판대용 · 1개 = 10잔 · 한 번에 3개까지']];
 const SAY = ['냥… 오늘 하루만 머물다 갈 거다냥.','다른 차원에서 귀한 물건을 잔뜩 가져왔다냥.','흥정은 한 번만이다냥. 신중하게 고르라냥.','파편만 받는다냥. 코인은 이 차원 돈이라 안 받는다냥.'];
-const src = c => `merchant/${c}.webp`;
+const IMG_V = {acc_collar:2};   // 같은 이름으로 그림을 바꾸면 숫자를 올려요 (옛 그림 캐시 피하기)
+const src = c => `merchant/${c}.webp${IMG_V[c] ? '?v='+IMG_V[c] : ''}`;
 const pct = v => (v*100).toFixed(2)+'%';
 
 /* ---------- 파수꾼 + 소품 그리기 ---------- */
