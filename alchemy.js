@@ -59,12 +59,17 @@ dialog.visit.alc-dlg{width:min(96vw,980px);max-width:min(96vw,980px);max-height:
 #alcDlg .a-dx.no{opacity:.55}
 #alcDlg .a-dx.no .em{color:#A27BE0}
 #alcDlg .a-recent{display:flex;flex-direction:column;gap:.25rem;margin-top:.5rem;font-size:.86rem}
-.alc-door{display:flex;align-items:center;gap:1rem;margin:0 0 1rem;padding:.8rem 1.1rem;border-radius:18px;border:2px solid #8A65C9;width:100%;text-align:left;cursor:pointer;font:inherit;
+.isk-duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;margin:0 0 1rem;align-items:stretch}
+@media (max-width:700px){ .isk-duo{grid-template-columns:1fr} }
+.isk-duo > #merchBox[hidden] + .alc-door{grid-column:1/-1}
+.alc-door{display:flex;align-items:center;gap:1rem;margin:0;padding:.8rem 1.1rem;border-radius:18px;border:2px solid #8A65C9;width:100%;text-align:left;cursor:pointer;font:inherit;
   background:linear-gradient(135deg,#2C1A52,#4B2A86);color:#F3EDFF;box-shadow:0 6px 16px rgba(30,10,60,.35)}
 .alc-door:hover{transform:translateY(-2px)}
 .alc-door .ic{font-size:2.6rem}
+@media (max-width:600px){ .alc-door .ic{font-size:2rem} .alc-door b{font-size:1.1rem} }
 .alc-door b{font-family:"Jua",sans-serif;font-weight:400;font-size:1.25rem;display:block}
 .alc-door span{font-size:.88rem;opacity:.9;line-height:1.5}
+.alc-door .go{display:table;margin-top:.45rem;font-family:"Jua",sans-serif;font-size:.9rem;opacity:1;background:#F2C24C;color:#2A1650;border-radius:999px;padding:.2rem .85rem}
 @media (prefers-reduced-motion:reduce){#alcDlg .a-stage .swirl{animation:none}}
 `; document.head.appendChild(css);
 

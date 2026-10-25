@@ -112,12 +112,17 @@ function renderMerch(){
   const groups = KINDS.map(([k,t,sub])=>{ const os = (M.offers||[]).filter(o=>o.kind===k); if(!os.length) return '';
     return `<div class="m-row"><h4>${t} <span class="small">${sub}</span></h4><div class="m-cards">${os.map(cardHTML).join('')}</div></div>`; }).join('');
   const say = SAY[new Date().getDate() % SAY.length];
-  box.innerHTML = `<div class="merch on"><div class="m-top"><img class="m-cat" src="${src('merchant')}" alt="차원 상인" draggable="false">
-      <div class="m-txt"><h3>🌀 차원 상인이 왔어요! <span class="small">오늘 하루만</span></h3>
-      <button class="mini m-fold" type="button" data-mfold aria-expanded="${!mFolded()}">${mFolded() ? '펼치기 ▾' : '접기 ▴'}</button><p class="m-say">“${esc(say)}”</p>
+  // 🛒 이세계 탭에는 작은 카드만, 물건은 팝업 창에서 (10-25 판 104)
+  box.innerHTML = `<div class="merch off m-mini"><img class="m-cat" src="${src('merchant')}" alt="차원 상인" draggable="false"><div class="m-txt"><h3>🌀 차원 상인이 왔어요!</h3>
+      <p class="small">오늘 하루만 · 물건 ${(M.offers||[]).length}가지 · 💠 이세계 파편만 받아요</p>
+      <div class="m-btns"><button class="mini m-go" type="button" data-mshop>🛒 물건 보러 가기</button>${decoBtn}</div></div></div>`;
+  const dlg = document.getElementById('merchShop'); if(!dlg || !dlg.open) return;
+  document.getElementById('merchShopBody').innerHTML = `<div class="merch on"><div class="m-top"><img class="m-cat" src="${src('merchant')}" alt="차원 상인" draggable="false">
+      <div class="m-txt"><h3>🌀 차원 상인 <span class="small">오늘 하루만</span></h3>
+      <button class="mini m-fold" type="button" data-mshopclose>✕ 닫기</button><p class="m-say">“${esc(say)}”</p>
       <p class="small">💠 이세계 파편만 받아요 · 흥정은 오늘 한 번 ${M.haggled ? '(이미 했어요)' : '(물건 하나 골라서)'} · <b>💠 ${(M.shards||0).toLocaleString()}</b></p>${decoBtn}
       ${!M.has_void ? `<p class="small">🔮 파수꾼과 하늘 장식은 아공간 문을 연 뒤에 데려갈 수 있어요</p>` : ''}</div></div>
-    ${mFolded() ? `<p class="small m-foldnote">물건 ${(M.offers||[]).length}가지를 접어 뒀어요 · 펼치기를 누르면 보여요</p>` : groups}</div>`;
+    ${groups}</div>`;
 }
 
 /* ---------- 꾸미기 창 ---------- */
@@ -143,6 +148,8 @@ function renderDeco(){
 
 /* ---------- 누르기 ---------- */
 document.addEventListener('click', e=>{
+  if(e.target.closest('[data-mshop]')){ const d = document.getElementById('merchShop'); if(d && !d.open) d.showModal(); renderMerch(); return; }
+  if(e.target.closest('[data-mshopclose]')){ document.getElementById('merchShop').close(); return; }
   if(e.target.closest('[data-mfold]')){ try{ localStorage.setItem('majam-merch-fold', mFolded() ? '0' : '1'); }catch(e){} renderMerch(); return; }
   if(e.target.closest('[data-mdeco]')){ const d = document.getElementById('merchDeco'); if(!d.open) d.showModal(); renderDeco(); return; }
   if(e.target.closest('[data-mdecoclose]')){ document.getElementById('merchDeco').close(); return; }
@@ -180,11 +187,20 @@ setTimeout(refreshMerch, 2500); setInterval(()=>{ if(!document.hidden) refreshMe
 
 /* ---------- 모양 ---------- */
 const css = document.createElement('style'); css.textContent = `
-#merchBox{margin:0 0 1rem}
+#merchBox{margin:0}
+#merchBox .m-mini{height:100%;box-sizing:border-box}
+#merchBox .m-btns{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
+#merchBox .m-go{background:#F2B544;border-color:#F2B544;color:#3A2400;font-family:"Jua",sans-serif}
+dialog.visit.merch-shop{width:min(96vw,980px);max-width:min(96vw,980px);max-height:94vh;overflow-y:auto;padding:1rem}
+@media (max-width:600px){ dialog.visit.merch-shop{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:22px 22px 0 0;padding:.8rem .7rem calc(.8rem + env(safe-area-inset-bottom,0px))} }
 .merch{border-radius:18px;padding:1rem;background:linear-gradient(135deg,rgba(60,30,110,.55),rgba(25,20,60,.55));border:1px solid rgba(200,170,255,.45);box-shadow:0 0 24px rgba(160,120,255,.25)}
 :root[data-mode="day"] .merch{background:linear-gradient(135deg,rgba(235,225,255,.92),rgba(255,248,235,.92));border-color:#C9B5F0}
 .merch.off{display:flex;gap:.8rem;align-items:center;padding:.6rem .9rem}
 .merch.off .m-cat{width:64px;filter:grayscale(.7) opacity(.7)}
+.merch.m-mini .m-cat{width:84px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))}
+.merch.m-mini h3{margin:0 0 .2rem}
+#merchBox .merch.m-mini .m-txt{flex:1 1 auto;min-width:0;padding-right:0}
+@media (max-width:600px){ .merch.m-mini .m-cat{width:58px} .merch.m-mini h3{font-size:1.05rem} }
 .merch .m-top{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
 .merch.on .m-cat{width:min(150px,32vw);filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));animation:mbob 3s ease-in-out infinite}
 @keyframes mbob{50%{transform:translateY(-4px) rotate(-1deg)}}
