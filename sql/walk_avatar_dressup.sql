@@ -70,13 +70,13 @@ begin
   if v_id is null then raise exception 'Discord 로그인이 필요해요'; end if;
   v_price := case
     when p_code ~ '^hair_(short|long|ponytail|bob|spiky|buns)_(brown|black|blonde|ginger|pink|mint)$'
-      and p_code <> 'hair_short_brown' then 1
-    when p_code = 'outfit_robe' then 3
-    when p_code = 'outfit_armor' then 5
-    when p_code = 'outfit_dress' then 3
-    when p_code = 'hat_beanie' then 2
-    when p_code = 'hat_wizard_hat' then 4
-    when p_code = 'hat_crown' then 5
+      and p_code <> 'hair_short_brown' then 10
+    when p_code = 'outfit_robe' then 15
+    when p_code = 'outfit_armor' then 20
+    when p_code = 'outfit_dress' then 15
+    when p_code = 'hat_beanie' then 12
+    when p_code = 'hat_wizard_hat' then 17
+    when p_code = 'hat_crown' then 20
     else null end;
   if v_price is null then raise exception '구매할 수 없는 의상이에요'; end if;
   select m.coins into v_coins from public.members m
