@@ -1817,6 +1817,9 @@ dialog.visit#visit{width:min(94vw,640px);max-width:min(94vw,640px)}
 .tank .tf img.lg{filter:drop-shadow(1px 0px 0 #3B2A22) drop-shadow(-1px 0px 0 #3B2A22) drop-shadow(0px 1px 0 #3B2A22) drop-shadow(0px -1px 0 #3B2A22) drop-shadow(0 3px 3px rgba(0,30,50,.3))}
 
 /* ===== 🖐️ 놓인 가구 끌어서 옮기기 (10-14 ㊵) ===== */
+#voidStage .furn[data-vpid]{cursor:grab;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#voidStage .furn.fdrag-src{opacity:.3}
+.quiet-btn.on{background:rgba(255,206,92,.18);border-color:rgba(255,206,92,.6)}
 #room .furn[data-pid]{cursor:grab;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #room .furn.fdrag-src{opacity:.3}
 .fghost{z-index:9999;pointer-events:none;opacity:.9;cursor:grabbing;filter:drop-shadow(0 8px 10px rgba(0,0,0,.35));transform:scale(1.04)}
@@ -2456,7 +2459,7 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <button class="shop-open deco-open" type="button" data-goto-deco><span class="so-ic" aria-hidden="true">🎨</span><span class="so-tx"><b>집 겉모습 꾸미기</b><span class="small" id="decoOpenSub"></span></span><span class="so-go" aria-hidden="true">열기 ›</span></button>
       <details class="shop-box bag-box" id="bagBox" open>
         <summary><span class="jua">🎒 가방</span> <span class="small" id="bagCount"></span></summary>
-        <div class="sell-bar"><button class="mini" id="sellBtn" type="button">🪙 되팔기</button><button class="mini" id="multiBtn" type="button">🧺 여러 개 팔기</button><button class="mini compact-btn" type="button" data-compact>▦ 작게 보기</button><span class="small" id="sellNote"></span></div>
+        <div class="sell-bar"><button class="mini" id="sellBtn" type="button">🪙 되팔기</button><button class="mini" id="multiBtn" type="button">🧺 여러 개 팔기</button><button class="mini compact-btn" type="button" data-compact>▦ 작게 보기</button><button class="mini quiet-btn" type="button" data-quiet>🔕 확인 창 끄기</button><span class="small" id="sellNote"></span></div>
         <div class="shop-tabs bag-tabs" id="bagTabs" role="tablist">
           <button class="shop-tab" data-bagtab="all" role="tab">전체 <span id="bcAll"></span></button>
           <button class="shop-tab" data-bagtab="furniture" role="tab">🪑 가구 <span id="bcF"></span></button>
@@ -4106,7 +4109,7 @@ const VFURN_DEF = [
   ['v_common_typewriter','common','⌨️','혼자 치는 타자기',1,1,'furniture',80,0,0], ['v_common_inkbottle','common','🖋️','은하 잉크병',1,1,'furniture',80,0,0], ['v_common_papers','common','📄','날아오르는 원고 더미',1,1,'furniture',80,0,0],
   ['v_common_hourglass','common','⏳','거꾸로 마감 모래시계',1,1,'furniture',80,0,0], ['v_common_mug','common','☕','별가루 커피 머그',1,1,'furniture',80,0,0], ['v_common_crystal','common','🔮','플롯 예언 수정구',1,1,'furniture',80,0,0],
   ['v_common_bulbtree','common','💡','아이디어 전구 나무',1,1,'furniture',80,0,0], ['v_common_scroll','common','📜','끝없는 원고지 두루마리',1,2,'furniture',120,0,0], ['v_common_clock','common','🕰️','녹아내리는 마감 시계',1,2,'furniture',120,0,0],
-  ['v_common_sofa','common','🛋️','원고 쿠션 소파',2,1,'furniture',200,0,0], ['v_common_papermt','common','🏔️','구겨진 원고 산',2,2,'furniture',250,0,0],,
+  ['v_common_sofa','common','🛋️','원고 쿠션 소파',2,1,'furniture',200,0,0], ['v_common_papermt','common','🏔️','구겨진 원고 산',2,2,'furniture',250,0,0],
   // 🧱 벽 조각 (10-23 판 66) — 도안 없이 💠로 바로 만들어요, 세트에는 안 들어가요
   ['v_hell_w1_1','hell','🧱','용암 균열 벽 (1칸)',1,1,'furniture',30,0,0], ['v_hell_w1_2','hell','🧱','용암 균열 벽 (2칸)',2,1,'furniture',50,0,0], ['v_hell_w1_3','hell','🧱','용암 균열 벽 (3칸)',3,1,'furniture',70,0,0], ['v_hell_w2_1','hell','🥀','가시덩굴 수정 울타리 (1칸)',1,1,'furniture',30,0,0], ['v_hell_w2_2','hell','🥀','가시덩굴 수정 울타리 (2칸)',2,1,'furniture',50,0,0], ['v_hell_w2_3','hell','🥀','가시덩굴 수정 울타리 (3칸)',3,1,'furniture',70,0,0], ['v_hell_w3_1','hell','🏛️','용암 폭포 회랑 (1칸)',1,1,'furniture',30,0,0], ['v_hell_w3_2','hell','🏛️','용암 폭포 회랑 (2칸)',2,1,'furniture',50,0,0], ['v_hell_w3_3','hell','🏛️','용암 폭포 회랑 (3칸)',3,1,'furniture',70,0,0], ['v_hell_w4_1','hell','⛓️','사슬 철창 (1칸)',1,1,'furniture',30,0,0], ['v_hell_w4_2','hell','⛓️','사슬 철창 (2칸)',2,1,'furniture',50,0,0], ['v_hell_w4_3','hell','⛓️','사슬 철창 (3칸)',3,1,'furniture',70,0,0], ['v_hell_w5_1','hell','🌋','화산 둔덕 (1칸)',1,1,'furniture',30,0,0], ['v_hell_w5_2','hell','🌋','화산 둔덕 (2칸)',2,1,'furniture',50,0,0], ['v_hell_w5_3','hell','🌋','화산 둔덕 (3칸)',3,1,'furniture',70,0,0], ['v_hell_w6_1','hell','🍲','끓는 가마솥 벽감 (1칸)',1,1,'furniture',30,0,0], ['v_hell_w6_2','hell','🍲','끓는 가마솥 벽감 (2칸)',2,1,'furniture',50,0,0], ['v_hell_w6_3','hell','🍲','끓는 가마솥 벽감 (3칸)',3,1,'furniture',70,0,0], ['v_base_w1_1','base','🌙','초승달 벽판 (1칸)',1,1,'furniture',30,0,0], ['v_base_w1_2','base','🌙','초승달 벽판 (2칸)',2,1,'furniture',50,0,0], ['v_base_w1_3','base','🌙','초승달 벽판 (3칸)',3,1,'furniture',70,0,0], ['v_base_w2_1','base','🌌','성운 벽판 (1칸)',1,1,'furniture',30,0,0], ['v_base_w2_2','base','🌌','성운 벽판 (2칸)',2,1,'furniture',50,0,0], ['v_base_w2_3','base','🌌','성운 벽판 (3칸)',3,1,'furniture',70,0,0], ['v_base_w3_1','base','🌿','금빛 덩굴 벽판 (1칸)',1,1,'furniture',30,0,0], ['v_base_w3_2','base','🌿','금빛 덩굴 벽판 (2칸)',2,1,'furniture',50,0,0], ['v_base_w3_3','base','🌿','금빛 덩굴 벽판 (3칸)',3,1,'furniture',70,0,0], ['v_base_w4_1','base','🏮','등불 아치 벽 (1칸)',1,1,'furniture',30,0,0], ['v_base_w4_2','base','🏮','등불 아치 벽 (2칸)',2,1,'furniture',50,0,0], ['v_base_w4_3','base','🏮','등불 아치 벽 (3칸)',3,1,'furniture',70,0,0], ['v_base_w5_1','base','🔯','마법진 벽판 (1칸)',1,1,'furniture',30,0,0], ['v_base_w5_2','base','🔯','마법진 벽판 (2칸)',2,1,'furniture',50,0,0], ['v_base_w5_3','base','🔯','마법진 벽판 (3칸)',3,1,'furniture',70,0,0], ['v_base_w6_1','base','🎭','별빛 커튼 벽 (1칸)',1,1,'furniture',30,0,0], ['v_base_w6_2','base','🎭','별빛 커튼 벽 (2칸)',2,1,'furniture',50,0,0], ['v_base_w6_3','base','🎭','별빛 커튼 벽 (3칸)',3,1,'furniture',70,0,0],
   // 🔮 별유리 가구 (10-24 판 72) — 테마 없는 아공간 기본 가구, 도안 없이 💠로 바로 만들어요
@@ -6314,8 +6317,16 @@ function voidCraftHTML(V){
     <div class="vcraft">${cards}</div>
     ${walls.length ? `<h4 style="margin-top:.8rem">${vcraftTab==='glass' ? `🔮 별유리 가구 <span class="small">도안 없이 💠로 바로 만들어요 · 어느 배경에나 어울리는 아공간 기본 가구예요</span>` : `🧱 ${esc(b.name)} 벽 <span class="small">도안 없이 💠로 바로 만들어요 · 세트에는 안 들어가요 · 가로로 놓을 때 제일 예뻐요</span>`}</h4><div class="vcraft">${walls.map(card).join('')}</div>` : ''}`;
 }
+/* 🔕 확인 창 끄기 (10-25 판 86, 주민 건의) — 켜면 가구 사기·아공간 가구 만들기·치우기 때 묻는 창과 알림을 건너뛰어요. 브라우저마다 기억 */
+const QUIET = () => { try{ return localStorage.getItem('majam-quiet')==='1'; }catch(e){ return false; } };
+function quietLabel(){ document.querySelectorAll('[data-quiet]').forEach(b=>{ const q = QUIET(); b.textContent = q ? '🔕 확인 창 꺼짐' : '🔔 확인 창 켜짐'; b.classList.toggle('on', q);
+  b.title = q ? '가구를 살 땐 1개씩 바로 사고, 묻는 창·알림 없이 바로 해요. 누르면 다시 켜져요' : '누르면 가구 사기·만들기·치우기 때 묻는 창과 알림을 건너뛰어요'; }); }
+document.addEventListener('click', e=>{ if(!e.target.closest('[data-quiet]')) return; try{ localStorage.setItem('majam-quiet', QUIET() ? '0' : '1'); }catch(err){}
+  quietLabel(); toast(QUIET() ? '🔕 이제 묻지 않고 바로 해요 (상점은 1개씩 바로 사요)' : '🔔 다시 한 번씩 물어볼게요'); });
+setTimeout(quietLabel, 0);
 function renderVoidRoom(){
   const st = document.getElementById('voidStage'); if(!st || !VOID || !VOID.open) return;
+  if(VDRAG && VDRAG.on){ VDRAG.dirty = true; return; }
   st.style.setProperty('--vbg', voidBgCSS(VOID.bg)); st.dataset.vbg = VOID.bg || 'base';
   { const ms = window.MERCH && window.MERCH.state, sk = ms && ms.sky || ''; if(st._msky !== sk){ st._msky = sk; st.querySelector('.msky')?.remove(); if(sk && typeof merchSkyHTML==='function') st.insertAdjacentHTML('afterbegin', merchSkyHTML(ms)); } }   // ✨ 차원 상인 하늘 장식 (10-25)
   if(st._fx !== VOID.fx){ st._fx = VOID.fx; st.querySelector('.vfx:not(.setfx)')?.remove(); if(VOID.fx) st.insertAdjacentHTML('afterbegin', voidFxHTML(VOID.fx)); }
@@ -6323,7 +6334,8 @@ function renderVoidRoom(){
   st.querySelector('.room')?.remove(); st.insertAdjacentHTML('beforeend', voidRoomHTML(VOID, true));
   const h = document.getElementById('voidHint');
   if(h) h.innerHTML = VSEL ? `「${esc(itemOf(VSEL).name)}」${jo(itemOf(VSEL).name,'을','를')} 놓을 칸을 누르세요 <button class="mini" type="button" data-vrot>↻ 돌리기</button> <button class="mini" type="button" data-vcancel>그만 놓기</button>`
-    : '아래 창고에서 가구를 고르고 칸을 누르면 놓여요 · 놓인 가구를 누르면 창고(전설 가구는 가방)로 돌아가요';
+    : `아래 창고에서 가구를 고르고 칸을 누르면 놓여요 · 놓인 가구는 끌어서 옮기고(폰은 꾹 눌렀다가) 그냥 누르면 창고(전설 가구는 가방)로 돌아가요 <button class="mini quiet-btn" type="button" data-quiet></button>`;
+  quietLabel();
 }
 function renderVoidFarmBar(){
   const b = document.getElementById('voidFarmBar'); if(!b || !VOID || !VOID.open) return;
@@ -6423,9 +6435,10 @@ document.addEventListener('click', e=>{
     await voidAfter(await api.voidPlace(code, +tl.dataset.vr, +tl.dataset.vc, VROT, fp.w, fp.h, layerOf(code)));
     if(!(voidHave(code)>0)){ VSEL = null; VROT = 0; } VHOVER = null; box_void_reset(); renderVoid(); });
   const fu = e.target.closest('.furn[data-vpid]');
+  if(fu && Date.now() - VDRAG_AT < 450) return;
   if(fu) return act(async()=>{ const id = +fu.dataset.vpid, f = (VOID.items||[]).find(x=>x.id===id); if(!f) return;
     if(VSEL){ toast('가구를 놓는 중이에요. 「그만 놓기」를 누른 뒤 치워 주세요'); return; }
-    if(!(await ask(`「${itemOf(f.item_code).name}」${jo(itemOf(f.item_code).name,'을','를')} ${isVoidFurn(f.item_code)?'🔮 아공간 창고':'가방'}에 넣을까요?`))) return;
+    if(!QUIET() && !(await ask(`「${itemOf(f.item_code).name}」${jo(itemOf(f.item_code).name,'을','를')} ${isVoidFurn(f.item_code)?'🔮 아공간 창고':'가방'}에 넣을까요?`))) return;
     await voidAfter(await api.voidRemove(id)); box_void_reset(); renderVoid(); });
   const fxb = e.target.closest('[data-vfx]');
   if(fxb) return act(async()=>{ const c = fxb.dataset.vfx, own = !c || (VOID.fxs||[]).includes(c); if((VOID.fx||'')===c) return;
@@ -6455,8 +6468,8 @@ document.addEventListener('click', e=>{
     petParty('🎯', `「${f.name}」 도안을 골라 가졌어요!\n\n📜 제작대에서 만들 수 있어요`); });
   const vcr = e.target.closest('[data-vcraft]');
   if(vcr) return act(async()=>{ const f = vfurnOf(vcr.dataset.vcraft); if(!f) return;
-    if(!(await ask(`💠 이세계 파편 ${f.price}개로 「${f.name}」${jo(f.name,'을','를')} 만들까요?\n만든 가구는 🔮 아공간 창고로 가요. 아공간에서만 쓸 수 있어요.`))) return;
-    await voidAfter(await api.voidCraft(f.code)); box_void_reset(); vbagTab = 'void'; renderVoid(); toast(`🔨 「${f.name}」${jo(f.name,'이','가')} 아공간 창고에 들어왔어요!`); });
+    if(!QUIET() && !(await ask(`💠 이세계 파편 ${f.price}개로 「${f.name}」${jo(f.name,'을','를')} 만들까요?\n만든 가구는 🔮 아공간 창고로 가요. 아공간에서만 쓸 수 있어요.`))) return;
+    await voidAfter(await api.voidCraft(f.code)); box_void_reset(); vbagTab = 'void'; renderVoid(); if(!QUIET()) toast(`🔨 「${f.name}」${jo(f.name,'이','가')} 아공간 창고에 들어왔어요!`); });
   if(e.target.closest('[data-vsnack]')) return act(async()=>{ const p = VOID.snack_price||100, hr = VOID.snack_hours||6;
     if(!(await ask(`🪙 ${p}코인으로 마물들에게 🍖 간식을 줄까요?\n앞으로 ${hr}시간 동안 💠 파편과 📜 도안 게이지를 2배로 물어와요. (하루 한 번)`))) return;
     await voidAfter(await api.voidSnack()); box_void_reset(); renderVoid(); toast('🍖 마물들이 신나게 간식을 먹어요! 이제 두 배로 물어올 거예요'); });
@@ -8305,14 +8318,14 @@ document.addEventListener('click', e=>{
   const buy = e.target.closest('[data-buy]');
   if(buy) return act(async()=>{
     const it = itemOf(buy.dataset.buy);
-    const n = await askBuyQty(it); if(!n) return;
+    const n = QUIET() ? (ME.coins >= it.price ? 1 : 0) : await askBuyQty(it); if(!n){ if(QUIET()) toast('코인이 모자라요'); return; }
     let got = 0, err = null;
     for(let k=0;k<n;k++){
       if(n>1) toast(`🛒 ${it.name} 사는 중… ${k+1}/${n}`);
       try{ await api.buy(it.code); got++; }catch(e2){ err = e2; break; }
     }
     await refreshMine(); renderTop(); renderBag();
-    if(got) toast(`${it.emoji||'🛒'} ${it.name}${n>1?` ${got}개`:''}${jo(it.name,'을','를')} 샀어요 · 가방에 넣어 뒀어요${err?` (${n-got}개는 못 샀어요: ${err.message||'오류'})`:''}`);
+    if(got && !QUIET()) toast(`${it.emoji||'🛒'} ${it.name}${n>1?` ${got}개`:''}${jo(it.name,'을','를')} 샀어요 · 가방에 넣어 뒀어요${err?` (${n-got}개는 못 샀어요: ${err.message||'오류'})`:''}`);
     else if(err) throw err;
   });
 
@@ -8580,6 +8593,64 @@ roomEl.addEventListener('mouseover', e=>{
   if(JSON.stringify(h)!==JSON.stringify(hover)){ hover=h; if(selected) renderMyHouse(); }
 });
 roomEl.addEventListener('mouseleave', ()=>{ hover=null; if(selected) renderMyHouse(); });
+// 🖐️ 아공간 가구도 끌어서 옮기기 (10-25 판 86, 주민 건의) — 마우스는 바로, 폰은 꾹 눌렀다가(0.3초)
+var VDRAG = null, VDRAG_AT = 0;
+function vdragClear(){ document.querySelectorAll('#voidStage .tile.pv-ok,#voidStage .tile.pv-no').forEach(t=>t.classList.remove('pv-ok','pv-no')); }
+function vdragStart(){
+  const D = VDRAG; D.on = true;
+  const r = D.el.getBoundingClientRect(), g = D.el.cloneNode(true);
+  g.className += ' fghost'; g.removeAttribute('data-vpid');
+  Object.assign(g.style, {position:'fixed', left:r.left+'px', top:r.top+'px', width:r.width+'px', height:r.height+'px', gridRow:'', gridColumn:'', margin:0});
+  document.body.appendChild(g); D.ghost = g; D.ox = D.x0 - r.left; D.oy = D.y0 - r.top;
+  D.el.classList.add('fdrag-src'); document.body.classList.add('fdragging');
+  try{ navigator.vibrate && navigator.vibrate(15); }catch(e){}
+}
+function vdragMove(x, y){
+  const D = VDRAG; D.ghost.style.left = (x - D.ox)+'px'; D.ghost.style.top = (y - D.oy)+'px';
+  const t = document.elementsFromPoint(x, y).find(el=>el.matches && el.matches('#voidStage .tile[data-vr]'));
+  vdragClear(); D.to = null; if(!t) return;
+  const to = {r: +t.dataset.vr - D.dr, c: +t.dataset.vc - D.dc};
+  const others = (VOID.items||[]).filter(p=>p.id!==D.f.id), cur = {cols:VOID.cols, rows:VOID.rows, extraW:0};
+  const ok = canPlaceIn(others, to.r, to.c, D.f.w, D.f.h, cur, D.f.item_code);
+  for(let y2=0;y2<D.f.h;y2++) for(let x2=0;x2<D.f.w;x2++){ const el = document.querySelector(`#voidStage .tile[data-vr="${to.r+y2}"][data-vc="${to.c+x2}"]`); if(el) el.classList.add(ok?'pv-ok':'pv-no'); }
+  D.to = ok ? to : null;
+}
+function vdragEnd(cancel){
+  const D = VDRAG; VDRAG = null; if(!D) return; clearTimeout(D.timer); if(!D.on) return;
+  VDRAG_AT = Date.now(); vdragClear(); D.ghost.remove(); D.el.classList.remove('fdrag-src'); document.body.classList.remove('fdragging');
+  const to = !cancel && D.to, f = D.f;
+  if(!to || (to.r===f.r && to.c===f.c)){ if(D.dirty) renderVoidRoom(); return; }
+  act(async()=>{
+    const layer = layerOf(f.item_code), rot = +f.rot || 0;
+    await api.voidRemove(f.id);
+    let r;
+    try{ r = await api.voidPlace(f.item_code, to.r, to.c, rot, f.w, f.h, layer); }
+    catch(err){ try{ r = await api.voidPlace(f.item_code, f.r, f.c, rot, f.w, f.h, layer); }catch(e2){} await voidAfter(r || null); box_void_reset(); renderVoid(); throw err; }
+    await voidAfter(r); box_void_reset(); renderVoid();
+  });
+}
+document.addEventListener('pointerdown', e=>{
+  if(VSEL || busy || e.button>0) return;
+  const el = e.target.closest && e.target.closest('#voidStage .furn[data-vpid]'); if(!el || !VOID) return;
+  const f = (VOID.items||[]).find(p=>p.id===+el.dataset.vpid); if(!f) return;
+  const r = el.getBoundingClientRect();
+  VDRAG = {el, f, x0:e.clientX, y0:e.clientY, on:false, mouse:e.pointerType==='mouse', id:e.pointerId,
+    dr: Math.min(f.h-1, Math.max(0, Math.floor((e.clientY-r.top)/r.height*f.h))), dc: Math.min(f.w-1, Math.max(0, Math.floor((e.clientX-r.left)/r.width*f.w)))};
+  if(!VDRAG.mouse) VDRAG.timer = setTimeout(()=>{ if(VDRAG && !VDRAG.on){ vdragStart(); vdragMove(VDRAG.x0, VDRAG.y0); } }, 300);
+});
+addEventListener('pointermove', e=>{
+  const D = VDRAG; if(!D || e.pointerId!==D.id) return;
+  if(!D.on){ const moved = Math.hypot(e.clientX-D.x0, e.clientY-D.y0);
+    if(D.mouse){ if(moved > 6) vdragStart(); else return; } else { if(moved > 10){ clearTimeout(D.timer); VDRAG = null; } return; } }
+  e.preventDefault(); vdragMove(e.clientX, e.clientY);
+});
+addEventListener('pointerup', e=>{ if(VDRAG && e.pointerId===VDRAG.id){ if(VDRAG.on) vdragMove(e.clientX, e.clientY); vdragEnd(false); } });
+addEventListener('pointercancel', e=>{ if(VDRAG && e.pointerId===VDRAG.id && !(VDRAG.on && !VDRAG.mouse)) vdragEnd(true); });
+document.addEventListener('touchmove', e=>{ if(VDRAG && VDRAG.on){ e.preventDefault(); const t = e.touches[0]; if(t) vdragMove(t.clientX, t.clientY); } }, {passive:false});
+addEventListener('touchend', ()=>{ if(VDRAG && VDRAG.on && !VDRAG.mouse) vdragEnd(false); });
+addEventListener('touchcancel', ()=>{ if(VDRAG && VDRAG.on && !VDRAG.mouse) vdragEnd(true); });
+document.addEventListener('contextmenu', e=>{ if(e.target.closest && e.target.closest('#voidStage .furn[data-vpid]')) e.preventDefault(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && VDRAG && VDRAG.on) vdragEnd(true); });
 // 🖐️ 놓인 가구 끌어서 옮기기 (주민 건의 10-14) — 마우스는 바로 끌기, 폰은 꾹 눌렀다가(0.3초) 끌기. 그냥 누르면 예전처럼 가방으로
 var FDRAG = null, FDRAG_AT = 0;   // var: renderMyHouse 가 먼저 불려도 괜찮게
 function fdragClear(){ document.querySelectorAll('#room .tile.pv-ok,#room .tile.pv-no').forEach(t=>t.classList.remove('pv-ok','pv-no')); }
@@ -9315,6 +9386,6 @@ start();
 </script>
 <script src="stall.js?v=1025a"></script>
 <script src="merchant.js?v=1025f"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 85</p>
+<p class="site-ver">마감의 숲 · 10-25 판 86</p>
 </body>
 </html>
