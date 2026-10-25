@@ -321,7 +321,7 @@ function drinkHTML(cup, ings, top){
 
 
 /* ---------- 숫자 (stall.sql 과 같아야 해요) ---------- */
-const NUM = {amePrice:3, ameCap:30, spCap:20, stock:10, saleMin:6, starP:.25, unit:50, vowEvery:30, vowMax:16};
+const NUM = {amePrice:3, ameCap:30, spCap:60, stock:10, saleMin:4, starP:.25, unit:50, vowEvery:30, vowMax:16};
 const TOP_COST = {'':0, whip:3, ice:4, both:7};
 window.STALL_NUM = NUM; window.STALL_ING = ING; window.STALL_CUPS = CUPS; window.STALL_TOP_COST = TOP_COST;
 function costOf(cup, ings, top, inv){
@@ -457,6 +457,12 @@ const GUESTS = [
   {img:'elf', lines:['숲 냄새가 나요!','이거 마시면 키 커져요?','마법 같아요!']},
   {img:'wolf', lines:['마감 전에 한 잔이면 충분하죠.','원고는요? …아, 음료 먼저.','작가님 가판대라니, 감동입니다.']},
   {img:'demon', lines:['고향의 맛이군…','이쪽 세계 음료도 나쁘지 않아.','흠, 다음에 또 오지.']},
+  // 10-25 새 손님
+  {img:'cat', lines:['테이크아웃 되죠? 냥.','산책길엔 역시 한 잔!','오늘 원고 술술 풀릴 것 같아요.']},
+  {img:'deer', lines:['빵이랑 같이 먹으면 딱이겠어요.','숲 끝까지 들고 갈게요!','향이 너무 좋아요~']},
+  {img:'frog', lines:['개굴, 우리 가게 메뉴로 넣고 싶어요!','쟁반에 하나 더 올려 주세요.','비 오는 날 생각나는 맛이에요.']},
+  {img:'girl', lines:['책 읽으면서 마실게요.','여기 단골 될 것 같아요!','오늘 마감 끝나면 또 올게요.']},
+  {img:'dragon', lines:['쿠키랑 먹으면 최고예요!','불 안 뿜고 마실게요. 약속!','배낭에 하나 더 넣어 가도 돼요?']},
 ];
 const TAG_LINES = {
   hell:['음료가 왜 이렇게 매워요?!','잠이 0.1초 만에 깼습니다.','마감 직전 뇌를 태우는 맛!'],
