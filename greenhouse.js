@@ -36,6 +36,12 @@ const css = document.createElement('style'); css.textContent = `
 .gh-card .have{position:absolute;top:.3rem;right:.35rem;font-family:"Jua",sans-serif;font-size:.75rem;background:#5E7F45;color:#FFF9EC;border-radius:999px;padding:0 .45rem}
 .gh-fly{position:fixed;pointer-events:none;z-index:9999;opacity:.9;transform:translate(-50%,-85%)}
 .gh-fly img{width:100%;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3))}
+.gh-fold{border:1px solid var(--line);border-radius:14px;padding:.55rem .8rem}
+.gh-fold > summary{cursor:pointer;font-family:"Jua",sans-serif;font-size:1.02rem;list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}
+.gh-fold > summary::-webkit-details-marker{display:none}
+.gh-fold > summary::before{content:"▸";transition:transform .2s}
+.gh-fold[open] > summary::before{transform:rotate(90deg)}
+.gh-fold[open] > .gh-chips{margin-bottom:.5rem}
 .gh-door{text-align:center;padding:1rem;border:1px dashed var(--line);border-radius:16px}
 .gh-door .gh-stage{margin:0 auto .8rem;max-width:640px;filter:saturate(.8)}
 .gh-box .small{font-size:.82rem;opacity:.8}
@@ -95,7 +101,8 @@ function itemsHTML(items, bg, sel){
 window.GH_viewHTML = G => `<div class="gh-stage" style="background-image:url(${img(G.bg||'bg_sun')})">${itemsHTML(G.items||[], G.bg)}</div>`;
 
 /* ---------- 내 온실 ---------- */
-let GH = null, CAT = 'pot', SEL = null, busy2 = false;
+let GH = null, CAT = 'pot', SEL = null, busy2 = false, FOLD = true;
+try{ FOLD = localStorage.getItem('majam-ghfold') !== '0'; }catch(e){}
 try{ CAT = localStorage.getItem('majam-ghcat') || 'pot'; }catch(e){}
 const box = () => document.getElementById('ghBox');
 async function refresh(){ try{ GH = api.gh ? await api.gh() : null; }catch(e){ GH = null; } }
@@ -106,7 +113,7 @@ window.GH_render = render;
 function render(force){
   const b = box(); if(!b) return;
   if(D || C) return;   // 끄는 중엔 다시 그리지 않아요
-  const key = JSON.stringify([GH, CAT, SEL, typeof ME!=='undefined' && ME ? ME.coins : 0]);
+  const key = JSON.stringify([GH, CAT, SEL, FOLD, typeof ME!=='undefined' && ME ? ME.coins : 0]);
   if(!force && b._k === key && b.firstChild) return; b._k = key;
   if(!GH){ b.innerHTML = `<p class="small">🪴 온실을 불러오는 중이에요…</p>`; refresh().then(()=>{ if(GH) render(); else b.innerHTML = `<p class="small">🪴 온실을 아직 열 수 없어요. 숲지기가 준비 중이에요.</p>`; }); return; }
   if(!GH.open){
@@ -123,12 +130,16 @@ function render(force){
     <div class="gh-chips" aria-label="온실 배경">${BGS.map(x=>{ const own = bgs.includes(x.k);
       return `<button class="gh-chip ${GH.bg===x.k?'on':''} ${own?'':'lock'}" type="button" data-ghbg="${x.k}">${x.n}${own?'':` <small>🪙 ${(GH.bg_price||300).toLocaleString()}</small>`}</button>`; }).join('')}</div>
     <p class="small" style="margin:0">가구를 끌어서 옮기고, 누르면 뒤집기·크기·창고로 넣기를 할 수 있어요. 아래(앞)에 둘수록 크게 보여요. 작은 화분을 테이블·선반 위로 끌면 반짝이고, 놓으면 그 위에 올라가요.</p>
-    <h4 style="margin:.3rem 0 0">🧺 온실 가구 <span class="small">창고에 있는 건 끌어서 놓고, 없는 건 눌러서 사요</span></h4>
+    <details class="gh-fold" ${FOLD?'':'open'}><summary>🧺 온실 가구 바구니 <span class="small">${DEF.length}종 · 창고 ${Object.values(inv).reduce((a,b)=>a+b,0)}개 · ${FOLD?'눌러서 펼치기':'눌러서 접기'}</span></summary>
+    <p class="small" style="margin:.4rem 0">창고에 있는 건 끌어서 놓고, 없는 건 눌러서 사요</p>
     <div class="gh-chips">${CATS.map(([k,nm])=>`<button class="gh-chip ${CAT===k?'on':''}" type="button" data-ghcat="${k}">${nm} <small>${DEF.filter(d=>d.cat===k).length}</small></button>`).join('')}</div>
     <div class="gh-tray">${DEF.filter(d=>d.cat===CAT).map(d=>{ const have = inv[d.k]||0;
       return `<div class="gh-card" data-ghk="${d.k}" role="button" tabindex="0" aria-label="${esc2(d.n)}">${have?`<span class="have">창고 ${have}</span>`:''}<div class="pic"><img src="${img(d.k)}" alt="" loading="lazy" draggable="false"></div><b>${esc2(d.n)}</b>
         <span class="pr">${have ? (d.hang?'천장에 걸어요':d.surf?'위에 화분을 올려요':d.small?'테이블에도 올려요':'바닥에 놓아요') : `🪙 ${(prices[d.k]||0).toLocaleString()}`}</span></div>`; }).join('')}</div>
+    </details>
   </div>`;
+  b.querySelector('.gh-fold')?.addEventListener('toggle', ev=>{ FOLD = !ev.target.open; try{ localStorage.setItem('majam-ghfold', FOLD?'1':'0'); }catch(_){}
+    const sm = ev.target.querySelector('summary .small'); if(sm) sm.textContent = sm.textContent.replace(/눌러서 (펼치기|접기)/, FOLD?'눌러서 펼치기':'눌러서 접기'); });
   tools();
 }
 function itemById(id){ return (GH.items||[]).find(i=>i.id===id); }
