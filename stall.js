@@ -321,7 +321,7 @@ function drinkHTML(cup, ings, top){
 
 
 /* ---------- 숫자 (stall.sql 과 같아야 해요) ---------- */
-const NUM = {amePrice:3, ameCap:30, spCap:60, stock:10, saleMin:4, starP:.25, unit:50, vowEvery:30, vowMax:16};
+const NUM = {amePrice:3, ameCap:30, spCap:9999, stock:10, saleMin:4, starP:.25, unit:50, vowEvery:30, vowMax:16};
 const TOP_COST = {'':0, whip:3, ice:4, both:7};
 window.STALL_NUM = NUM; window.STALL_ING = ING; window.STALL_CUPS = CUPS; window.STALL_TOP_COST = TOP_COST;
 function costOf(cup, ings, top, inv){
@@ -365,7 +365,7 @@ function renderStage(pop){
     const badge = i===0 ? `<span class="s-stock ame ${left<=0?'out':''}" style="left:${x}%">${left<=0?'오늘 품절':`${left}잔`}</span>` : `<span class="s-stock" style="left:${x}%">${m.stock}잔</span>`;
     return `<button class="s-slot ${pop===i?'pop':''}" type="button" style="left:${x}%" title="${esc(m.name)}${i===0?' · 늘 진열돼요':` · 🪙 ${m.price} · 눌러서 내리기`}" ${i?`data-sunshelf="${i}"`:''}>${drinkHTML(m.cup, m.ings, m.top)}</button>${badge}`; }).join('');
   const sp = ST.sp_cap - ST.sp_sold;
-  q('.s-today').textContent = `오늘 남은 판매 · ☕ ${Math.max(0,left)}잔 · 🍹 ${Math.max(0,sp)}잔`;
+  { const t = q('.s-today'); if(t) t.hidden = true; }   // 🍹 특제는 진열한 잔 수만큼 다 팔려요 (10-25) — 오늘 남은 판매 표시는 뺐어요
   q('.s-boxbtn').innerHTML = `💰 돈통 ${(ST.box.coins||0).toLocaleString()}${ST.box.stars?` · ⭐ ${ST.box.stars}`:''}`;
   q('.s-boxbtn').classList.toggle('full', (ST.box.coins||0) > 0);
 }
@@ -432,7 +432,7 @@ function shell(){
     </div>
     <div class="s-guide" hidden>
       <p>🍹 음료를 만들어 선반에 올려 두면, 가판대를 닫아도 손님이 와서 사 가요 (평균 6분에 한 잔). 돌아와서 <b>💰 돈통</b>을 정산하면 코인이 들어와요.</p>
-      <p>☕ 첫 칸 아메리카노는 재료 없이 늘 팔려요 (한 잔 🪙 ${NUM.amePrice} · 하루 ${NUM.ameCap}잔). 특제 음료는 하루 ${NUM.spCap}잔까지 팔리고, 다 팔면 남은 시간은 아메리카노가 채워요.</p>
+      <p>☕ 첫 칸 아메리카노는 재료 없이 늘 팔려요 (한 잔 🪙 ${NUM.amePrice} · 하루 ${NUM.ameCap}잔). 특제 음료는 하루 제한 없이 진열한 잔 수만큼 다 팔려요. 선반이 비면 아메리카노가 채워요.</p>
       <p>🌀 이세계 재료가 든 음료는 팔릴 때 가끔 ⭐ 별조각을 남겨요. 정해진 조합을 맞히면 📖 특제 레시피 도감에 올라가요.</p>
     </div>
     <div class="s-grid">
