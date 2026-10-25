@@ -39,6 +39,9 @@ dialog.visit.alc-dlg{width:min(96vw,980px);max-width:min(96vw,980px);max-height:
 #alcDlg .a-boss{display:flex;flex-direction:column;align-items:center;gap:.15rem;border:1px solid var(--line);border-radius:14px;padding:.35rem .2rem;background:rgba(255,255,255,.04);cursor:pointer;color:var(--ink);font:inherit}
 #alcDlg .a-boss.on{border-color:#A27BE0;background:rgba(162,123,224,.18)}
 #alcDlg .a-boss img{width:46px;height:40px;object-fit:contain}
+#alcDlg .a-unknown{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;color:#A794BF;font-family:"Jua",sans-serif;font-size:1.5rem}
+#alcDlg .a-boss .a-unknown{width:46px;height:40px}
+#alcDlg .a-mat .a-unknown{width:max(26px,4.2cqw);height:max(26px,4.2cqw);font-size:max(18px,3.2cqw)}
 #alcDlg .a-boss b{font-family:"Jua",sans-serif;font-weight:400;font-size:.78rem;text-align:center;line-height:1.2;word-break:keep-all}
 #alcDlg .a-boss .n{font-size:.75rem;color:var(--muted)}
 #alcDlg details.a-fold{border:1px solid var(--line);border-radius:14px;padding:.55rem .8rem;margin-top:.6rem}
@@ -93,15 +96,20 @@ function render(){
     : B.qty <= 0 ? `${B.name} 재료가 없어요. 이세계에서 ${B.name} 괴물을 때리면 모여요`
     : A.shards < A.cost ? `💠 파편이 모자라요 (💠 ${A.cost} 필요)` : '';
   const found = A.items.filter(i=>i.best!=null).length;
+  // 재료를 현재 보유 중이거나, 해당 보스로 연성한 도감 기록이 있으면 발견 상태로 유지해요.
+  // 재료를 연성에 전부 써서 0개가 되어도, 도감 기록을 통해 다시 ???로 돌아가지 않아요.
+  const materialKnown = x => Number(x.qty)>0 || A.items.some(i=>i.boss===x.code && i.best!=null);
+  const materialIcon = x => materialKnown(x) ? `<img src="monster/${e(x.code)}.webp?v=2" alt="">` : `<span class="a-unknown" aria-label="미발견">?</span>`;
+  const materialName = x => materialKnown(x) ? e(x.mat) : "???";
   b.innerHTML = `<div class="a-head"><h3>🧪 마감 극복 연금술</h3>
       <span class="a-pill">💠 ${(A.shards||0).toLocaleString()}</span><span class="a-pill">오늘 ${A.today}/${A.max}</span>
       <span class="a-pill">⚗️ 기회 ${A.charges}/${A.max}${A.charges<A.max && A.next_at ? ` · <span data-anext>${left(A.next_at)}</span>` : ''}</span>
       <button class="a-btn" type="button" data-aclose aria-label="닫기">✕</button></div>
     <div class="a-stage" id="alcStage"><div class="swirl"></div>
       <div class="a-res" id="alcRes">${RES ? resHTML(RES) : ''}</div>
-      <div class="a-mid"><div class="a-mat"><img src="monster/${B.code}.webp?v=2" alt=""><span>${B.emoji} ${e(B.mat)} <b>${B.qty}</b>개 · 1개 + 💠 ${A.cost}</span></div>
+      <div class="a-mid"><div class="a-mat">${materialIcon(B)}<span>${materialKnown(B)?B.emoji:""} ${materialName(B)} <b>${B.qty}</b>개 · 1개 + 💠 ${A.cost}</span></div>
         <button class="a-brew" type="button" data-abrew ${why?'disabled':''}>🔥 연성하기</button>${why ? `<div class="a-why">${e(why)}</div>` : ''}</div></div>
-    <div class="a-bosses">${A.bosses.map(x=>`<button class="a-boss ${x.code===PICK?'on':''}" type="button" data-apick="${x.code}"><img src="monster/${x.code}.webp?v=2" alt=""><b>${e(x.mat)}</b><span class="n">${x.qty}개</span></button>`).join('')}</div>
+    <div class="a-bosses">${A.bosses.map(x=>`<button class="a-boss ${x.code===PICK?'on':''}" type="button" data-apick="${x.code}">${materialIcon(x)}<b>${materialName(x)}</b><span class="n">${x.qty}개</span></button>`).join('')}</div>
     <p class="small" style="margin:0">괴물을 한 대 때릴 때마다 그 괴물의 재료가 1개 모여요. 연성 기회는 ${A.every}분마다 1번 충전되고 ${A.max}번까지 쌓여요. 하루에 ${A.max}번까지 연성할 수 있어요. 꽝은 없어요!</p>
     <details class="a-fold" ${typeof localStorage!=='undefined' && (()=>{ try{ return localStorage.getItem('majam-alcdex')==='1'; }catch(_){ return false; } })() ? 'open' : ''} data-adexfold><summary>📖 극복 도감 <span class="small">${found} / ${A.items.length}종 · 최고 수량을 겨뤄요</span></summary>
       <div class="a-tabs">${A.bosses.map(x=>{ const n = A.items.filter(i=>i.boss===x.code && i.best!=null).length; return `<button type="button" class="${x.code===BOSS_TAB?'on':''}" data-atab="${x.code}">${e(x.name)} ${n}/10</button>`; }).join('')}</div>
