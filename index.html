@@ -2872,7 +2872,7 @@ const CONFIG = {
 };
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 </script>
-<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1025b"><\/script>');</script>
+<script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1025c"><\/script>');</script>
 <script>
 
 /* ---------- 기준 데이터 (schema.sql 의 room_size 와 같아야 해요) ---------- */
@@ -4065,6 +4065,8 @@ const supaApi = (() => {
     async merchBuy(c){ return ok(await sb.rpc('merch_buy', {p_code:c})); },
     async merchPerk(p){ return ok(await sb.rpc('merch_perk', {p_perk:p})); },
     async merchEquip(slot, c){ return ok(await sb.rpc('merch_equip', {p_slot:slot, p_code:c||''})); },
+    async merchGuards(){ return ok(await sb.rpc('get_my_guards')) || []; },                      // 🛡️ 데려온 파수꾼 (guards.sql)
+    async merchGuardSwap(c){ return ok(await sb.rpc('merch_guard_swap', {p_code:c})); },
     async merchOf(id){ try{ return ok(await sb.rpc('get_merch_of', {p_discord_id:String(id)})); }catch(e){ return null; } },
     async stallSign(t){ return ok(await sb.rpc('stall_sign', {p_text:t||''})); },
     myId(){ return myId; },
@@ -9312,7 +9314,7 @@ start();
 
 </script>
 <script src="stall.js?v=1025a"></script>
-<script src="merchant.js?v=1025e"></script>
-<p class="site-ver">마감의 숲 · 10-25 판 84</p>
+<script src="merchant.js?v=1025f"></script>
+<p class="site-ver">마감의 숲 · 10-25 판 85</p>
 </body>
 </html>

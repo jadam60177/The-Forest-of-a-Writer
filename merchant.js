@@ -41,7 +41,7 @@ const ANC = {
 };
 const PERKS = [['keep','🧺 바구니 지킴이','바구니가 1.5배 더 오래 쌓여요'],['scent','📜 도안 냄새','봉인을 풀 때 50% 확률로 아직 없는 도안부터'],['bonus','💠 감시 보너스','바구니를 받을 때 20% 확률로 💠 +30%']];
 const SLOTS = [['head','머리'],['face','얼굴'],['neck','목'],['back','등'],['hand','손']];
-const KINDS = [['guard','🛡️ 파수꾼','한 사람에 한 마리 · 아공간 농장을 지켜요 · 바꿀 때도 같은 값'],['sky','✨ 하늘 장식','아공간 배경 위를 천천히 떠다녀요'],['acc','🎩 파수꾼 꾸미기','머리 · 얼굴 · 목 · 등 · 손에 하나씩'],['ing','🧪 희귀 재료','가판대용 · 1개 = 10잔 · 한 번에 3개까지']];
+const KINDS = [['guard','🛡️ 파수꾼','아공간 농장을 지켜요 · 한 번 데려오면 계속 내 거라 무료로 바꿔 끼워요'],['sky','✨ 하늘 장식','아공간 배경 위를 천천히 떠다녀요'],['acc','🎩 파수꾼 꾸미기','머리 · 얼굴 · 목 · 등 · 손에 하나씩'],['ing','🧪 희귀 재료','가판대용 · 1개 = 10잔 · 한 번에 3개까지']];
 const SAY = ['냥… 오늘 하루만 머물다 갈 거다냥.','다른 차원에서 귀한 물건을 잔뜩 가져왔다냥.','흥정은 한 번만이다냥. 신중하게 고르라냥.','파편만 받는다냥. 코인은 이 차원 돈이라 안 받는다냥.'];
 const IMG_V = {acc_collar:2};   // 같은 이름으로 그림을 바꾸면 숫자를 올려요 (옛 그림 캐시 피하기)
 const src = c => `merchant/${c}.webp${IMG_V[c] ? '?v='+IMG_V[c] : ''}`;
@@ -73,11 +73,14 @@ window.MERCH = null;
 let deco = 'head';
 // 접기 (10-25) — 스크롤 길어지는 판은 접을 수 있게. 브라우저마다 기억해요
 const mFolded = () => { try{ return localStorage.getItem('majam-merch-fold')==='1'; }catch(e){ return false; } };
-async function refreshMerch(){ if(!api.merchant) return; try{ window.MERCH = await api.merchant(); }catch(e){ return; }
+window.MERCH_GUARDS = [];
+async function refreshGuards(){ if(!api.merchGuards) return; try{ window.MERCH_GUARDS = (await api.merchGuards()) || []; }catch(e){ window.MERCH_GUARDS = []; } }
+const ownGuard = c => (window.MERCH_GUARDS||[]).includes(c) || ((window.MERCH||{}).state||{}).guard===c;
+async function refreshMerch(){ if(!api.merchant) return; try{ window.MERCH = await api.merchant(); }catch(e){ return; } await refreshGuards();
   syncShards(window.MERCH); renderMerch(); renderDeco(); try{ if(typeof renderVoid==='function' && VOID && VOID.open) renderVoid(); }catch(e){} }
 window.refreshMerch = refreshMerch;
 function syncShards(r){ if(r && r.shards!=null && typeof RIFT!=='undefined' && RIFT) RIFT.shards = r.shards; }
-function take(r){ window.MERCH = r; syncShards(r); renderMerch(); renderDeco(); try{ if(typeof refreshVoid==='function') refreshVoid().then(()=>{ try{ renderVoid(); renderRift(); }catch(e){} }); }catch(e){} }
+function take(r){ window.MERCH = r; syncShards(r); refreshGuards().then(()=>{ renderMerch(); renderDeco(); }); renderMerch(); renderDeco(); try{ if(typeof refreshVoid==='function') refreshVoid().then(()=>{ try{ renderVoid(); renderRift(); }catch(e){} }); }catch(e){} }
 
 /* ---------- 이세계 탭 상인 판 ---------- */
 function cardHTML(o){
@@ -87,6 +90,7 @@ function cardHTML(o){
   const have = it.kind==='guard' ? st.guard===o.code : it.kind==='ing' ? o.bought >= M.ing_max : owned.has(o.code);
   const label = o.refused ? '😾 흥, 안 팔아!' : have ? (it.kind==='guard' ? '🛡️ 함께 있어요' : it.kind==='ing' ? '오늘은 다 샀어요' : '✅ 가지고 있어요')
     : it.kind==='guard' && st.guard ? `🔁 바꾸기 · 💠 ${price.toLocaleString()}` : `💠 ${price.toLocaleString()}${it.kind==='ing'?` · ${o.bought}/${M.ing_max}`:''}`;
+  if(it.kind==='guard' && !have && ownGuard(o.code)) return `<div class="mcard k-guard"><div class="mc-art"><span class="mc-guard">${guardHTML({guard:o.code})}</span></div><b>${esc(it.name)}</b><span class="small">데려온 적 있어요</span><button class="mini ask-yes" type="button" data-mswap="${o.code}">🔁 무료로 바꿔 끼우기</button></div>`;
   const art = it.kind==='guard' ? `<span class="mc-guard">${guardHTML({guard:o.code})}</span>` : `<img src="${src(o.code)}" alt="" loading="lazy" draggable="false">`;
   return `<div class="mcard k-${it.kind} ${o.refused?'refused':''}"><div class="mc-art">${art}</div>
     <b>${esc(it.name)}</b>${it.slot ? `<span class="small">${SLOTS.find(s=>s[0]===it.slot)[1]}</span>` : ''}
@@ -130,6 +134,7 @@ function renderDeco(){
     <div class="md-side">
       ${st.guard ? `<h4>🛡️ 오늘의 임무 <span class="small">${st.perk_today ? '오늘은 이미 바꿨어요' : '하루에 한 번 바꿀 수 있어요'}</span></h4>
       <div class="md-perks">${PERKS.map(([k,n,d])=>`<button class="mperk ${st.perk===k?'on':''}" type="button" data-mperk="${k}" ${st.perk!==k && st.perk_today?'disabled':''}><b>${n}</b><span>${d}</span></button>`).join('')}</div>` : ''}
+      ${(window.MERCH_GUARDS||[]).filter(c=>ITEMS[c]).length > 1 ? `<h4>🛡️ 내 파수꾼 <span class="small">데려온 파수꾼끼리는 무료로 바꿔 끼워요 · 소품·임무는 그대로</span></h4><div class="md-row">${(window.MERCH_GUARDS||[]).filter(c=>ITEMS[c]).map(c=>`<button class="mchip ${st.guard===c?'on':''}" type="button" data-mswap="${c}"><img src="${src(c)}" alt="" loading="lazy"><span>${esc(ITEMS[c].name)}</span></button>`).join('')}</div>` : ''}
       <h4>✨ 하늘 장식</h4><div class="md-row">${sky.length ? off('sky') + sky.map(c=>chip('sky',c)).join('') : '<span class="small">상인에게서 사면 여기 생겨요</span>'}</div>
       ${st.guard ? `<div class="md-tabs">${SLOTS.map(([s,n])=>`<button class="mchip ${deco===s?'on':''}" type="button" data-mdecotab="${s}">${n}${st[s]?' ✓':''}</button>`).join('')}</div>
       <div class="md-row">${slotItems(deco).length ? off(deco) + slotItems(deco).map(c=>chip(deco,c)).join('') : '<span class="small">이 자리에 쓸 소품이 아직 없어요</span>'}</div>` : ''}
@@ -146,6 +151,9 @@ document.addEventListener('click', e=>{
   if(pk){ const k = pk.dataset.mperk, P = PERKS.find(x=>x[0]===k); if((window.MERCH.state||{}).perk===k) return;
     return act(async()=>{ if(!(await ask(`🛡️ 파수꾼에게 「${P[1]}」 임무를 맡길까요?\n${P[2]}\n\n임무는 하루에 한 번만 바꿀 수 있어요.`))) return;
       take(await api.merchPerk(k)); toast(`🛡️ 파수꾼이 「${P[1]}」 임무를 시작했어요!`); }); }
+  const sw = e.target.closest('[data-mswap]');
+  if(sw){ const c = sw.dataset.mswap; if(((window.MERCH||{}).state||{}).guard===c) return;
+    return act(async()=>{ take(await api.merchGuardSwap(c)); toast(`🛡️ 「${ITEMS[c].name}」 파수꾼으로 바꿔 끼웠어요! (무료)`); }); }
   const eq = e.target.closest('[data-mequip]');
   if(eq) return act(async()=>{ take(await api.merchEquip(eq.dataset.mequip, eq.dataset.code||'')); });
   const hg = e.target.closest('[data-mhaggle]');
@@ -158,7 +166,7 @@ document.addEventListener('click', e=>{
   const by = e.target.closest('[data-mbuy]');
   if(by) return act(async()=>{ const c = by.dataset.mbuy, it = ITEMS[c], o = (window.MERCH.offers||[]).find(x=>x.code===c), st = window.MERCH.state || {};
     const price = o && o.pct ? Math.round(o.price*(100-o.pct)/100) : it.price;
-    const msg = it.kind==='guard' ? (st.guard ? `🔁 지금 파수꾼 「${ITEMS[st.guard].name}」은 다른 차원으로 돌아가고\n「${it.name}」이 새로 와요.\n씌워 둔 소품은 그대로 옮겨져요.\n\n💠 ${price.toLocaleString()}을 낼까요?` : `🛡️ 「${it.name}」을 파수꾼으로 데려올까요?\n💠 ${price.toLocaleString()} · 아공간 농장을 지켜요`)
+    const msg = it.kind==='guard' ? (st.guard ? `🔁 지금 파수꾼 「${ITEMS[st.guard].name}」은 쉬러 가고\n「${it.name}」이 새로 와요.\n씌워 둔 소품은 그대로 옮겨져요.\n한 번 데려온 파수꾼은 내 거라, 나중에 꾸미기 창에서 무료로 다시 바꿔 끼울 수 있어요.\n\n💠 ${price.toLocaleString()}을 낼까요?` : `🛡️ 「${it.name}」을 파수꾼으로 데려올까요?\n💠 ${price.toLocaleString()} · 아공간 농장을 지켜요`)
       : `💠 ${price.toLocaleString()}으로 「${it.name}」을 살까요?`;
     if(!(await ask(msg))) return;
     const r = await api.merchBuy(c); take(r);
@@ -200,7 +208,7 @@ const css = document.createElement('style'); css.textContent = `
 .mguard .mg-body{position:relative;z-index:2;width:100%;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.3))}
 .mguard .mg-acc{position:absolute;z-index:3;height:auto;pointer-events:none}
 .mguard .mg-acc.back{z-index:1}
-.vfarm .mguard.farm{position:absolute;left:87%;bottom:7%;width:15%;max-width:150px;transform:translateX(-50%);z-index:95;animation:mguard 4s ease-in-out infinite}
+.vfarm .mguard.farm{position:absolute;left:88%;bottom:8%;width:10%;max-width:100px;transform:translateX(-50%);z-index:95;animation:mguard 4s ease-in-out infinite}
 @keyframes mguard{50%{transform:translateX(-50%) translateY(-2px)}}
 .vfarm .mguard.farm::after{content:"🛡️ 파수꾼";position:absolute;left:50%;bottom:-1.3em;transform:translateX(-50%);font-size:.7rem;white-space:nowrap;background:rgba(30,20,60,.7);color:#F3E8FF;border-radius:999px;padding:0 .5em}
 .msky{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:0}
