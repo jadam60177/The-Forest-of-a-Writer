@@ -13,6 +13,7 @@ function makeDemoApi(){
     ].map(([discord_id,display_name,h,in_voice,today_minutes,away])=>({discord_id,display_name,total_minutes:Math.round(h*60),in_voice,today_minutes,away,removed:false,house_color:Math.floor(Math.random()*10)})),
     plaza: PLAZA_DEFAULT.map((b,i)=>({...b, raised: i===0?b.goal: i===1?1350:0, built_at: i===0?new Date(Date.now()-5*86400e3).toISOString():null,
       givers: new Set(i===0?['moon','dl','green','dawn','pencil','bread']: i===1?['moon','dl','owl','cat','pencil']:[]), mine:0})),
+    expansion: PLAZA_EXPANSION_DEFAULT.map(b=>({...b,raised:0,built_at:null,givers:new Set(),mine:0})),
     coll:new Set(), cabs:{}, otherCabs:{}, raidDay:'', raidOwners:[],
     raidNotes:[{thief_name:'달빛작가', success:true}, {thief_name:'고양이손', success:false}], garden:[], gdex:{}, inv:{}, placed:[], nextId:1, otherRooms:{}, gifts:[], events:[], evId:1, noteId:3,
     notes:[
@@ -20,8 +21,8 @@ function makeDemoApi(){
       {id:1, discord_id:'dl', category:'건의', body:'담당자 대사에 \'수정고 부탁드려요\'도 넣어 주세요 ㅋㅋㅋ', created_at:new Date(Date.now()-86400e3).toISOString(), read:true, members:{display_name:'마감요정'}},
     ],
   };
-  try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; st.coll=new Set(s.coll||[]); st.cabs=s.cabs||{}; st.garden=s.garden||[]; st.gdex=s.gdex||{}; st.fdex=s.fdex||{}; st.fpend=s.fpend||[]; st.fpid=s.fpid||1; st.net=s.net||null; st.fday=s.fday||''; st.fused=s.fused||0; st.pt=s.pt||null; st.looks=s.looks||null; st.lotto=s.lotto||null; st.isk=s.isk||null; st.vd=s.vd||null; st.pub=s.pub||null; st.alc=s.alc||null; } }catch(e){}
-  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId, coll:[...st.coll], cabs:st.cabs, garden:st.garden, gdex:st.gdex, fdex:st.fdex, fpend:st.fpend, fpid:st.fpid, net:st.net, fday:st.fday, fused:st.fused, pt:st.pt, looks:st.looks, lotto:st.lotto, isk:st.isk, vd:st.vd, pub:st.pub, alc:st.alc})); }catch(e){} };
+  try{ const raw = localStorage.getItem('majam-forest-demo'); if(raw){ const s=JSON.parse(raw); Object.assign(st.me, s.me, {in_voice:false}); st.inv=s.inv||{}; st.placed=s.placed||[]; st.nextId=s.nextId||1; st.coll=new Set(s.coll||[]); st.cabs=s.cabs||{}; st.garden=s.garden||[]; st.gdex=s.gdex||{}; st.fdex=s.fdex||{}; st.fpend=s.fpend||[]; st.fpid=s.fpid||1; st.net=s.net||null; st.fday=s.fday||''; st.fused=s.fused||0; st.pt=s.pt||null; st.looks=s.looks||null; st.lotto=s.lotto||null; st.isk=s.isk||null; st.vd=s.vd||null; st.pub=s.pub||null; st.alc=s.alc||null; if(Array.isArray(s.expansion)) st.expansion.forEach(b=>{ const v=s.expansion.find(x=>x.code===b.code);if(v){b.raised=v.raised||0;b.built_at=v.built_at||null;b.mine=v.mine||0;b.givers=new Set(v.givers||[]);}}); } }catch(e){}
+  const persist = () => { try{ localStorage.setItem('majam-forest-demo', JSON.stringify({me:st.me, inv:st.inv, placed:st.placed, nextId:st.nextId, coll:[...st.coll], cabs:st.cabs, garden:st.garden, gdex:st.gdex, fdex:st.fdex, fpend:st.fpend, fpid:st.fpid, net:st.net, fday:st.fday, fused:st.fused, pt:st.pt, looks:st.looks, lotto:st.lotto, isk:st.isk, vd:st.vd, pub:st.pub, alc:st.alc, expansion:st.expansion.map(x=>({code:x.code,raised:x.raised,built_at:x.built_at,mine:x.mine,givers:[...x.givers]}))})); }catch(e){} };
   DEFAULT_SHOP.forEach(it=>{ if(it.unlock_by && st.plaza.find(b=>b.code===it.unlock_by && b.built_at)) it.active=true; });
   const item = code => DEFAULT_SHOP.find(s=>s.code===code);
   const fail = msg => { throw new Error(msg); };
@@ -75,6 +76,21 @@ function makeDemoApi(){
     async plaza(){
       return st.plaza.map(b=>({code:b.code, emoji:b.emoji, name:b.name, goal:b.goal, sort:b.sort, about:b.about,
         raised:b.raised, built_at:b.built_at, givers:b.givers.size, my_amount:b.mine}));
+    },
+    async plazaExpansion(){
+      return st.expansion.map(b=>({code:b.code, stage:b.stage, goal:b.goal, sort:b.sort,
+        raised:b.raised, built_at:b.built_at, givers:b.givers.size, my_amount:b.mine}));
+    },
+    async givePlazaExpansion(amount){
+      if(!st.plaza.every(b=>b.built_at)) fail('광장 1단계 건물이 아직 완공되지 않았어요');
+      const b=st.expansion.find(x=>!x.built_at); if(!b) fail('2단계까지 모두 완공했어요');
+      if(b.stage===2 && !st.expansion.find(x=>x.code==='dyeworkshop').built_at) fail('염색공방이 먼저 완공되어야 해요');
+      if(!(amount>=1)) fail('1코인 이상 보내 주세요');
+      const amt=Math.min(amount,b.goal-b.raised);
+      if(st.me.coins<amt) fail('코인이 부족해요');
+      st.me.coins-=amt; b.raised+=amt; b.mine+=amt; b.givers.add('me');
+      if(b.raised>=b.goal) b.built_at=new Date().toISOString();
+      persist();return st.me.coins;
     },
     async givePlaza(amount){
       const b = st.plaza.find(x=>!x.built_at); if(!b) fail('광장이 다 지어졌어요');
