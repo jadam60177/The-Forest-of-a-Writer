@@ -153,11 +153,11 @@ dialog.zoom{max-width:min(92vw,420px);text-align:center}
 .furn.drawn{padding:2px;background:rgba(255,255,255,.18)}
 .furn.carpet{background:transparent;box-shadow:none;padding:0;z-index:0}
 .furn.carpet:hover{box-shadow:inset 0 0 0 2px #B4513E}
-/* 🎨 러그 색 (10-22) */
+/* 🎨 러그 + 서랍장 색상 (서랍장은 테스트 전용) */
 .furn.tinted > *, .furn.tinted > img.fimg, .tart > *, .tart > img.fimg{filter:var(--tf)}
-.room.tint-mode .furn:not(.carpet){opacity:.28;pointer-events:none}
-.room.tint-mode .furn.carpet{cursor:pointer;outline:2px dashed rgba(255,206,92,.85);outline-offset:-2px}
-.room.tint-mode .furn.carpet:hover{outline-style:solid}
+.room.tint-mode .furn:not(.tintable){opacity:.28;pointer-events:none}
+.room.tint-mode .furn.tintable{cursor:pointer;outline:2px dashed rgba(255,206,92,.85);outline-offset:-2px}
+.room.tint-mode .furn.tintable:hover{outline-style:solid}
 .tint-pv{width:min(100%, calc(150px * var(--ar,1)));aspect-ratio:var(--ar,1);max-height:170px;margin:.8rem auto .2rem;display:grid;place-items:center}
 .tint-pv .tart{width:100%;height:100%;display:grid;place-items:center}
 .tint-pv .tart > *{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain}
@@ -2829,12 +2829,12 @@ document.documentElement.setAttribute('data-mode', modeNow());
 </dialog>
 
 <dialog class="visit ask tint-dlg" id="tintDlg">
-  <h3 style="margin:0 0 .2rem" id="tintTitle">🎨 러그 색 바꾸기</h3>
-  <p class="small" style="margin:0">무늬는 그대로, 색만 바뀌어요. 깔아 둔 러그마다 따로 기억하고, 놀러 온 주민에게도 이 색으로 보여요.</p>
+  <h3 style="margin:0 0 .2rem" id="tintTitle">🎨 색 바꾸기</h3>
+  <p class="small" style="margin:0">이미지 전체에 색 필터를 입혀요. 무늬뿐 아니라 장식 색도 같이 달라질 수 있어요. 가구마다 따로 저장하고 방문자에게도 보입니다.</p>
   <div class="tint-pv" id="tintPv"></div>
   <p class="small tint-now" id="tintNow"></p>
   <div class="tint-sw" id="tintSw" role="group" aria-label="색 견본"></div>
-  <label class="tint-hue"><span class="small">🌈 직접 돌리기 <span class="tint-hue-tip">막대를 밀면 무늬 속 색들이 같이 빙글 돌아가요 (하얀·회색 러그는 막대로는 잘 안 바뀌니 위 색 견본을 골라 주세요)</span></span><input type="range" id="tintHue" min="0" max="359" step="1" value="0"></label>
+  <label class="tint-hue"><span class="small">🌈 직접 돌리기 <span class="tint-hue-tip">막대를 밀면 무늬 속 색들이 같이 빙글 돌아가요 (밝은 가구는 막대로 변화가 작으니 위 색 견본을 골라 주세요)</span></span><input type="range" id="tintHue" min="0" max="359" step="1" value="0"></label>
   <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem">
     <button class="mini" id="tintCancel" type="button">취소</button>
     <button class="mini ask-yes" id="tintSave" type="button">🎨 이 색으로</button>
@@ -3222,6 +3222,8 @@ const RUG_TINTS = [['c1','빨강','#E06A5E'],['c2','주황','#EE9A4A'],['c3','�
   ['c7','남색','#4E5E9E'],['c8','보라','#9E84D6'],['c9','분홍','#EE8FB4'],['c10','갈색','#A8794E'],['c11','회색','#9A958E']];
 let TINT_MODE = false, TINT_CUR = null, TINT_ERR = '';   // 🎨 러그 색 바꾸기 중 · 서버에서 색 못 읽을 때 이유
 const isRug = code => !!code && (code.startsWith('rug_') || code==='hellrug');
+const TINTABLE_FURN = new Set(['drawer']);   // 🎨 1차 실험: 서랍장 1종만 추가
+const canTintItem = code => isRug(code) || TINTABLE_FURN.has(code);
 const tintCSS = t => !t ? '' : t[0]==='h' ? `hue-rotate(${(+t.slice(1))||0}deg) saturate(1.15)` : RUG_TINTS.some(x=>x[0]===t) ? `url(#rugT_${t})` : '';
 const tintName = t => !t ? '원래 색' : t[0]==='h' ? `🌈 직접 고른 색` : ((RUG_TINTS.find(x=>x[0]===t)||[])[1] || '원래 색');
 (() => {
@@ -4038,8 +4040,14 @@ const supaApi = (() => {
     async renameRoom(k, name){ ok(await sb.rpc('rename_room', {p_idx:k, p_name:name})); },
     async house(id){ const r = ok(await sb.rpc('get_house', {p_discord_id:id})); return Array.isArray(r) ? r[0] : r; },
     async remove(id){ ok(await sb.rpc('remove_item_ex', {p_id:id})); },
-    async setTint(id, t){ const { error } = await sb.rpc('set_rug_tint', {p_id:String(id), p_tint:t||''});
-      if(error) throw new Error(/set_rug_tint|function/i.test(error.message) ? '러그 색 바꾸기는 곧 열려요! 조금만 기다려 주세요' : error.message); },
+    async setTint(id, t, code){   // 서랍장만 별도 RPC: 기존 러그 서버 함수를 수정하지 않아요
+      const drawer = code==='drawer', fn = drawer ? 'set_drawer_tint' : 'set_rug_tint';
+      const { error } = await sb.rpc(fn, {p_id:String(id), p_tint:t||''});
+      if(error) throw new Error(drawer && /set_drawer_tint|function|PGRST202|schema cache/i.test(String(error.message||'')+String(error.code||''))
+        ? '서랍장 색상 저장용 SQL이 아직 적용되지 않았어요. 먼저 SQL을 등록해 주세요.'
+        : /set_rug_tint|function/i.test(error.message||'') ? '러그 색 바꾸기는 곧 열려요! 조금만 기다려 주세요'
+        : error.message);
+    },
     async adminList(){ return ok(await sb.rpc('admin_list')); },
     async finishTour(){ return ok(await sb.rpc('finish_tour')); },
     async logTab(t){ await sb.rpc('log_tab', {p_tab:t}); },   // 실패해도 조용히 넘어가요 (tabstats.sql 전이어도 괜찮아요)
@@ -4520,7 +4528,8 @@ function roomHTML(list, cur, {editable, cabs={}, maxR, maxC}){
     const cls = `furn ${turn && /^v_[a-z]+_w\d_[23]$/.test(f.item_code)?'vwall':''} ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${small?'acc-small':''} ${WIN2.has(f.item_code)?'winfit':''} ${rot?'rot r'+rot:''}`;
     const art = tableV ? `<img class="fsvg fimg" src="furn/${f.item_code}_v.webp${furnV(f.item_code)}" alt="" draggable="false" loading="lazy">` : wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
       : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
-    const tf = isRug(f.item_code) ? tintCSS(f.tint) : '', tcls = tf ? ' tinted' : '', ts = tf ? `;--tf:${tf}` : '';   // 🎨 러그 색
+    const canTint = canTintItem(f.item_code);   // 🎨 배치된 러그·서랍장에만 색상 적용
+    const tf = canTint ? tintCSS(f.tint) : '', tcls = (canTint ? ' tintable' : '') + (tf ? ' tinted' : ''), ts = tf ? `;--tf:${tf}` : '';
     html += editable
       ? `<button class="${cls}${tcls}" data-pid="${f.id}" style="${style}${rs}${ts}" aria-label="${esc(it.name)} 치우기">${art}</button>`
       : `<span class="${cls}${tcls}" style="${style}${rs}${ts}" title="${esc(it.name)}">${art}</span>`;
@@ -8211,7 +8220,7 @@ document.getElementById('tintHue').addEventListener('input', e=>{ if(!TINT_CUR) 
 document.getElementById('tintCancel').addEventListener('click', ()=>{ TINT_CUR = null; document.getElementById('tintDlg').close(); });
 document.getElementById('tintSave').addEventListener('click', ()=>act(async()=>{
   if(!TINT_CUR) return; const {f, t} = TINT_CUR;
-  if((f.tint||'') !== t){ await api.setTint(f.id, t); await refreshMine(); renderMyHouse();
+  if((f.tint||'') !== t){ await api.setTint(f.id, t, f.item_code); await refreshMine(); renderMyHouse();
     const n = PLACED.find(p=>p.id===f.id);   // 저장됐는지 한 번 더 확인
     if(n && !('tint' in n)) toast(`🎨 색은 저장했는데 다시 불러오지 못했어요 (10-22 판 ⑧) · ${TINT_ERR||'이유 모름'}`, 12000);
     else if(n && (n.tint||'') !== t) toast('🎨 색이 저장되지 않았어요. 잠시 뒤 다시 해 주세요');
@@ -8222,10 +8231,10 @@ function setHint(){
   const el = document.getElementById('hint');
   if(selected || inGarden || inTank || inGh) TINT_MODE = false;
   { const rm = document.getElementById('room'); if(rm) rm.classList.toggle('tint-mode', TINT_MODE); }
-  if(TINT_MODE){ el.innerHTML = `🎨 색을 바꿀 러그를 눌러 주세요 <button class="mini" id="tintDone">다 했어요</button>`; return; }
-  const rugHere = PLACED.some(p=>(p.room||0)===curRoom && isRug(p.item_code));
+  if(TINT_MODE){ el.innerHTML = `🎨 색을 바꿀 러그 또는 서랍장을 눌러 주세요 <button class="mini" id="tintDone">다 했어요</button>`; return; }
+  const tintHere = PLACED.some(p=>(p.room||0)===curRoom && canTintItem(p.item_code));
   if(!selected){ el.innerHTML = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구는 끌어서 옮기고(폰은 꾹 눌렀다가 끌기), 그냥 누르면 가방으로 돌아가요.'
-    + (rugHere && !inGarden && !inTank && !inGh ? ` <button class="mini" id="tintBtn">🎨 러그 색 바꾸기</button>` : ''); return; }
+    + (tintHere && !inGarden && !inTank && !inGh ? ` <button class="mini" id="tintBtn">🎨 가구 색 바꾸기</button>` : ''); return; }
   const it = itemOf(selected), fp = footprint(selected);
   const canRot = true;   // 진열장도 돌릴 수 있어요 (칸 배치만 세로로 바뀌어요)
   el.innerHTML = `<span class="hint-ico r${rotated}">${ico(it)}</span> ${esc(it.name)}(${fp.w}×${fp.h}칸)${rotated?` · ${ROT_NAME[rotated]}`:''} · 놓을 자리의 왼쪽 위 칸을 눌러 주세요.` + (TABLE_FOOD.has(selected) ? ' 🍰 식탁·테이블 위에도 올릴 수 있어요!' : '') +
@@ -8687,7 +8696,7 @@ document.addEventListener('click', e=>{
   });
 
   const fu = e.target.closest('.furn[data-pid]');
-  if(fu && TINT_MODE){ const f = PLACED.find(p=>p.id===+fu.dataset.pid); if(f && isRug(f.item_code)) openTint(f); else toast('러그만 색을 바꿀 수 있어요'); return; }
+  if(fu && TINT_MODE){ const f = PLACED.find(p=>p.id===+fu.dataset.pid); if(f && canTintItem(f.item_code)) openTint(f); else toast('지금은 러그와 서랍장만 색을 바꿀 수 있어요'); return; }
   if(fu && Date.now() - FDRAG_AT < 450) return;   // 끌어서 옮긴 직후의 클릭은 치우기로 안 쳐요
   if(fu) return act(async()=>{
     const pid = +fu.dataset.pid, f = PLACED.find(p=>p.id===pid), tops = f ? topsOn(f, PLACED) : [];
@@ -8989,10 +8998,10 @@ function fdragEnd(cancel){
   const it = itemOf(f.item_code); let rot = +f.rot || 0;
   if(!rot && it.w!==it.h && f.w===it.h && f.h===it.w) rot = 1;
   act(async()=>{
-    const keepTint = async (r, c) => {   // 🎨 옮겨도 러그 색은 그대로
+    const keepTint = async (r, c) => {   // 🎨 옮겨도 러그·서랍장 색은 그대로
       if(!f.tint) return; await refreshMine();
       const n = PLACED.find(p=>p.item_code===f.item_code && p.r===r && p.c===c && (p.room||0)===curRoom);
-      if(n && n.tint!==f.tint) try{ await api.setTint(n.id, f.tint); }catch(e){}
+      if(n && n.tint!==f.tint && canTintItem(f.item_code)) try{ await api.setTint(n.id, f.tint, f.item_code); }catch(e){}
     };
     await api.remove(f.id);
     try{ await api.place(f.item_code, to.r, to.c, rot, curRoom); }
