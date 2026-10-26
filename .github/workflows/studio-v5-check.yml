@@ -1,0 +1,21 @@
+name: Studio V5 Smoke Check
+on:
+  pull_request:
+    paths:
+      - 'studio_v5_showcase.html'
+      - 'studio/qa-v5.js'
+      - 'tests/studio-v5-smoke.cjs'
+      - '.github/workflows/studio-v5-check.yml'
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check studio/qa-v5.js
+      - run: node tests/studio-v5-smoke.cjs
