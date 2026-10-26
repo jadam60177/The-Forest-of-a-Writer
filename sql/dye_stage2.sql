@@ -47,7 +47,7 @@ declare
   v_out jsonb:='[]'::jsonb; v_required text;
 begin
   if auth.uid() is null then raise exception '로그인이 필요해요'; end if;
-  if p_count not in (1,10) or p_kind not in ('paint','sofa') then
+  if coalesce(p_count,0) not in (1,10) or coalesce(p_kind,'') not in ('paint','sofa') then
     raise exception '보따리 종류나 횟수가 올바르지 않아요'; end if;
   select i.provider_id into v_id from auth.identities i
    where i.user_id=auth.uid() and i.provider='discord' limit 1;
