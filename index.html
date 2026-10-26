@@ -2464,6 +2464,64 @@ button.wb-slot{font:inherit;color:inherit;cursor:pointer}
 #vcraftDlg .vcraft-body{flex:1;overflow-y:auto;min-height:0;padding-right:.2rem}
 #vcraftDlg .vcraft-body > h4:first-child{margin-top:.2rem}
 .vcraft-open{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin:.8rem 0}
+
+/* ===== 🌳 메인 숲 주민 정렬: 그림/명찰/상태를 같은 높이로 (10-26) =====
+   메인 #houses만 대상. 산책로·집 꾸미기·주민 구경 화면은 그대로 둡니다. */
+#houses{align-items:start;justify-items:stretch}
+#houses>.house{
+  display:grid;grid-template-rows:clamp(140px,24vw,220px) 46px 42px;
+  justify-items:center;align-items:end;row-gap:0;
+  width:100%;min-width:0;box-sizing:border-box;text-align:center;
+}
+#houses>.house>.hwrap{
+  position:relative;display:flex;justify-content:center;align-items:flex-end;
+  align-self:stretch;width:100%;max-width:220px;height:100%;min-width:0;overflow:visible;
+}
+#houses>.house>.hwrap>svg{
+  display:block;flex:none;width:100%;max-width:100%;height:auto;max-height:100%;
+}
+#houses>.house.vacant>svg{
+  width:100%;max-width:220px;height:auto;max-height:100%;align-self:end;
+}
+#houses>.house>.nm{
+  display:inline-flex;justify-content:center;align-items:center;align-self:center;
+  box-sizing:border-box;margin:0;min-width:0;max-width:100%;height:44px;min-height:44px;
+  padding-block:.35em;line-height:1.15;text-align:center;font-size:1rem;
+}
+#houses>.house>.nm .nm-label{
+  display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;text-align:center;
+}
+#houses>.house>.nm[class*="plate-"]{
+  /* 이미지 양쪽 폭이 다르면 글씨가 밀리므로 양쪽 장식을 균등하게 맞춥니다. */
+  --plate-edge:max(var(--pl),var(--pr));
+  border-left-width:var(--plate-edge);border-right-width:var(--plate-edge);
+  border-image-width:0 var(--plate-edge) 0 var(--plate-edge);
+  padding:.34em .08em;text-align:center;
+  filter:drop-shadow(0 2px 3px rgba(32,30,29,.19));
+}
+#houses>.house.lit>.nm[class*="plate-"]{
+  filter:drop-shadow(0 0 6px rgba(255,200,90,.65));
+}
+#houses>.house>.st{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  box-sizing:border-box;width:100%;min-height:42px;margin:0;padding:3px 0 0;
+  text-align:center;line-height:1.32;
+}
+#houses>.house>.st .t{display:block;text-align:center;width:100%}
+@media(max-width:600px){
+  #houses>.house{grid-template-rows:clamp(116px,32vw,142px) 36px 38px;padding:.18rem}
+  #houses>.house>.nm{height:36px;min-height:36px;font-size:.76rem}
+  #houses>.house>.nm[class*="plate-"]{
+    border-left-width:calc(var(--plate-edge)*.72);
+    border-right-width:calc(var(--plate-edge)*.72);
+    border-image-width:0 calc(var(--plate-edge)*.72) 0 calc(var(--plate-edge)*.72);
+    padding:.3em .04em;
+  }
+  #houses>.house>.st{min-height:38px;padding-top:2px;font-size:.72rem}
+}
+/* ===== 주민 정렬 끝 ===== */
+
 </style>
 <script>
 /* ☀️🌙 낮·밤 화면: 자동(실제 시간) · 낮 · 밤 — 그리기 전에 먼저 정해서 깜빡이지 않게 */
@@ -4502,13 +4560,13 @@ function renderVillage(){
   const lit = VILLAGE.filter(p=>p.in_voice && !p.removed).length;
   document.getElementById('litCount').textContent = `🕯️ 불 켜진 집 ${lit}채`;
   document.getElementById('houses').innerHTML = villageOrder(VILLAGE).map(p=>{
-    if(p.removed) return `<div class="house vacant">${vacantSVG()}<div class="nm">빈 터</div><div class="st">누군가 새로 이사 올 자리</div></div>`;
+    if(p.removed) return `<div class="house vacant">${vacantSVG()}<div class="nm"><span class="nm-label">빈 터</span></div><div class="st">누군가 새로 이사 올 자리</div></div>`;
     const st = stageIdx(p.total_minutes), dc = p.decay||0, me = isMe(p);
     const today = `<span class="t">오늘 ${fmt(p.today_minutes)}</span>`;
     const status = p.in_voice ? `작업 중${today}` : dc ? decayLabel(dc, st) : `불 꺼짐${today}`;
     return `<button class="house ${p.in_voice?'lit':''} ${me?'me':''}" data-visit="${esc(p.discord_id)}" aria-label="${esc(me?'내 집':p.display_name)} 구경하기">
       <span class="hwrap">${houseSVG(lookStage(p.discord_id, st), p.in_voice, dc, p.house_color, lookStyle(p.discord_id, st, me ? ME.house_style : HOUSE_STYLE_OF[p.discord_id]))}${flowerYard(FLOWERS_ON[p.discord_id])}${PETS_ON[p.discord_id]?petArt(PETS_ON[p.discord_id].pet_code, PETS_ON[p.discord_id].sad?'sad':'ok', 'yardpet', petShowBig(PETS_ON[p.discord_id].level||1, babyOf(me ? meId() : p.discord_id, PETS_ON[p.discord_id].pet_code, PETS_ON[p.discord_id].name))):''}</span>
-      <span class="nm ${plateCls(p)}">${plateEmo(p)}${me?'내 집':esc(p.display_name)}</span>
+      <span class="nm ${plateCls(p)}"><span class="nm-label">${plateEmo(p)}${me?'내 집':esc(p.display_name)}</span></span>
       <span class="st">${status}</span>
     </button>`;
   }).join('');
