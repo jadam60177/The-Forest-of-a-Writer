@@ -1834,6 +1834,23 @@ dialog.visit#visit{width:min(94vw,640px);max-width:min(94vw,640px)}
 .wlook-top[open] .wlk-go::after{content:"접기 ˄";font-size:1rem}
 .wlook-top > .wlook{padding:.2rem .8rem .8rem;border-top:1px dashed var(--line)}
 
+/* ===== 🎨 Jadewood 도트 아바타 (24px 네이티브, 픽셀 보간 금지) ===== */
+.pixel-avatar{display:block;position:relative;aspect-ratio:1/1;image-rendering:pixelated;overflow:visible}
+.pixel-avatar canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+.wch:has(.pixel-avatar){width:6.4%}
+.wch .pixel-avatar canvas{filter:drop-shadow(0 3px 2px rgba(0,0,0,.3))}
+.wl-grid.pixel-grid{grid-template-columns:repeat(auto-fill,minmax(98px,1fr))}
+.wl-opt.pixel-opt{gap:.25rem;min-height:116px;justify-content:center}
+.wl-opt.pixel-opt .pixel-avatar{width:64px;flex:none}
+.wl-opt.pixel-opt b{font-size:.82rem;line-height:1.25}
+.wl-opt.pixel-opt .pixel-cost{font-size:.74rem;color:var(--muted)}
+.wl-opt.pixel-opt.on .pixel-cost{color:var(--accent)}
+.wl-tabs.pixel-tabs{flex-wrap:wrap}
+.wl-avatar-head{display:flex;gap:.9rem;align-items:center;margin:.45rem 0 .7rem}
+.wl-avatar-head .pixel-avatar{width:86px;flex:none}
+.wl-avatar-head p{margin:.15rem 0}
+@media(max-width:600px){.wl-grid.pixel-grid{grid-template-columns:repeat(auto-fill,minmax(82px,1fr))}.wl-opt.pixel-opt .pixel-avatar{width:54px}}
+
 /* ===== 🐋 어항 속 전설 물고기 테두리 (10-13 ㊲) — 물속에서 잘 안 보이던 것. 갈색 선 1px (라밀: 2px는 너무 굵음) ===== */
 .tank .tf img.lg{filter:drop-shadow(1px 0px 0 #3B2A22) drop-shadow(-1px 0px 0 #3B2A22) drop-shadow(0px 1px 0 #3B2A22) drop-shadow(0px -1px 0 #3B2A22) drop-shadow(0 3px 3px rgba(0,30,50,.3))}
 
@@ -2929,6 +2946,7 @@ const CONFIG = {
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 </script>
 <script>/* 🧪 미리보기일 때만 가짜 서버(demo.js)를 불러와요 */ if(DEMO) document.write('<script src="demo.js?v=1025g"><\/script>');</script>
+<script src="pixel_avatar.js?v=1"></script>
 <script>
 
 /* ---------- 기준 데이터 (schema.sql 의 room_size 와 같아야 해요) ---------- */
@@ -4044,6 +4062,10 @@ const supaApi = (() => {
     async petsOf(id){ return ok(await sb.rpc('get_pets_of', {p_discord_id:id})); },
     async walkMine(){ return ok(await sb.rpc('get_my_walk')); },                       // 🗺️ 숲 산책 (walk.sql)
     async walkSetLook(l){ ok(await sb.rpc('set_walk_look', {p_char:l.char, p_hair:l.hair, p_top:l.top, p_bot:l.bot})); },
+    // 도트 옷입히기는 기존 산책 저장 RPC와 별도로 관리합니다.
+    async pixelMine(){ return ok(await sb.rpc('walk_avatar_mine')); },
+    async pixelBuy(code){ return ok(await sb.rpc('walk_avatar_buy',{p_code:code})); },
+    async pixelWear(l){ return ok(await sb.rpc('walk_avatar_wear',{p_body:l.body,p_outfit:l.outfit,p_hair:l.hair,p_hat:l.hat})); },
     walkChannel(id, priv){ return sb.channel('majam-walk', {config:{private:!!priv, presence:{key:id}, broadcast:{self:false}}}); },
     walkChannelClose(ch){ sb.removeChannel(ch); },
     async walkPing(x, y, look, say){ return ok(await sb.rpc('walk_ping', {p_x:x, p_y:y, p_look:look||null, p_say:say||null})); },   // 🗺️ 같이 걷기 튼튼판 (walkpos.sql, ㊳)
@@ -6950,12 +6972,35 @@ const WALK_PLOTS = [[42.5,52],[54,25],[66,56],[24,31],[80,32],[56,76],[37,77],[2
 const WALK_SLOTS = WALK_PLOTS.flatMap(([x,y])=>[[x-4.2,y-1],[x+4.2,y+1.5]]);
 const WALK_SAY_MAX = 30;
 let WALK = null;   // {look, owned}
+let WALK_PIXEL = null, WALK_PIXEL_TAB = 'outfit', WALK_PIXEL_BUSY = false;
 let WALK_CH = null, WALK_ME = null, WALK_OTHERS = new Map(), WALK_DEMO_T = [];
-const walkLookOf = l => ({char: (l && WALK_CHARS.some(c=>c.code===l.char)) ? l.char : 'w1',
-  hair: (l && WALK_HEX.test(l.hair||'')) ? l.hair : '#4A3226', top: (l && WALK_HEX.test(l.top||'')) ? l.top : '#9EE0CC', bot: (l && WALK_HEX.test(l.bot||'')) ? l.bot : '#5A78A8'});
-async function refreshWalk(){ try{ WALK = {look: walkLookOf(await api.walkMine())}; }catch(e){ WALK = WALK || {look: walkLookOf(null)}; } }
+const walkLookOf = l => {
+  const result={char: (l && WALK_CHARS.some(c=>c.code===l.char)) ? l.char : 'w1',
+    hair: (l && WALK_HEX.test(l.hair||'')) ? l.hair : '#4A3226', top: (l && WALK_HEX.test(l.top||'')) ? l.top : '#9EE0CC', bot: (l && WALK_HEX.test(l.bot||'')) ? l.bot : '#5A78A8'};
+  if(l && l.pixel && window.PIXEL_AVATAR) result.pixel = PIXEL_AVATAR.normalize(l.pixel);
+  return result;
+};
+async function refreshWalk(){
+  try{ WALK = {look: walkLookOf(await api.walkMine())}; }
+  catch(e){ WALK = WALK || {look: walkLookOf(null)}; }
+  WALK_PIXEL = null;
+  if(DEMO){
+    let saved=null; try{saved=JSON.parse(localStorage.getItem('majam-demo-pixel-avatar')||'null');}catch(e){}
+    WALK_PIXEL={look:PIXEL_AVATAR.normalize(saved&&saved.look),owned:Array.isArray(saved&&saved.owned)?saved.owned:[],coins:ME?ME.coins:0};
+  } else if(api.pixelMine){
+    try{ WALK_PIXEL = await api.pixelMine(); }
+    catch(e){ console.info('도트 아바타 SQL 미설치: 기존 아바타로 표시합니다', e.message); }
+  }
+  if(WALK_PIXEL && window.PIXEL_AVATAR){
+    WALK_PIXEL.look=PIXEL_AVATAR.normalize(WALK_PIXEL.look);
+    WALK_PIXEL.owned=Array.isArray(WALK_PIXEL.owned)?WALK_PIXEL.owned:[];
+    WALK.look.pixel=WALK_PIXEL.look;
+  }
+}
 function walkCharHTML(look){
-  const L = walkLookOf(look), c = WALK_CHARS.find(x=>x.code===L.char) || WALK_CHARS[0];
+  const L = walkLookOf(look);
+  if(L.pixel && window.PIXEL_AVATAR) return PIXEL_AVATAR.html(L.pixel);
+  const c = WALK_CHARS.find(x=>x.code===L.char) || WALK_CHARS[0];
   const mv = 'v=4';   // ㊴: 12명 몸 그림 바깥 흰 테두리(누끼 덜 따진 띠) 지움 + w3·w11 민트 배경 + w8 소매 — 몸·칠할 자리 48장 전부 다시 올림
   const body = `<img class="wc-img" src="walk/char/${c.code}.webp?${mv}" alt="" draggable="false" loading="lazy">`;   // (㉜) 칠할 자리 그림을 고쳐서 다시 올렸어요 — 예전 그림이 캐시에 남지 않게 붙이는 표시. 또 고치면 숫자만 올려요
   const tint = WALK_PARTS.map(([k,,s])=>`<i class="wc-tint" style="background:${L[k]};-webkit-mask-image:url(walk/char/${c.code}_${s}.webp?${mv});mask-image:url(walk/char/${c.code}_${s}.webp?${mv})"></i>`).join('');
@@ -6972,7 +7017,7 @@ function walkHouses(){
 function renderWalk(){
   const box = document.getElementById('walkBox'); if(!box || !ME) return;
   if(!box.querySelector('.wmap')){
-    box.innerHTML = `<details class="wlook-top" id="wlookTop"><summary><span class="wlk-mini" id="wlkMini" aria-hidden="true"></span><span class="wlk-tx"><b>✨ 내 작가 꾸미기</b><span class="small">캐릭터 · 머리색 · 옷 색을 무료로 바꿔요</span></span><span class="wlk-go" aria-hidden="true">열기 ›</span></summary><div class="wlook" id="wlook"></div></details>
+    box.innerHTML = `<details class="wlook-top" id="wlookTop"><summary><span class="wlk-mini" id="wlkMini" aria-hidden="true"></span><span class="wlk-tx"><b>✨ 내 작가 꾸미기</b><span class="small">나만의 아바타를 꾸며요</span></span><span class="wlk-go" aria-hidden="true">열기 ›</span></summary><div class="wlook" id="wlook"></div></details>
       <div class="wmap-wrap" id="wmapWrap"><div class="wmap" id="wmap" aria-label="숲 산책 지도"></div></div>
       <div class="wbar"><form class="wsay" id="wsay"><input id="wsayIn" maxlength="${WALK_SAY_MAX}" placeholder="한마디 건네기 (${WALK_SAY_MAX}자)" autocomplete="off"><button class="mini ask-yes" type="submit">💬</button></form>
         <button class="mini" type="button" id="wbackBtn">🌲 마을로 돌아가기</button><button class="mini" type="button" id="wmeBtn">📍 내 캐릭터 보기</button><span class="small wloot-cnt" id="wlootCnt" hidden></span><span class="small wnow" id="wnow"></span></div>
@@ -7326,8 +7371,34 @@ document.addEventListener('click', e=>{   // 🎁 숲지기 분실물 뿌리기
 
 // --- 꾸미기 ---
 let WALK_LOOK_TAB = 'char';
+function walkPixelOwned(it){
+  return it.price===0 || WALK_PIXEL.owned.includes(it.code);
+}
+function renderWalkPixelLook(el){
+  const p=PIXEL_AVATAR, look=p.normalize(WALK_PIXEL.look), tabs=[
+    ['body','🧑 피부'],['hair','💇 머리'],['outfit','👕 의상'],['hat','🎩 모자']
+  ];
+  const head = '<div class="wl-avatar-head">'+p.html(look)+
+    '<div><b>내 도트 아바타</b><p class="small">🪙 '+Number(ME&&ME.coins||0).toLocaleString()+'코인 · 기본 의상 무료</p>'+
+    '<p class="small">구매한 의상은 언제든 다시 입을 수 있어요.</p></div></div>';
+  const nav = '<div class="wl-tabs pixel-tabs">'+tabs.map(([id,title])=>
+    '<button type="button" class="rtab '+(WALK_PIXEL_TAB===id?'on':'')+
+      '" data-pixel-tab="'+id+'">'+title+'</button>').join('')+'</div>';
+  const grid = '<div class="wl-grid pixel-grid">'+p.catalog.filter(it=>it.kind===WALK_PIXEL_TAB).map(it=>{
+    const preview=p.html({...look,[it.kind]:it.code}), owned=walkPixelOwned(it), worn=look[it.kind]===it.code;
+    const status=worn?'✓ 착용 중':owned?'보유 중':'🪙 '+it.price;
+    return '<button type="button" class="wl-opt pixel-opt '+(worn?'on':'')+
+      '" data-pixel-choice="'+it.code+'" '+(WALK_PIXEL_BUSY?'disabled':'')+'>'+
+      preview+'<b>'+it.name+'</b><span class="pixel-cost">'+status+'</span></button>';
+  }).join('')+'</div>';
+  el.innerHTML=head+nav+grid;
+  const mini=document.getElementById('wlkMini'); if(mini) mini.innerHTML=p.html(look);
+  const desc=document.querySelector('#wlookTop .wlk-tx .small');
+  if(desc) desc.textContent='머리 · 옷 · 모자를 코인 10~20개로 꾸며요';
+}
 function renderWalkLook(){
   const el = document.getElementById('wlook'); if(!el || !WALK) return;
+  if(WALK_PIXEL && window.PIXEL_AVATAR){renderWalkPixelLook(el);return;}
   const L = WALK.look;
   const tabs = `<div class="wl-tabs">${[['char','🧑 캐릭터'], ...WALK_PARTS.map(([k,l])=>[k,l])].map(([k,l])=>`<button type="button" class="rtab ${k===WALK_LOOK_TAB?'on':''}" data-wltab="${k}">${l}</button>`).join('')}</div>`;
   let body = '';
@@ -7347,6 +7418,41 @@ document.addEventListener('click', e=>{
   const t = e.target.closest('[data-wltab]'); if(t){ WALK_LOOK_TAB = t.dataset.wltab; renderWalkLook(); return; }
   const c = e.target.closest('[data-wchar]'); if(c && WALK){ WALK.look.char = c.dataset.wchar; walkSaveLook(); return; }
   const k = e.target.closest('[data-wcol]'); if(k && WALK){ WALK.look[k.dataset.wcol] = k.dataset.c; walkSaveLook(); return; }
+});
+// 도트 옷입히기: 결제·구매내역·착용은 서버 RPC에서 확인합니다.
+document.addEventListener('click', e=>{
+  const tab=e.target.closest('[data-pixel-tab]');
+  if(tab && WALK_PIXEL){WALK_PIXEL_TAB=tab.dataset.pixelTab;renderWalkLook();return;}
+  const btn=e.target.closest('[data-pixel-choice]');
+  if(!btn || !WALK_PIXEL || WALK_PIXEL_BUSY) return;
+  const it=PIXEL_AVATAR.byCode[btn.dataset.pixelChoice];if(!it)return;
+  const current=PIXEL_AVATAR.normalize(WALK_PIXEL.look);
+  if(current[it.kind]===it.code)return;
+  act(async()=>{
+    WALK_PIXEL_BUSY=true;renderWalkLook();
+    try{
+      if(!walkPixelOwned(it)){
+        if(!(await ask('「'+it.name+'」을(를) 🪙 '+it.price+'코인으로 구매할까요?')))return;
+        if(DEMO){
+          if(demoApi.st.me.coins<it.price)throw new Error('코인이 부족해요');
+          demoApi.st.me.coins-=it.price;
+        }else{
+          await api.pixelBuy(it.code);
+          await refreshMine(); renderTop();
+        }
+        WALK_PIXEL.owned.push(it.code);
+      }
+      const next=PIXEL_AVATAR.normalize({...current,[it.kind]:it.code});
+      if(!DEMO) await api.pixelWear(next);
+      WALK_PIXEL.look=next; WALK.look.pixel=next;
+      if(DEMO){
+        try{localStorage.setItem('majam-demo-pixel-avatar',JSON.stringify({look:next,owned:WALK_PIXEL.owned}));}catch(e){}
+        ME.coins=demoApi.st.me.coins;renderTop();
+      }
+      if(WALK_ME)walkSetLook(WALK_ME,WALK.look);
+      walkTrack();walkPollNow();
+    }finally{WALK_PIXEL_BUSY=false;renderWalkLook();}
+  });
 });
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) walkLeave(); else if(!document.getElementById('tab-walk').hidden){ renderWalk(); walkJoin(); } });
 
