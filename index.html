@@ -672,13 +672,13 @@ main,.village-head,.houses,.trail{max-width:1200px}
 /* 🌲 숲 배경 그림 (bg/forest.webp) — 아래 풀밭은 같은 색으로 길게 이어져요 */
 .village{background:
   linear-gradient(#152340,#152340) top / 100% max(0px, calc(var(--bh,0px) - 98px)) no-repeat,
-  url(bg/forest5.webp) center calc(var(--bh,0px) - 100px) / max(100%,1500px) auto no-repeat,
+  url(bg/forest5.webp) center calc(var(--bh,0px) - 100px) / max(100%,1500px) calc(max(100vw,1500px) * 0.317) no-repeat,
   #6F9955}
 .village > .stars, .village > .pines, .village > .ground{display:none}
 .village .wolf .tag{background:rgba(0,0,0,.35)}
 @media (max-width:600px){ .village{background:
   linear-gradient(#152340,#152340) top / 100% calc(var(--bh,0px) + 2px) no-repeat,
-  url(bg/forest5.webp) center var(--bh,0px) / 1000px auto no-repeat,
+  url(bg/forest5.webp) center var(--bh,0px) / 1000px 317px no-repeat,
   #6F9955} }
 .himg.off{filter:brightness(.8) saturate(.85)}
 .himg.on{filter:drop-shadow(0 0 3px rgba(255,206,92,.6))}
@@ -1456,11 +1456,11 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 /* 🌲 마을: 낮 숲 그림 */
 :root[data-mode="day"] .village{background:
   linear-gradient(#7DCAF6,#7DCAF6) top / 100% max(0px, calc(var(--bh,0px) - 98px)) no-repeat,
-  url(bg/forest_day.webp) center calc(var(--bh,0px) - 100px) / max(100%,1500px) auto no-repeat,
+  url(bg/forest_day.webp) center calc(var(--bh,0px) - 100px) / max(100%,1500px) calc(max(100vw,1500px) * 0.317) no-repeat,
   #94C460}
 @media (max-width:600px){ :root[data-mode="day"] .village{background:
   linear-gradient(#7DCAF6,#7DCAF6) top / 100% calc(var(--bh,0px) + 2px) no-repeat,
-  url(bg/forest_day.webp) center var(--bh,0px) / 1000px auto no-repeat,
+  url(bg/forest_day.webp) center var(--bh,0px) / 1000px 317px no-repeat,
   #94C460} }
 :root[data-mode="day"] .village::after{background:linear-gradient(rgba(238,245,230,0),rgba(238,245,230,.55) 55%,var(--night))}
 :root[data-mode="day"] .village-head{color:#1E3A4A;text-shadow:0 1px 2px rgba(255,255,255,.85),0 0 8px rgba(255,255,255,.6)}
