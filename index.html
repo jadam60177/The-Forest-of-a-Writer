@@ -2674,6 +2674,8 @@ document.documentElement.setAttribute('data-mode', modeNow());
   </section>
 
   <section id="tab-gacha" hidden>
+    <div id="gachaStageSwitch" class="gacha-stage-tabs" hidden></div>
+    <div id="gachaStageOne">
     <div class="box-tabs" id="boxTabs"></div>
     <div class="gacha-scene">
       <svg class="stars" data-stars preserveAspectRatio="none"></svg>
@@ -2699,6 +2701,8 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <div class="dex" id="dex"></div>
       </div>
     </div>
+    </div><!-- gachaStageOne -->
+    <div id="gachaStageTwo" hidden></div>
   </section>
 
   <section id="tab-admin" class="panel" hidden>
@@ -3230,7 +3234,7 @@ const RUG_TINTS = [['c1','빨강','#E06A5E'],['c2','주황','#EE9A4A'],['c3','�
   ['c7','남색','#4E5E9E'],['c8','보라','#9E84D6'],['c9','분홍','#EE8FB4'],['c10','갈색','#A8794E'],['c11','회색','#9A958E']];
 let TINT_MODE = false, TINT_CUR = null, TINT_ERR = '';   // 🎨 러그 색 바꾸기 중 · 서버에서 색 못 읽을 때 이유
 const isRug = code => !!code && (code.startsWith('rug_') || code==='hellrug');
-const TINTABLE_FURN = new Set(['drawer']);   // 🎨 1차 실험: 서랍장 1종만 추가
+const TINTABLE_FURN = new Set(['drawer','dye_armchair']);   // 🎨 1차 실험: 서랍장 1종만 추가
 const canTintItem = code => isRug(code) || TINTABLE_FURN.has(code);
 const tintCSS = t => !t ? '' : t[0]==='h' ? `hue-rotate(${(+t.slice(1))||0}deg) saturate(1.15)` : RUG_TINTS.some(x=>x[0]===t) ? `url(#rugT_${t})` : '';
 const tintName = t => !t ? '원래 색' : t[0]==='h' ? `🌈 직접 고른 색` : ((RUG_TINTS.find(x=>x[0]===t)||[])[1] || '원래 색');
@@ -3345,13 +3349,15 @@ const NEW_FURN66 = [
 ];
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'); DEFAULT_SHOP.splice(at<0?DEFAULT_SHOP.length:at, 0, ...NEW_FURN66.map(([code,emoji,name,price,w,h,category])=>({code,emoji,name,price,w,h,active:true,category,icon:code,layer:'furniture'}))); NEW_FURN66.forEach(r=>FURN_IMG.add(r[0])); }
 { const at = DEFAULT_SHOP.findIndex(x=>x.code==='xmastree'); DEFAULT_SHOP.splice(at<0?DEFAULT_SHOP.length:at, 0, ...NEW_STUDY.map(([code,emoji,name,price,w,h,category])=>({code,emoji,name,price,w,h,active:true,category,icon:code,layer:'furniture'}))); NEW_STUDY.forEach(r=>FURN_IMG.add(r[0])); }
+// 🎨 새 가구는 기존 원본과 별도 아이템이에요. 그림은 원본+부분 염색 마스크를 겹쳐서 씁니다.
+DEFAULT_SHOP.push({code:'dye_armchair',emoji:'🛋️',name:'🎨 하늘빛 염색 소파',price:0,w:1,h:1,active:false,category:'furniture',icon:'armchair',layer:'furniture'});
 const fimgKey = it => !it ? null : FURN_IMG.has(it.code) ? it.code : (it.icon && FURN_IMG.has(it.icon)) ? it.icon : null;
 // 🧽 누끼를 다시 딴 그림 (같은 이름으로 덮어쓰니까 ?v= 를 붙여 옛 그림 캐시를 피해요) — 또 고치면 숫자만 올리기
 const FURN_VER = {candlestick:2, tbl_side:3, tbl_two:3, tbl_long:3, tbl_wide:3, lantern:2, tr_medal:2, tr_scarf:2, oldkey:2, gears:2, globe:2, wall_trellis:2, eggchair:2, hammock:2, hammock2:2, diningtable:2, rocking:2, rocking2:2, clip:2, glasses:2, v_magic_w3_2:2, v_magic_w3_3:2};
 const furnV = k => FURN_VER[k] ? `?v=${FURN_VER[k]}` : '';
 const fimg = it => fimgKey(it) ? `furn/${fimgKey(it)}.webp${furnV(fimgKey(it))}` : null;
 const icoSrc = it => it && WALL_H.has(it.code) && fimg(it) ? `furn/${it.code}_h.webp` : fimg(it);   // 예전 벽 4종은 상점·가방에서 앞모습으로
-const ico = it => fimg(it) ? `<img class="fsvg fimg" src="${icoSrc(it)}" alt="" draggable="false" loading="lazy">` : (iconKey(it) && FURN_SVG[iconKey(it)]) ? `<svg class="fsvg" viewBox="${FURN_SVG[iconKey(it)].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[iconKey(it)].svg}</svg>` : (it ? it.emoji : '');
+const ico = it => it?.code==='dye_armchair' && typeof dyeArt==='function' ? dyeArt() : fimg(it) ? `<img class="fsvg fimg" src="${icoSrc(it)}" alt="" draggable="false" loading="lazy">` : (iconKey(it) && FURN_SVG[iconKey(it)]) ? `<svg class="fsvg" viewBox="${FURN_SVG[iconKey(it)].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[iconKey(it)].svg}</svg>` : (it ? it.emoji : '');
 const GACHA_BOXES = [
   {code:'basic', emoji:'🎁', name:'담당자의 보따리', about:'담당자가 숲 어딘가에 두고 간 보따리예요.', unlock_by:null, sort:0},
   {code:'campfire', emoji:'🏕️', name:'모닥불 보따리', about:'불가에 둘러앉은 밤의 소품들이 들어 있어요.', unlock_by:'campfire', sort:1},
@@ -4013,6 +4019,7 @@ function vacantSVG(){
 const demoApi = DEMO ? makeDemoApi() : null;   // 🧪 미리보기 가짜 서버는 demo.js 에 (주민들은 안 받아요)
 const supaApi = (() => {
   let sb = null, myId = null;
+  window.FOREST_SUPABASE = () => sb;   // 🎨 이미 로그인된 같은 Supabase 클라이언트를 2단계 모듈에서 사용
   const ok = ({data, error}) => { if(error) throw new Error(error.message); return data; };
   return {
     async init(){
@@ -4572,7 +4579,7 @@ function roomHTML(list, cur, {editable, cabs={}, maxR, maxC}){
     const tallfit = !!fimg(it) && f.h>f.w && !stretch && !turn && !wallH && !tile && !floor && !TURN_IMG.has(f.item_code);
     const cls = `furn ${turn && /^v_[a-z]+_w\d_[23]$/.test(f.item_code)?'vwall':''} ${tallfit?'tallfit':''} ${big?'big':''} ${f.w!==f.h?'long':''} ${stretch?'stretchimg':turn?'turn'+(tile?' tilewall':''):tile?'tilewall':f.w>f.h && !floor?'wide'+(f.r===0?' wtop':'')+(LOTTO_TALL.has(f.item_code)||WALL_TALL.has(f.item_code)?' tallw':''):''} ${it.icon?'drawn':''} ${wallH?'wallimg':''} ${floor?'carpet':''} ${onRug?'onrug':''} ${onTable?'ontable':''} ${small?'acc-small':''} ${WIN2.has(f.item_code)?'winfit':''} ${rot?'rot r'+rot:''}`;
     const art = tableV ? `<img class="fsvg fimg" src="furn/${f.item_code}_v.webp${furnV(f.item_code)}" alt="" draggable="false" loading="lazy">` : wallH ? `<img class="fsvg fimg" src="furn/${f.item_code}${rot%2?'_h':''}.webp" alt="" draggable="false" loading="lazy">` : hKey ? `<svg class="fsvg" viewBox="${FURN_SVG[hKey].vb}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${FURN_SVG[hKey].svg}</svg>`
-      : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
+      : f.item_code==='dye_armchair' && typeof dyeArt==='function' ? dyeArt(f.tint) : fimg(it) || (iconKey(it) && FURN_SVG[iconKey(it)]) ? ico(it) : `<span class="emo">${ico(it)}</span>`;
     const canTint = canTintItem(f.item_code);   // 🎨 배치된 러그·서랍장에만 색상 적용
     const tf = canTint ? tintCSS(f.tint) : '', tcls = (canTint ? ' tintable' : '') + (tf ? ' tinted' : ''), ts = tf ? `;--tf:${tf}` : '';
     html += editable
@@ -8262,7 +8269,7 @@ function celebratePlaza(){   // 📬 새로 지어진 건물 소식은 우편함
   const fresh = [...PLAZA,...PLAZA_EXPANSION].filter(b=>b.built_at && !seen.includes(b.code));
   mailAdd(fresh.map(b=>{ const bx = plazaBox(b.code);
     return {icon:b.emoji, title:`광장에 ${b.name}${jo(b.name,'이','가')} 생겼어요!`,
-      body: b.code==='dyeworkshop' ? '마을광장 1단계가 완성되었어요! 🏗️ 이제 광장 2단계 증축이 열렸습니다.'
+      body: b.code==='dyeworkshop' ? '마을광장 1단계가 완성되었어요! 🏗️ 이제 광장 2단계 증축과 담당자의 보따리 2단계가 열렸습니다. 염색공방 보따리에서 특별한 물감을 뽑아 보세요!'
         : b.stage===2 ? '함께 벽돌을 나른 덕분에 새 증축이 완공되었어요! 염색 가구는 준비되는 대로 보따리에 추가됩니다.'
         : '다 같이 벽돌을 나른 덕분이에요.' + (bx?`\n담당자의 보따리 탭에 ${bx.emoji} ${bx.name}가 새로 열렸어요.`:'')}; }));
   return fresh.length;
@@ -8318,7 +8325,7 @@ function setHint(){
   const el = document.getElementById('hint');
   if(selected || inGarden || inTank || inGh) TINT_MODE = false;
   { const rm = document.getElementById('room'); if(rm) rm.classList.toggle('tint-mode', TINT_MODE); }
-  if(TINT_MODE){ el.innerHTML = `🎨 색을 바꿀 러그 또는 서랍장을 눌러 주세요 <button class="mini" id="tintDone">다 했어요</button>`; return; }
+  if(TINT_MODE){ el.innerHTML = `🎨 색을 바꿀 러그나 가구를 눌러 주세요 <button class="mini" id="tintDone">다 했어요</button>`; return; }
   const tintHere = PLACED.some(p=>(p.room||0)===curRoom && canTintItem(p.item_code));
   if(!selected){ el.innerHTML = '가방에서 가구를 고른 뒤 빈 칸을 눌러 놓아 보세요. 놓인 가구는 끌어서 옮기고(폰은 꾹 눌렀다가 끌기), 그냥 누르면 가방으로 돌아가요.'
     + (tintHere && !inGarden && !inTank && !inGh ? ` <button class="mini" id="tintBtn">🎨 가구 색 바꾸기</button>` : ''); return; }
@@ -8787,6 +8794,7 @@ document.addEventListener('click', e=>{
   if(fu && Date.now() - FDRAG_AT < 450) return;   // 끌어서 옮긴 직후의 클릭은 치우기로 안 쳐요
   if(fu) return act(async()=>{
     const pid = +fu.dataset.pid, f = PLACED.find(p=>p.id===pid), tops = f ? topsOn(f, PLACED) : [];
+    if(f?.item_code==='dye_armchair' && f.tint && !(await ask('염색 소파를 가방에 넣으면 입힌 색은 초기화돼요. 계속할까요?')))return;
     for(const t of tops) await api.remove(t.id);   // 🍰 테이블을 치우면 위에 올린 소품은 먼저 가방으로
     await api.remove(pid); await refreshMine(); renderMyHouse(); renderBag(); setHint();
     if(tops.length) toast(`🍰 위에 놓인 소품 ${tops.length}개도 가방으로 돌아갔어요`);
@@ -9102,6 +9110,7 @@ roomEl.addEventListener('pointerdown', e=>{
   const el = e.target.closest('.furn[data-pid]'); if(!el) return;
   const f = PLACED.find(p=>p.id===+el.dataset.pid); if(!f) return;
   if(topsOn(f, PLACED).length) return;   // 🍰 위에 소품이 놓인 테이블은 끌지 않고, 누르면 소품째 가방으로
+  if(f.item_code==='dye_armchair' && f.tint){toast('🎨 염색 소파는 먼저 하늘색으로 무료 초기화한 뒤 옮겨 주세요');return;}
   const r = el.getBoundingClientRect();
   FDRAG = {el, f, x0:e.clientX, y0:e.clientY, on:false, mouse:e.pointerType==='mouse', id:e.pointerId,
     dr: Math.min(f.h-1, Math.max(0, Math.floor((e.clientY-r.top)/r.height*f.h))), dc: Math.min(f.w-1, Math.max(0, Math.floor((e.clientX-r.left)/r.width*f.w)))};
@@ -9789,6 +9798,7 @@ setInterval(()=>{ if(modePick()==='auto' && applyMode()) toast(isDay() ? '☀️
 start();
 
 </script>
+<script src="dye_stage2.js?v=1026a"></script>
 <script src="stall.js?v=1025e"></script>
 <script src="greenhouse.js?v=1025d"></script>
 <script src="alchemy_art.js?v=1025a"></script>
