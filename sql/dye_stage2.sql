@@ -52,6 +52,9 @@ begin
   select i.provider_id into v_id from auth.identities i
    where i.user_id=auth.uid() and i.provider='discord' limit 1;
   if v_id is null then raise exception 'Discord 계정을 확인할 수 없어요'; end if;
+  if p_kind='sofa' and p_count<>1 then
+    raise exception '첫 염색 가구는 아직 1개씩만 뽑을 수 있어요';
+  end if;
   v_required := case when p_kind='paint' then 'dyeworkshop' else 'campfire_2' end;
   if not exists(select 1 from public.plaza_expansion_buildings
     where code=v_required and built_at is not null) then
