@@ -24,6 +24,7 @@ function dyeArt(t=''){
 (function installDyeArt(){
   const css = String.raw`
     .gacha-stage-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 .8rem}
+    .gacha-stage-tabs[hidden],#gachaStageOne[hidden],#gachaStageTwo[hidden]{display:none!important}
     .gacha-stage-tabs button,.dye-box-tabs button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:.48rem .95rem;font:inherit;cursor:pointer}
     .gacha-stage-tabs button.on,.dye-box-tabs button.on{background:linear-gradient(#FFDC86,#F2AA45);border-color:#F2C065;color:#3A2600}
     .dye-board{padding:1rem;border-radius:16px;background:var(--panel);border:1px solid var(--line);margin:.4rem 0 1.2rem}
@@ -120,6 +121,7 @@ function renderDyeStage(){
   const switcher=document.getElementById('gachaStageSwitch'),one=document.getElementById('gachaStageOne'),two=document.getElementById('gachaStageTwo');
   if(!switcher||!two)return;
   if(!DYE_STATE.open)DYE_STAGE=1;
+  // 보따리 화면이 열려 있을 때만 준비된 목록을 보여 줍니다.
   switcher.hidden=!DYE_STATE.open;
   switcher.innerHTML=DYE_STATE.open?'<button data-gacha-stage="1" class="'+(DYE_STAGE===1?'on':'')+'">🎁 1단계 보따리</button><button data-gacha-stage="2" class="'+(DYE_STAGE===2?'on':'')+'">🎨 2단계 보따리</button>':'';
   one.hidden=DYE_STAGE!==1;two.hidden=DYE_STAGE!==2;
