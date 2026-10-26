@@ -410,6 +410,13 @@ dialog.visit h3{margin:0 0 .25rem}
 .lot.fog .b{opacity:.5;font-size:2rem}
 .lot .mbar{width:80%;height:6px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden}
 .lot .mbar span{display:block;height:100%;background:var(--lamp)}
+.plaza-stage-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:.65rem 0 .3rem}
+.plaza-stage-tabs button{font:inherit;font-size:.84rem;padding:.4rem .8rem;border-radius:999px;border:1px solid rgba(255,206,92,.45);background:rgba(20,26,56,.48);color:#fff;cursor:pointer}
+.plaza-stage-tabs button.on{background:#F4C66C;color:#392C24;border-color:#F4C66C}
+:root[data-mode="day"] .plaza-stage-tabs button{background:rgba(255,255,255,.8);color:#55472F}
+:root[data-mode="day"] .plaza-stage-tabs button.on{background:#F4C66C;color:#392C24}
+.lot.building.secret .b{font-size:2.75rem}
+.lot.building.secret .n{letter-spacing:.13rem}
 .plaza-panel h3{margin:0 0 .3rem}
 .give-row{display:flex;flex-wrap:wrap;gap:.45rem;margin:.7rem 0 .4rem;align-items:center}
 .give-row .give{border:1px solid var(--accent);background:var(--panel);color:var(--accent);border-radius:999px;padding:.4rem .9rem;font-family:"Jua",sans-serif;font-size:1rem}
@@ -2616,7 +2623,8 @@ document.documentElement.setAttribute('data-mode', modeNow());
       <svg class="stars" data-stars preserveAspectRatio="none"></svg>
       <div class="plaza-head">
         <h3>🏘️ 마을 광장</h3>
-        <p>주민들이 모은 코인으로 광장에 건물을 하나씩 지어요. 건물이 생기면 상점에 그 건물에서만 파는 소품이 들어와요.</p>
+        <p>작업실에서 모은 코인으로 마을을 함께 지어요. 건물을 전부 완성하면 다음 증축이 시작돼요.</p>
+        <div class="plaza-stage-tabs" id="plazaStageTabs"></div>
       </div>
       <div class="lots" id="lots"></div>
     </div>
@@ -3516,6 +3524,23 @@ const PLAZA_DEFAULT = [
   {code:'shelter', emoji:'🐾', name:'동물 보호소', goal:10000, sort:10, about:'숲의 꼬마 동물들이 새 가족을 기다리는 곳', unlocks:[]}
 ];
 
+// 🏘️ 광장 확장: 1단계 마지막 공방 + 2단계 증축 11곳.
+// 서버는 공사 진행률만 제공하며, 미완공 건물의 이름·그림·보상은 화면에서 공개하지 않습니다.
+const PLAZA_EXPANSION_DEFAULT = [
+  {code:'dyeworkshop', stage:1, emoji:'🎨', name:'염색공방', goal:15000, sort:11, about:'마을을 빛깔로 물들일 염색공방. 완공되면 광장 2단계가 열려요.'},
+  {code:'campfire_2', stage:2, emoji:'🔥', name:'광장 모닥불 증축', goal:10000, sort:101, about:'모닥불 주변에 따뜻한 원목 가구를 전시하는 가구점'},
+  {code:'postbox_2', stage:2, emoji:'📮', name:'우체통 증축', goal:12000, sort:102, about:'책상과 서류 정리 가구를 꾸미는 편지 가구점'},
+  {code:'bakery_2', stage:2, emoji:'🍞', name:'빵집 증축', goal:15000, sort:103, about:'식탁과 주방 가구를 소개하는 가구점'},
+  {code:'florist_2', stage:2, emoji:'💐', name:'꽃집 증축', goal:18000, sort:104, about:'정원 의자와 화분대를 꾸미는 가구점'},
+  {code:'lake_2', stage:2, emoji:'🎣', name:'호숫가 증축', goal:20000, sort:105, about:'호숫가에 어울리는 휴식 가구점'},
+  {code:'bookstore_2', stage:2, emoji:'📚', name:'서점 증축', goal:25000, sort:106, about:'책장과 원고 책상, 서재 의자를 소개하는 가구점'},
+  {code:'teahouse_2', stage:2, emoji:'☕', name:'찻집 증축', goal:30000, sort:107, about:'티테이블과 소파를 꾸미는 가구점'},
+  {code:'shelter_2', stage:2, emoji:'🐾', name:'동물 보호소 증축', goal:35000, sort:108, about:'반려동물과 함께 쓰는 가구점'},
+  {code:'festival_2', stage:2, emoji:'🎪', name:'축제 천막 증축', goal:40000, sort:109, about:'축하 파티용 가구점'},
+  {code:'library_2', stage:2, emoji:'🏛️', name:'숲의 도서관 증축', goal:45000, sort:110, about:'고급 서재를 위한 가구점'},
+  {code:'memorial_2', stage:2, emoji:'✨', name:'기념 광장 증축', goal:50000, sort:111, about:'작가들의 특별한 추억을 전시하는 가구점'}
+];
+
 const WOLF_BODY = `
   <path d="M9 17 Q1 10 3 19 Q6 21 9 19 Z" fill="#6F6B7E"/>
   <ellipse cx="19" cy="18" rx="11" ry="6" fill="#7A7690"/>
@@ -4090,6 +4115,8 @@ const supaApi = (() => {
     async deleteNote(id){ ok(await sb.rpc('admin_note_delete', {p_id:id})); },
     async paint(k){ ok(await sb.rpc('paint_house', {p_color:k})); },
     async plaza(){ return ok(await sb.rpc('get_plaza')); },
+    async plazaExpansion(){ return ok(await sb.rpc('get_plaza_expansion')); },
+    async givePlazaExpansion(amount){ const c = ok(await sb.rpc('give_to_plaza_expansion', {p_amount:amount})); return {coins:c}; },
     async gachaBoxes(){ return ok(await sb.rpc('get_gacha_boxes')); },
     async gacha(){ return ok(await sb.rpc('get_gacha')); },
     async pull(box, n){ return ok(await sb.rpc('gacha_pull', {p_box:box, p_count:n})); },
@@ -7979,12 +8006,28 @@ document.getElementById('dupAll').addEventListener('click', async e=>{
   b.disabled = false; renderTop(); renderBag(); renderGacha();
 });
 
-/* ---------- 마을 광장 ---------- */
-let PLAZA = [];
-async function refreshPlaza(){ try{ PLAZA = (await api.plaza()) || []; }catch(e){ PLAZA = []; } }
-const PLAZA_IMG = new Set(['campfire','postbox','bakery','florist','lake','bookstore','teahouse','festival','library','shelter']);
+/* ---------- 마을 광장 / 증축 ---------- */
+let PLAZA = [], PLAZA_EXPANSION = [], PLAZA_EXPANSION_ERROR = '', PLAZA_PAGE = 1;
+async function refreshPlaza(){
+  try{ PLAZA = (await api.plaza()) || []; }catch(e){ PLAZA = []; }
+  try{
+    const added = await api.plazaExpansion();
+    const byCode = new Map(PLAZA_EXPANSION_DEFAULT.map(p=>[p.code,p]));
+    PLAZA_EXPANSION = (Array.isArray(added)?added:[]).filter(p=>byCode.has(p.code)).map(p=>({...byCode.get(p.code),...p}));
+    PLAZA_EXPANSION_ERROR = '';
+  }catch(e){ PLAZA_EXPANSION = []; PLAZA_EXPANSION_ERROR = e.message || '광장 증축 데이터를 불러오지 못했어요'; }
+}
+const PLAZA_IMG = new Set(['campfire','postbox','bakery','florist','lake','bookstore','teahouse','festival','library','shelter','dyeworkshop']);
 const plazaArt = b => PLAZA_IMG.has(b.code) ? `<img class="pimg" src="plaza/${b.code}.webp" alt="" draggable="false" loading="lazy">` : b.emoji;
-function plazaBox(code){ return GACHA_BOXES.find(b=>b.unlock_by===code); }
+const plazaStage2Open = () => PLAZA_EXPANSION.some(p=>p.code==='dyeworkshop' && p.built_at);
+const plazaOriginalReady = () => PLAZA.length>=PLAZA_DEFAULT.length && PLAZA.every(p=>!!p.built_at);
+const plazaBox = code => GACHA_BOXES.find(b=>b.unlock_by===code);
+document.addEventListener('click',e=>{
+  const tab=e.target.closest('[data-plaza-page]'); if(!tab) return;
+  const page=Number(tab.dataset.plazaPage);
+  if(page===2 && !plazaStage2Open()) return;
+  PLAZA_PAGE=page; renderPlaza();
+});
 /* ---------- 🏛️ 기념 광장 (10-22) — 행사마다 기념물 하나씩 ---------- */
 // spot: c 가운데 큰 받침대 · l1 l2 r1 r2 작은 받침대 (그림 위 위치 %) · img 는 그림이 생기면 (없으면 emoji)
 const MEM_SPOTS = {c:{x:50.5, b:46.5, ib:23.5, fs:'4.6rem'}, l1:{x:21.2, b:37.5, fs:'2.8rem'}, l2:{x:34.4, b:43, fs:'2.4rem'}, r2:{x:67.4, b:43, fs:'2.4rem'}, r1:{x:80.6, b:37.5, fs:'2.8rem'}};
@@ -8014,27 +8057,48 @@ document.addEventListener('click', e=>{
       : `<b>${m ? m.emoji+' '+esc(m.name) : ''}</b> <span class="small">(👁️ 숲지기 미리 보기)</span>`; }
 });
 function renderPlaza(){
-  const list = [...PLAZA].sort((a,b)=>a.sort-b.sort);
-  { const pd = document.getElementById('pubDoorBox'), bs = list.find(b=>b.code==='bookstore' && b.built_at);   // 📚 수상한 출판사 입구 (publisher.js)
-    if(pd) pd.innerHTML = bs ? `<button class="pub-door" type="button" data-pubopen><img src="pub/building.webp" alt=""><span><b>📚 담당자의 수상한 출판사</b><span>원고도 안 냈는데 담당자가 멋대로 BL 소설을 출간 중이래요. 소재를 뽑아 내 서점에 진열하고, 이웃의 책도 구경해 보세요!<br><span class="go">📖 출판사 들어가기</span></span></span></button>` : ''; }
-  const cur = list.find(b=>!b.built_at);
+  const base = [...PLAZA].sort((a,b)=>a.sort-b.sort);
+  const dye = PLAZA_EXPANSION.find(p=>p.code==='dyeworkshop');
+  const stage2Open = plazaStage2Open();
+  if(!stage2Open) PLAZA_PAGE = 1;
+  const list = PLAZA_PAGE===2
+    ? PLAZA_EXPANSION.filter(p=>p.stage===2).sort((a,b)=>a.sort-b.sort)
+    : [...base, ...(dye ? [dye] : [])];
+  { const pd = document.getElementById('pubDoorBox'), bs=base.find(b=>b.code==='bookstore' && b.built_at);
+    if(pd) pd.innerHTML=bs ? `<button class="pub-door" type="button" data-pubopen><img src="pub/building.webp" alt=""><span><b>📚 담당자의 수상한 출판사</b><span>원고도 안 냈는데 담당자가 멋대로 BL 소설을 출간 중이래요. 소재를 뽑아 내 서점에 진열하고, 이웃의 책도 구경해 보세요!<br><span class="go">📖 출판사 들어가기</span></span></span></button>` : ''; }
+  document.getElementById('plazaStageTabs').innerHTML =
+    `<button type="button" data-plaza-page="1" class="${PLAZA_PAGE===1?'on':''}">🏘️ 광장 1단계</button>`
+    + (stage2Open ? `<button type="button" data-plaza-page="2" class="${PLAZA_PAGE===2?'on':''}">🏗️ 광장 2단계 · 증축</button>` : '');
+  const cur=list.find(b=>!b.built_at);
   document.getElementById('lots').innerHTML = list.map(b=>{
+    const secret=(b.code==='dyeworkshop'||b.stage===2)&&!b.built_at;
     if(b.built_at) return `<div class="lot built" title="${esc(b.about||'')}" ${b.code==='bookstore'?'data-pubopen style="cursor:pointer"':''}><div class="b">${plazaArt(b)}</div><div class="n">${esc(b.name)}</div><div class="s">${b.code==='bookstore'?'📚 출판사 열기':'완공'}</div></div>`;
     if(b===cur){
-      const pct = Math.min(100, Math.round(b.raised/b.goal*100));
-      return `<div class="lot building"><div class="b"><span class="ghost">${plazaArt(b)}</span><span class="crane">🚧</span></div><div class="n">${esc(b.name)}</div><div class="mbar"><span style="width:${pct}%"></span></div><div class="s">짓는 중 · ${pct}%</div></div>`;
+      const pct=Math.min(100,Math.round(b.raised/b.goal*100));
+      return `<div class="lot building ${secret?'secret':''}"><div class="b">${secret?'❔':`<span class="ghost">${plazaArt(b)}</span>`}<span class="crane">🚧</span></div><div class="n">${secret?'???':esc(b.name)}</div><div class="mbar"><span style="width:${pct}%"></span></div><div class="s">짓는 중 · ${pct}%</div></div>`;
     }
-    return `<div class="lot fog"><div class="b">🌫️</div><div class="n">빈 터</div><div class="s">아직 안개 속</div></div>`;
-  }).join('') + memorialLotHTML();
-  const w = document.getElementById('plazaWork');
-  if(!list.length){ w.innerHTML = `<p class="small">광장을 불러오지 못했어요.</p>`; return; }
-  w.hidden = false;
-  if(!cur){ if(WINTER && WINTER.state!=='wait'){ w.innerHTML = ''; w.hidden = true; return; }
-    w.innerHTML = `<h3>🎉 광장이 모두 지어졌어요!</h3><p class="small">주민 여러분 덕분이에요. 다음 건물은 숲지기가 곧 준비할 거예요.</p>`; return; }
-  const left = cur.goal - cur.raised, bx = plazaBox(cur.code);
-  w.innerHTML = `
-    <h3>${cur.emoji} 지금 짓는 중: ${esc(cur.name)}</h3>
-    <p class="small" style="margin:0">${esc(cur.about||'')}</p>
+    return `<div class="lot fog"><div class="b">❔</div><div class="n">???</div><div class="s">아직 안개 속</div></div>`;
+  }).join('') + (PLAZA_PAGE===1 ? memorialLotHTML() : '');
+  const w=document.getElementById('plazaWork');
+  if(!base.length){w.hidden=false;w.innerHTML='<p class="small">광장을 불러오지 못했어요.</p>';return;}
+  if(PLAZA_PAGE===1 && !dye && plazaOriginalReady()){
+    w.hidden=false;
+    w.innerHTML=`<h3>🎨 광장의 마지막 건물을 준비하고 있어요</h3><p class="small">이 건물의 투자를 열려면 숲지기가 광장 확장 SQL을 적용해야 해요.${PLAZA_EXPANSION_ERROR? ' ('+esc(PLAZA_EXPANSION_ERROR)+')':''}</p>`;
+    return;
+  }
+  w.hidden=false;
+  if(!cur){
+    w.innerHTML=PLAZA_PAGE===2
+      ? '<h3>🎉 광장 2단계 증축 완료!</h3><p class="small">주민들이 함께 모든 증축을 끝냈어요. 신규 가구는 준비되는 대로 차례로 공개돼요.</p>'
+      : '<h3>🎉 광장 1단계가 모두 지어졌어요!</h3><p class="small">염색공방까지 완공했어요! 광장 2단계에서 새로운 증축을 시작할 수 있어요.</p>';
+    return;
+  }
+  const secret=(cur.code==='dyeworkshop'||cur.stage===2), left=cur.goal-cur.raised, bx=!secret&&plazaBox(cur.code);
+  const heading=secret ? (cur.stage===2?'??? 증축':'??? 건설') : esc(cur.name);
+  const about=secret ? (cur.stage===2?'안개 속의 다음 가구점이 증축 중이에요. 완공하면 정체가 공개됩니다. 신규 가구는 제작되는 대로 추가돼요.':'광장의 마지막 빈터에 비밀스러운 공방이 지어지고 있어요.') : esc(cur.about||'');
+  w.innerHTML=`
+    <h3>${secret?'❔':cur.emoji} 지금 짓는 중: ${heading}</h3>
+    <p class="small" style="margin:0">${about}</p>
     <div class="bar plaza-bar"><span style="width:${Math.min(100,cur.raised/cur.goal*100)}%"></span></div>
     <p class="small" style="margin:.1rem 0 0">🪙 ${cur.raised.toLocaleString()} / ${cur.goal.toLocaleString()} · 완공까지 ${left.toLocaleString()}코인 · 지금까지 ${cur.givers}명이 벽돌을 날랐어요</p>
     <div class="give-row">
@@ -8042,9 +8106,9 @@ function renderPlaza(){
       <input type="number" min="1" inputmode="numeric" id="giveCustom" placeholder="직접 입력">
       <button class="give" data-give="custom" ${ME.coins<1?'disabled':''}>보내기</button>
     </div>
-    ${cur.code==='shelter'?`<p class="small" style="margin:.5rem 0 .1rem">완공되면 🐾 펫 탭에서 꼬마 동물 15종을 입양할 수 있어요!</p>`:''}
-    ${cur.code==='lake'?`<p class="small" style="margin:.5rem 0 .1rem">완공되면 🎣 호숫가 탭에서 낚시가 열려요. 하루 5번, 물고기 31종!</p>`:''}
-    ${cur.code==='library' && WINTER ? `<p class="small winter-tease" style="margin:.5rem 0 .1rem">❄️ 숲 도서관이 다 지어지면 다음 날 0시에 <b>겨울 행사</b>가 열려요. 무엇이 기다리고 있을까요?</p>`:''}
+    ${cur.code==='shelter'?'<p class="small" style="margin:.5rem 0 .1rem">완공되면 🐾 펫 탭에서 꼬마 동물 15종을 입양할 수 있어요!</p>':''}
+    ${cur.code==='lake'?'<p class="small" style="margin:.5rem 0 .1rem">완공되면 🎣 호숫가 탭에서 낚시가 열려요. 하루 5번, 물고기 31종!</p>':''}
+    ${cur.code==='library' && WINTER ? '<p class="small winter-tease" style="margin:.5rem 0 .1rem">❄️ 숲 도서관이 다 지어지면 다음 날 0시에 <b>겨울 행사</b>가 열려요.</p>':''}
     <p class="small" style="margin:0">내가 이 건물에 보탠 코인: 🪙 ${(cur.my_amount||0).toLocaleString()} · 보탠 코인은 돌려받을 수 없어요. 완공에 필요한 만큼만 빠져나가요.</p>
     ${bx?`<p class="small" style="margin:.7rem 0 .1rem">완공되면 담당자의 보따리 탭에 새 보따리가 열려요</p><div class="unlock-list"><span>${bx.emoji} ${esc(bx.name)} · 소품 ${GACHA_DEFAULT.filter(g=>g.gacha_box===bx.code).length}종</span></div>`:''}`;
 }
@@ -8191,13 +8255,16 @@ document.getElementById('winterBox').addEventListener('click', e=>{
 });
 function celebratePlaza(){   // 📬 새로 지어진 건물 소식은 우편함으로 (새로 생긴 개수를 돌려줘요)
   const seenKey = 'majam-plaza-seen';
-  const built = PLAZA.filter(b=>b.built_at).map(b=>b.code);
+  const built = [...PLAZA,...PLAZA_EXPANSION].filter(b=>b.built_at).map(b=>b.code);
   let seen = null; try{ seen = JSON.parse(localStorage.getItem(seenKey)||'null'); }catch(e){}
   try{ localStorage.setItem(seenKey, JSON.stringify(built)); }catch(e){}
   if(!seen) return 0;
-  const fresh = PLAZA.filter(b=>b.built_at && !seen.includes(b.code));
+  const fresh = [...PLAZA,...PLAZA_EXPANSION].filter(b=>b.built_at && !seen.includes(b.code));
   mailAdd(fresh.map(b=>{ const bx = plazaBox(b.code);
-    return {icon:b.emoji, title:`광장에 ${b.name}${jo(b.name,'이','가')} 생겼어요!`, body:'다 같이 벽돌을 나른 덕분이에요.' + (bx?`\n담당자의 보따리 탭에 ${bx.emoji} ${bx.name}가 새로 열렸어요.`:'')}; }));
+    return {icon:b.emoji, title:`광장에 ${b.name}${jo(b.name,'이','가')} 생겼어요!`,
+      body: b.code==='dyeworkshop' ? '마을광장 1단계가 완성되었어요! 🏗️ 이제 광장 2단계 증축이 열렸습니다.'
+        : b.stage===2 ? '함께 벽돌을 나른 덕분에 새 증축이 완공되었어요! 염색 가구는 준비되는 대로 보따리에 추가됩니다.'
+        : '다 같이 벽돌을 나른 덕분이에요.' + (bx?`\n담당자의 보따리 탭에 ${bx.emoji} ${bx.name}가 새로 열렸어요.`:'')}; }));
   return fresh.length;
 }
 document.getElementById('plazaWork').addEventListener('click', async e=>{
@@ -8207,7 +8274,9 @@ document.getElementById('plazaWork').addEventListener('click', async e=>{
   if(n>ME.coins) return toast('코인이 부족해요');
   g.disabled = true;
   try{
-    const r = await api.givePlaza(n);
+    const active = PLAZA_PAGE===2 ? PLAZA_EXPANSION.filter(b=>b.stage===2).find(b=>!b.built_at) : [...PLAZA,...PLAZA_EXPANSION.filter(b=>b.stage===1)].find(b=>!b.built_at);
+    if(!active) throw new Error('건설 중인 건물이 없어요');
+    const r = await (active.stage ? api.givePlazaExpansion(n) : api.givePlaza(n));
     await Promise.all([refreshMine(), refreshPlaza(), refreshGacha(), api.shop().then(s=>{ if(s && s.length) SHOP=s; })]);
     renderTop(); renderBag(); renderPlaza(); renderGacha();
     if(celebratePlaza()) openMail();   // 내 벽돌로 완공되면 바로 보여 줘요
