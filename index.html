@@ -3876,14 +3876,14 @@ const STYLE_ANNEX = {
   ],
 };
   // 🏠 집 크기 맞추기: 그림마다 크기가 제각각이라, 단계별 크기에 맞춰 줄이거나 늘려요 (땅 위치·가운데는 그대로)
-const HOUSE_FIT = [58,62,66,70,74,78,82,86,92,100];
+const HOUSE_FIT = [58,62,66,70,74,78,82,92,100,120];  // 8·9단계는 조금 더 크게, 최종 성은 실루엣 기준 확대
 const HOUSE_IMG = [[464,477],[469,398],[473,462],[465,520],[486,437],[489,486],[508,504],[464,577],[640,473],[640,638]];   // house/h0~h9.webp 크기
 const HOUSE_IMG_SCALE = 1.2;
 const STYLE_IMG = {"korean":[[640,497],[640,509],[640,487],[640,593]],"modern":[[640,486],[640,520],[640,601],[489,640]],"fantasy":[[640,601],[524,640],[450,640],[640,616]],"ancient":[[640,535],[640,574],[640,588],[617,640]]};   // house/스타일0~3.webp 크기 (통나무·흙벽돌 / 기와·벽돌 / 이층·저택 / 성)   // 그림 집은 풀밭 받침까지 있어서 조금 크게   // 단계별 집 크기 (움막 → 성으로 갈수록 커져요)
 // 업그레이드 그림 (흙벽돌·벽돌·저택 단계 = 4·6·8단계): house/스타일0b~2b.webp — 그림이 있는 스타일만 써요
 const STYLE_IMG_B = {"korean":[[640,484],[640,418],[640,464]],"modern":[[640,554],[640,541],[636,640]],"fantasy":[[572,640],[625,640],[479,640]],"ancient":[[640,516],[640,595],[640,570]]};
 STYLE_IMG.winter26 = [[640,588],[640,480],[637,640],[590,640]];   // house/winter260~263.webp
-STYLE_IMG_B.winter26 = [null, null, [553,640]];                       // house/winter262b.webp (저택만 따로)
+STYLE_IMG_B.winter26 = [[640,588],[640,600],[553,640]];             // 겨울 한정집 4·6·8단계도 각각 다른 일러스트 사용
 const styleSrc = (style, st) => { const z = styleSize(st), b = (st===4||st===6||st===8) && STYLE_IMG_B[style] && STYLE_IMG_B[style][z];
   return b ? {src:`${style}${z}b`, wh:b} : {src:`${style}${z}`, wh:STYLE_IMG[style][z]}; };
 const FIT_CACHE = {}; let FIT_SVG = null;
@@ -3913,12 +3913,30 @@ function houseSVG(stage, lit, decay=0, color=null, style=null){
   const st = Math.min(Math.max(stage,0), HOUSE_IMG.length-1);
   const sty = styled ? styleSrc(style, st) : null;
   const src = styled ? sty.src : `h${st}`, [iw, ih] = styled ? sty.wh : HOUSE_IMG[st];
-  const boost = styled && (sty.src==='fantasy2'||sty.src==='fantasy2b') ? 1.15 : styled && sty.src==='winter262' ? 1.12 : styled && sty.src==='winter262b' ? 1.08 : 1;   // 길쭉한 마법사의 탑 · 이층 이글루는 조금 크게
-  // ⛄ 겨울 집은 뒤로 갈수록 그림이 세로로 길어서 키 제한(95)에 걸려 작아 보였어요 → 위로 더 자랄 수 있게 (10-22)
-  const hcap = styled && style==='winter26' ? 122 : 95;
-  const k = Math.min(HOUSE_FIT[st]*HOUSE_IMG_SCALE*boost/Math.sqrt(iw*ih), 120/iw, hcap/ih), w = iw*k, h = ih*k;
-  const vtop = Math.min(0, Math.floor(96 - h - 1));   // 키가 상자보다 크면 위로 넓혀요
-  g = `<image href="house/${src}.webp" x="${(60-w/2).toFixed(1)}" y="${(96-h).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" class="himg ${lit?'on':'off'}"/>`;
+  const boost = styled && (sty.src==='fantasy2'||sty.src==='fantasy2b') ? 1.15 : styled && sty.src==='winter262' ? 1.12 : styled && sty.src==='winter262b' ? 1.08 : 1;
+  // 🏰 새 집 이미지는 주변 투명 여백이 제각각이라, 최상위 성은 실제 건물 영역을 기준으로 확대해요.
+  // [왼쪽, 위, 오른쪽, 아래] = 각 WebP의 불투명 실루엣 좌표 (38채 + 7채 새 에셋)
+  const FINAL_HOUSE_BOUNDS = {
+    h9:[106,8,534,630], korean3:[8,88,632,505], modern3:[8,43,481,597],
+    fantasy3:[116,8,523,608], ancient3:[8,19,609,620], winter263:[63,8,526,632]
+  };
+  const silhouette = st===9 ? FINAL_HOUSE_BOUNDS[src] : null;
+  let w, h, hx, hy, vtop;
+  if(silhouette){
+    const [left,top,right,bottom] = silhouette;
+    const k = Math.min(117/(right-left), 124/(bottom-top)); // 폭 제한 + 충분한 높이, 주변 집과 겹치지 않도록
+    w=iw*k; h=ih*k;
+    hx=60-(left+right)*k/2;  // 마젠타 제거 후 남은 실제 건물 중심에 맞춰요
+    hy=96-bottom*k;          // 잔디 받침이 다른 집과 같은 높이에 오도록
+    vtop=Math.min(0,Math.floor(hy+top*k-3));
+  } else {
+    const hcap = styled && style==='winter26' ? 122 : st>=7 ? 110 : 95;
+    const k = Math.min(HOUSE_FIT[st]*HOUSE_IMG_SCALE*boost/Math.sqrt(iw*ih), 120/iw, hcap/ih);
+    w=iw*k; h=ih*k; hx=60-w/2; hy=96-h;
+    vtop=Math.min(0,Math.floor(hy-1));
+  }
+  // 이미지 교체 직후 예전 집이 남는 브라우저 캐시를 피하기 위한 버전 값
+  g = `<image href="house/${src}.webp?v=20261026-size2" x="${hx.toFixed(1)}" y="${hy.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" class="himg ${lit?'on':'off'}"/>`;
   const sturdy = stage >= STURDY;
   const label = `${STAGES[stage].name}${lit?' (불 켜짐)':''}${decay?' · '+decayLabel(decay, stage):''}`;
   // 집이 날아간 상태 (벽돌집 미만)
