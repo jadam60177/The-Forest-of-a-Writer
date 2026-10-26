@@ -1059,6 +1059,15 @@ body.compact-items .item .ltag{font-size:.52rem;padding:0 .25rem}
 .tpet .stage{position:relative;width:92px;height:92px;display:flex;align-items:flex-end;justify-content:center}
 .tpet .stage .pet{width:84px}
 .tpet .nm{font-family:"Jua",sans-serif;font-size:.92rem}
+/* 🐾 이웃 집 펫: 5마리는 가로 한 줄, 작은 화면에서도 자동 축소 */
+#visitPets{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.4rem;justify-items:center;align-items:start}
+#visitPets .tpet{width:100%;min-width:0;max-width:100%;text-align:center;gap:.15rem}
+#visitPets .tpet .stage{width:min(92px,100%);height:clamp(62px,14vw,92px)}
+#visitPets .tpet .stage .pet{width:min(84px,100%)}
+#visitPets .tpet .nm{max-width:100%;font-size:clamp(.65rem,1.55vw,.85rem);line-height:1.28;overflow-wrap:anywhere}
+#visitPets .tpet .nm .small{font-size:.88em}
+#visitPets .tpet [data-treat]{max-width:100%;white-space:normal;line-height:1.3;padding:.25rem .2rem;font-size:clamp(.63rem,1.35vw,.78rem)}
+
 .tfx{position:absolute;pointer-events:none;z-index:3;width:var(--w,34px);left:var(--x,50%);top:var(--y,10%);transform:translate(-50%,0);animation:tfxUp var(--d,1.4s) ease-out var(--dl,0s) forwards;opacity:0}
 .tfx.pop{animation-name:tfxPop}
 .tfx.drop{animation-name:tfxDrop;animation-timing-function:ease-in}
@@ -1643,6 +1652,14 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 .pet-yard h3{position:absolute;left:1rem;top:.9rem;z-index:4;margin:0;padding:.25rem .75rem;background:rgba(22,29,35,.72);border-radius:999px;text-shadow:none;color:#fff;pointer-events:none}
 .pet-yard h3 .small{font-size:.78em;font-weight:400}
 .pet-yard-scene{position:absolute;inset:0;overflow:hidden}
+/* 최대 5마리 마당 돌보기 + 숙소에서 고른 5마리 전시 */
+.pet-yard-scene.many .yard-friend{width:clamp(42px,6.8vw,76px)}
+.yard-friend.yard-guest .yard-friend-name{background:rgba(237,241,253,.94)}
+.yard-friend.yard-guest:hover .yard-friend-name{background:#e0eafe}
+.lodge-pet.yard-showing{border-color:#85ab77;background:rgba(137,181,120,.14)}
+.lodge-pet .yard-toggle{margin-top:.3rem}
+@media (max-width:600px){.pet-yard-scene.many .yard-friend{width:clamp(37px,10vw,52px)}}
+
 .pet-yard-empty{position:absolute;left:50%;top:64%;transform:translate(-50%,-50%);width:max-content;max-width:88%;padding:.45rem .85rem;border-radius:14px;background:rgba(24,38,37,.72);color:#fff;text-shadow:0 1px 3px #24342f;text-align:center}
 .pet-yard .locked-note{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:min(90%,480px);z-index:2}
 .yard-friend{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:clamp(48px,8.4vw,98px);height:auto;padding:0;border:0;background:none;cursor:pointer;transform:translate(-50%,-50%);transition:left 6s ease-in-out,top 6s ease-in-out;filter:drop-shadow(0 4px 4px rgba(12,26,25,.3));z-index:2}
@@ -6153,18 +6170,52 @@ function petCardHTML(p){
     </div></div>`;
 }
 
+/* 🏡 숙소 펫 전시 선택: 돌보기 슬롯과 분리. 계정별 브라우저 저장. */
+const PET_YARD_GUEST_MAX = 5;
+const petYardGuestKey = () => 'majam-pet-yard-guests-' + meId();
+function getPetYardGuestIds(){
+  try{
+    const ids=JSON.parse(localStorage.getItem(petYardGuestKey())||'[]');
+    return Array.isArray(ids) ? [...new Set(ids.map(String))].slice(0,PET_YARD_GUEST_MAX) : [];
+  }catch(e){ return []; }
+}
+function savePetYardGuestIds(ids){
+  try{localStorage.setItem(petYardGuestKey(),JSON.stringify(ids.slice(0,PET_YARD_GUEST_MAX)));}catch(e){}
+}
+document.getElementById('petBox').addEventListener('click',e=>{
+  const b=e.target.closest('[data-yard-guest-toggle]');
+  if(!b) return;
+  const id=String(b.dataset.yardGuestToggle);
+  const stored=getPetYardGuestIds();
+  const valid=new Set(((PETS&&PETS.lodge)||[]).map(p=>String(p.id)));
+  let chosen=stored.filter(x=>valid.has(x));
+  const found=chosen.includes(id);
+  if(found) chosen=chosen.filter(x=>x!==id);
+  else{
+    if(!valid.has(id)) return;
+    if(chosen.length>=PET_YARD_GUEST_MAX){toast('🐾 숙소 펫은 마당에 최대 5마리까지 보여줄 수 있어요!');return;}
+    chosen.push(id);
+  }
+  savePetYardGuestIds(chosen);
+  renderPets();
+  toast(found?'🐾 마당에서 숙소 펫을 내렸어요':'🐾 숙소 펫을 마당에 추가했어요!');
+});
 /* 🐾 마당의 펫 그림은 관리 카드와 별도로 배치해 풍경을 가리지 않아요. */
 let PET_FOLD_OPEN = false;
 try{ PET_FOLD_OPEN = localStorage.getItem('majam-pet-care-fold') === '1'; }catch(e){}
 function petYardPlayHTML(pets, open){
   if(!open) return '<div class="locked-note">🏘️ 광장에 동물 보호소가 생기면 이 마당에서 펫을 만날 수 있어요.</div>';
   if(!pets.length) return '<p class="pet-yard-empty">🐾 아직 마당에 나온 친구가 없어요.<br>아래 펫 돌보기와 도감에서 만나 보세요!</p>';
-  const spots = [[18,68],[37,79],[59,64],[80,77],[50,88]];
-  return pets.map((p,i)=>{
-    const mood=petMood(p),lv=petLevel(p.affection),pos=spots[i%spots.length];
-    return '<button class="yard-friend" type="button" data-yard-pet="'+p.id+'" title="'+esc(p.name)+' · 펫 돌보기 열기" aria-label="'+esc(p.name)+' 돌보기" style="left:'+pos[0]+'%;top:'+pos[1]+'%;--yb:-'+(i*.5).toFixed(1)+'s">'
+  const spots = [[14,61],[32,59],[50,63],[68,60],[86,62],[14,83],[32,82],[50,86],[68,82],[86,84]];
+  return pets.slice(0,10).map((p,i)=>{
+    const guest=!!p.yardGuest, mood=guest?'ok':petMood(p), lv=petLevel(p.affection), pos=spots[i];
+    return '<button class="yard-friend'+(guest?' yard-guest':'')+'" type="button" '
+      +(guest?'data-yard-lodge="'+p.id+'"':'data-yard-pet="'+p.id+'"')
+      +' title="'+esc(p.name)+(guest?' · 숙소에서 마당 구경 중':' · 펫 돌보기 열기')
+      +'" aria-label="'+esc(p.name)+(guest?' 숙소 펫 전시':' 돌보기')
+      +'" style="left:'+pos[0]+'%;top:'+pos[1]+'%;--yb:-'+(i*.5).toFixed(1)+'s">'
       +'<span class="yard-friend-art">'+petArt(p.code,mood,'',petShowBig(lv,babyById(p.id)))+'</span>'
-      +'<span class="yard-friend-name">'+esc(p.name)+'</span></button>';
+      +'<span class="yard-friend-name">'+(guest?'🏡 ':'')+esc(p.name)+'</span></button>';
   }).join('');
 }
 const PET_YARD_STARTED = new WeakSet();
@@ -6174,23 +6225,25 @@ function startPetYardPlay(scene){
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(reduced) return;
   scene.querySelectorAll('.yard-friend').forEach((el,i)=>{
-    let x=parseFloat(el.style.left), y=parseFloat(el.style.top);
+    const anchorX=parseFloat(el.style.left),anchorY=parseFloat(el.style.top);
+    let x=anchorX,y=anchorY;
     const step=()=>{
       if(!scene.isConnected) return;
       if(document.hidden || document.getElementById('tab-pet').hidden){
         setTimeout(step,2600);return;
       }
-      if(Math.random()<.22){ setTimeout(step,1900+Math.random()*2400);return; }
-      const nx=Math.max(10,Math.min(90,x+(Math.random()-.5)*42));
-      const ny=Math.max(57,Math.min(87,y+(Math.random()-.5)*13));
-      const duration=4+Math.hypot(nx-x,(ny-y)*1.4)/6;
+      if(Math.random()<.22){setTimeout(step,1900+Math.random()*2400);return;}
+      // 10마리여도 서로 뭉개지지 않도록 각자 영역 안에서 이동해요.
+      const nx=Math.max(8,Math.min(92,anchorX+(Math.random()-.5)*13));
+      const ny=Math.max(52,Math.min(90,anchorY+(Math.random()-.5)*7));
+      const duration=3.5+Math.hypot(nx-x,(ny-y)*1.4)/5.5;
       el.style.transitionDuration=duration.toFixed(1)+'s';
       if(Math.abs(nx-x)>1) el.classList.toggle('face-left',nx<x);
-      el.style.left=nx.toFixed(1)+'%'; el.style.top=ny.toFixed(1)+'%';
-      x=nx; y=ny;
+      el.style.left=nx.toFixed(1)+'%';el.style.top=ny.toFixed(1)+'%';
+      x=nx;y=ny;
       setTimeout(step,duration*1000+600+Math.random()*2400);
     };
-    setTimeout(step,800+i*550+Math.random()*1600);
+    setTimeout(step,800+i*360+Math.random()*1600);
   });
 }
 document.getElementById('petBox').addEventListener('toggle',e=>{
@@ -6225,14 +6278,19 @@ function renderPets(){
           ? `<div class="pdx ${peek()?'peek':''}">${peekPet(s)}<button class="mini" data-petdex="${s.code}" ${(!open||traces<1)?'disabled':''}>✨ 흔적으로 열기</button></div>`
           : `<div class="pdx ${peek()?'peek':''}">${peekPet(s)}<button class="mini" data-petdex="${s.code}" ${(!open||coins<PET_TIER[t].open)?'disabled':''}>칸 열기 🪙 ${PET_TIER[t].open.toLocaleString()}</button></div>`;
     }).join('') + `</div>`).join('');
+  const guestIds=getPetYardGuestIds();
+  const guests=LG.filter(p=>guestIds.includes(String(p.id))).slice(0,PET_YARD_GUEST_MAX);
+  const yardVisible=(P.pets||[]).concat(guests.map(p=>({...p,yardGuest:true})));
   const yardFull = (P.pets||[]).length >= P.slots;
-  const lodgeHTML = !open ? '' : `<div class="panel lodge"><h3 style="margin:0 0 .2rem">🏡 펫 숙소 <span class="small">${LG.length}마리</span></h3>
+  const lodgeHTML = !open ? '' : `<div class="panel lodge"><h3 style="margin:0 0 .2rem">🏡 펫 숙소 <span class="small">${LG.length}마리 · 마당 전시 ${guests.length}/${PET_YARD_GUEST_MAX}마리</span></h3>
     <p class="small" style="margin:0 0 .6rem">숙소에서 지내는 친구는 돌보지 않아도 시무룩해지지 않아요. 친밀도도 그대로예요. 마당이 꽉 찼을 때 입양하면 여기로 와요.</p>
+    <p class="small" style="margin:0 0 .6rem">🌿 숙소 친구 중 최대 5마리를 마당에 추가로 보여줄 수 있어요. 전시한 친구는 숙소에 그대로 있고, 돌보기는 기존 마당 펫 5마리에게만 적용돼요.</p>
     ${LG.length ? `<div class="lodge-list">${LG.map(p=>{ const s = petOf(p.code), lv = petLevel(p.affection);
-      return `<div class="lodge-pet"><div class="lp-art">${petArt(p.code,'ok','',petShowBig(lv, babyById(p.id)))}</div><b>${esc(p.name)}</b><span class="small"><span class="rb ${s.tier}">${PET_TIER[s.tier].label}</span> 💗 Lv.${lv}</span>
+      return `<div class="lodge-pet ${guestIds.includes(String(p.id))?'yard-showing':''}" data-lodge-card="${p.id}"><div class="lp-art">${petArt(p.code,'ok','',petShowBig(lv, babyById(p.id)))}</div><b>${esc(p.name)}</b><span class="small"><span class="rb ${s.tier}">${PET_TIER[s.tier].label}</span> 💗 Lv.${lv}</span>
+        <button class="mini yard-toggle ${guestIds.includes(String(p.id))?'ask-yes':''}" type="button" data-yard-guest-toggle="${p.id}" aria-pressed="${guestIds.includes(String(p.id))}" ${!guestIds.includes(String(p.id))&&guests.length>=PET_YARD_GUEST_MAX?'disabled':''}>${guestIds.includes(String(p.id))?'🌿 전시 해제':'🌿 마당에서 놀기'}</button>
         <button class="mini ${yardFull?'':'ask-yes'}" data-unlodge="${p.id}" ${yardFull?'disabled':''} title="${yardFull?'마당이 꽉 찼어요. 먼저 다른 친구를 숙소에 보내 주세요':''}">🐾 마당으로 데려오기</button></div>`; }).join('')}</div>`
       : `<p class="small lodge-empty">아직 숙소에서 지내는 친구가 없어요.</p>`}</div>`;
-  const html = `<div class="pet-yard"><h3>🐾 우리 집 펫 <span class="small">${open?`마당 ${(P.pets||[]).length} / ${P.slots}마리${LG.length?` · 숙소 ${LG.length}마리`:''}`:''}</span></h3><div class="pet-yard-scene">${petYardPlayHTML(P.pets||[],open)}</div></div><details class="pet-care-fold" ${PET_FOLD_OPEN?'open':''}><summary>🐾 펫 돌보기 <span class="small">밥 주기 · 쓰다듬기 · 놀기 · 산책 · 숙소 보내기</span></summary><div class="pet-care-inner"><div class="pet-cards">${yard}</div></div></details>${lodgeHTML}
+  const html = `<div class="pet-yard"><h3>🐾 우리 집 펫 <span class="small">${open?`마당 ${(P.pets||[]).length} / ${P.slots}마리${LG.length?` · 숙소 ${LG.length}마리`:''}`:''}</span></h3><div class="pet-yard-scene ${yardVisible.length>5?'many':''}">${petYardPlayHTML(yardVisible,open)}</div></div><details class="pet-care-fold" ${PET_FOLD_OPEN?'open':''}><summary>🐾 펫 돌보기 <span class="small">밥 주기 · 쓰다듬기 · 놀기 · 산책 · 숙소 보내기</span></summary><div class="pet-care-inner"><div class="pet-cards">${yard}</div></div></details>${lodgeHTML}
     <div class="panel"><h3 style="margin:0 0 .2rem">📖 펫 도감 <span class="small">${dex.size} / ${PETS_DEFAULT.length}</span></h3>
     <p class="small" style="margin:0 0 .6rem">도감 칸을 열어야 그 친구를 입양할 수 있어요. 돌봐 주면 친밀도가 오르고, 단계가 오를 때마다 코인을 받아요. 7일 넘게 못 보면 시무룩해지니 가끔 들러 주세요!</p><div class="dex-scroll">${dexHTML}${seasonDexHTML(ALL)}</div></div>`;
   const key = html.replace(/\d+분/g,'');
@@ -6856,6 +6914,16 @@ function petParty(emoji, msg){
   if(!d.open) d.showModal();
 }
 document.addEventListener('click', e=>{
+  const guestFriend=e.target.closest('[data-yard-lodge]');
+  if(guestFriend){
+    const card=document.querySelector('#petBox [data-lodge-card="'+guestFriend.dataset.yardLodge+'"]');
+    if(card){
+      card.classList.add('yard-selected');
+      card.scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(()=>{if(card.isConnected)card.classList.remove('yard-selected');},1800);
+    }
+    return;
+  }
   const friend = e.target.closest('[data-yard-pet]');
   if(friend){
     const box=document.getElementById('petBox'), fold=box.querySelector('.pet-care-fold');
