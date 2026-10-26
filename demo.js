@@ -176,9 +176,10 @@ function makeDemoApi(){
       if(!canPlaceIn(st.placed.filter(p=>(p.room||0)===room),r,c,w,h,cur,code)) fail(`여기엔 ${w}×${h}칸 자리가 없어요`);
       st.inv[code]--; st.placed.push({id:st.nextId++,item_code:code,r,c,w,h,room,rot:rot||0}); persist();
     },
-    async setTint(id, t){
-      const p = st.placed.find(x=>x.id===id); if(!p) fail('내 방에 깔린 러그가 아니에요');
-      if(!isRug(p.item_code)) fail('러그만 색을 바꿀 수 있어요'); p.tint = t || null; persist();
+    async setTint(id, t, code){
+      const p = st.placed.find(x=>x.id===id); if(!p) fail('내 방에 놓인 가구가 아니에요');
+      if(!canTintItem(p.item_code)) fail('러그와 서랍장만 색을 바꿀 수 있어요');
+      p.tint = t || null; persist();
     },
     async remove(id){
       const i=st.placed.findIndex(p=>p.id===id); if(i<0) fail('내 가구가 아니에요');
