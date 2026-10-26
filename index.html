@@ -673,13 +673,13 @@ main,.village-head,.houses,.trail{max-width:1200px}
 .village{background:
   linear-gradient(#152340,#152340) top / 100% max(0px, calc(var(--bh,0px) - 98px)) no-repeat,
   url(bg/forest5.webp) center calc(var(--bh,0px) - 100px) / max(100%,1500px) calc(max(100vw,1500px) * 0.317) no-repeat,
-  #6F9955}
+  #334F48}
 .village > .stars, .village > .pines, .village > .ground{display:none}
 .village .wolf .tag{background:rgba(0,0,0,.35)}
 @media (max-width:600px){ .village{background:
   linear-gradient(#152340,#152340) top / 100% calc(var(--bh,0px) + 2px) no-repeat,
   url(bg/forest5.webp) center var(--bh,0px) / 1000px 317px no-repeat,
-  #6F9955} }
+  #334F48} }
 .himg.off{filter:brightness(.8) saturate(.85)}
 .himg.on{filter:drop-shadow(0 0 3px rgba(255,206,92,.6))}
 /* =========================================================
@@ -707,17 +707,35 @@ body{background:
 .village::after{content:"";position:absolute;left:0;right:0;bottom:0;height:110px;pointer-events:none;z-index:1;
   background:linear-gradient(rgba(18,21,38,0),rgba(18,21,38,.55) 55%,var(--night))}
 .village > .trail{z-index:3}
-/* 🌼 들꽃 초원 (10-25 판 104) — 숲 그림 아래 잔디밭에 반복 무늬만 얹어요. 집 배치·마을 높이는 그대로
-   .village 에 isolation 을 줘서, 초원(z -1)이 마을 배경 바로 위 · 모든 내용 아래에 깔려요. ::before/::after 와는 따로예요 */
+/* 🌼 마을 초원: 낮·밤 바닥 잔디 + 투명 꽃장식 (배경색과 위치는 서로 독립) */
 .village{isolation:isolate}
-.village > .meadow{position:absolute;left:0;right:0;bottom:0;z-index:-1;pointer-events:none;
+.village > .meadow{
+  position:absolute;left:0;right:0;bottom:0;z-index:-1;pointer-events:none;
   top:calc(var(--bh,0px) - 100px + max(100vw,1500px) * .27);
+  background:url(bg/meadow_floor_night.webp?v=2) 0 0 / 512px 512px repeat #334F48;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 160px);
+  mask-image:linear-gradient(to bottom,transparent,#000 160px);
+}
+:root[data-mode="day"] .village > .meadow{
+  background-image:url(bg/meadow_floor_day.webp?v=2);
+  background-color:#A5BD6A;
+}
+/* 예전 꽃·풀 타일은 덮어쓰지 않고 윗층에 그대로 둬요 */
+.village > .meadow::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
   background:url(bg/meadow_tile.webp?v=1) 0 0 / 420px 420px repeat;
-  -webkit-mask-image:linear-gradient(transparent,#000 160px);mask-image:linear-gradient(transparent,#000 160px);
-  filter:brightness(.62) saturate(.75)}
-:root[data-mode="day"] .village > .meadow{filter:none}
+  filter:brightness(.62) saturate(.75);
+}
+:root[data-mode="day"] .village > .meadow::after{filter:none}
 :root[data-season="winter"] .village > .meadow{display:none}
-@media (max-width:600px){ .village > .meadow{top:calc(var(--bh,0px) + 250px);background-size:300px 300px;-webkit-mask-image:linear-gradient(transparent,#000 100px);mask-image:linear-gradient(transparent,#000 100px)} }
+@media (max-width:600px){
+  .village > .meadow{
+    top:calc(var(--bh,0px) + 250px);
+    -webkit-mask-image:linear-gradient(to bottom,transparent,#000 100px);
+    mask-image:linear-gradient(to bottom,transparent,#000 100px);
+  }
+  .village > .meadow::after{background-size:300px 300px}
+}
 /* 유리 패널 */
 .panel,.shop-box{background:var(--panel);border:1px solid var(--line);border-radius:20px;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,235,190,.06)}
@@ -1457,11 +1475,11 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 :root[data-mode="day"] .village{background:
   linear-gradient(#7DCAF6,#7DCAF6) top / 100% max(0px, calc(var(--bh,0px) - 98px)) no-repeat,
   url(bg/forest_day.webp) center calc(var(--bh,0px) - 100px) / max(100%,1500px) calc(max(100vw,1500px) * 0.317) no-repeat,
-  #94C460}
+  #A5BD6A}
 @media (max-width:600px){ :root[data-mode="day"] .village{background:
   linear-gradient(#7DCAF6,#7DCAF6) top / 100% calc(var(--bh,0px) + 2px) no-repeat,
   url(bg/forest_day.webp) center var(--bh,0px) / 1000px 317px no-repeat,
-  #94C460} }
+  #A5BD6A} }
 :root[data-mode="day"] .village::after{background:linear-gradient(rgba(238,245,230,0),rgba(238,245,230,.55) 55%,var(--night))}
 :root[data-mode="day"] .village-head{color:#1E3A4A;text-shadow:0 1px 2px rgba(255,255,255,.85),0 0 8px rgba(255,255,255,.6)}
 :root[data-mode="day"] .lit-count{color:#B5651D}
