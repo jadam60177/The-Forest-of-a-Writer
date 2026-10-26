@@ -130,7 +130,7 @@ function renderDyeStage(){
   const isPaint=DYE_BAG==='paint',p=isPaint?100:250;
   const tabs='<div class="dye-box-tabs"><button data-dye-bag="paint" class="'+(isPaint?'on':'')+'">🎨 염색공방 보따리</button>'
     +'<button data-dye-bag="sofa" class="'+(!isPaint?'on':'')+'" '+(DYE_STATE.furniture_open?'':'disabled')+'>'+(DYE_STATE.furniture_open?'🛋️ 모닥불 가구 보따리':'🔒 ???')+'</button></div>';
-  const pulls='<div class="pull-row"><button class="pull" data-dye-pull="1" '+(ME.coins<p?'disabled':'')+'>한 번 열기 · 🪙 '+p+'</button><button class="pull ten" data-dye-pull="10" '+(ME.coins<p*9?'disabled':'')+'>열 번 열기 · 🪙 '+(p*9)+'</button></div>';
+  const pulls='<div class="pull-row"><button class="pull" data-dye-pull="1" '+(ME.coins<p?'disabled':'')+'>한 번 열기 · 🪙 '+p+'</button>'+(isPaint?'<button class="pull ten" data-dye-pull="10" '+(ME.coins<p*9?'disabled':'')+'>열 번 열기 · 🪙 '+(p*9)+'</button>':'')+'</div>';
   const colors='<div class="dye-color-grid">'+DYE_PAINTS.map(d=>{
     const uses=dyeUses(d.code),have=uses>=0;
     return '<div class="dye-color-card '+(have?'':'locked')+'"><span class="swatch" style="'+(have?'background:'+d.hex:'')+'">'+(have?'':'❔')+'</span><b>'+(have?esc(d.name):'???')+'</b><small>'+(have?'남은 염색 '+uses+'회':'미수집')+'</small>'
