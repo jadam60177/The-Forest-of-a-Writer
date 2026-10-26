@@ -1637,6 +1637,45 @@ body.compact-items .item .gbadge{font-size:.52rem;padding:0 .25rem;top:.15rem;le
 .pdx .to-lodge{display:block;font-size:.72rem;opacity:.8;margin-top:.15rem}
 :root[data-mode="day"] .lodge-pet{background:rgba(255,255,255,.7)}
 
+
+/* 🐾 펫 마당: 풍경은 넓게, 돌보기 카드는 별도로 접어요 (10-26) */
+.pet-yard{position:relative;isolation:isolate;overflow:hidden;padding:0;min-height:clamp(280px,33vw,440px);height:clamp(280px,33vw,440px);margin-bottom:.8rem}
+.pet-yard h3{position:absolute;left:1rem;top:.9rem;z-index:4;margin:0;padding:.25rem .75rem;background:rgba(22,29,35,.72);border-radius:999px;text-shadow:none;color:#fff;pointer-events:none}
+.pet-yard h3 .small{font-size:.78em;font-weight:400}
+.pet-yard-scene{position:absolute;inset:0;overflow:hidden}
+.pet-yard-empty{position:absolute;left:50%;top:64%;transform:translate(-50%,-50%);width:max-content;max-width:88%;padding:.45rem .85rem;border-radius:14px;background:rgba(24,38,37,.72);color:#fff;text-shadow:0 1px 3px #24342f;text-align:center}
+.pet-yard .locked-note{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:min(90%,480px);z-index:2}
+.yard-friend{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:clamp(48px,8.4vw,98px);height:auto;padding:0;border:0;background:none;cursor:pointer;transform:translate(-50%,-50%);transition:left 6s ease-in-out,top 6s ease-in-out;filter:drop-shadow(0 4px 4px rgba(12,26,25,.3));z-index:2}
+.yard-friend-art{display:block;width:100%;animation:yard-friend-bop 3s ease-in-out var(--yb,0s) infinite}
+.yard-friend-art .pet{width:100%;max-width:none;display:block;pointer-events:none}
+.yard-friend.face-left .yard-friend-art{scale:-1 1}
+.yard-friend-name{display:block;position:relative;max-width:128%;padding:.08rem .4rem;margin-top:-.1rem;font-size:clamp(.65rem,.92vw,.8rem);font-family:"Jua",sans-serif;line-height:1.4;color:#3A3326;background:rgba(255,250,226,.94);border:1px solid rgba(117,88,53,.48);border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 3px rgba(0,0,0,.1);pointer-events:none}
+.yard-friend:hover .yard-friend-name,.yard-friend:focus-visible .yard-friend-name{background:#FFE9A8}
+.yard-friend:focus-visible{outline:3px solid #FFD27A;outline-offset:5px;border-radius:10px}
+@keyframes yard-friend-bop{0%,100%{transform:translateY(0)}48%{transform:translateY(-5px)}}
+.pet-care-fold{margin:0 0 1rem;border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
+.pet-care-fold>summary{display:flex;align-items:center;gap:.6rem;padding:.8rem 1rem;font-family:"Jua",sans-serif;cursor:pointer;list-style:none;user-select:none}
+.pet-care-fold>summary::-webkit-details-marker{display:none}
+.pet-care-fold>summary .small{font-family:"Gowun Dodum",sans-serif;font-weight:400;color:var(--muted)}
+.pet-care-fold>summary::after{content:"펼치기 ▾";margin-left:auto;font-size:.82rem;font-family:"Gowun Dodum",sans-serif;color:var(--muted)}
+.pet-care-fold[open]>summary::after{content:"접기 ▴"}
+.pet-care-fold>summary:hover{background:rgba(128,155,105,.1)}
+.pet-care-fold>.pet-care-inner{border-top:1px solid var(--line);padding:.85rem}
+.pet-care-fold .pet-cards{margin:0}
+.pet-card.yard-selected{outline:3px solid #E6BF64;outline-offset:2px}
+:root[data-mode="day"] .pet-yard-empty{background:rgba(250,251,231,.9);color:#3B4B32;text-shadow:none}
+@media (max-width:600px){
+  .pet-yard{height:clamp(270px,65vw,360px);min-height:270px}
+  .pet-yard h3{left:.65rem;top:.6rem;padding:.2rem .6rem;font-size:1rem}
+  .yard-friend{width:clamp(46px,12vw,66px)}
+  .yard-friend-name{font-size:.67rem;max-width:145%}
+  .pet-care-fold>.pet-care-inner{padding:.5rem}
+}
+@media (prefers-reduced-motion:reduce){
+  .yard-friend{transition:none}
+  .yard-friend-art{animation:none}
+}
+
 /* ===== 🐠 마당 어항 (10-13) ===== */
 .tank-box{margin-top:1rem}
 .tank-title{margin:.2rem 0 .5rem;font-family:"Jua",sans-serif;font-weight:400}
@@ -6100,7 +6139,7 @@ function petCardHTML(p){
     ? `<p class="small pet-next">🐾 다음 산책까지 ${(m=>`${m>=60?Math.floor(m/60)+'시간 ':''}${m%60?m%60+'분':''}`)(Math.ceil(w/60e3))}</p>`
     : `<div class="pet-walk"><p>${esc((s.tier==='fairy'?PET_WALK_FAIRY:PET_WALK)[(p.id + Math.floor(new Date(p.event_at).getTime()/36e5)) % (s.tier==='fairy'?PET_WALK_FAIRY:PET_WALK).length].replace('{n}', p.name + jo(p.name,'이','가')))}</p>
         <div class="pet-choices">${PET_CHOICE.map(([l,h],k)=>`<button class="pet-choice" data-walk="${k}" data-pet="${p.id}"><b>${l}</b><span>${h}</span></button>`).join('')}</div></div>`;
-  return `<div class="pet-card ${mood}">
+  return `<div class="pet-card ${mood}" data-pet-card="${p.id}">
     <div class="pet-stage">${petArt(p.code, mood, 'big', petShowBig(lv, babyById(p.id)))}</div>
     <div class="pet-info">
       <h4>${esc(p.name)} <button class="ren" data-petren="${p.id}" title="이름 바꾸기">✏️</button> <span class="rb ${s.tier}">${PET_TIER[s.tier].label}</span></h4>
@@ -6113,6 +6152,53 @@ function petCardHTML(p){
       ${walk}
     </div></div>`;
 }
+
+/* 🐾 마당의 펫 그림은 관리 카드와 별도로 배치해 풍경을 가리지 않아요. */
+let PET_FOLD_OPEN = false;
+try{ PET_FOLD_OPEN = localStorage.getItem('majam-pet-care-fold') === '1'; }catch(e){}
+function petYardPlayHTML(pets, open){
+  if(!open) return '<div class="locked-note">🏘️ 광장에 동물 보호소가 생기면 이 마당에서 펫을 만날 수 있어요.</div>';
+  if(!pets.length) return '<p class="pet-yard-empty">🐾 아직 마당에 나온 친구가 없어요.<br>아래 펫 돌보기와 도감에서 만나 보세요!</p>';
+  const spots = [[18,68],[37,79],[59,64],[80,77],[50,88]];
+  return pets.map((p,i)=>{
+    const mood=petMood(p),lv=petLevel(p.affection),pos=spots[i%spots.length];
+    return '<button class="yard-friend" type="button" data-yard-pet="'+p.id+'" title="'+esc(p.name)+' · 펫 돌보기 열기" aria-label="'+esc(p.name)+' 돌보기" style="left:'+pos[0]+'%;top:'+pos[1]+'%;--yb:-'+(i*.5).toFixed(1)+'s">'
+      +'<span class="yard-friend-art">'+petArt(p.code,mood,'',petShowBig(lv,babyById(p.id)))+'</span>'
+      +'<span class="yard-friend-name">'+esc(p.name)+'</span></button>';
+  }).join('');
+}
+const PET_YARD_STARTED = new WeakSet();
+function startPetYardPlay(scene){
+  if(!scene || PET_YARD_STARTED.has(scene)) return;
+  PET_YARD_STARTED.add(scene);
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced) return;
+  scene.querySelectorAll('.yard-friend').forEach((el,i)=>{
+    let x=parseFloat(el.style.left), y=parseFloat(el.style.top);
+    const step=()=>{
+      if(!scene.isConnected) return;
+      if(document.hidden || document.getElementById('tab-pet').hidden){
+        setTimeout(step,2600);return;
+      }
+      if(Math.random()<.22){ setTimeout(step,1900+Math.random()*2400);return; }
+      const nx=Math.max(10,Math.min(90,x+(Math.random()-.5)*42));
+      const ny=Math.max(57,Math.min(87,y+(Math.random()-.5)*13));
+      const duration=4+Math.hypot(nx-x,(ny-y)*1.4)/6;
+      el.style.transitionDuration=duration.toFixed(1)+'s';
+      if(Math.abs(nx-x)>1) el.classList.toggle('face-left',nx<x);
+      el.style.left=nx.toFixed(1)+'%'; el.style.top=ny.toFixed(1)+'%';
+      x=nx; y=ny;
+      setTimeout(step,duration*1000+600+Math.random()*2400);
+    };
+    setTimeout(step,800+i*550+Math.random()*1600);
+  });
+}
+document.getElementById('petBox').addEventListener('toggle',e=>{
+  if(!e.target.matches || !e.target.matches('.pet-care-fold')) return;
+  PET_FOLD_OPEN=e.target.open;
+  try{localStorage.setItem('majam-pet-care-fold',PET_FOLD_OPEN?'1':'0');}catch(err){}
+},true);
+
 function renderPets(){
   const box = document.getElementById('petBox'); if(!box) return;
   const open = shelterOpen(), P = PETS || {slots:1, dex:[], pets:[], lodge:[], all:[]}, dex = new Set(P.dex||[]), coins = ME ? ME.coins : 0, LG = P.lodge||[], ALL = P.all||P.pets||[];
@@ -6146,11 +6232,12 @@ function renderPets(){
       return `<div class="lodge-pet"><div class="lp-art">${petArt(p.code,'ok','',petShowBig(lv, babyById(p.id)))}</div><b>${esc(p.name)}</b><span class="small"><span class="rb ${s.tier}">${PET_TIER[s.tier].label}</span> 💗 Lv.${lv}</span>
         <button class="mini ${yardFull?'':'ask-yes'}" data-unlodge="${p.id}" ${yardFull?'disabled':''} title="${yardFull?'마당이 꽉 찼어요. 먼저 다른 친구를 숙소에 보내 주세요':''}">🐾 마당으로 데려오기</button></div>`; }).join('')}</div>`
       : `<p class="small lodge-empty">아직 숙소에서 지내는 친구가 없어요.</p>`}</div>`;
-  const html = `<div class="pet-yard"><h3>🐾 우리 집 펫 <span class="small">${open?`마당 ${(P.pets||[]).length} / ${P.slots}마리${LG.length?` · 숙소 ${LG.length}마리`:''}`:''}</span></h3><div class="pet-cards">${yard}</div></div>${lodgeHTML}
+  const html = `<div class="pet-yard"><h3>🐾 우리 집 펫 <span class="small">${open?`마당 ${(P.pets||[]).length} / ${P.slots}마리${LG.length?` · 숙소 ${LG.length}마리`:''}`:''}</span></h3><div class="pet-yard-scene">${petYardPlayHTML(P.pets||[],open)}</div></div><details class="pet-care-fold" ${PET_FOLD_OPEN?'open':''}><summary>🐾 펫 돌보기 <span class="small">밥 주기 · 쓰다듬기 · 놀기 · 산책 · 숙소 보내기</span></summary><div class="pet-care-inner"><div class="pet-cards">${yard}</div></div></details>${lodgeHTML}
     <div class="panel"><h3 style="margin:0 0 .2rem">📖 펫 도감 <span class="small">${dex.size} / ${PETS_DEFAULT.length}</span></h3>
     <p class="small" style="margin:0 0 .6rem">도감 칸을 열어야 그 친구를 입양할 수 있어요. 돌봐 주면 친밀도가 오르고, 단계가 오를 때마다 코인을 받아요. 7일 넘게 못 보면 시무룩해지니 가끔 들러 주세요!</p><div class="dex-scroll">${dexHTML}${seasonDexHTML(ALL)}</div></div>`;
   const key = html.replace(/\d+분/g,'');
   if(box._html !== key || box._min !== Math.floor(Date.now()/60e3)){ box.innerHTML = html; box._html = key; box._min = Math.floor(Date.now()/60e3); }
+  startPetYardPlay(box.querySelector('.pet-yard-scene'));
 }
 function seasonDexHTML(ALL){   // ❄️ 시즌 한정 칸 — 공개 전엔 정체를 숨겨요
   const list = PETS_DEFAULT.filter(s=>s.tier==='season'); if(!list.length) return '';
@@ -6769,6 +6856,19 @@ function petParty(emoji, msg){
   if(!d.open) d.showModal();
 }
 document.addEventListener('click', e=>{
+  const friend = e.target.closest('[data-yard-pet]');
+  if(friend){
+    const box=document.getElementById('petBox'), fold=box.querySelector('.pet-care-fold');
+    if(!fold) return;
+    fold.open=true;
+    const card=box.querySelector('[data-pet-card="'+friend.dataset.yardPet+'"]');
+    if(card){
+      card.classList.add('yard-selected');
+      card.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+      setTimeout(()=>{if(card.isConnected) card.classList.remove('yard-selected');},1800);
+    }
+    return;
+  }
   const cr = e.target.closest('[data-care]');
   if(cr) return act(async()=>{
     const p = PETS.pets.find(x=>x.id===+cr.dataset.pet), c = PET_CARE[cr.dataset.care];
