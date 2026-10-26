@@ -8543,7 +8543,20 @@ try{ shopSort = localStorage.getItem('majam-shop-sort') || 'base'; shopNotOwned 
 const SHOP_WALL = new Set(['screen']);                 // 벽 칸에 같이 보일 가구 (병풍)
 const SHOP_WIN = new Set(['wall_curtain','wall_bamboo']);   // 창문·커튼 칸에 같이 보일 것 (커튼 칸막이·대나무 발)   // 창문·벽 칸에 같이 보일 가구
 // 기타 칸: 가구로 분류돼 있지만 큰 가구는 아닌 것들 (나무·동물 집·놀이기구·광장 물건 등)
-const SHOP_ETC = new Set(['tree','monstera','telescope','camptent','fountain','carousel','cattower','aquarium','hammock','postbox','campfire','xmastree','cauldron','gramophone','plotboard']);
+// 🧺 순수 인테리어 분류 (화면에만 적용): 원래 아이템 코드·가격·소유·배치·서버 category는 유지.
+// 의자/침대/책상/식탁/수납장 등 실제 큰 가구는 가구 탭에 남기고,
+// 조명·장식·소품·작업 도구 등은 소품 탭으로 옮겨 찾기 쉽게 해요.
+// SHOP_ETC는 renderShop의 소품 탭과 bagKind의 가방 소품 탭에서 공통으로 확인합니다.
+const SHOP_ETC = new Set([
+  // 기존부터 소품 탭에 있던 장식물 (변경 없음)
+  'tree','monstera','telescope','camptent','fountain','carousel','cattower',
+  'aquarium','hammock','postbox','campfire','xmastree','cauldron','gramophone','plotboard',
+  // 2026-10-26 분류 정리: 가구 탭에 있던 소품 20종
+  'clock','floorlamp','coatrack','ironstove',
+  'st_magicbin','st_satchel','st_telescope','st_candelabra',
+  'paperroll','artcart','stereo','corkstand','plotwhite',
+  'cushions','planttray','teashelf','easel','suitcases','radiator','booktower'
+]);
 function renderRoad(){
   renderDeco();
   const i = stageIdx(ME.total_minutes);
