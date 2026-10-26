@@ -12,8 +12,8 @@ revoke all on public.dye_wallet from public, anon, authenticated;
 
 -- 새 가구도 기존 가방/집 배치 로직으로 다룰 수 있도록 등록합니다.
 -- active=false: 상점에서 별도 판매하지 않음 (2단계 보따리에서만 지급)
-insert into public.shop_items(code,emoji,name,price,w,h,active,category)
-values('dye_armchair','🛋️','🎨 하늘빛 염색 소파',0,1,1,false,'furniture')
+insert into public.shop_items(code,emoji,name,price,w,h,active,category,sort)
+values('dye_armchair','🛋️','🎨 하늘빛 염색 소파',0,1,1,false,'furniture',9999)
 on conflict(code) do nothing;
 
 create or replace function public.dye_stage_state()
