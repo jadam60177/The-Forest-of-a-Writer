@@ -7,7 +7,7 @@ var catalog={hair:new Set(['bob']),outfit:new Set(['pajamas']),eyes:new Set(['ro
 var fallback={hair:'bob',outfit:'pajamas',eyes:'round',hairColor:null,outfitColor:null},look=Object.assign({},fallback),seq=0;
 function el(id){return document.getElementById(id);}
 function clean(v){var r=Object.assign({},fallback);v=v||{};['hair','outfit','eyes'].forEach(function(k){if(/^[a-z0-9_]{1,40}$/.test(v[k]))r[k]=v[k];});['hairColor','outfitColor'].forEach(function(k){if(typeof v[k]==='string'&&/^#[a-f0-9]{6}$/i.test(v[k]))r[k]=v[k].toLowerCase();});return r;}
-function add(name,file){name=String(name).replace(/^.*?(dye_masks\/)/,'dye_masks/');if(!name.startsWith('dye_masks/'))name=name.split('/').pop();if(!/^[a-z0-9_\/.-]+\.png$/i.test(name)||file.size>20000000)return;var old=local.get(name);if(old)URL.revokeObjectURL(old);local.set(name,URL.createObjectURL(file));cache.delete(name);done.clear();var m=name.match(/^hair_([a-z0-9_]+)_back_(?:standing|seated)\.png$/);if(m)catalog.hair.add(m[1]);m=name.match(/^outfit_([a-z0-9_]+)_(?:standing|seated)\.png$/);if(m)catalog.outfit.add(m[1]);m=name.match(/^face_([a-z0-9_]+)_(?:standing|seated)\.png$/);if(m)catalog.eyes.add(m[1]);}
+function add(name,file){name=String(name).replace(/^.*?(dye_masks\/)/,'dye_masks/');if(!name.startsWith('dye_masks/'))name=name.split('/').pop();if(name.endsWith('_dye_mask.png')&&!name.startsWith('dye_masks/'))name='dye_masks/'+name;if(!/^[a-z0-9_\/.-]+\.png$/i.test(name)||file.size>20000000)return;var old=local.get(name);if(old)URL.revokeObjectURL(old);local.set(name,URL.createObjectURL(file));cache.delete(name);done.clear();var m=name.match(/^hair_([a-z0-9_]+)_back_(?:standing|seated)\.png$/);if(m)catalog.hair.add(m[1]);m=name.match(/^outfit_([a-z0-9_]+)_(?:standing|seated)\.png$/);if(m)catalog.outfit.add(m[1]);m=name.match(/^face_([a-z0-9_]+)_(?:standing|seated)\.png$/);if(m)catalog.eyes.add(m[1]);}
 function img(name,optional){
 if(!cache.has(name))cache.set(name,new Promise(function(ok,no){var i=new Image();i.onload=function(){i.naturalWidth===480&&i.naturalHeight===620?ok(i):no(Error('480×620 규격 오류: '+name));};i.onerror=function(){no(Error('에셋 누락: '+name));};i.src=local.get(name)||DIR+name;}).catch(function(e){if(optional)return null;throw e;}));
 return cache.get(name);
@@ -23,7 +23,7 @@ async function layer(ctx,name,color){var i=await img(name);var mask=color?await 
 function original(style,pose){return w.StudioCore&&w.StudioCore.sprite?w.StudioCore.sprite(style||'bob',pose):'';}
 async function render(spec,pose,originalStyle){
 pose=pose==='standing'?'standing':'seated';var a=clean(spec),key=JSON.stringify([a,pose]);if(done.has(key))return done.get(key);
-var paths=['hair_'+a.hair+'_back_'+pose+'.png','master_body_'+pose+'.png','outfit_'+a.outfit+'_'+pose+'.png','face_'+a.eyes+'_'+pose+'.png','hair_'+a.hair+'_front_'+pose+'.png'];
+var paths=['hair_'+a.hair+'_back_'+pose+'.png','body_base_'+pose+'.png','outfit_'+a.outfit+'_'+pose+'.png','face_'+a.eyes+'_'+pose+'.png','hair_'+a.hair+'_front_'+pose+'.png'];
 try{
 await Promise.all(paths.map(function(n){return img(n);}));
 var c=document.createElement('canvas');c.width=480;c.height=620;var ctx=c.getContext('2d');
@@ -59,7 +59,7 @@ if(peopleCache.key===key&&now-peopleCache.when<20000)return peopleCache.looks;
 try{var r=await client.rpc('studio_wardrobe_many',{p_ids:ids});if(r.error)throw r.error;var obj={};(Array.isArray(r.data)?r.data:[]).forEach(function(x){if(x.id)obj[String(x.id)]=clean(x);});peopleCache={key:key,when:now,looks:obj};return obj;}catch(e){return {};}
 }
 async function validate(){
-var names=['hair_bob_back_standing.png','hair_bob_front_standing.png','hair_bob_back_seated.png','hair_bob_front_seated.png','outfit_pajamas_standing.png','outfit_pajamas_seated.png','master_body_standing.png','master_body_seated.png','face_round_standing.png','face_round_seated.png'];
+var names=['hair_bob_back_standing.png','hair_bob_front_standing.png','hair_bob_back_seated.png','hair_bob_front_seated.png','outfit_pajamas_standing.png','outfit_pajamas_seated.png','body_base_standing.png','body_base_seated.png','face_round_standing.png','face_round_seated.png'];
 var bad=[];for(var n of names){try{await img(n);}catch(e){bad.push(n);}}
 label(bad.length?'필수 파츠 '+bad.length+'개 누락: '+bad.join(', '):'기본 서기/앉기 파츠 규격 검사 통과');
 }
