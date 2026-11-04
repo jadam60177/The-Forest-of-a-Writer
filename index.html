@@ -4556,10 +4556,53 @@ function applyVillageFold(){
   hs.forEach((h,k)=>h.classList.toggle('fold-hide', k>=lim));
 }
 addEventListener('resize', ()=>{ clearTimeout(applyVillageFold._t); applyVillageFold._t = setTimeout(()=>{ if(VILLAGE.length) renderVillage(); }, 200); });
+/* Forest performance helpers: no changes to economy or persistence. */
+const FOREST_HTML_CACHE = new WeakMap();
+function forestSetHTML(el, html){
+  let state = FOREST_HTML_CACHE.get(el);
+  if(!state){
+    state = {html:null, dirty:true};
+    state.observer = new MutationObserver(()=>{ state.dirty = true; });
+    state.observer.observe(el, {subtree:true, childList:true, attributes:true, characterData:true});
+    FOREST_HTML_CACHE.set(el, state);
+  }
+  if(state.observer.takeRecords().length) state.dirty = true;
+  if(!state.dirty && state.html === html) return false;
+  el.innerHTML = html;
+  state.observer.takeRecords();
+  state.html = html; state.dirty = false;
+  return true;
+}
+function forestVisiblePoll(task, delay){
+  let timer = null, running = false, stopped = false;
+  const schedule = () => {
+    clearTimeout(timer); timer = null;
+    if(!stopped && !document.hidden) timer = setTimeout(run, delay);
+  };
+  async function run(){
+    if(stopped || running) return;
+    clearTimeout(timer); timer = null;
+    if(document.hidden) return;
+    running = true;
+    try{ await task(); }
+    catch(e){ console.warn('숲 갱신 실패', e); }
+    finally{ running = false; schedule(); }
+  }
+  function visible(){
+    if(document.hidden){ clearTimeout(timer); timer = null; }
+    else void run();
+  }
+  document.addEventListener('visibilitychange', visible);
+  schedule();
+  return () => { stopped = true; clearTimeout(timer); document.removeEventListener('visibilitychange', visible); };
+}
+let FOREST_TRUCK_POLL_STOP = null;
+/* End forest performance helpers. */
+
 function renderVillage(){
   const lit = VILLAGE.filter(p=>p.in_voice && !p.removed).length;
   document.getElementById('litCount').textContent = `🕯️ 불 켜진 집 ${lit}채`;
-  document.getElementById('houses').innerHTML = villageOrder(VILLAGE).map(p=>{
+  forestSetHTML(document.getElementById('houses'), villageOrder(VILLAGE).map(p=>{
     if(p.removed) return `<div class="house vacant">${vacantSVG()}<div class="nm"><span class="nm-label">빈 터</span></div><div class="st">누군가 새로 이사 올 자리</div></div>`;
     const st = stageIdx(p.total_minutes), dc = p.decay||0, me = isMe(p);
     const today = `<span class="t">오늘 ${fmt(p.today_minutes)}</span>`;
@@ -4569,8 +4612,11 @@ function renderVillage(){
       <span class="nm ${plateCls(p)}"><span class="nm-label">${plateEmo(p)}${me?'내 집':esc(p.display_name)}</span></span>
       <span class="st">${status}</span>
     </button>`;
-  }).join('');
+  }).join(''));
   applyVillageFold();
+  // Folding only changes derived visibility classes, not the source markup.
+  const cached = FOREST_HTML_CACHE.get(document.getElementById('houses'));
+  if(cached){ cached.observer.takeRecords(); cached.dirty = false; }
 }
 
 function cabHTML(f, cabs){
@@ -8473,7 +8519,7 @@ function renderBag(){
   document.getElementById('sellNote').textContent = sellMode ? '팔 가구를 누르세요 · 산 값 그대로 돌려받아요 (방에 놓은 건 먼저 치워 주세요)'
     : multiMode ? '칸마다 개수를 고르고 아래 「팔기」를 한 번만 누르세요 · 가방에 든 것만 세요 (방에 놓은 건 안 세요)' : '';
   renderMultiBar();
-  document.getElementById('bag').innerHTML = shown.length ? shown.map(([code,n])=>{
+  forestSetHTML(document.getElementById('bag'), shown.length ? shown.map(([code,n])=>{
     const it = itemOf(code), sp = sellPrice(code);
     if(multiMode){ const q = PICK[code]||0, c = esc(code);
       if(!sp) return `<div class="item ${gradeCls(code)} nosell">${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span>${limTag(code)}<span class="p">팔 수 없어요 · ×${n}</span></div>`;
@@ -8481,7 +8527,7 @@ function renderBag(){
         + `<div class="qty"><button type="button" data-pick="${c}" data-d="-1" ${q?'':'disabled'} aria-label="하나 빼기">−</button><b>${q}개</b><button type="button" data-pick="${c}" data-d="1" ${q>=n?'disabled':''} aria-label="하나 더">＋</button><button type="button" data-pick="${c}" data-d="all" ${q>=n?'disabled':''}>전부</button></div></div>`; }
     if(sellMode) return `<button class="item ${gradeCls(code)} ${sp?'':'nosell'}" data-sell="${esc(code)}" ${sp?'':'disabled'}>${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)}</span>${limTag(code)}<span class="p">${sp?`🪙 ${sp}에 팔기`:'팔 수 없어요'} · ×${n}</span></button>`;
     return `<button class="item ${gradeCls(code)} ${selected===code?'sel':''}" data-bag="${esc(code)}" ${gradeOf(code)?`title="${GRADE_LABEL[gradeOf(code)].replace('👑 ','')}"`:''}>${gradeBadge(code)}<span class="em">${ico(it)}</span><span class="t">${esc(it.name)} · ${sizeText(it)}</span>${limTag(code)}<span class="p">×${n}</span></button>`;
-  }).join('') : `<p class="empty" style="grid-column:1/-1">${entries.length ? '이 칸에는 아직 아무것도 없어요.' : '가방이 비어 있어요. 상점에서 가구를 사 보세요.'}</p>`;
+  }).join('') : `<p class="empty" style="grid-column:1/-1">${entries.length ? '이 칸에는 아직 아무것도 없어요.' : '가방이 비어 있어요. 상점에서 가구를 사 보세요.'}</p>`);
   const regular = SHOP.filter(x=>!x.limited_until), lim = SHOP.filter(x=>x.limited_until && isLive(x));
   document.getElementById('shopCount').textContent = `${regular.length+lim.length}개`;
   { const nNew = [...lim, ...regular].filter(isNewItem).length;
@@ -8526,9 +8572,9 @@ function renderBag(){
   else if(shopSort==='name') list = [...list].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ko'));
   if(q) limNote = `<p class="shop-note">「${esc(shopQ.trim())}」 찾은 물건 ${list.length}개 · 모든 칸에서 찾았어요</p>`;
   const empty = list.length ? '' : `<p class="empty" style="grid-column:1/-1">${q ? '찾는 물건이 없어요. 다른 이름으로 찾아볼까요?' : shopNotOwned ? '이 칸 물건은 벌써 다 갖고 있어요!' : '아직 물건이 없어요.'}</p>`;
-  document.getElementById('shop').innerHTML = limNote + empty + list.map(s=>{ const own = ownedCount(s.code); return ''+
+  forestSetHTML(document.getElementById('shop'), limNote + empty + list.map(s=>{ const own = ownedCount(s.code); return ''+
     `<button class="item ${own?'owned':''}" data-buy="${esc(s.code)}" ${ME.coins<s.price?'disabled':''}>${isNewItem(s)?'<span class="nwb">NEW</span>':''}${own?`<span class="own" title="가방·방·진열장에 있는 것까지 합친 개수">보유 ${own}</span>`:''}<span class="em">${ico(s)}</span><span class="t">${esc(s.name)} · ${sizeText(s)}</span><span class="p">🪙 ${s.price}</span>${(L=>L?`<span class="ltag ${L.cls}">${esc(L.txt)}</span>${L.left?`<span class="lleft">${esc(L.left)}</span>`:''}`:'')(limInfo(s.code))}</button>`; }
-  ).join('');
+  ).join(''));
 }
 
 // ✨ 새로 들어온 가구 — 이 날짜 전까지 상점에 NEW 표시와 「새 가구」 칸이 보여요. 다음에 가구를 넣을 땐 SHOP_NEW 에 코드를 더해 주세요
@@ -8722,7 +8768,8 @@ async function loadAll(){
   await refreshVoid();
   renderPlaza(); renderBoss(); renderWinter(); winterMailCheck(); celebratePlaza(); renderGacha(); renderBanners(); renderFloatDrops(); renderBoard();
   refreshTrucks().then(renderTrucks); showTruckReport();
-  setInterval(()=>refreshTrucks().then(renderTrucks), 5*60e3);
+  if(FOREST_TRUCK_POLL_STOP) FOREST_TRUCK_POLL_STOP();
+  FOREST_TRUCK_POLL_STOP = forestVisiblePoll(()=>refreshTrucks().then(renderTrucks), 5*60e3);
   renderTop(); renderVillage(); renderMyHouse(); renderBag(); renderRoad(); setHint();
   document.getElementById('adminTabBtn').hidden = !ME.is_admin;
   renderAdmin();
@@ -9504,24 +9551,26 @@ async function start(){
   } else {
     setInterval(()=>{ const r = readyIn(); if(!document.getElementById('tab-lake').hidden && r!=null && (r===0 || r%60<16)) renderLake(); }, 15000);
     // 30초마다 마을 불빛·코인 새로 고침
-    setInterval(async ()=>{
+    forestVisiblePoll(async ()=>{
       try{
         const before = stageIdx(ME.total_minutes);
-        await Promise.all([refreshVillage(), api.me().then(m=>ME=m), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPetsOn(), refreshWinter(), refreshNameplates(), refreshPetBabies()]);
+        const reads = await Promise.allSettled([refreshVillage(), api.me().then(m=>ME=m), refreshFlowersOn(), refreshHouseStyles(), refreshHouseLooks(), refreshPetsOn(), refreshWinter(), refreshNameplates(), refreshPetBabies()]);
+        const failed = reads.find(r=>r.status==='rejected');
+        if(failed) throw failed.reason;
         renderWinter(); winterMailCheck();
         await liveGarden();   // 🌷 (10-14 ⑤) 꽃 자란 시간은 뒤쪽 단계가 실패해도 먼저 갱신
         if(!document.getElementById('tab-pet').hidden){ await refreshPets(); renderPets(); }
         const after = stageIdx(ME.total_minutes);
         if(after>before){ toast(`🎉 집이 ${STAGES[after].name}(으)로 커졌어요!`); renderMyHouse(); renderRoad(); }
-        if(!document.getElementById('tab-plaza').hidden || Math.random()<.34){ await refreshPlaza(); renderPlaza(); celebratePlaza(); api.shop().then(s=>{ if(s && s.length){ SHOP=s; renderBag(); } }); }
+        if(!document.getElementById('tab-plaza').hidden || Math.random()<.34){ await refreshPlaza(); renderPlaza(); celebratePlaza(); await api.shop().then(s=>{ if(s && s.length){ SHOP=s; renderBag(); } }); }
         renderTop(); renderVillage(); renderBag();
         if(!document.getElementById('tab-lake').hidden){ await refreshLake(); renderLake(); }
         await refreshBanners(); renderBanners();
         await refreshTree(); renderFloatDrops(); if(!document.getElementById('tab-tree').hidden) renderTree();
         await refreshBoss(); renderBoss();
         if(!document.getElementById('tab-plaza').hidden && !document.activeElement?.closest('#boardBox')){ await refreshBoard(); renderBoard(); }
-        showGifts(); showRaids(); showFlowerNotices(); showTreatNotices(); showNews(); refreshEvents(); refreshNotes(); refreshStreak();
-      }catch(e){}
+        await Promise.allSettled([showGifts(), showRaids(), showFlowerNotices(), showTreatNotices(), showNews(), refreshEvents(), refreshNotes(), refreshStreak()]);
+      }catch(e){ console.warn('숲 정기 갱신 실패', e); }
     }, 30000);
   }
 }
@@ -9530,7 +9579,11 @@ async function start(){
 /* 🌷 꽃밭 실시간 갱신 (10-14 ⑤) — 새로고침 없이도 자란 시간이 반영되게
    다른 갱신이 실패·지연돼도 따로 돌고, 방은 안 건드려서(끌기 중에도) 꽃밭 칸만 다시 그려요 */
 let LIVE_GARDEN_BUSY = false, LIVE_GARDEN_AT = 0;
-const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej)=>setTimeout(()=>rej(new Error('시간 초과')), ms))]);
+const withTimeout = (p, ms) => {
+  let timer;
+  return Promise.race([p, new Promise((_, rej)=>{ timer = setTimeout(()=>rej(new Error('시간 초과')), ms); })])
+    .finally(()=>clearTimeout(timer));
+};
 async function liveGarden(){
   if(DEMO || typeof ME==='undefined' || !ME) return;
   if(LIVE_GARDEN_BUSY && Date.now() - LIVE_GARDEN_AT < 30000) return;   // 요청이 걸려 잠금이 안 풀려도 30초 뒤엔 다시 해요
@@ -9869,3 +9922,4 @@ start();
 <p class="site-ver">마감의 숲 · 10-25 판 111</p>
 </body>
 </html>
+
